@@ -1,10 +1,10 @@
-"""Stable project identity used by the starter API and CLI."""
+"""Stable project identity used by the package API and CLI."""
 
 from dataclasses import dataclass
 from importlib.metadata import PackageNotFoundError, version
 
-DISTRIBUTION_NAME = "agent-python-project"
-PACKAGE_NAME = "agent_py"
+DISTRIBUTION_NAME = "kn-event-horizon"
+PACKAGE_NAME = "kn"
 FALLBACK_VERSION = "0.0.0+uninstalled"
 
 

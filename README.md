@@ -1,38 +1,28 @@
-# Agent Python Project
+# KN Event Horizon
 
-A GitHub template for Python projects that use coding agents. It includes a typed starter package,
-an `agent-py` command, a locked development environment, and shared rules for planning,
-implementation, and verification.
+A domain knowledge aggregator. KN Event Horizon is intended to collect evidence about industrial
+and technology domains from public or legitimately licensed sources, normalize it into domain
+knowledge models, and keep the provenance and history of each fact. Product capabilities enter
+through the [specification](docs/design/spec.md) before they are planned and built.
 
-## Start a project from this template
+The repository currently provides the typed `kn` package and its `kn` command, a locked development
+environment, and shared rules for planning, implementation, and verification.
 
-On GitHub, choose **Use this template** and then **Create a new repository**. Enter the new
-repository name and a short project description, then click **Create repository from template**.
-[GitHub template instructions](https://docs.github.com/en/repositories/creating-and-managing-repositories/creating-a-repository-from-a-template)
+## Setup
 
-With Git, Make, and uv installed, substitute your new repository's owner and name below.
+With Git, Make, and uv installed:
 
 ```bash
-git clone https://github.com/OWNER/REPO.git
-cd REPO
+git clone https://github.com/volod/kn-event-horizon.git
+cd kn-event-horizon
 make bootstrap
+make doctor
+make run
 make plan-status
 ```
 
-### Give your agent the first task
-
-Open your coding agent in the new checkout and give it this prompt to start
-[`personalize-template-project`](docs/impl/plan.md#personalize-template-project).
-
-> Read `AGENTS.md` and complete `personalize-template-project` from `docs/impl/plan.md` before
-> starting product work. Resolve the project name and description from the existing spec or the
-> new GitHub repository's metadata.
-> Ask me for any missing details or conflicting choices. Rename the starter package, commands, and
-> their references, then verify the result and close the task through its record.
-
-The task covers the distribution, imports, CLI entry points, lockfile, tests, tooling, and active
-documentation links. The agent updates the README for the new project and checks the installed
-package and commands.
+`make run` calls `kn info`, which reports the installed distribution, version, and import package.
+`make plan-status` (or `kn-plan`) counts open work and shows the next task in each lane.
 
 ## Daily commands
 
@@ -40,7 +30,7 @@ package and commands.
 | --- | --- |
 | `make help` | List supported workflows |
 | `make bootstrap` | Create or update the locked development environment |
-| `make run` | Run the starter CLI |
+| `make run` | Run `kn info` |
 | `make test` | Run the unit test suite |
 | `make coverage` | Run tests with the coverage gate |
 | `make format` | Apply Ruff formatting |
@@ -52,7 +42,7 @@ package and commands.
 | `make quality-report` | Report files over the soft size limit |
 
 Use Make targets for repeatable workflows. Direct `uv` debugging should first source
-`scripts/shared/common.sh` and run `apy_load_env` so cache and link behavior follows `.env`.
+`scripts/shared/common.sh` and run `kn_load_env` so cache and link behavior follows `.env`.
 
 ## Documentation model
 
@@ -82,9 +72,10 @@ Keep these files focused on their integration. [CLAUDE.md](CLAUDE.md), [GEMINI.m
 ## Layout
 
 ```text
-src/agent_py/              production package
+src/kn/                    production package and kn CLI
 tests/                     unit and governance tests
-docs/design/               product specification
+domains/                   domain packages; seeds/proposals/ holds the converted workbooks
+docs/design/               product specification and domain design pages
 docs/impl/plan.md          forward-only work
 docs/impl/current/         delivered behavior
 docs/impl/records/         task contracts and acceptance evidence

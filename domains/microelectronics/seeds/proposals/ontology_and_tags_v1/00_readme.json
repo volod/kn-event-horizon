@@ -1,0 +1,115 @@
+{
+  "format": "kn.seed-proposal.notes",
+  "status": "unreviewed_proposal",
+  "domain": "microelectronics",
+  "source": {
+    "file_name": "microelectronics_ontology_and_tags_v1.xlsx",
+    "sha256": "7166aa06791998c692cc6a2ac377692a6687f15e3353ffa70a1c159f2e63c34f",
+    "sheet_name": "00_README",
+    "sheet_position": 1
+  },
+  "rows": [
+    {
+      "source_row": 1,
+      "cells": {
+        "A": "Microelectronics Knowledge Base \u2014 ontology & tags"
+      }
+    },
+    {
+      "source_row": 4,
+      "cells": {
+        "A": "Topic",
+        "B": "Decision / instruction",
+        "C": "Reference"
+      }
+    },
+    {
+      "source_row": 5,
+      "cells": {
+        "A": "Scope",
+        "B": "Global technology intelligence; EU, UK, Canada first. US/other vendors as benchmark or documented exception; do not exclude research signals solely by geography.",
+        "C": "User requirements"
+      }
+    },
+    {
+      "source_row": 6,
+      "cells": {
+        "A": "Design",
+        "B": "Independent axes: product class, technology, application, entity class, maturity, geographical provenance. One primary class per product; tags many-to-many.",
+        "C": "https://www.oecd.org/en/publications/chips-nodes-and-wafers_f68de895-en.html"
+      }
+    },
+    {
+      "source_row": 7,
+      "cells": {
+        "A": "Product classifier",
+        "B": "Four OECD categories from Figure 9, p.30; KB extensions have local IDs, not official OECD codes.",
+        "C": "https://www.oecd.org/en/publications/chips-nodes-and-wafers_f68de895-en.html"
+      }
+    },
+    {
+      "source_row": 8,
+      "cells": {
+        "A": "Technology",
+        "B": "ECS SRIA chapter codes + local detailed technology tags; IRDS for roadmaps; no invented official mapping.",
+        "C": "https://ecssria.eu/2026"
+      }
+    },
+    {
+      "source_row": 9,
+      "cells": {
+        "A": "Attributes",
+        "B": "IEC 61360 semantic properties / ECLASS mapping; JEP30 PartModel as interchange reference. Local field IDs, not official IEC/ECLASS property IDs.",
+        "C": "https://cdd.iec.ch ; https://www.jedec.org/"
+      }
+    },
+    {
+      "source_row": 10,
+      "cells": {
+        "A": "Evidence",
+        "B": "Every fact, relation, tag or measurement has source, revision/date/page, conditions, maturity and confidence; preserve unknowns and conflicts.",
+        "C": "Local KB policy"
+      }
+    },
+    {
+      "source_row": 11,
+      "cells": {
+        "A": "Priority",
+        "B": "First capture research, demonstrators, new silicon and roadmaps that could improve energy/autonomy; parallel baseline product data.",
+        "C": "Local KB policy"
+      }
+    },
+    {
+      "source_row": 12,
+      "cells": {
+        "A": "Comparison",
+        "B": "Compare exactly matched operating point, workload, precision, accuracy, voltage, temperature and boundary (die, board, system). Never rank headline TOPS alone.",
+        "C": "https://mlcommons.org/benchmarks/inference-tiny/"
+      }
+    },
+    {
+      "source_row": 13,
+      "cells": {
+        "A": "Geography",
+        "B": "HQ, legal ownership/control, design location, wafer fab, assembly/test and export classification separate. EU/CA design does not establish EU/CA manufacture.",
+        "C": "Local KB policy"
+      }
+    },
+    {
+      "source_row": 14,
+      "cells": {
+        "A": "Use",
+        "B": "English field IDs and controlled terms for ingestion; Ukrainian instructions in final. Product examples at family level; not verified MPNs or performance claims.",
+        "C": "Local KB policy"
+      }
+    },
+    {
+      "source_row": 15,
+      "cells": {
+        "A": "Version",
+        "B": "2026-11-19; taxonomy and comparison schema v1; not a populated component database.",
+        "C": "Local KB policy"
+      }
+    }
+  ]
+}

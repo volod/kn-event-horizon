@@ -1,0 +1,125 @@
+{
+  "format": "kn.seed-proposal.table",
+  "status": "unreviewed_proposal",
+  "domain": "microelectronics",
+  "source": {
+    "file_name": "microelectronics_data_sources_v1.xlsx",
+    "sha256": "ab7837e18fc1907a2b977def23d03de78e608787d3125011ab3b38bda2536fba",
+    "sheet_name": "04_Prospective_Signals",
+    "sheet_position": 5
+  },
+  "title": "Priority watch topics \u2014 measurable autonomy & energy signals",
+  "notes": [],
+  "header_row": 4,
+  "columns": [
+    {
+      "key": "watch_id",
+      "label": "Watch ID",
+      "column": "A"
+    },
+    {
+      "key": "topic",
+      "label": "Topic",
+      "column": "B"
+    },
+    {
+      "key": "tags",
+      "label": "Tags",
+      "column": "C"
+    },
+    {
+      "key": "metrics",
+      "label": "Metrics",
+      "column": "D"
+    },
+    {
+      "key": "sources",
+      "label": "Sources",
+      "column": "E"
+    },
+    {
+      "key": "acceptance_rule",
+      "label": "Acceptance rule",
+      "column": "F"
+    }
+  ],
+  "records": [
+    {
+      "source_row": 5,
+      "values": {
+        "watch_id": "W01",
+        "topic": "Always-on sensing / harvesting",
+        "tags": "T.ULP; T.EVENT; T.HARV",
+        "metrics": "Energy/event, sleep uA, false wakes, net harvest J/day",
+        "sources": "D01; D04; D05; D06; D09\u2013D11; V16",
+        "acceptance_rule": "Prototype and real deployment duty cycle"
+      }
+    },
+    {
+      "source_row": 6,
+      "values": {
+        "watch_id": "W02",
+        "topic": "Analog, near-memory and neuromorphic AI",
+        "tags": "T.AIMC; T.CIM; T.NEURO; T.NPU",
+        "metrics": "uJ/inference at same accuracy; calibration/ADC overhead",
+        "sources": "D01; D02; D04; D05; V09; D12; D13",
+        "acceptance_rule": "Distinguish IP/test silicon/volume"
+      }
+    },
+    {
+      "source_row": 7,
+      "values": {
+        "watch_id": "W03",
+        "topic": "Energy-efficient image readout / optics",
+        "tags": "T.CIS; T.SPAD; T.IR; T.PIC; T.VISION",
+        "metrics": "ROI FPS at equivalence, noise, energy/frame, interface",
+        "sources": "D04; D05; V01; V11; D09",
+        "acceptance_rule": "Record sensor/ISP/board boundary"
+      }
+    },
+    {
+      "source_row": 8,
+      "values": {
+        "watch_id": "W04",
+        "topic": "FPGA and heterogeneous compute",
+        "tags": "T.FPGA; T.MPU; T.RTL; T.IO",
+        "metrics": "J/sample, post-route timing, native I/O, tool support",
+        "sources": "V07; V08; V03; D01; D04",
+        "acceptance_rule": "Workload-equivalent design, not LUT conversion"
+      }
+    },
+    {
+      "source_row": 9,
+      "values": {
+        "watch_id": "W05",
+        "topic": "Low-energy links",
+        "tags": "T.LPWAN; T.UWB; T.NTN",
+        "metrics": "nJ/delivered bit, sleep and receive cost",
+        "sources": "V10; V01; D05; D11",
+        "acceptance_rule": "Identical link and packet success conditions"
+      }
+    },
+    {
+      "source_row": 10,
+      "values": {
+        "watch_id": "W06",
+        "topic": "Power conversion / storage electronics",
+        "tags": "T.PM; T.WBG; T.BAT; T.HARV",
+        "metrics": "Efficiency at real profile, standby, thermals",
+        "sources": "D01; D03; V05; V06; V01",
+        "acceptance_rule": "System loss including driver and auxiliaries"
+      }
+    },
+    {
+      "source_row": 11,
+      "values": {
+        "watch_id": "W07",
+        "topic": "Memory & process / integration",
+        "tags": "T.MRAM; T.FDSOI; T.CHIPLET",
+        "metrics": "Read/write energy, retention, latency, PPA, packaging overhead",
+        "sources": "D02; D04; D08; D06",
+        "acceptance_rule": "Node label not performance metric"
+      }
+    }
+  ]
+}

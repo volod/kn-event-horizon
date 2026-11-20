@@ -1,0 +1,185 @@
+{
+  "format": "kn.seed-proposal.table",
+  "status": "unreviewed_proposal",
+  "domain": "gdelt",
+  "source": {
+    "file_name": "gdelt_ontology_and_tags_v1.xlsx",
+    "sha256": "c31bba2aad40336c620044c6df5332744aebdce70b415e56bc121096845881a2",
+    "sheet_name": "08_Application_Tags",
+    "sheet_position": 9
+  },
+  "title": "Application tags | analytical scenarios",
+  "notes": [
+    "Local application tags are many-to-many; not native GDELT themes or a classification of people."
+  ],
+  "header_row": 4,
+  "columns": [
+    {
+      "key": "tag_id",
+      "label": "Tag ID",
+      "column": "A"
+    },
+    {
+      "key": "label",
+      "label": "Label",
+      "column": "B"
+    },
+    {
+      "key": "trigger_scope",
+      "label": "Trigger scope",
+      "column": "C"
+    },
+    {
+      "key": "validation_gate",
+      "label": "Validation gate",
+      "column": "D"
+    },
+    {
+      "key": "origin",
+      "label": "Origin",
+      "column": "E"
+    }
+  ],
+  "records": [
+    {
+      "source_row": 5,
+      "values": {
+        "tag_id": "APP.SCOUT",
+        "label": "Technology scouting",
+        "trigger_scope": "R&D or product announcement; energy or autonomy improvement",
+        "validation_gate": "Confirm maturity/benchmark",
+        "origin": "KB_EXTENSION"
+      }
+    },
+    {
+      "source_row": 6,
+      "values": {
+        "tag_id": "APP.SUPPLY",
+        "label": "Supply chain intelligence",
+        "trigger_scope": "Manufacturer, supplier, capacity, component lifecycle",
+        "validation_gate": "Validate actor role and facility",
+        "origin": "KB_EXTENSION"
+      }
+    },
+    {
+      "source_row": 7,
+      "values": {
+        "tag_id": "APP.MARKET",
+        "label": "Market and competitor awareness",
+        "trigger_scope": "Product introductions and market entry",
+        "validation_gate": "Separate announcements from availability",
+        "origin": "KB_EXTENSION"
+      }
+    },
+    {
+      "source_row": 8,
+      "values": {
+        "tag_id": "APP.INVEST",
+        "label": "Investment and finance",
+        "trigger_scope": "Funding, M&A, consortium formation",
+        "validation_gate": "Verify transaction status and amount",
+        "origin": "KB_EXTENSION"
+      }
+    },
+    {
+      "source_row": 9,
+      "values": {
+        "tag_id": "APP.PROCURE",
+        "label": "Procurement and demand",
+        "trigger_scope": "Tender, award, purchase agreement",
+        "validation_gate": "Intent vs contract",
+        "origin": "KB_EXTENSION"
+      }
+    },
+    {
+      "source_row": 10,
+      "values": {
+        "tag_id": "APP.REG",
+        "label": "Regulatory monitoring",
+        "trigger_scope": "Law, licence, policy, export regulation",
+        "validation_gate": "Official text/version",
+        "origin": "KB_EXTENSION"
+      }
+    },
+    {
+      "source_row": 11,
+      "values": {
+        "tag_id": "APP.ENERGY",
+        "label": "Energy and infrastructure resilience",
+        "trigger_scope": "Generation, grid, storage, low-power electronics",
+        "validation_gate": "Measure actual vs promised",
+        "origin": "KB_EXTENSION"
+      }
+    },
+    {
+      "source_row": 12,
+      "values": {
+        "tag_id": "APP.AGRI",
+        "label": "Agriculture and environment",
+        "trigger_scope": "Crop monitoring, smart farming, environmental sensors",
+        "validation_gate": "Validate real use or pilot",
+        "origin": "KB_EXTENSION"
+      }
+    },
+    {
+      "source_row": 13,
+      "values": {
+        "tag_id": "APP.SPACE",
+        "label": "Space sector awareness",
+        "trigger_scope": "Launch, satellites, ground services, EO",
+        "validation_gate": "External launch/registry cross-check",
+        "origin": "KB_EXTENSION"
+      }
+    },
+    {
+      "source_row": 14,
+      "values": {
+        "tag_id": "APP.SEMI",
+        "label": "Microelectronics awareness",
+        "trigger_scope": "Sensors, SoC, FPGA, semiconductor R&D",
+        "validation_gate": "Datasheet or paper cross-check",
+        "origin": "KB_EXTENSION"
+      }
+    },
+    {
+      "source_row": 15,
+      "values": {
+        "tag_id": "APP.CRISIS",
+        "label": "Crisis and humanitarian awareness",
+        "trigger_scope": "Disaster, health, disruption reporting",
+        "validation_gate": "Confirm with official sources",
+        "origin": "KB_EXTENSION"
+      }
+    },
+    {
+      "source_row": 16,
+      "values": {
+        "tag_id": "APP.MEDIA",
+        "label": "Media narrative analysis",
+        "trigger_scope": "Coverage, topic salience, tone, source diversity",
+        "validation_gate": "Normalize media volume",
+        "origin": "KB_EXTENSION"
+      }
+    },
+    {
+      "source_row": 17,
+      "values": {
+        "tag_id": "APP.SCIENCE",
+        "label": "Science and innovation policy",
+        "trigger_scope": "Research programs, publications, grants",
+        "validation_gate": "Primary publication/award",
+        "origin": "KB_EXTENSION"
+      }
+    },
+    {
+      "source_row": 18,
+      "values": {
+        "tag_id": "APP.CIV_AUTONOMY",
+        "label": "Civil autonomy and embedded systems",
+        "trigger_scope": "Low-power robotics and distributed sensing",
+        "validation_gate": "Validate workload and power conditions",
+        "origin": "KB_EXTENSION"
+      }
+    }
+  ]
+}

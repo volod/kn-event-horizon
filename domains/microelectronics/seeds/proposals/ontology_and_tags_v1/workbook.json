@@ -1,0 +1,131 @@
+{
+  "format": "kn.seed-proposal.workbook",
+  "status": "unreviewed_proposal",
+  "domain": "microelectronics",
+  "workbook": {
+    "file_name": "microelectronics_ontology_and_tags_v1.xlsx",
+    "sha256": "7166aa06791998c692cc6a2ac377692a6687f15e3353ffa70a1c159f2e63c34f",
+    "size_bytes": 53819
+  },
+  "conversion": {
+    "method": "OOXML parsed with the Python standard library; no spreadsheet engine",
+    "cell_text": "verbatim; empty cells are null; numeric cells are JSON numbers",
+    "formulas": "never evaluated; cached values kept; formula text recorded per record",
+    "macros_or_external_links": "none present",
+    "encoding": "ASCII JSON with escaped non-ASCII characters"
+  },
+  "sheets": [
+    {
+      "sheet_name": "00_README",
+      "sheet_position": 1,
+      "file": "00_readme.json",
+      "format": "kn.seed-proposal.notes",
+      "sha256": "8a68f36b085afc0d09358fa1ac213cf509630d739f4dce9f82bd73235be8153d",
+      "row_count": 13
+    },
+    {
+      "sheet_name": "01_Entity_Ontology",
+      "sheet_position": 2,
+      "file": "01_entity_ontology.json",
+      "format": "kn.seed-proposal.table",
+      "sha256": "5252f18f25e3b33de5af5cf9ae151eccc26e774e6e85f0dd06bccf6cb3e1dc01",
+      "record_count": 27
+    },
+    {
+      "sheet_name": "02_Relations",
+      "sheet_position": 3,
+      "file": "02_relations.json",
+      "format": "kn.seed-proposal.table",
+      "sha256": "5836244c7ef65894c48eef45b70bd8a2d82d43983f90c23941550a8fcdffc234",
+      "record_count": 29
+    },
+    {
+      "sheet_name": "03_Product_Classifier",
+      "sheet_position": 4,
+      "file": "03_product_classifier.json",
+      "format": "kn.seed-proposal.table",
+      "sha256": "1ec58ca8e2078e24c75cc6e769c9e7a15e7f85100df7d29e7353427837949ce4",
+      "record_count": 76
+    },
+    {
+      "sheet_name": "04_ECS_Technology",
+      "sheet_position": 5,
+      "file": "04_ecs_technology.json",
+      "format": "kn.seed-proposal.table",
+      "sha256": "57c83306a54b82da82b1ebbc430ddad118f15c2c38c9911b0aebe23194ec4c2f",
+      "record_count": 8
+    },
+    {
+      "sheet_name": "05_Technology_Tags",
+      "sheet_position": 6,
+      "file": "05_technology_tags.json",
+      "format": "kn.seed-proposal.table",
+      "sha256": "738a7bf1429c211837fa85de49f0143ddfdb9221ce4b5d1e66a572b3c81973e0",
+      "record_count": 40
+    },
+    {
+      "sheet_name": "06_Application_Tags",
+      "sheet_position": 7,
+      "file": "06_application_tags.json",
+      "format": "kn.seed-proposal.table",
+      "sha256": "c00f28be0a8414da62794e64ea3b09ad17ae3838adadbbf25bf18036f7ab9a4d",
+      "record_count": 12
+    },
+    {
+      "sheet_name": "07_Service_Vocabulary",
+      "sheet_position": 8,
+      "file": "07_service_vocabulary.json",
+      "format": "kn.seed-proposal.table",
+      "sha256": "09e9218360c83e7a5b8ce38e9328fac43be5d6d2bd1285b66154b1b0da89e9b6",
+      "record_count": 14
+    },
+    {
+      "sheet_name": "08_Attribute_Dictionary",
+      "sheet_position": 9,
+      "file": "08_attribute_dictionary.json",
+      "format": "kn.seed-proposal.table",
+      "sha256": "89832c1489d45616b6a6f1d7d12f50418dd03762b1ff069ffc112db23de257f6",
+      "record_count": 195
+    },
+    {
+      "sheet_name": "09_Observation_Schema",
+      "sheet_position": 10,
+      "file": "09_observation_schema.json",
+      "format": "kn.seed-proposal.table",
+      "sha256": "30e97a9a5f49aca1af4dc750b83a303ef987a17725937d70b3a388d69cf37cda",
+      "record_count": 19
+    },
+    {
+      "sheet_name": "10_Comparison_Profiles",
+      "sheet_position": 11,
+      "file": "10_comparison_profiles.json",
+      "format": "kn.seed-proposal.table",
+      "sha256": "2aeb20809c5f8fa21bf193ed81ecf311405842d4d4e5aa61f9243b56b58b8ce6",
+      "record_count": 7
+    },
+    {
+      "sheet_name": "11_Tagging_Examples",
+      "sheet_position": 12,
+      "file": "11_tagging_examples.json",
+      "format": "kn.seed-proposal.table",
+      "sha256": "69cffaa08c38184cb0e3ee75c5e2ed2c1debf8e950937b892c3a592b11f0f076",
+      "record_count": 11
+    },
+    {
+      "sheet_name": "12_Scouting_Rubric",
+      "sheet_position": 13,
+      "file": "12_scouting_rubric.json",
+      "format": "kn.seed-proposal.table",
+      "sha256": "c4fe58b4b994b707a65cf1e18e9a1bb9b7e93b67c3d3bcb3ee1a34ef1651389d",
+      "record_count": 5
+    },
+    {
+      "sheet_name": "13_Energy_Template",
+      "sheet_position": 14,
+      "file": "13_energy_template.json",
+      "format": "kn.seed-proposal.table",
+      "sha256": "6cf19d36d1ae1244f194c104e9bb7aece79f8f0ee370eb07a99a97e82b76a44c",
+      "record_count": 2
+    }
+  ]
+}

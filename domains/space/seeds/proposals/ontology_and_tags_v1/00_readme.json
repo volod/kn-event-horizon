@@ -1,0 +1,101 @@
+{
+  "format": "kn.seed-proposal.notes",
+  "status": "unreviewed_proposal",
+  "domain": "space",
+  "source": {
+    "file_name": "space_sector_ontology_and_tags_v1.xlsx",
+    "sha256": "26e7468ee372e9c606ff08910756b2066ef30ac9fea7524e646b52d8529eec28",
+    "sheet_name": "00_README",
+    "sheet_position": 1
+  },
+  "rows": [
+    {
+      "source_row": 1,
+      "cells": {
+        "A": "Space Sector Knowledge Base \u2014 ontology, product classifier and tags"
+      }
+    },
+    {
+      "source_row": 3,
+      "cells": {
+        "A": "Design principle",
+        "B": "Three independent axes + ontology: ESA Generic Product Tree = product hierarchy; NASA TX / ESA Technology Tree = technology tags; EUSPA = application/market tags.",
+        "D": "How to tag a record"
+      }
+    },
+    {
+      "source_row": 4,
+      "cells": {
+        "A": "Primary product classifier",
+        "B": "ESA Generic Product Tree (GPT), Issue 1 Rev 1. Official Level 1 segments: I Launchers; II Satellites & Probes; III Orbital Transportation & Re-entry Systems; IV Ground Segment.",
+        "D": "1",
+        "E": "Assign entity class",
+        "F": "e.g. Organization / Spacecraft / Service"
+      }
+    },
+    {
+      "source_row": 5,
+      "cells": {
+        "A": "Technology tags",
+        "B": "Use NASA 2024 Technology Taxonomy and ESA Technology Tree v4.1 as many-to-many tags. Do not use them as product/market categories.",
+        "D": "2",
+        "E": "If it is a product, assign ESA GPT path",
+        "F": "one primary path; secondary mappings allowed"
+      }
+    },
+    {
+      "source_row": 6,
+      "cells": {
+        "A": "Application tags",
+        "B": "Use the 16 EUSPA EU Space Market Report 2026 segments as many-to-many downstream application/market tags.",
+        "D": "3",
+        "E": "Assign technology tags",
+        "F": "0..N NASA TX + 0..N ESA TD/TS"
+      }
+    },
+    {
+      "source_row": 7,
+      "cells": {
+        "A": "Ontology",
+        "B": "Organization, Program, Mission, Product, Spacecraft, Constellation, Launch Event, Component, Payload, Facility, Terminal, Service, Dataset, Contract, Partnership, Licence/Filing, Patent, R&D Project, Technology.",
+        "D": "4",
+        "E": "Assign application tags",
+        "F": "0..N EUSPA segments"
+      }
+    },
+    {
+      "source_row": 8,
+      "cells": {
+        "A": "Important rule",
+        "B": "Organization \u2260 Program \u2260 Product/Asset \u2260 Service \u2260 Contract/Filing. Store typed relations between them.",
+        "D": "5",
+        "E": "Add lifecycle/status",
+        "F": "concept / development / qualification / operational / retired"
+      }
+    },
+    {
+      "source_row": 9,
+      "cells": {
+        "A": "Modern extensions",
+        "B": "Where the 2011 ESA GPT does not explicitly represent modern categories such as user terminals, GSaaS or cloud/data services, keep the official GPT segment mapping and mark the detailed node as KB_EXTENSION.",
+        "D": "6",
+        "E": "Add evidence",
+        "F": "source URL / record ID / retrieved date / confidence"
+      }
+    },
+    {
+      "source_row": 10,
+      "cells": {
+        "A": "Source: ESA GPT",
+        "B": "https://esastar-emr.sso.esa.int/Account/DownloadCompetencesFile?fileType=P"
+      }
+    },
+    {
+      "source_row": 11,
+      "cells": {
+        "A": "Source: NASA taxonomy",
+        "B": "https://www.nasa.gov/otps/2024-nasa-technology-taxonomy/"
+      }
+    }
+  ]
+}

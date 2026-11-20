@@ -1,0 +1,281 @@
+{
+  "format": "kn.seed-proposal.table",
+  "status": "unreviewed_proposal",
+  "domain": "space",
+  "source": {
+    "file_name": "space_sector_ontology_and_tags_v1.xlsx",
+    "sha256": "26e7468ee372e9c606ff08910756b2066ef30ac9fea7524e646b52d8529eec28",
+    "sheet_name": "02_Relations",
+    "sheet_position": 3
+  },
+  "title": "Typed relationships \u2014 minimum controlled vocabulary",
+  "notes": [],
+  "header_row": 3,
+  "columns": [
+    {
+      "key": "relation",
+      "label": "Relation",
+      "column": "A"
+    },
+    {
+      "key": "allowed_from",
+      "label": "Allowed from",
+      "column": "B"
+    },
+    {
+      "key": "allowed_to",
+      "label": "Allowed to",
+      "column": "C"
+    },
+    {
+      "key": "meaning",
+      "label": "Meaning",
+      "column": "D"
+    },
+    {
+      "key": "minimum_evidence",
+      "label": "Minimum evidence",
+      "column": "E"
+    },
+    {
+      "key": "common_error_to_avoid",
+      "label": "Common error to avoid",
+      "column": "F"
+    },
+    {
+      "key": "example",
+      "label": "Example",
+      "column": "G"
+    }
+  ],
+  "records": [
+    {
+      "source_row": 4,
+      "values": {
+        "relation": "manufactures",
+        "allowed_from": "Organization",
+        "allowed_to": "Product / Spacecraft / Component / Payload",
+        "meaning": "Physical producer",
+        "minimum_evidence": "manufacturer source; contract; authoritative catalog",
+        "common_error_to_avoid": "Do not infer manufacturer from operator",
+        "example": "Company \u2192 satellite bus"
+      }
+    },
+    {
+      "source_row": 5,
+      "values": {
+        "relation": "integrates",
+        "allowed_from": "Organization",
+        "allowed_to": "Spacecraft / System",
+        "meaning": "Prime/system integration responsibility",
+        "minimum_evidence": "contract/program documentation",
+        "common_error_to_avoid": "Integrator may not make all subsystems",
+        "example": "Prime \u2192 spacecraft"
+      }
+    },
+    {
+      "source_row": 6,
+      "values": {
+        "relation": "supplies_component",
+        "allowed_from": "Organization",
+        "allowed_to": "Component / Subsystem",
+        "meaning": "Supplier relationship",
+        "minimum_evidence": "vendor heritage; contract; AIT docs",
+        "common_error_to_avoid": "Catalog claim \u2260 mission heritage",
+        "example": "Supplier \u2192 star tracker"
+      }
+    },
+    {
+      "source_row": 7,
+      "values": {
+        "relation": "owns",
+        "allowed_from": "Organization / State",
+        "allowed_to": "Asset / Product / Facility",
+        "meaning": "Legal/economic ownership",
+        "minimum_evidence": "registry; contract; company filing",
+        "common_error_to_avoid": "Ownership \u2260 operation/tasking",
+        "example": "Owner \u2192 satellite"
+      }
+    },
+    {
+      "source_row": 8,
+      "values": {
+        "relation": "operates",
+        "allowed_from": "Organization",
+        "allowed_to": "Asset / System / Facility",
+        "meaning": "Operational control",
+        "minimum_evidence": "operator/agency statement",
+        "common_error_to_avoid": "Operation \u2260 ownership",
+        "example": "Operator \u2192 constellation"
+      }
+    },
+    {
+      "source_row": 9,
+      "values": {
+        "relation": "provides_service",
+        "allowed_from": "Organization",
+        "allowed_to": "Service",
+        "meaning": "Provider of commercial/public service",
+        "minimum_evidence": "provider docs; contract",
+        "common_error_to_avoid": "Service may use third-party assets",
+        "example": "Company \u2192 launch service"
+      }
+    },
+    {
+      "source_row": 10,
+      "values": {
+        "relation": "launches",
+        "allowed_from": "Launch Event",
+        "allowed_to": "Spacecraft",
+        "meaning": "Object carried/launched in event",
+        "minimum_evidence": "official manifest; LL2; DISCOS",
+        "common_error_to_avoid": "Vehicle family is not the event",
+        "example": "Event \u2192 spacecraft"
+      }
+    },
+    {
+      "source_row": 11,
+      "values": {
+        "relation": "launch_service_provider",
+        "allowed_from": "Organization",
+        "allowed_to": "Launch Event / Service",
+        "meaning": "Launch service responsibility",
+        "minimum_evidence": "licence; provider release; manifest",
+        "common_error_to_avoid": "Separate from vehicle manufacturer if different",
+        "example": "Provider \u2192 mission"
+      }
+    },
+    {
+      "source_row": 12,
+      "values": {
+        "relation": "member_of_constellation",
+        "allowed_from": "Spacecraft",
+        "allowed_to": "Constellation / Fleet",
+        "meaning": "Membership",
+        "minimum_evidence": "operator / catalog evidence",
+        "common_error_to_avoid": "Do not infer only from similar naming",
+        "example": "Satellite \u2192 constellation"
+      }
+    },
+    {
+      "source_row": 13,
+      "values": {
+        "relation": "carries_payload",
+        "allowed_from": "Spacecraft",
+        "allowed_to": "Payload / Instrument",
+        "meaning": "Physical hosting",
+        "minimum_evidence": "mission/manufacturer docs",
+        "common_error_to_avoid": "Payload supplier can differ from spacecraft maker",
+        "example": "Spacecraft \u2192 SAR payload"
+      }
+    },
+    {
+      "source_row": 14,
+      "values": {
+        "relation": "produces_dataset",
+        "allowed_from": "Payload / Mission",
+        "allowed_to": "Dataset / Data Product",
+        "meaning": "Data origin",
+        "minimum_evidence": "mission/data catalog",
+        "common_error_to_avoid": "Dataset distributor may differ from origin",
+        "example": "Sensor \u2192 imagery"
+      }
+    },
+    {
+      "source_row": 15,
+      "values": {
+        "relation": "procures",
+        "allowed_from": "Organization",
+        "allowed_to": "Contract / Product / Service",
+        "meaning": "Demand/procurement relation",
+        "minimum_evidence": "tender; award; contract",
+        "common_error_to_avoid": "Tender/LoI \u2260 award",
+        "example": "Agency \u2192 service"
+      }
+    },
+    {
+      "source_row": 16,
+      "values": {
+        "relation": "funds",
+        "allowed_from": "Agency / Investor",
+        "allowed_to": "R&D Project / Organization",
+        "meaning": "Funding relation",
+        "minimum_evidence": "award/investment record",
+        "common_error_to_avoid": "Funding \u2260 procurement",
+        "example": "Agency \u2192 R&D project"
+      }
+    },
+    {
+      "source_row": 17,
+      "values": {
+        "relation": "licenses",
+        "allowed_from": "Regulator",
+        "allowed_to": "Organization / Facility / Activity",
+        "meaning": "Regulatory authorization",
+        "minimum_evidence": "official regulator record",
+        "common_error_to_avoid": "Licence \u2260 operational success",
+        "example": "CAA \u2192 operator"
+      }
+    },
+    {
+      "source_row": 18,
+      "values": {
+        "relation": "registers",
+        "allowed_from": "State / Registry",
+        "allowed_to": "Spacecraft",
+        "meaning": "Legal registration",
+        "minimum_evidence": "UNOOSA / national register",
+        "common_error_to_avoid": "Registration may lag launch",
+        "example": "State \u2192 object"
+      }
+    },
+    {
+      "source_row": 19,
+      "values": {
+        "relation": "files_spectrum",
+        "allowed_from": "Administration / Organization",
+        "allowed_to": "Network / Filing",
+        "meaning": "Spectrum/network filing",
+        "minimum_evidence": "ITU record",
+        "common_error_to_avoid": "Filing \u2260 deployed constellation",
+        "example": "Administration \u2192 NGSO filing"
+      }
+    },
+    {
+      "source_row": 20,
+      "values": {
+        "relation": "partners_with",
+        "allowed_from": "Organization",
+        "allowed_to": "Organization",
+        "meaning": "Cooperation",
+        "minimum_evidence": "MoU/LoI/release",
+        "common_error_to_avoid": "Partnership \u2260 contract",
+        "example": "Company \u2194 company"
+      }
+    },
+    {
+      "source_row": 21,
+      "values": {
+        "relation": "implements_technology",
+        "allowed_from": "Product / Project",
+        "allowed_to": "Technology",
+        "meaning": "Technology implementation",
+        "minimum_evidence": "technical docs; taxonomy mapping",
+        "common_error_to_avoid": "Tagging is many-to-many",
+        "example": "bus \u2192 ESA TD19"
+      }
+    },
+    {
+      "source_row": 22,
+      "values": {
+        "relation": "serves_application",
+        "allowed_from": "Service / Product",
+        "allowed_to": "EUSPA application segment",
+        "meaning": "Market/application relevance",
+        "minimum_evidence": "service docs; analyst mapping",
+        "common_error_to_avoid": "Application tag \u2260 product class",
+        "example": "EO analytics \u2192 Agriculture"
+      }
+    }
+  ]
+}

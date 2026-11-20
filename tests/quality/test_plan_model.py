@@ -1,6 +1,6 @@
 from pathlib import Path
 
-from agent_py.quality.plan_model import read_registry, read_tasks
+from kn.quality.plan_model import read_registry, read_tasks
 from tests.quality._plan_fixture import SPEC, plan_with, task_block, write_project
 
 
@@ -42,3 +42,10 @@ def test_only_the_capability_registry_table_is_parsed(tmp_path: Path) -> None:
         "foundation",
         "feature",
     ]
+
+
+def test_wrapped_prerequisites_are_preserved(tmp_path: Path) -> None:
+    block = task_block() + "\n- Requires: `first-task`,\n  `second-task`\n"
+    root = write_project(tmp_path, plan=plan_with(block))
+    (task,) = read_tasks(root / "docs/impl/plan.md")
+    assert task.fields["requires"] == "`first-task`, `second-task`"

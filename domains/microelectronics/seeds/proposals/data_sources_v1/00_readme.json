@@ -1,0 +1,82 @@
+{
+  "format": "kn.seed-proposal.notes",
+  "status": "unreviewed_proposal",
+  "domain": "microelectronics",
+  "source": {
+    "file_name": "microelectronics_data_sources_v1.xlsx",
+    "sha256": "ab7837e18fc1907a2b977def23d03de78e608787d3125011ab3b38bda2536fba",
+    "sheet_name": "00_README",
+    "sheet_position": 1
+  },
+  "rows": [
+    {
+      "source_row": 1,
+      "cells": {
+        "A": "Microelectronics Knowledge Base \u2014 source catalogue"
+      }
+    },
+    {
+      "source_row": 4,
+      "cells": {
+        "A": "Topic",
+        "B": "Policy"
+      }
+    },
+    {
+      "source_row": 5,
+      "cells": {
+        "A": "Purpose",
+        "B": "Prospective technologies first; product baselines in parallel. Match ontology field IDs and tags in companion workbook."
+      }
+    },
+    {
+      "source_row": 6,
+      "cells": {
+        "A": "P0",
+        "B": "Early signals (roadmaps, funded R&D, manuscripts, patents, demonstrators), priority-vendor documentation, benchmarks."
+      }
+    },
+    {
+      "source_row": 7,
+      "cells": {
+        "A": "P1",
+        "B": "Commercial enrichment, supply provenance, procurement, catalogues."
+      }
+    },
+    {
+      "source_row": 8,
+      "cells": {
+        "A": "P2",
+        "B": "Aggregate context / secondary evidence."
+      }
+    },
+    {
+      "source_row": 9,
+      "cells": {
+        "A": "Access",
+        "B": "API documentation links are not live API tests. Web-only sources require permitted collection or analyst workflow; no assumed unrestricted scraping."
+      }
+    },
+    {
+      "source_row": 10,
+      "cells": {
+        "A": "Geography",
+        "B": "EU/UK/Canada preferred; worldwide discovery for technology awareness; any production selection subject to origin and export checks."
+      }
+    },
+    {
+      "source_row": 11,
+      "cells": {
+        "A": "Evidence",
+        "B": "Primary vendor specs for MPN; independent benchmarks for energy/performance; filings for ownership; trade/catalog data only for supply context."
+      }
+    },
+    {
+      "source_row": 12,
+      "cells": {
+        "A": "Version",
+        "B": "2026-11-19. Access or terms can change; account/API validation at connector implementation."
+      }
+    }
+  ]
+}

@@ -3,7 +3,7 @@
 import re
 from graphlib import CycleError, TopologicalSorter
 
-from agent_py.quality.plan_model import Task
+from kn.quality.plan_model import Task
 
 _TASK_ID = re.compile(r"`([a-z0-9][a-z0-9-]*)`")
 

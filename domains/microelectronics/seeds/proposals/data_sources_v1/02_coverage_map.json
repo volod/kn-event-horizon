@@ -1,0 +1,169 @@
+{
+  "format": "kn.seed-proposal.table",
+  "status": "unreviewed_proposal",
+  "domain": "microelectronics",
+  "source": {
+    "file_name": "microelectronics_data_sources_v1.xlsx",
+    "sha256": "ab7837e18fc1907a2b977def23d03de78e608787d3125011ab3b38bda2536fba",
+    "sheet_name": "02_Coverage_Map",
+    "sheet_position": 3
+  },
+  "title": "Coverage \u2014 knowledge questions to source IDs",
+  "notes": [],
+  "header_row": 4,
+  "columns": [
+    {
+      "key": "question",
+      "label": "Question",
+      "column": "A"
+    },
+    {
+      "key": "primary_source_ids",
+      "label": "Primary source IDs",
+      "column": "B"
+    },
+    {
+      "key": "entity_coverage",
+      "label": "Entity coverage",
+      "column": "C"
+    },
+    {
+      "key": "class_tag_focus",
+      "label": "Class / tag focus",
+      "column": "D"
+    },
+    {
+      "key": "priority",
+      "label": "Priority",
+      "column": "E"
+    },
+    {
+      "key": "fields_outcome",
+      "label": "Fields / outcome",
+      "column": "F"
+    }
+  ],
+  "records": [
+    {
+      "source_row": 5,
+      "values": {
+        "question": "Emerging energy and edge AI",
+        "primary_source_ids": "D01\u2013D15; V06; V09; V10",
+        "entity_coverage": "R&DProject; Demo; IP; Patent; Roadmap",
+        "class_tag_focus": "T.ULP; T.AIMC; T.CIM; T.NEURO; T.HARV; T.WBG",
+        "priority": "P0",
+        "fields_outcome": "Technology evidence, baseline, milestone, partner, TRL"
+      }
+    },
+    {
+      "source_row": 6,
+      "values": {
+        "question": "Low-power sensors / imaging",
+        "primary_source_ids": "V01; V05; V15; V17\u2013V23; D09; D10; V11",
+        "entity_coverage": "MPN; ProductModel; Demo",
+        "class_tag_focus": "O.SENS; O.OPTO",
+        "priority": "P0",
+        "fields_outcome": "SENSOR/IMAGING/ACOUSTIC/IMU; ROI and ODR conditions"
+      }
+    },
+    {
+      "source_row": 7,
+      "values": {
+        "question": "MCU/SoC and NPU",
+        "primary_source_ids": "V01\u2013V05; V14; V16; D16\u2013D19",
+        "entity_coverage": "MPN; SW; TEST",
+        "class_tag_focus": "L.MCU; L.MPU; L.IPU",
+        "priority": "P0",
+        "fields_outcome": "MCU_SOC, AI, ENERGY; exact SKU"
+      }
+    },
+    {
+      "source_row": 8,
+      "values": {
+        "question": "FPGA",
+        "primary_source_ids": "V07; V08; D01; D04",
+        "entity_coverage": "MPN; SW; TEST",
+        "class_tag_focus": "L.PLD.FPGA",
+        "priority": "P0",
+        "fields_outcome": "FPGA post-route metrics; I/O native/soft/bridge"
+      }
+    },
+    {
+      "source_row": 9,
+      "values": {
+        "question": "Power and harvesting",
+        "primary_source_ids": "V01; V03; V05; V06; D01; D04",
+        "entity_coverage": "MPN; Demo",
+        "class_tag_focus": "A.PM; O.DISC",
+        "priority": "P0",
+        "fields_outcome": "POWER & ENERGY; efficiency curve"
+      }
+    },
+    {
+      "source_row": 10,
+      "values": {
+        "question": "Connectivity / low-power RF",
+        "primary_source_ids": "V01; V03; V05; V10; D11",
+        "entity_coverage": "MPN; Demo; SW",
+        "class_tag_focus": "T.LPWAN; T.UWB; T.NTN",
+        "priority": "P0",
+        "fields_outcome": "RF; energy/delivered bit, retry model"
+      }
+    },
+    {
+      "source_row": 11,
+      "values": {
+        "question": "Canadian emerging projects",
+        "primary_source_ids": "D05\u2013D07; V09\u2013V11; V22; V24\u2013V25; V27\u2013V28; C14",
+        "entity_coverage": "ORG; PROJECT; IP; DEMO",
+        "class_tag_focus": "T.MEMS; T.PIC; T.AIMC; T.UWB",
+        "priority": "P0",
+        "fields_outcome": "Development vs orderability and supply route"
+      }
+    },
+    {
+      "source_row": 12,
+      "values": {
+        "question": "Corporate, fab/ATP, origin",
+        "primary_source_ids": "C04; C06; C07; V12; V13; PCN/vendor statements",
+        "entity_coverage": "ORG; FAC; CLAIM; NOTICE",
+        "class_tag_focus": "All",
+        "priority": "P0/P1",
+        "fields_outcome": "HQ, owner, wafer fab, packaging/test independent"
+      }
+    },
+    {
+      "source_row": 13,
+      "values": {
+        "question": "Stock, price, status",
+        "primary_source_ids": "C01\u2013C03; V12; V13",
+        "entity_coverage": "OFFER; NOTICE; MPN",
+        "class_tag_focus": "All",
+        "priority": "P1",
+        "fields_outcome": "Price ladder, quote date, PCN/EOL, step quantity"
+      }
+    },
+    {
+      "source_row": 14,
+      "values": {
+        "question": "Comparison/qualifications",
+        "primary_source_ids": "D16\u2013D19; C11\u2013C13; vendor datasheets",
+        "entity_coverage": "TEST; OBS; CERT",
+        "class_tag_focus": "All",
+        "priority": "P0",
+        "fields_outcome": "Condition set/version, measured vs declared"
+      }
+    },
+    {
+      "source_row": 15,
+      "values": {
+        "question": "Industrial services/IP",
+        "primary_source_ids": "C14; D05; D06; D03; C15; V26\u2013V27",
+        "entity_coverage": "SVC; PROC; FAC; IP",
+        "class_tag_focus": "X.*",
+        "priority": "P1",
+        "fields_outcome": "MPW, PDK, licensing, site, process"
+      }
+    }
+  ]
+}

@@ -1,7 +1,7 @@
 # Development Guide
 
-This guide describes the tooling, starter command, documentation checks, and agent adapters that
-every project copied from the template starts with. The project's own product behavior is indexed
+This guide describes the tooling, documentation checks, and agent adapters that came with the
+project template. The project's own product behavior is indexed
 under [current implementation](../impl/current.md).
 
 ## Setup
@@ -33,7 +33,7 @@ Make targets are the stable workflow. For one-off dependency debugging:
 
 ```bash
 source scripts/shared/common.sh
-apy_load_env
+kn_load_env
 uv <command>
 ```
 
@@ -51,16 +51,10 @@ Ruff, mypy, pytest, and complexipy caches stay below the same root. `.gitignore`
 artifacts, local environments, secrets, caches, and root build outputs without hiding same-named
 source subpackages.
 
-## Starter identity
+## Project identity
 
-The `agent_py` package provides a typed `ProjectInfo` value through `project_info()`. It reports
-the distribution name, import package, and installed version, with a source-checkout fallback when
-distribution metadata is unavailable. `src/agent_py/cli.py` owns argument parsing, and
-`agent-py info`, run by `make run`, logs the same identity as a packaging and executable-path smoke
-test. `tests/test_metadata.py` and `tests/test_cli.py` cover the API and command boundary.
-
-The first plan task, `personalize-template-project`, replaces this starter identity with the new
-project's own.
+The distribution, import package, and commands are described in
+[product core](../impl/current/product-core.md).
 
 ## Documentation checks
 
@@ -69,7 +63,7 @@ placement, lane statuses, required metadata, registry order, and forward-only la
 `plan_dependencies.py` checks open task references across both lanes for unknown IDs, cycles, and
 required work that depends on optional work.
 
-`make plan-status` and `agent-py-plan` use `plan_summary.py`. They count work and surface lane
+`make plan-status` and `kn-plan` use `plan_summary.py`. They count work and surface lane
 priority after filtering tasks whose explicit prerequisites are still open. Contributors verify
 manual prerequisites before taking a task.
 

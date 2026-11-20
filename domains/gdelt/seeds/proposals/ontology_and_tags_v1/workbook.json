@@ -1,0 +1,131 @@
+{
+  "format": "kn.seed-proposal.workbook",
+  "status": "unreviewed_proposal",
+  "domain": "gdelt",
+  "workbook": {
+    "file_name": "gdelt_ontology_and_tags_v1.xlsx",
+    "sha256": "c31bba2aad40336c620044c6df5332744aebdce70b415e56bc121096845881a2",
+    "size_bytes": 49392
+  },
+  "conversion": {
+    "method": "OOXML parsed with the Python standard library; no spreadsheet engine",
+    "cell_text": "verbatim; empty cells are null; numeric cells are JSON numbers",
+    "formulas": "never evaluated; cached values kept; formula text recorded per record",
+    "macros_or_external_links": "none present",
+    "encoding": "ASCII JSON with escaped non-ASCII characters"
+  },
+  "sheets": [
+    {
+      "sheet_name": "00_README",
+      "sheet_position": 1,
+      "file": "00_readme.json",
+      "format": "kn.seed-proposal.notes",
+      "sha256": "c389f76cda1da3d4f96e6618f371d1913acdadb07f6fa9284905256a8f9e9057",
+      "row_count": 14
+    },
+    {
+      "sheet_name": "01_Ontology",
+      "sheet_position": 2,
+      "file": "01_ontology.json",
+      "format": "kn.seed-proposal.table",
+      "sha256": "b4ed1c8f8754ae929116aece956ac9c6b8379f544c42ce6d9ec1588145d213bf",
+      "record_count": 28
+    },
+    {
+      "sheet_name": "02_Relations",
+      "sheet_position": 3,
+      "file": "02_relations.json",
+      "format": "kn.seed-proposal.table",
+      "sha256": "8bc4db93fd810e265dc5f9e0bac2e2e7c67db860f76390d6b8e3cf86520cef02",
+      "record_count": 29
+    },
+    {
+      "sheet_name": "03_CAMEO_Classifier",
+      "sheet_position": 4,
+      "file": "03_cameo_classifier.json",
+      "format": "kn.seed-proposal.table",
+      "sha256": "0feab16be1f659c82f96905ba775292ebf623b17d6d44e258ddf0140891db20e",
+      "record_count": 22
+    },
+    {
+      "sheet_name": "04_Actor_Geo_Tags",
+      "sheet_position": 5,
+      "file": "04_actor_geo_tags.json",
+      "format": "kn.seed-proposal.table",
+      "sha256": "992b249cc1d33d38727fc7f7791668de3b8cc37ecc4161658e58ced73867813e",
+      "record_count": 11
+    },
+    {
+      "sheet_name": "05_GKG_Theme_Tags",
+      "sheet_position": 6,
+      "file": "05_gkg_theme_tags.json",
+      "format": "kn.seed-proposal.table",
+      "sha256": "176652a4c87dc50bcafff2ac3b2d2e950bfe55e034c3d762a1a4874c3e0793d9",
+      "record_count": 43
+    },
+    {
+      "sheet_name": "06_GCAM_Tone_Tags",
+      "sheet_position": 7,
+      "file": "06_gcam_tone_tags.json",
+      "format": "kn.seed-proposal.table",
+      "sha256": "215314748b81e421a414cee6e8fedcc786b460d21cd2d7bf3fdb708cc0506b49",
+      "record_count": 14
+    },
+    {
+      "sheet_name": "07_Technology_Tags",
+      "sheet_position": 8,
+      "file": "07_technology_tags.json",
+      "format": "kn.seed-proposal.table",
+      "sha256": "3696a1e2dd82ea5cf25acd8a2ad1e63bbcbb7ed81d1917b3a7b605185fc314ea",
+      "record_count": 18
+    },
+    {
+      "sheet_name": "08_Application_Tags",
+      "sheet_position": 9,
+      "file": "08_application_tags.json",
+      "format": "kn.seed-proposal.table",
+      "sha256": "d217523caf7524c112583049a6bff7eceb5e95c2e8194d6a285a3bde51cf3cd9",
+      "record_count": 14
+    },
+    {
+      "sheet_name": "09_Service_Vocabulary",
+      "sheet_position": 10,
+      "file": "09_service_vocabulary.json",
+      "format": "kn.seed-proposal.table",
+      "sha256": "cc02573448397913b4f379d5d8c1332c1d875fa04f0df555754127f90b8ee363",
+      "record_count": 13
+    },
+    {
+      "sheet_name": "10_Tagging_Examples",
+      "sheet_position": 11,
+      "file": "10_tagging_examples.json",
+      "format": "kn.seed-proposal.table",
+      "sha256": "8c4e27b07e883aca9e3ffd96f54d0ad9d5ecf86a4483a8011c657785ea51c416",
+      "record_count": 8
+    },
+    {
+      "sheet_name": "11_Field_Mapping",
+      "sheet_position": 12,
+      "file": "11_field_mapping.json",
+      "format": "kn.seed-proposal.table",
+      "sha256": "e031a5396b979f3ce933f0ce6cb40a7c711c2905634adc477e8aa91f7354c690",
+      "record_count": 29
+    },
+    {
+      "sheet_name": "12_Sources_Ingestion",
+      "sheet_position": 13,
+      "file": "12_sources_ingestion.json",
+      "format": "kn.seed-proposal.table",
+      "sha256": "9d4402200e7fe451c33a3017af26668935c4dfd3c0cc66d84ef2e82294ed1a91",
+      "record_count": 17
+    },
+    {
+      "sheet_name": "13_Ingestion_Order",
+      "sheet_position": 14,
+      "file": "13_ingestion_order.json",
+      "format": "kn.seed-proposal.table",
+      "sha256": "2b8ef45873898bdcc0eaa77e0e16ca365cb96e20b3dae2514da1981c486f3c4e",
+      "record_count": 7
+    }
+  ]
+}

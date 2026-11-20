@@ -1,0 +1,163 @@
+{
+  "format": "kn.seed-proposal.table",
+  "status": "unreviewed_proposal",
+  "domain": "microelectronics",
+  "source": {
+    "file_name": "microelectronics_ontology_and_tags_v1.xlsx",
+    "sha256": "7166aa06791998c692cc6a2ac377692a6687f15e3353ffa70a1c159f2e63c34f",
+    "sheet_name": "06_Application_Tags",
+    "sheet_position": 7
+  },
+  "title": "Application tags \u2014 ECS segments + local use cases",
+  "notes": [],
+  "header_row": 4,
+  "columns": [
+    {
+      "key": "id",
+      "label": "ID",
+      "column": "A"
+    },
+    {
+      "key": "application",
+      "label": "Application",
+      "column": "B"
+    },
+    {
+      "key": "origin",
+      "label": "Origin",
+      "column": "C"
+    },
+    {
+      "key": "typical_uses",
+      "label": "Typical uses",
+      "column": "D"
+    },
+    {
+      "key": "source",
+      "label": "Source",
+      "column": "E"
+    }
+  ],
+  "records": [
+    {
+      "source_row": 5,
+      "values": {
+        "id": "APP.31",
+        "application": "Mobility",
+        "origin": "ECS 3.1",
+        "typical_uses": "Robotics/vehicles, intelligent transport",
+        "source": "https://ecssria.eu/2026"
+      }
+    },
+    {
+      "source_row": 6,
+      "values": {
+        "id": "APP.32",
+        "application": "Energy",
+        "origin": "ECS 3.2",
+        "typical_uses": "Grid, power conversion, storage, energy harvesting",
+        "source": "https://ecssria.eu/2026"
+      }
+    },
+    {
+      "source_row": 7,
+      "values": {
+        "id": "APP.33",
+        "application": "Digital Industry",
+        "origin": "ECS 3.3",
+        "typical_uses": "Industrial sensing, robotics, automation",
+        "source": "https://ecssria.eu/2026"
+      }
+    },
+    {
+      "source_row": 8,
+      "values": {
+        "id": "APP.34",
+        "application": "Health & Wellbeing",
+        "origin": "ECS 3.4",
+        "typical_uses": "Wearables, diagnostics, ultrasound",
+        "source": "https://ecssria.eu/2026"
+      }
+    },
+    {
+      "source_row": 9,
+      "values": {
+        "id": "APP.35",
+        "application": "Agrifood and Natural Resources",
+        "origin": "ECS 3.5",
+        "typical_uses": "Smart farming, environmental monitoring",
+        "source": "https://ecssria.eu/2026"
+      }
+    },
+    {
+      "source_row": 10,
+      "values": {
+        "id": "APP.36",
+        "application": "Digital Society",
+        "origin": "ECS 3.6",
+        "typical_uses": "IoT, infrastructure, communications",
+        "source": "https://ecssria.eu/2026"
+      }
+    },
+    {
+      "source_row": 11,
+      "values": {
+        "id": "APP.X1",
+        "application": "Autonomous mobile platforms",
+        "origin": "KB_EXTENSION",
+        "typical_uses": "UGV/UAV civilian mobility, local control",
+        "source": "Local mapping"
+      }
+    },
+    {
+      "source_row": 12,
+      "values": {
+        "id": "APP.X2",
+        "application": "Distributed low-power sensor networks",
+        "origin": "KB_EXTENSION",
+        "typical_uses": "Always-on sensing, remote nodes",
+        "source": "Local mapping"
+      }
+    },
+    {
+      "source_row": 13,
+      "values": {
+        "id": "APP.X3",
+        "application": "Edge vision & industrial inspection",
+        "origin": "KB_EXTENSION",
+        "typical_uses": "High-speed perception, machine vision",
+        "source": "Local mapping"
+      }
+    },
+    {
+      "source_row": 14,
+      "values": {
+        "id": "APP.X4",
+        "application": "Mesh / NTN communications",
+        "origin": "KB_EXTENSION",
+        "typical_uses": "Resilient communication, satellite IoT",
+        "source": "Local mapping"
+      }
+    },
+    {
+      "source_row": 15,
+      "values": {
+        "id": "APP.X5",
+        "application": "Space electronics / harsh environment",
+        "origin": "KB_EXTENSION",
+        "typical_uses": "Space-grade and radiation tolerance",
+        "source": "Local mapping"
+      }
+    },
+    {
+      "source_row": 16,
+      "values": {
+        "id": "APP.X6",
+        "application": "AI infrastructure & edge compute",
+        "origin": "KB_EXTENSION",
+        "typical_uses": "Embedded and data-centre acceleration",
+        "source": "Local mapping"
+      }
+    }
+  ]
+}

@@ -1,0 +1,886 @@
+{
+  "format": "kn.seed-proposal.table",
+  "status": "unreviewed_proposal",
+  "domain": "microelectronics",
+  "source": {
+    "file_name": "microelectronics_ontology_and_tags_v1.xlsx",
+    "sha256": "7166aa06791998c692cc6a2ac377692a6687f15e3353ffa70a1c159f2e63c34f",
+    "sheet_name": "03_Product_Classifier",
+    "sheet_position": 4
+  },
+  "title": "OECD product backbone + engineering extensions",
+  "notes": [
+    "OECD Figure 9 (p.30); codes are LOCAL. SoC, MEMS, SiP, material and integration style are facets, not competing root classes."
+  ],
+  "header_row": 4,
+  "columns": [
+    {
+      "key": "kb_node",
+      "label": "KB node",
+      "column": "A"
+    },
+    {
+      "key": "parent",
+      "label": "Parent",
+      "column": "B"
+    },
+    {
+      "key": "class",
+      "label": "Class",
+      "column": "C"
+    },
+    {
+      "key": "origin",
+      "label": "Origin",
+      "column": "D"
+    },
+    {
+      "key": "profile_rule",
+      "label": "Profile / rule",
+      "column": "E"
+    },
+    {
+      "key": "reference",
+      "label": "Reference",
+      "column": "F"
+    }
+  ],
+  "records": [
+    {
+      "source_row": 5,
+      "values": {
+        "kb_node": "L",
+        "parent": null,
+        "class": "IC-Logic",
+        "origin": "OECD_NODE",
+        "profile_rule": "Core classification; local identifier",
+        "reference": "https://www.oecd.org/en/publications/chips-nodes-and-wafers_f68de895-en.html"
+      }
+    },
+    {
+      "source_row": 6,
+      "values": {
+        "kb_node": "L.CPU",
+        "parent": "L",
+        "class": "CPU",
+        "origin": "OECD_NODE",
+        "profile_rule": "Core classification; local identifier",
+        "reference": "https://www.oecd.org/en/publications/chips-nodes-and-wafers_f68de895-en.html"
+      }
+    },
+    {
+      "source_row": 7,
+      "values": {
+        "kb_node": "L.MPU",
+        "parent": "L",
+        "class": "MPU",
+        "origin": "OECD_NODE",
+        "profile_rule": "Core classification; local identifier",
+        "reference": "https://www.oecd.org/en/publications/chips-nodes-and-wafers_f68de895-en.html"
+      }
+    },
+    {
+      "source_row": 8,
+      "values": {
+        "kb_node": "L.GPU",
+        "parent": "L",
+        "class": "GPU",
+        "origin": "OECD_NODE",
+        "profile_rule": "Core classification; local identifier",
+        "reference": "https://www.oecd.org/en/publications/chips-nodes-and-wafers_f68de895-en.html"
+      }
+    },
+    {
+      "source_row": 9,
+      "values": {
+        "kb_node": "L.ASIC",
+        "parent": "L",
+        "class": "ASIC",
+        "origin": "OECD_NODE",
+        "profile_rule": "Core classification; local identifier",
+        "reference": "https://www.oecd.org/en/publications/chips-nodes-and-wafers_f68de895-en.html"
+      }
+    },
+    {
+      "source_row": 10,
+      "values": {
+        "kb_node": "L.MCU",
+        "parent": "L",
+        "class": "MCU",
+        "origin": "OECD_NODE",
+        "profile_rule": "Core classification; local identifier",
+        "reference": "https://www.oecd.org/en/publications/chips-nodes-and-wafers_f68de895-en.html"
+      }
+    },
+    {
+      "source_row": 11,
+      "values": {
+        "kb_node": "L.DSP",
+        "parent": "L",
+        "class": "DSP",
+        "origin": "OECD_NODE",
+        "profile_rule": "Core classification; local identifier",
+        "reference": "https://www.oecd.org/en/publications/chips-nodes-and-wafers_f68de895-en.html"
+      }
+    },
+    {
+      "source_row": 12,
+      "values": {
+        "kb_node": "L.IPU",
+        "parent": "L",
+        "class": "IPU",
+        "origin": "OECD_NODE",
+        "profile_rule": "Core classification; local identifier",
+        "reference": "https://www.oecd.org/en/publications/chips-nodes-and-wafers_f68de895-en.html"
+      }
+    },
+    {
+      "source_row": 13,
+      "values": {
+        "kb_node": "L.PLD",
+        "parent": "L",
+        "class": "Programmable Logic Devices",
+        "origin": "OECD_NODE",
+        "profile_rule": "Core classification; local identifier",
+        "reference": "https://www.oecd.org/en/publications/chips-nodes-and-wafers_f68de895-en.html"
+      }
+    },
+    {
+      "source_row": 14,
+      "values": {
+        "kb_node": "L.PLD.FPGA",
+        "parent": "L.PLD",
+        "class": "FPGA/FPLD",
+        "origin": "OECD_NODE",
+        "profile_rule": "Core classification; local identifier",
+        "reference": "https://www.oecd.org/en/publications/chips-nodes-and-wafers_f68de895-en.html"
+      }
+    },
+    {
+      "source_row": 15,
+      "values": {
+        "kb_node": "M",
+        "parent": null,
+        "class": "IC-Memory",
+        "origin": "OECD_NODE",
+        "profile_rule": "Core classification; local identifier",
+        "reference": "https://www.oecd.org/en/publications/chips-nodes-and-wafers_f68de895-en.html"
+      }
+    },
+    {
+      "source_row": 16,
+      "values": {
+        "kb_node": "M.V",
+        "parent": "M",
+        "class": "Volatile",
+        "origin": "OECD_NODE",
+        "profile_rule": "Core classification; local identifier",
+        "reference": "https://www.oecd.org/en/publications/chips-nodes-and-wafers_f68de895-en.html"
+      }
+    },
+    {
+      "source_row": 17,
+      "values": {
+        "kb_node": "M.V.DRAM",
+        "parent": "M.V",
+        "class": "DRAM",
+        "origin": "OECD_NODE",
+        "profile_rule": "Core classification; local identifier",
+        "reference": "https://www.oecd.org/en/publications/chips-nodes-and-wafers_f68de895-en.html"
+      }
+    },
+    {
+      "source_row": 18,
+      "values": {
+        "kb_node": "M.V.SRAM",
+        "parent": "M.V",
+        "class": "SRAM",
+        "origin": "OECD_NODE",
+        "profile_rule": "Core classification; local identifier",
+        "reference": "https://www.oecd.org/en/publications/chips-nodes-and-wafers_f68de895-en.html"
+      }
+    },
+    {
+      "source_row": 19,
+      "values": {
+        "kb_node": "M.NV",
+        "parent": "M",
+        "class": "Non-Volatile",
+        "origin": "OECD_NODE",
+        "profile_rule": "Core classification; local identifier",
+        "reference": "https://www.oecd.org/en/publications/chips-nodes-and-wafers_f68de895-en.html"
+      }
+    },
+    {
+      "source_row": 20,
+      "values": {
+        "kb_node": "M.NV.ROM",
+        "parent": "M.NV",
+        "class": "ROM",
+        "origin": "OECD_NODE",
+        "profile_rule": "Core classification; local identifier",
+        "reference": "https://www.oecd.org/en/publications/chips-nodes-and-wafers_f68de895-en.html"
+      }
+    },
+    {
+      "source_row": 21,
+      "values": {
+        "kb_node": "M.NV.NVRAM",
+        "parent": "M.NV",
+        "class": "NVRAM",
+        "origin": "OECD_NODE",
+        "profile_rule": "Core classification; local identifier",
+        "reference": "https://www.oecd.org/en/publications/chips-nodes-and-wafers_f68de895-en.html"
+      }
+    },
+    {
+      "source_row": 22,
+      "values": {
+        "kb_node": "M.NV.FLASH",
+        "parent": "M.NV",
+        "class": "Flash",
+        "origin": "OECD_NODE",
+        "profile_rule": "Core classification; local identifier",
+        "reference": "https://www.oecd.org/en/publications/chips-nodes-and-wafers_f68de895-en.html"
+      }
+    },
+    {
+      "source_row": 23,
+      "values": {
+        "kb_node": "M.NV.FLASH.NOR",
+        "parent": "M.NV.FLASH",
+        "class": "NOR",
+        "origin": "OECD_NODE",
+        "profile_rule": "Core classification; local identifier",
+        "reference": "https://www.oecd.org/en/publications/chips-nodes-and-wafers_f68de895-en.html"
+      }
+    },
+    {
+      "source_row": 24,
+      "values": {
+        "kb_node": "M.NV.FLASH.NAND",
+        "parent": "M.NV.FLASH",
+        "class": "NAND",
+        "origin": "OECD_NODE",
+        "profile_rule": "Core classification; local identifier",
+        "reference": "https://www.oecd.org/en/publications/chips-nodes-and-wafers_f68de895-en.html"
+      }
+    },
+    {
+      "source_row": 25,
+      "values": {
+        "kb_node": "A",
+        "parent": null,
+        "class": "IC-Analog",
+        "origin": "OECD_NODE",
+        "profile_rule": "Core classification; local identifier",
+        "reference": "https://www.oecd.org/en/publications/chips-nodes-and-wafers_f68de895-en.html"
+      }
+    },
+    {
+      "source_row": 26,
+      "values": {
+        "kb_node": "A.PM",
+        "parent": "A",
+        "class": "Power Management",
+        "origin": "OECD_NODE",
+        "profile_rule": "Core classification; local identifier",
+        "reference": "https://www.oecd.org/en/publications/chips-nodes-and-wafers_f68de895-en.html"
+      }
+    },
+    {
+      "source_row": 27,
+      "values": {
+        "kb_node": "A.SC",
+        "parent": "A",
+        "class": "Signal Conversion",
+        "origin": "OECD_NODE",
+        "profile_rule": "Core classification; local identifier",
+        "reference": "https://www.oecd.org/en/publications/chips-nodes-and-wafers_f68de895-en.html"
+      }
+    },
+    {
+      "source_row": 28,
+      "values": {
+        "kb_node": "A.AMP",
+        "parent": "A",
+        "class": "Amplifier",
+        "origin": "OECD_NODE",
+        "profile_rule": "Core classification; local identifier",
+        "reference": "https://www.oecd.org/en/publications/chips-nodes-and-wafers_f68de895-en.html"
+      }
+    },
+    {
+      "source_row": 29,
+      "values": {
+        "kb_node": "O",
+        "parent": null,
+        "class": "Others",
+        "origin": "OECD_NODE",
+        "profile_rule": "Core classification; local identifier",
+        "reference": "https://www.oecd.org/en/publications/chips-nodes-and-wafers_f68de895-en.html"
+      }
+    },
+    {
+      "source_row": 30,
+      "values": {
+        "kb_node": "O.OPTO",
+        "parent": "O",
+        "class": "Optoelectronics",
+        "origin": "OECD_NODE",
+        "profile_rule": "Core classification; local identifier",
+        "reference": "https://www.oecd.org/en/publications/chips-nodes-and-wafers_f68de895-en.html"
+      }
+    },
+    {
+      "source_row": 31,
+      "values": {
+        "kb_node": "O.SENS",
+        "parent": "O",
+        "class": "Sensors and actuators",
+        "origin": "OECD_NODE",
+        "profile_rule": "Core classification; local identifier",
+        "reference": "https://www.oecd.org/en/publications/chips-nodes-and-wafers_f68de895-en.html"
+      }
+    },
+    {
+      "source_row": 32,
+      "values": {
+        "kb_node": "O.DISC",
+        "parent": "O",
+        "class": "Discrete",
+        "origin": "OECD_NODE",
+        "profile_rule": "Core classification; local identifier",
+        "reference": "https://www.oecd.org/en/publications/chips-nodes-and-wafers_f68de895-en.html"
+      }
+    },
+    {
+      "source_row": 33,
+      "values": {
+        "kb_node": "O.OTHER",
+        "parent": "O",
+        "class": "Others",
+        "origin": "OECD_NODE",
+        "profile_rule": "Core classification; local identifier",
+        "reference": "https://www.oecd.org/en/publications/chips-nodes-and-wafers_f68de895-en.html"
+      }
+    },
+    {
+      "source_row": 34,
+      "values": {
+        "kb_node": "L.MCU.ULP",
+        "parent": "L.MCU",
+        "class": "Ultra-low-power MCU",
+        "origin": "KB_EXTENSION",
+        "profile_rule": "MCU; ENERGY",
+        "reference": "https://www.oecd.org/en/publications/chips-nodes-and-wafers_f68de895-en.html"
+      }
+    },
+    {
+      "source_row": 35,
+      "values": {
+        "kb_node": "L.MCU.RF",
+        "parent": "L.MCU",
+        "class": "Wireless MCU / radio SoC",
+        "origin": "KB_EXTENSION",
+        "profile_rule": "MCU; RF",
+        "reference": "https://www.oecd.org/en/publications/chips-nodes-and-wafers_f68de895-en.html"
+      }
+    },
+    {
+      "source_row": 36,
+      "values": {
+        "kb_node": "L.MCU.AI",
+        "parent": "L.MCU",
+        "class": "AI MCU with accelerator",
+        "origin": "KB_EXTENSION",
+        "profile_rule": "MCU; AI",
+        "reference": "https://www.oecd.org/en/publications/chips-nodes-and-wafers_f68de895-en.html"
+      }
+    },
+    {
+      "source_row": 37,
+      "values": {
+        "kb_node": "L.MCU.RT",
+        "parent": "L.MCU",
+        "class": "Real-time / control MCU",
+        "origin": "KB_EXTENSION",
+        "profile_rule": "MCU",
+        "reference": "https://www.oecd.org/en/publications/chips-nodes-and-wafers_f68de895-en.html"
+      }
+    },
+    {
+      "source_row": 38,
+      "values": {
+        "kb_node": "L.MPU.EDGE",
+        "parent": "L.MPU",
+        "class": "Edge application SoC/MPU",
+        "origin": "KB_EXTENSION",
+        "profile_rule": "SOC; AI",
+        "reference": "https://www.oecd.org/en/publications/chips-nodes-and-wafers_f68de895-en.html"
+      }
+    },
+    {
+      "source_row": 39,
+      "values": {
+        "kb_node": "L.MPU.VISION",
+        "parent": "L.MPU",
+        "class": "Vision / multimedia application SoC",
+        "origin": "KB_EXTENSION",
+        "profile_rule": "SOC; IMAGING",
+        "reference": "https://www.oecd.org/en/publications/chips-nodes-and-wafers_f68de895-en.html"
+      }
+    },
+    {
+      "source_row": 40,
+      "values": {
+        "kb_node": "L.GPU.EDGE",
+        "parent": "L.GPU",
+        "class": "Embedded GPU",
+        "origin": "KB_EXTENSION",
+        "profile_rule": "SOC; AI",
+        "reference": "https://www.oecd.org/en/publications/chips-nodes-and-wafers_f68de895-en.html"
+      }
+    },
+    {
+      "source_row": 41,
+      "values": {
+        "kb_node": "L.IPU.NPU",
+        "parent": "L.IPU",
+        "class": "Digital inference accelerator / NPU",
+        "origin": "KB_EXTENSION",
+        "profile_rule": "AI",
+        "reference": "https://www.oecd.org/en/publications/chips-nodes-and-wafers_f68de895-en.html"
+      }
+    },
+    {
+      "source_row": 42,
+      "values": {
+        "kb_node": "L.IPU.ANALOG",
+        "parent": "L.IPU",
+        "class": "Analog / mixed-signal AI accelerator",
+        "origin": "KB_EXTENSION",
+        "profile_rule": "AI; ANALOG (IP stays IP)",
+        "reference": "https://www.oecd.org/en/publications/chips-nodes-and-wafers_f68de895-en.html"
+      }
+    },
+    {
+      "source_row": 43,
+      "values": {
+        "kb_node": "L.IPU.NEURO",
+        "parent": "L.IPU",
+        "class": "Neuromorphic accelerator",
+        "origin": "KB_EXTENSION",
+        "profile_rule": "AI",
+        "reference": "https://www.oecd.org/en/publications/chips-nodes-and-wafers_f68de895-en.html"
+      }
+    },
+    {
+      "source_row": 44,
+      "values": {
+        "kb_node": "L.PLD.FPGA.SMALL",
+        "parent": "L.PLD.FPGA",
+        "class": "Low-density FPGA",
+        "origin": "KB_EXTENSION",
+        "profile_rule": "FPGA",
+        "reference": "https://www.oecd.org/en/publications/chips-nodes-and-wafers_f68de895-en.html"
+      }
+    },
+    {
+      "source_row": 45,
+      "values": {
+        "kb_node": "L.PLD.FPGA.HIGH",
+        "parent": "L.PLD.FPGA",
+        "class": "High-throughput FPGA",
+        "origin": "KB_EXTENSION",
+        "profile_rule": "FPGA",
+        "reference": "https://www.oecd.org/en/publications/chips-nodes-and-wafers_f68de895-en.html"
+      }
+    },
+    {
+      "source_row": 46,
+      "values": {
+        "kb_node": "L.PLD.FPGA.SOC",
+        "parent": "L.PLD.FPGA",
+        "class": "SoC FPGA",
+        "origin": "KB_EXTENSION",
+        "profile_rule": "FPGA; SOC",
+        "reference": "https://www.oecd.org/en/publications/chips-nodes-and-wafers_f68de895-en.html"
+      }
+    },
+    {
+      "source_row": 47,
+      "values": {
+        "kb_node": "L.ASIC.RF",
+        "parent": "L.ASIC",
+        "class": "Digital-dominant connectivity ASIC",
+        "origin": "KB_EXTENSION",
+        "profile_rule": "RF; verify dominant function",
+        "reference": "https://www.oecd.org/en/publications/chips-nodes-and-wafers_f68de895-en.html"
+      }
+    },
+    {
+      "source_row": 48,
+      "values": {
+        "kb_node": "L.ASIC.SEC",
+        "parent": "L.ASIC",
+        "class": "Security / cryptographic ASIC",
+        "origin": "KB_EXTENSION",
+        "profile_rule": "MCU; Security",
+        "reference": "https://www.oecd.org/en/publications/chips-nodes-and-wafers_f68de895-en.html"
+      }
+    },
+    {
+      "source_row": 49,
+      "values": {
+        "kb_node": "M.NV.NVRAM.MRAM",
+        "parent": "M.NV.NVRAM",
+        "class": "MRAM",
+        "origin": "KB_EXTENSION",
+        "profile_rule": "MEMORY",
+        "reference": "https://www.oecd.org/en/publications/chips-nodes-and-wafers_f68de895-en.html"
+      }
+    },
+    {
+      "source_row": 50,
+      "values": {
+        "kb_node": "M.NV.NVRAM.RRAM",
+        "parent": "M.NV.NVRAM",
+        "class": "ReRAM / PCM / FeRAM (subtype tag)",
+        "origin": "KB_EXTENSION",
+        "profile_rule": "MEMORY",
+        "reference": "https://www.oecd.org/en/publications/chips-nodes-and-wafers_f68de895-en.html"
+      }
+    },
+    {
+      "source_row": 51,
+      "values": {
+        "kb_node": "A.PM.REG",
+        "parent": "A.PM",
+        "class": "DC/DC, LDO, PMIC",
+        "origin": "KB_EXTENSION",
+        "profile_rule": "POWER",
+        "reference": "https://www.oecd.org/en/publications/chips-nodes-and-wafers_f68de895-en.html"
+      }
+    },
+    {
+      "source_row": 52,
+      "values": {
+        "kb_node": "A.PM.HARV",
+        "parent": "A.PM",
+        "class": "Energy harvesting / battery management IC",
+        "origin": "KB_EXTENSION",
+        "profile_rule": "POWER",
+        "reference": "https://www.oecd.org/en/publications/chips-nodes-and-wafers_f68de895-en.html"
+      }
+    },
+    {
+      "source_row": 53,
+      "values": {
+        "kb_node": "A.PM.DRV",
+        "parent": "A.PM",
+        "class": "Gate / motor driver IC",
+        "origin": "KB_EXTENSION",
+        "profile_rule": "POWER",
+        "reference": "https://www.oecd.org/en/publications/chips-nodes-and-wafers_f68de895-en.html"
+      }
+    },
+    {
+      "source_row": 54,
+      "values": {
+        "kb_node": "A.SC.ADC",
+        "parent": "A.SC",
+        "class": "ADC and AFE",
+        "origin": "KB_EXTENSION",
+        "profile_rule": "ANALOG",
+        "reference": "https://www.oecd.org/en/publications/chips-nodes-and-wafers_f68de895-en.html"
+      }
+    },
+    {
+      "source_row": 55,
+      "values": {
+        "kb_node": "A.SC.DAC",
+        "parent": "A.SC",
+        "class": "DAC",
+        "origin": "KB_EXTENSION",
+        "profile_rule": "ANALOG",
+        "reference": "https://www.oecd.org/en/publications/chips-nodes-and-wafers_f68de895-en.html"
+      }
+    },
+    {
+      "source_row": 56,
+      "values": {
+        "kb_node": "A.SC.RF",
+        "parent": "A.SC",
+        "class": "Mixed-signal RF transceiver / converter",
+        "origin": "KB_EXTENSION",
+        "profile_rule": "RF; only if primary analog conversion",
+        "reference": "https://www.oecd.org/en/publications/chips-nodes-and-wafers_f68de895-en.html"
+      }
+    },
+    {
+      "source_row": 57,
+      "values": {
+        "kb_node": "A.AMP.RF",
+        "parent": "A.AMP",
+        "class": "RF LNA / PA / amplifier",
+        "origin": "KB_EXTENSION",
+        "profile_rule": "RF",
+        "reference": "https://www.oecd.org/en/publications/chips-nodes-and-wafers_f68de895-en.html"
+      }
+    },
+    {
+      "source_row": 58,
+      "values": {
+        "kb_node": "A.AMP.PREC",
+        "parent": "A.AMP",
+        "class": "Precision / instrumentation amplifier",
+        "origin": "KB_EXTENSION",
+        "profile_rule": "ANALOG",
+        "reference": "https://www.oecd.org/en/publications/chips-nodes-and-wafers_f68de895-en.html"
+      }
+    },
+    {
+      "source_row": 59,
+      "values": {
+        "kb_node": "O.OPTO.CIS",
+        "parent": "O.OPTO",
+        "class": "CMOS image sensor / focal plane",
+        "origin": "KB_EXTENSION",
+        "profile_rule": "IMAGING",
+        "reference": "https://www.oecd.org/en/publications/chips-nodes-and-wafers_f68de895-en.html"
+      }
+    },
+    {
+      "source_row": 60,
+      "values": {
+        "kb_node": "O.OPTO.PHOT",
+        "parent": "O.OPTO",
+        "class": "Photodiode, SPAD, optical detector",
+        "origin": "KB_EXTENSION",
+        "profile_rule": "IMAGING",
+        "reference": "https://www.oecd.org/en/publications/chips-nodes-and-wafers_f68de895-en.html"
+      }
+    },
+    {
+      "source_row": 61,
+      "values": {
+        "kb_node": "O.OPTO.EMIT",
+        "parent": "O.OPTO",
+        "class": "LED, VCSEL, laser",
+        "origin": "KB_EXTENSION",
+        "profile_rule": "OPTO",
+        "reference": "https://www.oecd.org/en/publications/chips-nodes-and-wafers_f68de895-en.html"
+      }
+    },
+    {
+      "source_row": 62,
+      "values": {
+        "kb_node": "O.OPTO.PIC",
+        "parent": "O.OPTO",
+        "class": "Photonic integrated circuit",
+        "origin": "KB_EXTENSION",
+        "profile_rule": "OPTO",
+        "reference": "https://www.oecd.org/en/publications/chips-nodes-and-wafers_f68de895-en.html"
+      }
+    },
+    {
+      "source_row": 63,
+      "values": {
+        "kb_node": "O.SENS.IMU",
+        "parent": "O.SENS",
+        "class": "Accelerometer / gyro / IMU",
+        "origin": "KB_EXTENSION",
+        "profile_rule": "IMU",
+        "reference": "https://www.oecd.org/en/publications/chips-nodes-and-wafers_f68de895-en.html"
+      }
+    },
+    {
+      "source_row": 64,
+      "values": {
+        "kb_node": "O.SENS.ACO",
+        "parent": "O.SENS",
+        "class": "MEMS microphone / acoustic / ultrasound",
+        "origin": "KB_EXTENSION",
+        "profile_rule": "ACOUSTIC",
+        "reference": "https://www.oecd.org/en/publications/chips-nodes-and-wafers_f68de895-en.html"
+      }
+    },
+    {
+      "source_row": 65,
+      "values": {
+        "kb_node": "O.SENS.MAG",
+        "parent": "O.SENS",
+        "class": "Magnetic / Hall / current sensor",
+        "origin": "KB_EXTENSION",
+        "profile_rule": "SENSOR",
+        "reference": "https://www.oecd.org/en/publications/chips-nodes-and-wafers_f68de895-en.html"
+      }
+    },
+    {
+      "source_row": 66,
+      "values": {
+        "kb_node": "O.SENS.ENV",
+        "parent": "O.SENS",
+        "class": "Temperature / pressure / humidity / gas / chemical",
+        "origin": "KB_EXTENSION",
+        "profile_rule": "SENSOR",
+        "reference": "https://www.oecd.org/en/publications/chips-nodes-and-wafers_f68de895-en.html"
+      }
+    },
+    {
+      "source_row": 67,
+      "values": {
+        "kb_node": "O.SENS.RANGE",
+        "parent": "O.SENS",
+        "class": "ToF / ranging sensor module",
+        "origin": "KB_EXTENSION",
+        "profile_rule": "RANGE; optoelectronic dies may be O.OPTO",
+        "reference": "https://www.oecd.org/en/publications/chips-nodes-and-wafers_f68de895-en.html"
+      }
+    },
+    {
+      "source_row": 68,
+      "values": {
+        "kb_node": "O.SENS.RAD",
+        "parent": "O.SENS",
+        "class": "Integrated radar sensing device",
+        "origin": "KB_EXTENSION",
+        "profile_rule": "RADAR; classify radio chip by dominant function",
+        "reference": "https://www.oecd.org/en/publications/chips-nodes-and-wafers_f68de895-en.html"
+      }
+    },
+    {
+      "source_row": 69,
+      "values": {
+        "kb_node": "O.SENS.SMART",
+        "parent": "O.SENS",
+        "class": "Smart sensor / event sensor with embedded compute",
+        "origin": "KB_EXTENSION",
+        "profile_rule": "SENSOR; choose modality first where known",
+        "reference": "https://www.oecd.org/en/publications/chips-nodes-and-wafers_f68de895-en.html"
+      }
+    },
+    {
+      "source_row": 70,
+      "values": {
+        "kb_node": "O.SENS.ACT",
+        "parent": "O.SENS",
+        "class": "MEMS actuator / transducer",
+        "origin": "KB_EXTENSION",
+        "profile_rule": "SENSOR",
+        "reference": "https://www.oecd.org/en/publications/chips-nodes-and-wafers_f68de895-en.html"
+      }
+    },
+    {
+      "source_row": 71,
+      "values": {
+        "kb_node": "O.DISC.SW",
+        "parent": "O.DISC",
+        "class": "Power MOSFET / IGBT / GaN / SiC switch",
+        "origin": "KB_EXTENSION",
+        "profile_rule": "POWER",
+        "reference": "https://www.oecd.org/en/publications/chips-nodes-and-wafers_f68de895-en.html"
+      }
+    },
+    {
+      "source_row": 72,
+      "values": {
+        "kb_node": "O.DISC.DIO",
+        "parent": "O.DISC",
+        "class": "Diode / rectifier / protection",
+        "origin": "KB_EXTENSION",
+        "profile_rule": "POWER",
+        "reference": "https://www.oecd.org/en/publications/chips-nodes-and-wafers_f68de895-en.html"
+      }
+    },
+    {
+      "source_row": 73,
+      "values": {
+        "kb_node": "O.OTHER.Q",
+        "parent": "O.OTHER",
+        "class": "Emerging semiconductor devices",
+        "origin": "KB_EXTENSION",
+        "profile_rule": "Research candidate",
+        "reference": "https://www.oecd.org/en/publications/chips-nodes-and-wafers_f68de895-en.html"
+      }
+    },
+    {
+      "source_row": 74,
+      "values": {
+        "kb_node": "X",
+        "parent": null,
+        "class": "Non-chip products & enabling assets",
+        "origin": "KB_NON_CHIP",
+        "profile_rule": "Separate from OECD chip totals",
+        "reference": "Local KB extension"
+      }
+    },
+    {
+      "source_row": 75,
+      "values": {
+        "kb_node": "X.MOD",
+        "parent": "X",
+        "class": "Module / SiP / board",
+        "origin": "KB_NON_CHIP",
+        "profile_rule": "Product form; link contained dies/parts",
+        "reference": "Local KB extension"
+      }
+    },
+    {
+      "source_row": 76,
+      "values": {
+        "kb_node": "X.DEV",
+        "parent": "X",
+        "class": "Development kit",
+        "origin": "KB_NON_CHIP",
+        "profile_rule": "DEV",
+        "reference": "Local KB extension"
+      }
+    },
+    {
+      "source_row": 77,
+      "values": {
+        "kb_node": "X.IP",
+        "parent": "X",
+        "class": "Licensable semiconductor IP",
+        "origin": "KB_NON_CHIP",
+        "profile_rule": "IP",
+        "reference": "Local KB extension"
+      }
+    },
+    {
+      "source_row": 78,
+      "values": {
+        "kb_node": "X.SW",
+        "parent": "X",
+        "class": "EDA / compiler / SDK / runtime",
+        "origin": "KB_NON_CHIP",
+        "profile_rule": "SW",
+        "reference": "Local KB extension"
+      }
+    },
+    {
+      "source_row": 79,
+      "values": {
+        "kb_node": "X.FAB",
+        "parent": "X",
+        "class": "Process platforms and equipment",
+        "origin": "KB_NON_CHIP",
+        "profile_rule": "PROC/FAC; not chip",
+        "reference": "Local KB extension"
+      }
+    },
+    {
+      "source_row": 80,
+      "values": {
+        "kb_node": "X.MAT",
+        "parent": "X",
+        "class": "Wafers / materials / packaging",
+        "origin": "KB_NON_CHIP",
+        "profile_rule": "Material product",
+        "reference": "Local KB extension"
+      }
+    }
+  ]
+}

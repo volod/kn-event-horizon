@@ -1,0 +1,171 @@
+{
+  "format": "kn.seed-proposal.table",
+  "status": "unreviewed_proposal",
+  "domain": "gdelt",
+  "source": {
+    "file_name": "gdelt_ontology_and_tags_v1.xlsx",
+    "sha256": "c31bba2aad40336c620044c6df5332744aebdce70b415e56bc121096845881a2",
+    "sheet_name": "04_Actor_Geo_Tags",
+    "sheet_position": 5
+  },
+  "title": "Actor & geography tags",
+  "notes": [
+    "CAMEO actor dictionaries are linked, not copied in full. Retain original namespace; crosswalk explicitly."
+  ],
+  "header_row": 4,
+  "columns": [
+    {
+      "key": "dimension",
+      "label": "Dimension",
+      "column": "A"
+    },
+    {
+      "key": "native_fields",
+      "label": "Native fields",
+      "column": "B"
+    },
+    {
+      "key": "vocabulary",
+      "label": "Vocabulary",
+      "column": "C"
+    },
+    {
+      "key": "constraints",
+      "label": "Constraints",
+      "column": "D"
+    },
+    {
+      "key": "storage",
+      "label": "Storage",
+      "column": "E"
+    },
+    {
+      "key": "source_url",
+      "label": "Source URL",
+      "column": "F"
+    }
+  ],
+  "records": [
+    {
+      "source_row": 5,
+      "values": {
+        "dimension": "actor_code",
+        "native_fields": "Actor1Code / Actor2Code",
+        "vocabulary": "CAMEO composite",
+        "constraints": "3-character tokens; do not parse as country-only",
+        "storage": "Raw string",
+        "source_url": "https://data.gdeltproject.org/documentation/GDELT-Event_Codebook-V2.0.pdf"
+      }
+    },
+    {
+      "source_row": 6,
+      "values": {
+        "dimension": "actor_name",
+        "native_fields": "Actor1Name / Actor2Name",
+        "vocabulary": "Raw dictionary/text label",
+        "constraints": "Not stable organization ID",
+        "storage": "String",
+        "source_url": "https://data.gdeltproject.org/documentation/GDELT-Event_Codebook-V2.0.pdf"
+      }
+    },
+    {
+      "source_row": 7,
+      "values": {
+        "dimension": "actor_country",
+        "native_fields": "Actor1CountryCode / Actor2CountryCode",
+        "vocabulary": "CAMEO countries",
+        "constraints": "Not FIPS or ISO by assumption",
+        "storage": "Versioned lookup",
+        "source_url": "https://gdeltproject.org/data.html"
+      }
+    },
+    {
+      "source_row": 8,
+      "values": {
+        "dimension": "actor_group",
+        "native_fields": "Actor1KnownGroupCode / Actor2KnownGroupCode",
+        "vocabulary": "CAMEO known groups",
+        "constraints": "Retain as source label not verified membership",
+        "storage": "Versioned lookup",
+        "source_url": "https://gdeltproject.org/data.html"
+      }
+    },
+    {
+      "source_row": 9,
+      "values": {
+        "dimension": "actor_ethnic",
+        "native_fields": "Actor1EthnicCode / Actor2EthnicCode",
+        "vocabulary": "CAMEO ethnic codes",
+        "constraints": "Sensitive inferred/dictionary attribute; restrict use; don't project to people",
+        "storage": "Versioned lookup",
+        "source_url": "https://gdeltproject.org/data.html"
+      }
+    },
+    {
+      "source_row": 10,
+      "values": {
+        "dimension": "actor_religion",
+        "native_fields": "Actor1Religion1Code / Actor2Religion1Code; Religion2Code",
+        "vocabulary": "CAMEO religion codes",
+        "constraints": "Sensitive; preserve provenance and avoid individual inference",
+        "storage": "Versioned lookup",
+        "source_url": "https://gdeltproject.org/data.html"
+      }
+    },
+    {
+      "source_row": 11,
+      "values": {
+        "dimension": "actor_type",
+        "native_fields": "Actor1Type1Code/Type2Code/Type3Code; Actor2 equivalents",
+        "vocabulary": "CAMEO role/type codes",
+        "constraints": "Multiple codes; source dictionary labels may differ from text",
+        "storage": "Versioned lookup",
+        "source_url": "https://gdeltproject.org/data.html"
+      }
+    },
+    {
+      "source_row": 12,
+      "values": {
+        "dimension": "actor_geo",
+        "native_fields": "Actor1Geo* / Actor2Geo*",
+        "vocabulary": "GDELT geocoding (FIPS country codes)",
+        "constraints": "Actor referenced geography; not confirmed location",
+        "storage": "Raw fields",
+        "source_url": "https://data.gdeltproject.org/documentation/GDELT-Event_Codebook-V2.0.pdf"
+      }
+    },
+    {
+      "source_row": 13,
+      "values": {
+        "dimension": "action_geo",
+        "native_fields": "ActionGeo*",
+        "vocabulary": "GDELT geocoding (FIPS country codes)",
+        "constraints": "Estimated event geography; retain type",
+        "storage": "Raw fields",
+        "source_url": "https://data.gdeltproject.org/documentation/GDELT-Event_Codebook-V2.0.pdf"
+      }
+    },
+    {
+      "source_row": 14,
+      "values": {
+        "dimension": "document_geo",
+        "native_fields": "V2Locations",
+        "vocabulary": "GKG geocoded mentions",
+        "constraints": "Many locations per document, not event geography",
+        "storage": "Explode occurrences",
+        "source_url": "https://data.gdeltproject.org/documentation/GDELT-Global_Knowledge_Graph_Codebook-V2.1.pdf"
+      }
+    },
+    {
+      "source_row": 15,
+      "values": {
+        "dimension": "source_geo",
+        "native_fields": "DOC sourcecountry filter / source country metadata if supplied",
+        "vocabulary": "Source jurisdiction",
+        "constraints": "Not where reported event occurred",
+        "storage": "Separate dimension",
+        "source_url": "https://blog.gdeltproject.org/gdelt-doc-2-0-api-debuts/"
+      }
+    }
+  ]
+}

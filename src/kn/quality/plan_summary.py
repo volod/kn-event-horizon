@@ -6,15 +6,15 @@ from collections import Counter
 from collections.abc import Sequence
 from pathlib import Path
 
-from agent_py.quality.plan_dependencies import prerequisites
-from agent_py.quality.plan_integrity import PLAN_DOC, integrity_findings
-from agent_py.quality.plan_model import (
+from kn.quality.plan_dependencies import prerequisites
+from kn.quality.plan_integrity import PLAN_DOC, integrity_findings
+from kn.quality.plan_model import (
     AGENT_SECTION,
     HUMAN_SECTION,
     Task,
     read_tasks,
 )
-from agent_py.quality.project_root import discover_project_root
+from kn.quality.project_root import discover_project_root
 
 _LOG = logging.getLogger(__name__)
 

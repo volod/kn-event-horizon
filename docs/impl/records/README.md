@@ -15,5 +15,8 @@ decision. A record can name a plan task by ID because plan headings disappear on
 
 | Sequence | Task | Record |
 | --- | --- | --- |
+| 0001 | `personalize-template-project` | [0001-project-identity-personalize-template-project.md](0001-project-identity-personalize-template-project.md) |
+| 0002 | `adhoc` knowledge platform specification | [0002-adhoc-knowledge-platform-specification.md](0002-adhoc-knowledge-platform-specification.md) |
+| 0003 | Specification and plan audit | [Audit record](0003-adhoc-specification-audit.md) |
 
-Next unused sequence is `0001`.
+Next unused sequence is `0004`.

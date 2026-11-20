@@ -1,0 +1,240 @@
+{
+  "format": "kn.seed-proposal.table",
+  "status": "unreviewed_proposal",
+  "domain": "space",
+  "source": {
+    "file_name": "space_sector_data_sources_v1.xlsx",
+    "sha256": "83958f6df5f3e5b0cd969a4fe3206197fe4bf4cee396df62f02dbe394a3040f0",
+    "sheet_name": "02_Coverage_Map",
+    "sheet_position": 3
+  },
+  "title": "Coverage map \u2014 which source families answer which knowledge questions",
+  "notes": [],
+  "header_row": 3,
+  "columns": [
+    {
+      "key": "knowledge_question",
+      "label": "Knowledge question",
+      "column": "A"
+    },
+    {
+      "key": "primary_entity_classes",
+      "label": "Primary entity classes",
+      "column": "B"
+    },
+    {
+      "key": "preferred_primary_sources",
+      "label": "Preferred primary sources",
+      "column": "C"
+    },
+    {
+      "key": "secondary_enrichment",
+      "label": "Secondary/enrichment",
+      "column": "D"
+    },
+    {
+      "key": "typical_gpt_segment",
+      "label": "Typical GPT segment",
+      "column": "E"
+    },
+    {
+      "key": "technology_tagging_source",
+      "label": "Technology tagging source",
+      "column": "F"
+    },
+    {
+      "key": "application_tagging_source",
+      "label": "Application tagging source",
+      "column": "G"
+    },
+    {
+      "key": "automation_priority",
+      "label": "Automation priority",
+      "column": "H"
+    }
+  ],
+  "records": [
+    {
+      "source_row": 4,
+      "values": {
+        "knowledge_question": "Who manufactures launch vehicles and engines/components?",
+        "primary_entity_classes": "Organization; Launch Vehicle; Component",
+        "preferred_primary_sources": "ESA-match; SatBase/SatCatalog; satsearch",
+        "secondary_enrichment": "LL2; Novaspace; Seradata; company sources",
+        "typical_gpt_segment": "I Launchers",
+        "technology_tagging_source": "NASA TX01/TX12/TX15/TX17; ESA TD19/20/23/24",
+        "application_tagging_source": "Usually none",
+        "automation_priority": "P0/P1"
+      }
+    },
+    {
+      "source_row": 5,
+      "values": {
+        "knowledge_question": "Who provides launch services, from which sites, using which vehicle?",
+        "primary_entity_classes": "Organization; Service; Launch Event; Facility; Launch Vehicle",
+        "preferred_primary_sources": "LL2; FAA/CAA; ESA DISCOS",
+        "secondary_enrichment": "RocketLaunch.Live; Novaspace; Seradata",
+        "typical_gpt_segment": "I + IV",
+        "technology_tagging_source": "NASA TX15/TX16; ESA TD8/9",
+        "application_tagging_source": "Usually none",
+        "automation_priority": "P0"
+      }
+    },
+    {
+      "source_row": 6,
+      "values": {
+        "knowledge_question": "Who manufactures satellite buses and platform subsystems?",
+        "primary_entity_classes": "Organization; Product; Component",
+        "preferred_primary_sources": "ESA-match; SatBase/SatCatalog; satsearch",
+        "secondary_enrichment": "Novaspace; Seradata; company sources",
+        "typical_gpt_segment": "II Satellites & Probes",
+        "technology_tagging_source": "NASA TX02/03/12/14/17; ESA relevant TDs",
+        "application_tagging_source": "Space tag if end market needed",
+        "automation_priority": "P0/P1"
+      }
+    },
+    {
+      "source_row": 7,
+      "values": {
+        "knowledge_question": "Who manufactures EO/SAR/RF/SATCOM/PNT payloads?",
+        "primary_entity_classes": "Organization; Payload; Spacecraft",
+        "preferred_primary_sources": "ESA-match; CEOS; SatBase; satsearch",
+        "secondary_enrichment": "Novaspace; mission/manufacturer sources",
+        "typical_gpt_segment": "II.I Payloads/Instruments",
+        "technology_tagging_source": "NASA TX05/TX08; ESA TD6/7/16/17",
+        "application_tagging_source": "EUSPA 16 segments",
+        "automation_priority": "P0"
+      }
+    },
+    {
+      "source_row": 8,
+      "values": {
+        "knowledge_question": "Which spacecraft are actually in orbit and what is their status?",
+        "primary_entity_classes": "Spacecraft; Constellation; Mission",
+        "preferred_primary_sources": "Space-Track; CelesTrak; ESA DISCOS",
+        "secondary_enrichment": "UNOOSA; LL2; operator",
+        "typical_gpt_segment": "II/III",
+        "technology_tagging_source": "Optional",
+        "application_tagging_source": "Optional",
+        "automation_priority": "P0"
+      }
+    },
+    {
+      "source_row": 9,
+      "values": {
+        "knowledge_question": "What sovereign/legal ownership or registration is confirmed?",
+        "primary_entity_classes": "Spacecraft; Organization; Licence/Registration",
+        "preferred_primary_sources": "UNOOSA; national registers; contracts/company filings",
+        "secondary_enrichment": "DISCOS; Space-Track",
+        "typical_gpt_segment": "II/III",
+        "technology_tagging_source": "None",
+        "application_tagging_source": "None",
+        "automation_priority": "P0"
+      }
+    },
+    {
+      "source_row": 10,
+      "values": {
+        "knowledge_question": "What constellations/networks are being planned before launch?",
+        "primary_entity_classes": "Filing; Organization; Constellation/Network",
+        "preferred_primary_sources": "ITU Space Explorer",
+        "secondary_enrichment": "company filings; procurement; funding sources",
+        "typical_gpt_segment": "II + IV",
+        "technology_tagging_source": "NASA TX05; ESA TD6/7/12",
+        "application_tagging_source": "Secure SATCOM / Space",
+        "automation_priority": "P0"
+      }
+    },
+    {
+      "source_row": 11,
+      "values": {
+        "knowledge_question": "Who builds ground stations, gateways and networks?",
+        "primary_entity_classes": "Organization; Ground Station; Facility; Product",
+        "preferred_primary_sources": "ESA-match; satsearch; SatBase",
+        "secondary_enrichment": "Novaspace; SatNOGS; operator sources",
+        "typical_gpt_segment": "IV Ground Segment",
+        "technology_tagging_source": "NASA TX05/TX13; ESA TD12/9",
+        "application_tagging_source": "Space; application segments as served",
+        "automation_priority": "P0/P1"
+      }
+    },
+    {
+      "source_row": 12,
+      "values": {
+        "knowledge_question": "Who builds user terminals and GNSS/SATCOM equipment?",
+        "primary_entity_classes": "Organization; Terminal; Product",
+        "preferred_primary_sources": "satsearch; SatBase; ESA-match",
+        "secondary_enrichment": "Novaspace; vendor sources; ITU/network sources",
+        "typical_gpt_segment": "IV + KB extension",
+        "technology_tagging_source": "NASA TX05/TX02; ESA TD6/7/23",
+        "application_tagging_source": "Relevant EUSPA segments",
+        "automation_priority": "P0/P1"
+      }
+    },
+    {
+      "source_row": 13,
+      "values": {
+        "knowledge_question": "Who provides EO data and analytics services?",
+        "primary_entity_classes": "Organization; Service; Dataset; Mission",
+        "preferred_primary_sources": "CEOS; Copernicus STAC; NASA CMR",
+        "secondary_enrichment": "Space Insider; Novaspace; provider sources",
+        "typical_gpt_segment": "II + IV enabling products",
+        "technology_tagging_source": "NASA TX08/TX11; ESA TD2/16/17",
+        "application_tagging_source": "EUSPA application tags",
+        "automation_priority": "P0"
+      }
+    },
+    {
+      "source_row": 14,
+      "values": {
+        "knowledge_question": "What technologies are emerging 1\u20135 years ahead?",
+        "primary_entity_classes": "R&D Project; Patent; Technology; Organization",
+        "preferred_primary_sources": "NASA TechPort; CORDIS; EPO OPS",
+        "secondary_enrichment": "Lens; Space Insider; company R&D",
+        "typical_gpt_segment": "Any",
+        "technology_tagging_source": "NASA TX + ESA TT",
+        "application_tagging_source": "EUSPA if application known",
+        "automation_priority": "P0"
+      }
+    },
+    {
+      "source_row": 15,
+      "values": {
+        "knowledge_question": "What capabilities are governments trying to buy?",
+        "primary_entity_classes": "Tender; Contract; Organization; Product/Service",
+        "preferred_primary_sources": "TED; USAspending; SAM.gov",
+        "secondary_enrichment": "agency releases; commercial intelligence",
+        "typical_gpt_segment": "Any",
+        "technology_tagging_source": "Map from scope",
+        "application_tagging_source": "Map from use case",
+        "automation_priority": "P0"
+      }
+    },
+    {
+      "source_row": 16,
+      "values": {
+        "knowledge_question": "Who has received contracts and how much?",
+        "primary_entity_classes": "Contract/Award; Buyer; Supplier",
+        "preferred_primary_sources": "USAspending; TED awards",
+        "secondary_enrichment": "agency releases; Space Insider",
+        "typical_gpt_segment": "Any",
+        "technology_tagging_source": "Map from award scope",
+        "application_tagging_source": "Map from award scope",
+        "automation_priority": "P0"
+      }
+    },
+    {
+      "source_row": 17,
+      "values": {
+        "knowledge_question": "Which companies are growing, funded or consolidating?",
+        "primary_entity_classes": "Organization; Investment/M&A",
+        "preferred_primary_sources": "Space Insider; Novaspace",
+        "secondary_enrichment": "The Space List; public filings",
+        "typical_gpt_segment": "Any",
+        "technology_tagging_source": "Map company capabilities",
+        "application_tagging_source": "Map served markets",
+        "automation_priority": "P1"
+      }
+    }
+  ]
+}

@@ -1,0 +1,162 @@
+{
+  "format": "kn.seed-proposal.table",
+  "status": "unreviewed_proposal",
+  "domain": "space",
+  "source": {
+    "file_name": "space_sector_data_sources_v1.xlsx",
+    "sha256": "83958f6df5f3e5b0cd969a4fe3206197fe4bf4cee396df62f02dbe394a3040f0",
+    "sheet_name": "03_Ingestion_Order",
+    "sheet_position": 4
+  },
+  "title": "Recommended ingestion order",
+  "notes": [],
+  "header_row": 3,
+  "columns": [
+    {
+      "key": "wave",
+      "label": "Wave",
+      "column": "A"
+    },
+    {
+      "key": "objective",
+      "label": "Objective",
+      "column": "B"
+    },
+    {
+      "key": "sources",
+      "label": "Sources",
+      "column": "C"
+    },
+    {
+      "key": "ingest_first",
+      "label": "Ingest first",
+      "column": "D"
+    },
+    {
+      "key": "output",
+      "label": "Output",
+      "column": "E"
+    },
+    {
+      "key": "identity_quality_rule",
+      "label": "Identity / quality rule",
+      "column": "F"
+    },
+    {
+      "key": "automation_mode",
+      "label": "Automation mode",
+      "column": "G"
+    },
+    {
+      "key": "priority",
+      "label": "Priority",
+      "column": "H"
+    }
+  ],
+  "records": [
+    {
+      "source_row": 4,
+      "values": {
+        "wave": "1",
+        "objective": "Operational object/event truth",
+        "sources": "Launch Library 2; Space-Track; CelesTrak; ESA DISCOS; UNOOSA",
+        "ingest_first": "organizations; vehicles; launch events; spacecraft IDs; orbital status; registration",
+        "output": "Canonical asset/event graph",
+        "identity_quality_rule": "Resolve aliases with COSPAR/catalog IDs + source provenance; manufacturer \u2260 operator",
+        "automation_mode": "API/structured",
+        "priority": "P0"
+      }
+    },
+    {
+      "source_row": 5,
+      "values": {
+        "wave": "2",
+        "objective": "EO mission/instrument/data awareness",
+        "sources": "CEOS DB/API; Copernicus STAC; NASA CMR",
+        "ingest_first": "missions; instruments; payload capabilities; acquisitions; products",
+        "output": "EO capability graph",
+        "identity_quality_rule": "Mission \u2260 spacecraft \u2260 instrument \u2260 data product",
+        "automation_mode": "API",
+        "priority": "P0"
+      }
+    },
+    {
+      "source_row": 6,
+      "values": {
+        "wave": "3",
+        "objective": "Industrial products and supply chain",
+        "sources": "ESA-match; SatBase/SatCatalog; satsearch",
+        "ingest_first": "companies; products; components; buses; payloads; ground equipment; terminals",
+        "output": "Supplier/product graph",
+        "identity_quality_rule": "Record product version, supplier and qualification/heritage separately",
+        "automation_mode": "API/web/export",
+        "priority": "P0/P1"
+      }
+    },
+    {
+      "source_row": 7,
+      "values": {
+        "wave": "4",
+        "objective": "Prospective technology",
+        "sources": "NASA TechPort; CORDIS; EPO OPS",
+        "ingest_first": "projects; performers; TRL; technologies; patents",
+        "output": "Technology-to-company/project graph",
+        "identity_quality_rule": "R&D/patent \u2260 deployed product; retain maturity/status",
+        "automation_mode": "API/export",
+        "priority": "P0"
+      }
+    },
+    {
+      "source_row": 8,
+      "values": {
+        "wave": "5",
+        "objective": "Demand and contracts",
+        "sources": "TED; USAspending; SAM.gov",
+        "ingest_first": "buyer; supplier; notice/award; amount; dates; scope",
+        "output": "Procurement graph",
+        "identity_quality_rule": "Tender \u2260 award \u2260 contract \u2260 LoI/MoU",
+        "automation_mode": "API",
+        "priority": "P0"
+      }
+    },
+    {
+      "source_row": 9,
+      "values": {
+        "wave": "6",
+        "objective": "Regulatory intent/licensing",
+        "sources": "ITU Space Explorer; FAA; UK CAA; national regulators",
+        "ingest_first": "network filings; spectrum; licences; operators/sites",
+        "output": "Intent/licensing graph",
+        "identity_quality_rule": "Filing/licence \u2260 operational deployment",
+        "automation_mode": "Web/API/structured export where possible",
+        "priority": "P0/P1"
+      }
+    },
+    {
+      "source_row": 10,
+      "values": {
+        "wave": "7",
+        "objective": "Commercial market enrichment",
+        "sources": "Space Insider; Novaspace; Seradata",
+        "ingest_first": "ownership; finance; planned missions; market links",
+        "output": "Corporate/market enrichment",
+        "identity_quality_rule": "Preserve source licence/provenance and avoid redistributing restricted data",
+        "automation_mode": "Commercial API/export",
+        "priority": "P1"
+      }
+    },
+    {
+      "source_row": 11,
+      "values": {
+        "wave": "8",
+        "objective": "Analyst secondary references",
+        "sources": "Gunter; Orbital Radar; SWF directory; The Space List",
+        "ingest_first": "aliases; historical context; candidate actors/facts",
+        "output": "Research queue",
+        "identity_quality_rule": "Do not promote to high-confidence fact without corroboration",
+        "automation_mode": "Human-in-the-loop",
+        "priority": "P2"
+      }
+    }
+  ]
+}

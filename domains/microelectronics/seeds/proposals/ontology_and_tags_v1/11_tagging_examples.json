@@ -1,0 +1,219 @@
+{
+  "format": "kn.seed-proposal.table",
+  "status": "unreviewed_proposal",
+  "domain": "microelectronics",
+  "source": {
+    "file_name": "microelectronics_ontology_and_tags_v1.xlsx",
+    "sha256": "7166aa06791998c692cc6a2ac377692a6687f15e3353ffa70a1c159f2e63c34f",
+    "sheet_name": "11_Tagging_Examples",
+    "sheet_position": 12
+  },
+  "title": "Combined tagging \u2014 source-grounded examples",
+  "notes": [
+    "Tag assignments are analyst mappings; no benchmark values or wafer/ATP provenance inferred."
+  ],
+  "header_row": 4,
+  "columns": [
+    {
+      "key": "actor",
+      "label": "Actor",
+      "column": "A"
+    },
+    {
+      "key": "record",
+      "label": "Record",
+      "column": "B"
+    },
+    {
+      "key": "entity_class",
+      "label": "Entity class",
+      "column": "C"
+    },
+    {
+      "key": "primary_class",
+      "label": "Primary class",
+      "column": "D"
+    },
+    {
+      "key": "technology_tags",
+      "label": "Technology tags",
+      "column": "E"
+    },
+    {
+      "key": "app_tags",
+      "label": "App tags",
+      "column": "F"
+    },
+    {
+      "key": "profile",
+      "label": "Profile",
+      "column": "G"
+    },
+    {
+      "key": "caution",
+      "label": "Caution",
+      "column": "H"
+    },
+    {
+      "key": "source",
+      "label": "Source",
+      "column": "I"
+    }
+  ],
+  "records": [
+    {
+      "source_row": 5,
+      "values": {
+        "actor": "ST",
+        "record": "STM32WL",
+        "entity_class": "ProductFamily",
+        "primary_class": "L.MCU.RF",
+        "technology_tags": "T.ULP; T.MCU; T.LPWAN",
+        "app_tags": "APP.35; APP.X2",
+        "profile": "C01",
+        "caution": "Family only; MPN, actual mode, link benchmark needed",
+        "source": "https://www.st.com/en/microcontrollers-microprocessors/stm32wl-series.html"
+      }
+    },
+    {
+      "source_row": 6,
+      "values": {
+        "actor": "ST",
+        "record": "STM32U5",
+        "entity_class": "ProductFamily",
+        "primary_class": "L.MCU.ULP",
+        "technology_tags": "T.ULP; T.MCU",
+        "app_tags": "APP.33; APP.X2",
+        "profile": "C01",
+        "caution": "Family tag; external radio separate",
+        "source": "https://www.st.com/en/microcontrollers-microprocessors/stm32u5-series.html"
+      }
+    },
+    {
+      "source_row": 7,
+      "values": {
+        "actor": "ST",
+        "record": "STM32N6",
+        "entity_class": "ProductFamily",
+        "primary_class": "L.MCU.AI",
+        "technology_tags": "T.NPU; T.MCU; T.VISION",
+        "app_tags": "APP.X3; APP.X6",
+        "profile": "C02",
+        "caution": "NPU-equipped variant only; benchmark not inferred",
+        "source": "https://www.st.com/content/st_com/en/browse/product-portfolio.html"
+      }
+    },
+    {
+      "source_row": 8,
+      "values": {
+        "actor": "NXP",
+        "record": "MCX N",
+        "entity_class": "ProductFamily",
+        "primary_class": "L.MCU.AI",
+        "technology_tags": "T.MCU; T.NPU",
+        "app_tags": "APP.33; APP.X6",
+        "profile": "C02",
+        "caution": "Confirm exact variant with NPU",
+        "source": "https://www.nxp.com/applications/technologies/ai-and-machine-learning:MACHINE-LEARNING"
+      }
+    },
+    {
+      "source_row": 9,
+      "values": {
+        "actor": "NXP",
+        "record": "i.MX 95",
+        "entity_class": "ProductFamily",
+        "primary_class": "L.MPU.EDGE",
+        "technology_tags": "T.MPU; T.NPU; T.VISION",
+        "app_tags": "APP.31; APP.X3",
+        "profile": "C03",
+        "caution": "Family; external RAM/PMIC accounted separately",
+        "source": "https://www.nxp.com/products/i.MX95"
+      }
+    },
+    {
+      "source_row": 10,
+      "values": {
+        "actor": "Infineon",
+        "record": "PSoC Edge",
+        "entity_class": "ProductFamily",
+        "primary_class": "L.MCU.AI",
+        "technology_tags": "T.MCU; T.NPU; T.ULP",
+        "app_tags": "APP.33; APP.X6",
+        "profile": "C02",
+        "caution": "Verify specific accelerator and power mode",
+        "source": "https://www.infineon.com/products/microcontroller/32-bit-psoc-arm-cortex"
+      }
+    },
+    {
+      "source_row": 11,
+      "values": {
+        "actor": "Infineon",
+        "record": "XENSIV",
+        "entity_class": "Product portfolio",
+        "primary_class": "O.SENS (map by modality)",
+        "technology_tags": "T.MEMS; T.RAD (conditional)",
+        "app_tags": "APP.33; APP.X2",
+        "profile": "C01/C05",
+        "caution": "Portfolio cannot be compared as single part",
+        "source": "https://www.infineon.com/products/sensor"
+      }
+    },
+    {
+      "source_row": 12,
+      "values": {
+        "actor": "Cologne Chip",
+        "record": "GateMate",
+        "entity_class": "ProductFamily",
+        "primary_class": "L.PLD.FPGA.SMALL",
+        "technology_tags": "T.FPGA; T.RTL",
+        "app_tags": "APP.33; APP.X3",
+        "profile": "C04",
+        "caution": "Native resource and post-route comparison",
+        "source": "https://www.colognechip.com/programmable-logic/gatemate/"
+      }
+    },
+    {
+      "source_row": 13,
+      "values": {
+        "actor": "NanoXplore",
+        "record": "NG-ULTRA",
+        "entity_class": "ProductFamily",
+        "primary_class": "L.PLD.FPGA.SOC",
+        "technology_tags": "T.FPGA; T.RTL",
+        "app_tags": "APP.X5; APP.X3",
+        "profile": "C04",
+        "caution": "COTS/RH variants and documentation differ; resolve exact part",
+        "source": "https://nanoxplore.com/product/ng-ultra/"
+      }
+    },
+    {
+      "source_row": 14,
+      "values": {
+        "actor": "Blumind (Canada)",
+        "record": "AMPL",
+        "entity_class": "IPBlock",
+        "primary_class": "X.IP",
+        "technology_tags": "T.AIMC; T.NPU",
+        "app_tags": "APP.X2; APP.X6",
+        "profile": "C07",
+        "caution": "IP offering, not assumed orderable packaged IC",
+        "source": "https://blumind.ai/products/"
+      }
+    },
+    {
+      "source_row": 15,
+      "values": {
+        "actor": "SPARK Microsystems (Canada)",
+        "record": "LE-UWB",
+        "entity_class": "Technology",
+        "primary_class": "\u2014",
+        "technology_tags": "T.UWB; T.ULP",
+        "app_tags": "APP.X2; APP.X4",
+        "profile": "C01",
+        "caution": "Technology; create distinct transceiver MPN record after catalogue check",
+        "source": "https://www.sparkmicro.com/technology/"
+      }
+    }
+  ]
+}

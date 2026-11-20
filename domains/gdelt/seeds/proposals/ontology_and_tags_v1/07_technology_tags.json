@@ -1,0 +1,294 @@
+{
+  "format": "kn.seed-proposal.table",
+  "status": "unreviewed_proposal",
+  "domain": "gdelt",
+  "source": {
+    "file_name": "gdelt_ontology_and_tags_v1.xlsx",
+    "sha256": "c31bba2aad40336c620044c6df5332744aebdce70b415e56bc121096845881a2",
+    "sheet_name": "07_Technology_Tags",
+    "sheet_position": 8
+  },
+  "title": "Technology tags | cross-domain extensions",
+  "notes": [
+    "Local namespace TECH. Proposed mappings to prior KBs are conceptual, not verified one-to-one code mappings."
+  ],
+  "header_row": 4,
+  "columns": [
+    {
+      "key": "tag_id",
+      "label": "Tag ID",
+      "column": "A"
+    },
+    {
+      "key": "parent_blank_root",
+      "label": "Parent (blank = root)",
+      "column": "B"
+    },
+    {
+      "key": "label",
+      "label": "Label",
+      "column": "C"
+    },
+    {
+      "key": "origin",
+      "label": "Origin",
+      "column": "D"
+    },
+    {
+      "key": "reference_axis",
+      "label": "Reference axis",
+      "column": "E"
+    },
+    {
+      "key": "candidate_keywords",
+      "label": "Candidate keywords",
+      "column": "F"
+    },
+    {
+      "key": "kb_link",
+      "label": "KB link",
+      "column": "G"
+    },
+    {
+      "key": "tagging_rule",
+      "label": "Tagging rule",
+      "column": "H"
+    }
+  ],
+  "records": [
+    {
+      "source_row": 5,
+      "values": {
+        "tag_id": "TECH.SPACE",
+        "parent_blank_root": null,
+        "label": "Space systems",
+        "origin": "KB_EXTENSION",
+        "reference_axis": "ESA GPT / NASA TX / ESA TT",
+        "candidate_keywords": "satellite; launch vehicle; ground station; EO",
+        "kb_link": "Space KB",
+        "tagging_rule": "Validate on article context; native theme only candidate filter"
+      }
+    },
+    {
+      "source_row": 6,
+      "values": {
+        "tag_id": "TECH.SPACE.LAUNCH",
+        "parent_blank_root": "TECH.SPACE",
+        "label": "Launch and access to space",
+        "origin": "KB_EXTENSION",
+        "reference_axis": "ESA GPT I",
+        "candidate_keywords": "launcher; launch services; reusable vehicle",
+        "kb_link": "Space KB",
+        "tagging_rule": "Validate on article context; native theme only candidate filter"
+      }
+    },
+    {
+      "source_row": 7,
+      "values": {
+        "tag_id": "TECH.SPACE.SAT",
+        "parent_blank_root": "TECH.SPACE",
+        "label": "Spacecraft and payloads",
+        "origin": "KB_EXTENSION",
+        "reference_axis": "ESA GPT II",
+        "candidate_keywords": "bus; EO payload; communications payload",
+        "kb_link": "Space KB",
+        "tagging_rule": "Validate on article context; native theme only candidate filter"
+      }
+    },
+    {
+      "source_row": 8,
+      "values": {
+        "tag_id": "TECH.SPACE.GROUND",
+        "parent_blank_root": "TECH.SPACE",
+        "label": "Ground segment",
+        "origin": "KB_EXTENSION",
+        "reference_axis": "ESA GPT IV",
+        "candidate_keywords": "terminal; ground station; gateway",
+        "kb_link": "Space KB",
+        "tagging_rule": "Validate on article context; native theme only candidate filter"
+      }
+    },
+    {
+      "source_row": 9,
+      "values": {
+        "tag_id": "TECH.SPACE.EOSVC",
+        "parent_blank_root": "TECH.SPACE",
+        "label": "EO data & analytics",
+        "origin": "KB_EXTENSION",
+        "reference_axis": "Space service vocabulary",
+        "candidate_keywords": "Earth observation; geospatial analytics",
+        "kb_link": "Space KB",
+        "tagging_rule": "Validate on article context; native theme only candidate filter"
+      }
+    },
+    {
+      "source_row": 10,
+      "values": {
+        "tag_id": "TECH.SEMI",
+        "parent_blank_root": null,
+        "label": "Microelectronics",
+        "origin": "KB_EXTENSION",
+        "reference_axis": "OECD product taxonomy + ECS SRIA",
+        "candidate_keywords": "semiconductor; chip; microelectronics",
+        "kb_link": "Microelectronics KB",
+        "tagging_rule": "Validate on article context; native theme only candidate filter"
+      }
+    },
+    {
+      "source_row": 11,
+      "values": {
+        "tag_id": "TECH.SEMI.SENSOR",
+        "parent_blank_root": "TECH.SEMI",
+        "label": "Sensors & MEMS",
+        "origin": "KB_EXTENSION",
+        "reference_axis": "Microelectronics local product classifier",
+        "candidate_keywords": "MEMS; IMU; CMOS imager; photodetector",
+        "kb_link": "Microelectronics KB",
+        "tagging_rule": "Validate on article context; native theme only candidate filter"
+      }
+    },
+    {
+      "source_row": 12,
+      "values": {
+        "tag_id": "TECH.SEMI.SOC",
+        "parent_blank_root": "TECH.SEMI",
+        "label": "MCU / SoC",
+        "origin": "KB_EXTENSION",
+        "reference_axis": "OECD Logic / local classifier",
+        "candidate_keywords": "microcontroller; SoC; heterogeneous computing",
+        "kb_link": "Microelectronics KB",
+        "tagging_rule": "Validate on article context; native theme only candidate filter"
+      }
+    },
+    {
+      "source_row": 13,
+      "values": {
+        "tag_id": "TECH.SEMI.FPGA",
+        "parent_blank_root": "TECH.SEMI",
+        "label": "Programmable logic",
+        "origin": "KB_EXTENSION",
+        "reference_axis": "OECD Logic / local classifier",
+        "candidate_keywords": "FPGA; programmable logic",
+        "kb_link": "Microelectronics KB",
+        "tagging_rule": "Validate on article context; native theme only candidate filter"
+      }
+    },
+    {
+      "source_row": 14,
+      "values": {
+        "tag_id": "TECH.SEMI.AI",
+        "parent_blank_root": "TECH.SEMI",
+        "label": "AI accelerators and edge AI",
+        "origin": "KB_EXTENSION",
+        "reference_axis": "ECS SRIA / local tags",
+        "candidate_keywords": "NPU; TinyML; edge inference",
+        "kb_link": "Microelectronics KB",
+        "tagging_rule": "Validate on article context; native theme only candidate filter"
+      }
+    },
+    {
+      "source_row": 15,
+      "values": {
+        "tag_id": "TECH.SEMI.ULP",
+        "parent_blank_root": "TECH.SEMI",
+        "label": "Ultra-low-power electronics",
+        "origin": "KB_EXTENSION",
+        "reference_axis": "ECS SRIA / local tags",
+        "candidate_keywords": "energy per inference; sleep current; energy harvesting",
+        "kb_link": "Microelectronics KB",
+        "tagging_rule": "Validate on article context; native theme only candidate filter"
+      }
+    },
+    {
+      "source_row": 16,
+      "values": {
+        "tag_id": "TECH.SEMI.FAB",
+        "parent_blank_root": "TECH.SEMI",
+        "label": "Fabrication and packaging",
+        "origin": "KB_EXTENSION",
+        "reference_axis": "OECD production taxonomy / ECS SRIA",
+        "candidate_keywords": "foundry; advanced packaging; chiplet",
+        "kb_link": "Microelectronics KB",
+        "tagging_rule": "Validate on article context; native theme only candidate filter"
+      }
+    },
+    {
+      "source_row": 17,
+      "values": {
+        "tag_id": "TECH.ENERGY",
+        "parent_blank_root": null,
+        "label": "Energy technologies",
+        "origin": "KB_EXTENSION",
+        "reference_axis": "Local technology vocabulary",
+        "candidate_keywords": "storage; efficiency; power conversion",
+        "kb_link": "Local",
+        "tagging_rule": "Validate on article context; native theme only candidate filter"
+      }
+    },
+    {
+      "source_row": 18,
+      "values": {
+        "tag_id": "TECH.AUTONOMY",
+        "parent_blank_root": null,
+        "label": "Autonomous systems (civil)",
+        "origin": "KB_EXTENSION",
+        "reference_axis": "Local technology vocabulary",
+        "candidate_keywords": "robotics; perception; control; onboard inference",
+        "kb_link": "Local",
+        "tagging_rule": "Validate on article context; native theme only candidate filter"
+      }
+    },
+    {
+      "source_row": 19,
+      "values": {
+        "tag_id": "TECH.COMMS",
+        "parent_blank_root": null,
+        "label": "Communications and connectivity",
+        "origin": "KB_EXTENSION",
+        "reference_axis": "Local technology vocabulary",
+        "candidate_keywords": "LPWAN; NTN; UWB; optical communications",
+        "kb_link": "Local",
+        "tagging_rule": "Validate on article context; native theme only candidate filter"
+      }
+    },
+    {
+      "source_row": 20,
+      "values": {
+        "tag_id": "TECH.PHOTONICS",
+        "parent_blank_root": null,
+        "label": "Photonics and optical systems",
+        "origin": "KB_EXTENSION",
+        "reference_axis": "Local technology vocabulary",
+        "candidate_keywords": "SPAD; integrated photonics; optical sensing",
+        "kb_link": "Local",
+        "tagging_rule": "Validate on article context; native theme only candidate filter"
+      }
+    },
+    {
+      "source_row": 21,
+      "values": {
+        "tag_id": "TECH.AI",
+        "parent_blank_root": null,
+        "label": "AI and data processing",
+        "origin": "KB_EXTENSION",
+        "reference_axis": "Local technology vocabulary",
+        "candidate_keywords": "machine learning; models; analytics",
+        "kb_link": "Local",
+        "tagging_rule": "Validate on article context; native theme only candidate filter"
+      }
+    },
+    {
+      "source_row": 22,
+      "values": {
+        "tag_id": "TECH.CYBER",
+        "parent_blank_root": null,
+        "label": "Cybersecurity and resilience",
+        "origin": "KB_EXTENSION",
+        "reference_axis": "Local technology vocabulary",
+        "candidate_keywords": "security updates; infrastructure resilience",
+        "kb_link": "Local",
+        "tagging_rule": "Validate on article context; native theme only candidate filter"
+      }
+    }
+  ]
+}

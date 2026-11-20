@@ -1,0 +1,149 @@
+{
+  "format": "kn.seed-proposal.table",
+  "status": "unreviewed_proposal",
+  "domain": "microelectronics",
+  "source": {
+    "file_name": "microelectronics_data_sources_v1.xlsx",
+    "sha256": "ab7837e18fc1907a2b977def23d03de78e608787d3125011ab3b38bda2536fba",
+    "sheet_name": "03_Ingestion_Order",
+    "sheet_position": 4
+  },
+  "title": "Ingestion order \u2014 prospective signals first",
+  "notes": [],
+  "header_row": 4,
+  "columns": [
+    {
+      "key": "wave",
+      "label": "Wave",
+      "column": "A"
+    },
+    {
+      "key": "objective",
+      "label": "Objective",
+      "column": "B"
+    },
+    {
+      "key": "sources",
+      "label": "Sources",
+      "column": "C"
+    },
+    {
+      "key": "capture",
+      "label": "Capture",
+      "column": "D"
+    },
+    {
+      "key": "cadence",
+      "label": "Cadence",
+      "column": "E"
+    },
+    {
+      "key": "deliverable",
+      "label": "Deliverable",
+      "column": "F"
+    },
+    {
+      "key": "priority",
+      "label": "Priority",
+      "column": "G"
+    }
+  ],
+  "records": [
+    {
+      "source_row": 5,
+      "values": {
+        "wave": "1",
+        "objective": "Scout future technologies",
+        "sources": "D01\u2013D11; D20\u2013D22; V06; V09; V10; V25",
+        "capture": "Roadmaps, funded projects, proof of concept, measured test chip",
+        "cadence": "Weekly",
+        "deliverable": "Research queue: energy/autonomy thesis, baseline, maturity, next milestone",
+        "priority": "P0"
+      }
+    },
+    {
+      "source_row": 6,
+      "values": {
+        "wave": "2",
+        "objective": "Build empirical benchmark layer in parallel",
+        "sources": "D16\u2013D19; vendor app notes",
+        "capture": "Tiny inference, MCU sleep/wake, power curve, comparable task protocols",
+        "cadence": "Release + weekly",
+        "deliverable": "Canonical comparison conditions and baseline tests",
+        "priority": "P0"
+      }
+    },
+    {
+      "source_row": 7,
+      "values": {
+        "wave": "3",
+        "objective": "Seed EU/CA vendor catalogues in parallel",
+        "sources": "V01\u2013V25 (relevant vendors)",
+        "capture": "Exact MPN, family, SDK, errata, docs and lifecycle",
+        "cadence": "Weekly",
+        "deliverable": "Normalized products and technical attributes; MPN variants",
+        "priority": "P0"
+      }
+    },
+    {
+      "source_row": 8,
+      "values": {
+        "wave": "4",
+        "objective": "Enrich science and IP signals",
+        "sources": "D12\u2013D15; D20\u2013D22; D04; D05",
+        "capture": "Papers, grants, patent families, assignee and technology tags",
+        "cadence": "Weekly",
+        "deliverable": "Evidence graph, novelty/trend, verified claims",
+        "priority": "P0"
+      }
+    },
+    {
+      "source_row": 9,
+      "values": {
+        "wave": "5",
+        "objective": "Verify industrial readiness & origin",
+        "sources": "C04; C06; C07; V12; V13; C14; vendor PCN",
+        "capture": "Legal entity, supplier roles, fab, ATP, lot provenance, PCN",
+        "cadence": "Monthly + event",
+        "deliverable": "Origin gate and alternative-source candidates",
+        "priority": "P0/P1"
+      }
+    },
+    {
+      "source_row": 10,
+      "values": {
+        "wave": "6",
+        "objective": "Add distributor offers",
+        "sources": "C01\u2013C03",
+        "capture": "Price/stock/MOQ/lead time per MPN",
+        "cadence": "Daily/weekly",
+        "deliverable": "BOM feasibility and market availability; authorized channels",
+        "priority": "P1"
+      }
+    },
+    {
+      "source_row": 11,
+      "values": {
+        "wave": "7",
+        "objective": "Monitor demand/industrial services",
+        "sources": "C08; C09; C14; C15; D03",
+        "capture": "Contracts, pilot lines, MPW, IP, test facilities",
+        "cadence": "Weekly/monthly",
+        "deliverable": "Scale-up paths and demand signals",
+        "priority": "P1"
+      }
+    },
+    {
+      "source_row": 12,
+      "values": {
+        "wave": "8",
+        "objective": "Validate / analyst escalation",
+        "sources": "All",
+        "capture": "Conflicts, unmet attributes, model evidence, supply exceptions",
+        "cadence": "Continuous review",
+        "deliverable": "Promote only with evidence; separate verified facts from predictions",
+        "priority": "P0"
+      }
+    }
+  ]
+}

@@ -1,0 +1,203 @@
+{
+  "format": "kn.seed-proposal.table",
+  "status": "unreviewed_proposal",
+  "domain": "space",
+  "source": {
+    "file_name": "space_sector_ontology_and_tags_v1.xlsx",
+    "sha256": "26e7468ee372e9c606ff08910756b2066ef30ac9fea7524e646b52d8529eec28",
+    "sheet_name": "06_EUSPA_App_Tags",
+    "sheet_position": 7
+  },
+  "title": "EUSPA EU Space Market Report 2026 \u2014 application / market tags",
+  "notes": [],
+  "header_row": 3,
+  "columns": [
+    {
+      "key": "application_tag",
+      "label": "Application tag",
+      "column": "A"
+    },
+    {
+      "key": "axis_type",
+      "label": "Axis type",
+      "column": "B"
+    },
+    {
+      "key": "use",
+      "label": "Use",
+      "column": "C"
+    },
+    {
+      "key": "typical_space_capabilities",
+      "label": "Typical space capabilities",
+      "column": "D"
+    },
+    {
+      "key": "official_source",
+      "label": "Official source",
+      "column": "E"
+    }
+  ],
+  "records": [
+    {
+      "source_row": 4,
+      "values": {
+        "application_tag": "Agriculture",
+        "axis_type": "Downstream application / market",
+        "use": "Many-to-many tag on services, datasets, missions and products",
+        "typical_space_capabilities": "EO; GNSS; SATCOM",
+        "official_source": "https://www.euspa.europa.eu/market-report"
+      }
+    },
+    {
+      "source_row": 5,
+      "values": {
+        "application_tag": "Aviation and Drones",
+        "axis_type": "Downstream application / market",
+        "use": "Many-to-many tag on services, datasets, missions and products",
+        "typical_space_capabilities": "GNSS; EO; SATCOM",
+        "official_source": "https://www.euspa.europa.eu/market-report"
+      }
+    },
+    {
+      "source_row": 6,
+      "values": {
+        "application_tag": "Climate, Environment and Biodiversity",
+        "axis_type": "Downstream application / market",
+        "use": "Many-to-many tag on services, datasets, missions and products",
+        "typical_space_capabilities": "EO; GNSS",
+        "official_source": "https://www.euspa.europa.eu/market-report"
+      }
+    },
+    {
+      "source_row": 7,
+      "values": {
+        "application_tag": "Consumer Solutions, Tourism and Health",
+        "axis_type": "Downstream application / market",
+        "use": "Many-to-many tag on services, datasets, missions and products",
+        "typical_space_capabilities": "GNSS; SATCOM",
+        "official_source": "https://www.euspa.europa.eu/market-report"
+      }
+    },
+    {
+      "source_row": 8,
+      "values": {
+        "application_tag": "Emergency Management and Humanitarian Aid",
+        "axis_type": "Downstream application / market",
+        "use": "Many-to-many tag on services, datasets, missions and products",
+        "typical_space_capabilities": "EO; GNSS; Secure SATCOM",
+        "official_source": "https://www.euspa.europa.eu/market-report"
+      }
+    },
+    {
+      "source_row": 9,
+      "values": {
+        "application_tag": "Energy and Raw Materials",
+        "axis_type": "Downstream application / market",
+        "use": "Many-to-many tag on services, datasets, missions and products",
+        "typical_space_capabilities": "EO; GNSS; Secure SATCOM",
+        "official_source": "https://www.euspa.europa.eu/market-report"
+      }
+    },
+    {
+      "source_row": 10,
+      "values": {
+        "application_tag": "EU Border and Internal Security",
+        "axis_type": "Downstream application / market",
+        "use": "Many-to-many tag on services, datasets, missions and products",
+        "typical_space_capabilities": "EO; GNSS; Secure SATCOM; SSA-related resilience",
+        "official_source": "https://www.euspa.europa.eu/market-report"
+      }
+    },
+    {
+      "source_row": 11,
+      "values": {
+        "application_tag": "Fisheries and Aquaculture",
+        "axis_type": "Downstream application / market",
+        "use": "Many-to-many tag on services, datasets, missions and products",
+        "typical_space_capabilities": "EO; GNSS; SATCOM",
+        "official_source": "https://www.euspa.europa.eu/market-report"
+      }
+    },
+    {
+      "source_row": 12,
+      "values": {
+        "application_tag": "Forestry",
+        "axis_type": "Downstream application / market",
+        "use": "Many-to-many tag on services, datasets, missions and products",
+        "typical_space_capabilities": "EO; GNSS",
+        "official_source": "https://www.euspa.europa.eu/market-report"
+      }
+    },
+    {
+      "source_row": 13,
+      "values": {
+        "application_tag": "Infrastructure",
+        "axis_type": "Downstream application / market",
+        "use": "Many-to-many tag on services, datasets, missions and products",
+        "typical_space_capabilities": "EO; GNSS; Secure SATCOM",
+        "official_source": "https://www.euspa.europa.eu/market-report"
+      }
+    },
+    {
+      "source_row": 14,
+      "values": {
+        "application_tag": "Insurance and Finance",
+        "axis_type": "Downstream application / market",
+        "use": "Many-to-many tag on services, datasets, missions and products",
+        "typical_space_capabilities": "EO; GNSS",
+        "official_source": "https://www.euspa.europa.eu/market-report"
+      }
+    },
+    {
+      "source_row": 15,
+      "values": {
+        "application_tag": "Maritime and Inland Waterways",
+        "axis_type": "Downstream application / market",
+        "use": "Many-to-many tag on services, datasets, missions and products",
+        "typical_space_capabilities": "GNSS; EO; SATCOM",
+        "official_source": "https://www.euspa.europa.eu/market-report"
+      }
+    },
+    {
+      "source_row": 16,
+      "values": {
+        "application_tag": "Rail",
+        "axis_type": "Downstream application / market",
+        "use": "Many-to-many tag on services, datasets, missions and products",
+        "typical_space_capabilities": "GNSS; SATCOM; EO",
+        "official_source": "https://www.euspa.europa.eu/market-report"
+      }
+    },
+    {
+      "source_row": 17,
+      "values": {
+        "application_tag": "Road and Automotive",
+        "axis_type": "Downstream application / market",
+        "use": "Many-to-many tag on services, datasets, missions and products",
+        "typical_space_capabilities": "GNSS; SATCOM",
+        "official_source": "https://www.euspa.europa.eu/market-report"
+      }
+    },
+    {
+      "source_row": 18,
+      "values": {
+        "application_tag": "Space",
+        "axis_type": "Downstream application / market",
+        "use": "Many-to-many tag on services, datasets, missions and products",
+        "typical_space_capabilities": "SSA; GNSS; SATCOM; EO",
+        "official_source": "https://www.euspa.europa.eu/market-report"
+      }
+    },
+    {
+      "source_row": 19,
+      "values": {
+        "application_tag": "Urban Development and Cultural Heritage",
+        "axis_type": "Downstream application / market",
+        "use": "Many-to-many tag on services, datasets, missions and products",
+        "typical_space_capabilities": "EO; GNSS",
+        "official_source": "https://www.euspa.europa.eu/market-report"
+      }
+    }
+  ]
+}

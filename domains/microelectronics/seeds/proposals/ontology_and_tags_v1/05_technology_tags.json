@@ -1,0 +1,490 @@
+{
+  "format": "kn.seed-proposal.table",
+  "status": "unreviewed_proposal",
+  "domain": "microelectronics",
+  "source": {
+    "file_name": "microelectronics_ontology_and_tags_v1.xlsx",
+    "sha256": "7166aa06791998c692cc6a2ac377692a6687f15e3353ffa70a1c159f2e63c34f",
+    "sheet_name": "05_Technology_Tags",
+    "sheet_position": 6
+  },
+  "title": "Detailed technology tags \u2014 KB extensions",
+  "notes": [
+    "Local granular tags, not official IRDS codes. One item may carry multiple tags; distinguish demonstrated vs claimed."
+  ],
+  "header_row": 4,
+  "columns": [
+    {
+      "key": "tag_id",
+      "label": "Tag ID",
+      "column": "A"
+    },
+    {
+      "key": "technology",
+      "label": "Technology",
+      "column": "B"
+    },
+    {
+      "key": "ecs_chapter_mapping_analyst",
+      "label": "ECS chapter mapping (analyst)",
+      "column": "C"
+    },
+    {
+      "key": "watch_metric",
+      "label": "Watch metric",
+      "column": "D"
+    },
+    {
+      "key": "priority",
+      "label": "Priority",
+      "column": "E"
+    },
+    {
+      "key": "basis",
+      "label": "Basis",
+      "column": "F"
+    }
+  ],
+  "records": [
+    {
+      "source_row": 5,
+      "values": {
+        "tag_id": "T.ULP",
+        "technology": "Ultra-low-power / always-on",
+        "ecs_chapter_mapping_analyst": "2.1;1.2",
+        "watch_metric": "Sleep leakage; wake energy; duty-cycle",
+        "priority": "P0",
+        "basis": "https://ecssria.eu/2026 ; https://roadmaps.ieee.org/roadmaps/"
+      }
+    },
+    {
+      "source_row": 6,
+      "values": {
+        "tag_id": "T.HARV",
+        "technology": "Energy harvesting / energy-neutral node",
+        "ecs_chapter_mapping_analyst": "1.2;1.1",
+        "watch_metric": "Cold start; harvest profile; quiescent current",
+        "priority": "P0",
+        "basis": "https://ecssria.eu/2026 ; https://roadmaps.ieee.org/roadmaps/"
+      }
+    },
+    {
+      "source_row": 7,
+      "values": {
+        "tag_id": "T.PM",
+        "technology": "Power management / DVFS / power gating",
+        "ecs_chapter_mapping_analyst": "1.2;2.1",
+        "watch_metric": "Efficiency curve; active/idle power",
+        "priority": "P0",
+        "basis": "https://ecssria.eu/2026 ; https://roadmaps.ieee.org/roadmaps/"
+      }
+    },
+    {
+      "source_row": 8,
+      "values": {
+        "tag_id": "T.WBG",
+        "technology": "Wide bandgap SiC/GaN",
+        "ecs_chapter_mapping_analyst": "1.1;1.2",
+        "watch_metric": "Switching losses; thermal; efficiency",
+        "priority": "P0",
+        "basis": "https://ecssria.eu/2026 ; https://roadmaps.ieee.org/roadmaps/"
+      }
+    },
+    {
+      "source_row": 9,
+      "values": {
+        "tag_id": "T.BAT",
+        "technology": "Battery management / sensing",
+        "ecs_chapter_mapping_analyst": "1.2",
+        "watch_metric": "SoC/SoH; standby; accuracy",
+        "priority": "P0",
+        "basis": "https://ecssria.eu/2026 ; https://roadmaps.ieee.org/roadmaps/"
+      }
+    },
+    {
+      "source_row": 10,
+      "values": {
+        "tag_id": "T.MEMS",
+        "technology": "MEMS/NEMS sensing",
+        "ecs_chapter_mapping_analyst": "1.1;1.2",
+        "watch_metric": "Noise; range; power at ODR",
+        "priority": "P0",
+        "basis": "https://ecssria.eu/2026 ; https://roadmaps.ieee.org/roadmaps/"
+      }
+    },
+    {
+      "source_row": 11,
+      "values": {
+        "tag_id": "T.EVENT",
+        "technology": "Event-driven / wake-on-event",
+        "ecs_chapter_mapping_analyst": "1.2;2.1",
+        "watch_metric": "Event energy; false wakes",
+        "priority": "P0",
+        "basis": "https://ecssria.eu/2026 ; https://roadmaps.ieee.org/roadmaps/"
+      }
+    },
+    {
+      "source_row": 12,
+      "values": {
+        "tag_id": "T.CIS",
+        "technology": "CMOS imaging / global shutter",
+        "ecs_chapter_mapping_analyst": "1.2",
+        "watch_metric": "Photon response; ROI fps; readout",
+        "priority": "P0",
+        "basis": "https://ecssria.eu/2026 ; https://roadmaps.ieee.org/roadmaps/"
+      }
+    },
+    {
+      "source_row": 13,
+      "values": {
+        "tag_id": "T.SPAD",
+        "technology": "SPAD / ToF / photon counting",
+        "ecs_chapter_mapping_analyst": "1.2",
+        "watch_metric": "PDE; jitter; ambient; power",
+        "priority": "P0",
+        "basis": "https://ecssria.eu/2026 ; https://roadmaps.ieee.org/roadmaps/"
+      }
+    },
+    {
+      "source_row": 14,
+      "values": {
+        "tag_id": "T.IR",
+        "technology": "IR / thermal / multispectral / hyperspectral",
+        "ecs_chapter_mapping_analyst": "1.2",
+        "watch_metric": "NETD; responsivity; spectral range",
+        "priority": "P0",
+        "basis": "https://ecssria.eu/2026 ; https://roadmaps.ieee.org/roadmaps/"
+      }
+    },
+    {
+      "source_row": 15,
+      "values": {
+        "tag_id": "T.PIC",
+        "technology": "Integrated photonics / optical interfaces",
+        "ecs_chapter_mapping_analyst": "1.1;1.2;2.2",
+        "watch_metric": "Loss; wavelength; energy per bit",
+        "priority": "P0",
+        "basis": "https://ecssria.eu/2026 ; https://roadmaps.ieee.org/roadmaps/"
+      }
+    },
+    {
+      "source_row": 16,
+      "values": {
+        "tag_id": "T.ACO",
+        "technology": "MEMS audio / ultrasonic sensing",
+        "ecs_chapter_mapping_analyst": "1.2",
+        "watch_metric": "SNR; sensitivity; AOP; ODR",
+        "priority": "P0",
+        "basis": "https://ecssria.eu/2026 ; https://roadmaps.ieee.org/roadmaps/"
+      }
+    },
+    {
+      "source_row": 17,
+      "values": {
+        "tag_id": "T.IMU",
+        "technology": "Inertial / magnetic sensing",
+        "ecs_chapter_mapping_analyst": "1.2",
+        "watch_metric": "Bias; ARW; noise; current",
+        "priority": "P0",
+        "basis": "https://ecssria.eu/2026 ; https://roadmaps.ieee.org/roadmaps/"
+      }
+    },
+    {
+      "source_row": 18,
+      "values": {
+        "tag_id": "T.RAD",
+        "technology": "Radar/mmWave sensing",
+        "ecs_chapter_mapping_analyst": "1.2;2.2",
+        "watch_metric": "Bandwidth; channels; power",
+        "priority": "P0",
+        "basis": "https://ecssria.eu/2026 ; https://roadmaps.ieee.org/roadmaps/"
+      }
+    },
+    {
+      "source_row": 19,
+      "values": {
+        "tag_id": "T.AFE",
+        "technology": "Low-noise analog / mixed signal",
+        "ecs_chapter_mapping_analyst": "1.2",
+        "watch_metric": "ENOB; noise; bandwidth; power",
+        "priority": "P0",
+        "basis": "https://ecssria.eu/2026 ; https://roadmaps.ieee.org/roadmaps/"
+      }
+    },
+    {
+      "source_row": 20,
+      "values": {
+        "tag_id": "T.MCU",
+        "technology": "MCU / deterministic low-power compute",
+        "ecs_chapter_mapping_analyst": "2.1;1.2",
+        "watch_metric": "Energy per task; wake; memory",
+        "priority": "P0",
+        "basis": "https://ecssria.eu/2026 ; https://roadmaps.ieee.org/roadmaps/"
+      }
+    },
+    {
+      "source_row": 21,
+      "values": {
+        "tag_id": "T.MPU",
+        "technology": "Heterogeneous application processor",
+        "ecs_chapter_mapping_analyst": "2.1;2.3",
+        "watch_metric": "CPU/GPU/NPU and system power",
+        "priority": "P0",
+        "basis": "https://ecssria.eu/2026 ; https://roadmaps.ieee.org/roadmaps/"
+      }
+    },
+    {
+      "source_row": 22,
+      "values": {
+        "tag_id": "T.NPU",
+        "technology": "Digital NPU / tensor accelerator",
+        "ecs_chapter_mapping_analyst": "2.1",
+        "watch_metric": "J/inference at matched accuracy",
+        "priority": "P0",
+        "basis": "https://ecssria.eu/2026 ; https://roadmaps.ieee.org/roadmaps/"
+      }
+    },
+    {
+      "source_row": 23,
+      "values": {
+        "tag_id": "T.AIMC",
+        "technology": "Analog compute / analog in-memory",
+        "ecs_chapter_mapping_analyst": "2.1;1.1",
+        "watch_metric": "Measured energy; accuracy; calibration",
+        "priority": "P0",
+        "basis": "https://ecssria.eu/2026 ; https://roadmaps.ieee.org/roadmaps/"
+      }
+    },
+    {
+      "source_row": 24,
+      "values": {
+        "tag_id": "T.CIM",
+        "technology": "Digital compute-in-memory / near-memory",
+        "ecs_chapter_mapping_analyst": "2.1;1.1",
+        "watch_metric": "Memory traffic; energy; endurance",
+        "priority": "P0",
+        "basis": "https://ecssria.eu/2026 ; https://roadmaps.ieee.org/roadmaps/"
+      }
+    },
+    {
+      "source_row": 25,
+      "values": {
+        "tag_id": "T.NEURO",
+        "technology": "Neuromorphic / spiking",
+        "ecs_chapter_mapping_analyst": "2.1",
+        "watch_metric": "Energy/event; workload accuracy",
+        "priority": "P0",
+        "basis": "https://ecssria.eu/2026 ; https://roadmaps.ieee.org/roadmaps/"
+      }
+    },
+    {
+      "source_row": 26,
+      "values": {
+        "tag_id": "T.SPARSE",
+        "technology": "Sparsity / mixed precision / quantization",
+        "ecs_chapter_mapping_analyst": "2.1;2.3",
+        "watch_metric": "Precision; sparsity; accuracy loss",
+        "priority": "P0",
+        "basis": "https://ecssria.eu/2026 ; https://roadmaps.ieee.org/roadmaps/"
+      }
+    },
+    {
+      "source_row": 27,
+      "values": {
+        "tag_id": "T.FPGA",
+        "technology": "Reconfigurable logic / eFPGA",
+        "ecs_chapter_mapping_analyst": "2.3;1.2",
+        "watch_metric": "Resources; throughput; power",
+        "priority": "P0",
+        "basis": "https://ecssria.eu/2026 ; https://roadmaps.ieee.org/roadmaps/"
+      }
+    },
+    {
+      "source_row": 28,
+      "values": {
+        "tag_id": "T.RTL",
+        "technology": "RTL/HLS and synthesis",
+        "ecs_chapter_mapping_analyst": "2.3",
+        "watch_metric": "Tool support; timing; licenses",
+        "priority": "P0",
+        "basis": "https://ecssria.eu/2026 ; https://roadmaps.ieee.org/roadmaps/"
+      }
+    },
+    {
+      "source_row": 29,
+      "values": {
+        "tag_id": "T.VISION",
+        "technology": "ISP / vision pipeline / sensor fusion",
+        "ecs_chapter_mapping_analyst": "2.1;1.2",
+        "watch_metric": "Latency/fps; sensor format; power",
+        "priority": "P0",
+        "basis": "https://ecssria.eu/2026 ; https://roadmaps.ieee.org/roadmaps/"
+      }
+    },
+    {
+      "source_row": 30,
+      "values": {
+        "tag_id": "T.RF",
+        "technology": "RFIC / mmWave front end",
+        "ecs_chapter_mapping_analyst": "2.2;1.2",
+        "watch_metric": "NF; EVM; power; bands",
+        "priority": "P1",
+        "basis": "https://ecssria.eu/2026 ; https://roadmaps.ieee.org/roadmaps/"
+      }
+    },
+    {
+      "source_row": 31,
+      "values": {
+        "tag_id": "T.LPWAN",
+        "technology": "Sub-GHz / LPWAN / mesh",
+        "ecs_chapter_mapping_analyst": "2.2",
+        "watch_metric": "Energy per delivered payload; link",
+        "priority": "P0",
+        "basis": "https://ecssria.eu/2026 ; https://roadmaps.ieee.org/roadmaps/"
+      }
+    },
+    {
+      "source_row": 32,
+      "values": {
+        "tag_id": "T.UWB",
+        "technology": "Low-energy UWB",
+        "ecs_chapter_mapping_analyst": "2.2",
+        "watch_metric": "Energy/bit; ranging; latency",
+        "priority": "P0",
+        "basis": "https://ecssria.eu/2026 ; https://roadmaps.ieee.org/roadmaps/"
+      }
+    },
+    {
+      "source_row": 33,
+      "values": {
+        "tag_id": "T.NTN",
+        "technology": "NTN / satellite IoT connectivity",
+        "ecs_chapter_mapping_analyst": "2.2",
+        "watch_metric": "Protocol; RF band; duty cycle",
+        "priority": "P1",
+        "basis": "https://ecssria.eu/2026 ; https://roadmaps.ieee.org/roadmaps/"
+      }
+    },
+    {
+      "source_row": 34,
+      "values": {
+        "tag_id": "T.IO",
+        "technology": "High-speed I/O / MIPI / Ethernet / SerDes",
+        "ecs_chapter_mapping_analyst": "2.2;2.3",
+        "watch_metric": "Lane speed; BER; energy/bit",
+        "priority": "P0",
+        "basis": "https://ecssria.eu/2026 ; https://roadmaps.ieee.org/roadmaps/"
+      }
+    },
+    {
+      "source_row": 35,
+      "values": {
+        "tag_id": "T.MRAM",
+        "technology": "Emerging NVM MRAM/ReRAM/FeRAM/PCM",
+        "ecs_chapter_mapping_analyst": "1.1;1.2",
+        "watch_metric": "Retention; endurance; energy",
+        "priority": "P0",
+        "basis": "https://ecssria.eu/2026 ; https://roadmaps.ieee.org/roadmaps/"
+      }
+    },
+    {
+      "source_row": 36,
+      "values": {
+        "tag_id": "T.FDSOI",
+        "technology": "FD-SOI / body bias",
+        "ecs_chapter_mapping_analyst": "1.1",
+        "watch_metric": "Process capability; leakage",
+        "priority": "P0",
+        "basis": "https://ecssria.eu/2026 ; https://roadmaps.ieee.org/roadmaps/"
+      }
+    },
+    {
+      "source_row": 37,
+      "values": {
+        "tag_id": "T.GAA",
+        "technology": "FinFET / GAA / advanced nodes",
+        "ecs_chapter_mapping_analyst": "1.1",
+        "watch_metric": "Process evidence; PPA",
+        "priority": "P1",
+        "basis": "https://ecssria.eu/2026 ; https://roadmaps.ieee.org/roadmaps/"
+      }
+    },
+    {
+      "source_row": 38,
+      "values": {
+        "tag_id": "T.CHIPLET",
+        "technology": "Chiplets / 2.5D / 3D / SiP",
+        "ecs_chapter_mapping_analyst": "1.1;1.2",
+        "watch_metric": "Bandwidth; thermal; yield",
+        "priority": "P0",
+        "basis": "https://ecssria.eu/2026 ; https://roadmaps.ieee.org/roadmaps/"
+      }
+    },
+    {
+      "source_row": 39,
+      "values": {
+        "tag_id": "T.RADHARD",
+        "technology": "Radiation tolerance / harsh environment",
+        "ecs_chapter_mapping_analyst": "2.4",
+        "watch_metric": "TID/SEE; test conditions",
+        "priority": "P1",
+        "basis": "https://ecssria.eu/2026 ; https://roadmaps.ieee.org/roadmaps/"
+      }
+    },
+    {
+      "source_row": 40,
+      "values": {
+        "tag_id": "T.SEC",
+        "technology": "Secure boot / root of trust / crypto",
+        "ecs_chapter_mapping_analyst": "2.4",
+        "watch_metric": "Security features; certified scope",
+        "priority": "P1",
+        "basis": "https://ecssria.eu/2026 ; https://roadmaps.ieee.org/roadmaps/"
+      }
+    },
+    {
+      "source_row": 41,
+      "values": {
+        "tag_id": "T.SAFE",
+        "technology": "Functional safety / reliability",
+        "ecs_chapter_mapping_analyst": "2.4",
+        "watch_metric": "FIT; grade; safety manual",
+        "priority": "P1",
+        "basis": "https://ecssria.eu/2026 ; https://roadmaps.ieee.org/roadmaps/"
+      }
+    },
+    {
+      "source_row": 42,
+      "values": {
+        "tag_id": "T.SW",
+        "technology": "Embedded software / RTOS / Linux",
+        "ecs_chapter_mapping_analyst": "1.3",
+        "watch_metric": "SDK; drivers; support lifetime",
+        "priority": "P0",
+        "basis": "https://ecssria.eu/2026 ; https://roadmaps.ieee.org/roadmaps/"
+      }
+    },
+    {
+      "source_row": 43,
+      "values": {
+        "tag_id": "T.AUTO",
+        "technology": "Autonomous distributed systems",
+        "ecs_chapter_mapping_analyst": "1.4;2.1",
+        "watch_metric": "Local decision latency; uptime",
+        "priority": "P0",
+        "basis": "https://ecssria.eu/2026 ; https://roadmaps.ieee.org/roadmaps/"
+      }
+    },
+    {
+      "source_row": 44,
+      "values": {
+        "tag_id": "T.EDA",
+        "technology": "EDA / PDK / digital twin / verification",
+        "ecs_chapter_mapping_analyst": "2.3",
+        "watch_metric": "Design access; process support",
+        "priority": "P1",
+        "basis": "https://ecssria.eu/2026 ; https://roadmaps.ieee.org/roadmaps/"
+      }
+    }
+  ]
+}

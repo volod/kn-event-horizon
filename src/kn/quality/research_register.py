@@ -7,9 +7,9 @@ from collections.abc import Sequence
 from dataclasses import dataclass, field
 from pathlib import Path
 
-from agent_py.quality.plan_integrity import PLAN_DOC
-from agent_py.quality.plan_model import read_tasks
-from agent_py.quality.project_root import discover_project_root
+from kn.quality.plan_integrity import PLAN_DOC
+from kn.quality.plan_model import read_tasks
+from kn.quality.project_root import discover_project_root
 
 _LOG = logging.getLogger(__name__)
 

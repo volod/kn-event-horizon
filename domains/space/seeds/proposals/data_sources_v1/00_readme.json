@@ -1,0 +1,75 @@
+{
+  "format": "kn.seed-proposal.notes",
+  "status": "unreviewed_proposal",
+  "domain": "space",
+  "source": {
+    "file_name": "space_sector_data_sources_v1.xlsx",
+    "sha256": "83958f6df5f3e5b0cd969a4fe3206197fe4bf4cee396df62f02dbe394a3040f0",
+    "sheet_name": "00_README",
+    "sheet_position": 1
+  },
+  "rows": [
+    {
+      "source_row": 1,
+      "cells": {
+        "A": "Space Sector Knowledge Base \u2014 data source catalogue"
+      }
+    },
+    {
+      "source_row": 3,
+      "cells": {
+        "A": "Purpose",
+        "B": "Source catalogue for automated and analyst-driven ingestion into the ontology/classifier workbook."
+      }
+    },
+    {
+      "source_row": 4,
+      "cells": {
+        "A": "Original user table",
+        "B": "Resources from the uploaded PDF are marked ORIG. They are preserved and expanded rather than replaced."
+      }
+    },
+    {
+      "source_row": 5,
+      "cells": {
+        "A": "P0",
+        "B": "Core / authoritative or high-value automated ingestion."
+      }
+    },
+    {
+      "source_row": 6,
+      "cells": {
+        "A": "P1",
+        "B": "Important enrichment; periodic ingestion or commercial/conditional access."
+      }
+    },
+    {
+      "source_row": 7,
+      "cells": {
+        "A": "P2",
+        "B": "Secondary analyst reference / discovery source."
+      }
+    },
+    {
+      "source_row": 8,
+      "cells": {
+        "A": "Prospective signals",
+        "B": "R&D, patents, procurement and regulatory filings are included because they reveal future capability before launch/orbit."
+      }
+    },
+    {
+      "source_row": 9,
+      "cells": {
+        "A": "Industrial priority",
+        "B": "Manufacturer, product/component, launch service, spacecraft, ground infrastructure, terminal and downstream service sources receive explicit coverage columns."
+      }
+    },
+    {
+      "source_row": 10,
+      "cells": {
+        "A": "Date",
+        "B": "Catalogue structured 2026-11-16; API terms and access should be revalidated during connector implementation."
+      }
+    }
+  ]
+}

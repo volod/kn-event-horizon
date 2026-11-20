@@ -1,0 +1,373 @@
+{
+  "format": "kn.seed-proposal.table",
+  "status": "unreviewed_proposal",
+  "domain": "gdelt",
+  "source": {
+    "file_name": "gdelt_ontology_and_tags_v1.xlsx",
+    "sha256": "c31bba2aad40336c620044c6df5332744aebdce70b415e56bc121096845881a2",
+    "sheet_name": "03_CAMEO_Classifier",
+    "sheet_position": 4
+  },
+  "title": "CAMEO event classifier",
+  "notes": [
+    "20 root categories and documented branch example. Codes are strings. QuadClass supplied by GDELT is authoritative; import full lookup before production."
+  ],
+  "header_row": 4,
+  "columns": [
+    {
+      "key": "code",
+      "label": "Code",
+      "column": "A"
+    },
+    {
+      "key": "parent_code",
+      "label": "Parent code",
+      "column": "B"
+    },
+    {
+      "key": "level",
+      "label": "Level",
+      "column": "C"
+    },
+    {
+      "key": "quadclass",
+      "label": "QuadClass",
+      "column": "D"
+    },
+    {
+      "key": "quadclass_label",
+      "label": "QuadClass label",
+      "column": "E"
+    },
+    {
+      "key": "action_label",
+      "label": "Action label",
+      "column": "F"
+    },
+    {
+      "key": "scope",
+      "label": "Scope",
+      "column": "G"
+    },
+    {
+      "key": "implementation_note",
+      "label": "Implementation note",
+      "column": "H"
+    },
+    {
+      "key": "source_url",
+      "label": "Source URL",
+      "column": "I"
+    }
+  ],
+  "records": [
+    {
+      "source_row": 5,
+      "values": {
+        "code": "01",
+        "parent_code": null,
+        "level": 1,
+        "quadclass": 1,
+        "quadclass_label": "Verbal cooperation",
+        "action_label": "Make public statement",
+        "scope": "CAMEO root",
+        "implementation_note": "Root overview; import full official lookup for all leaves",
+        "source_url": "https://gdeltproject.org/data.html"
+      }
+    },
+    {
+      "source_row": 6,
+      "values": {
+        "code": "02",
+        "parent_code": null,
+        "level": 1,
+        "quadclass": 1,
+        "quadclass_label": "Verbal cooperation",
+        "action_label": "Appeal",
+        "scope": "CAMEO root",
+        "implementation_note": "Root overview; import full official lookup for all leaves",
+        "source_url": "https://gdeltproject.org/data.html"
+      }
+    },
+    {
+      "source_row": 7,
+      "values": {
+        "code": "03",
+        "parent_code": null,
+        "level": 1,
+        "quadclass": 1,
+        "quadclass_label": "Verbal cooperation",
+        "action_label": "Express intent to cooperate",
+        "scope": "CAMEO root",
+        "implementation_note": "Root overview; import full official lookup for all leaves",
+        "source_url": "https://gdeltproject.org/data.html"
+      }
+    },
+    {
+      "source_row": 8,
+      "values": {
+        "code": "04",
+        "parent_code": null,
+        "level": 1,
+        "quadclass": 1,
+        "quadclass_label": "Verbal cooperation",
+        "action_label": "Consult",
+        "scope": "CAMEO root",
+        "implementation_note": "Root overview; import full official lookup for all leaves",
+        "source_url": "https://gdeltproject.org/data.html"
+      }
+    },
+    {
+      "source_row": 9,
+      "values": {
+        "code": "05",
+        "parent_code": null,
+        "level": 1,
+        "quadclass": 1,
+        "quadclass_label": "Verbal cooperation",
+        "action_label": "Engage in diplomatic cooperation",
+        "scope": "CAMEO root",
+        "implementation_note": "Root overview; import full official lookup for all leaves",
+        "source_url": "https://gdeltproject.org/data.html"
+      }
+    },
+    {
+      "source_row": 10,
+      "values": {
+        "code": "06",
+        "parent_code": null,
+        "level": 1,
+        "quadclass": 2,
+        "quadclass_label": "Material cooperation",
+        "action_label": "Engage in material cooperation",
+        "scope": "CAMEO root",
+        "implementation_note": "Root overview; import full official lookup for all leaves",
+        "source_url": "https://gdeltproject.org/data.html"
+      }
+    },
+    {
+      "source_row": 11,
+      "values": {
+        "code": "07",
+        "parent_code": null,
+        "level": 1,
+        "quadclass": 2,
+        "quadclass_label": "Material cooperation",
+        "action_label": "Provide aid",
+        "scope": "CAMEO root",
+        "implementation_note": "Root overview; import full official lookup for all leaves",
+        "source_url": "https://gdeltproject.org/data.html"
+      }
+    },
+    {
+      "source_row": 12,
+      "values": {
+        "code": "08",
+        "parent_code": null,
+        "level": 1,
+        "quadclass": 2,
+        "quadclass_label": "Material cooperation",
+        "action_label": "Yield",
+        "scope": "CAMEO root",
+        "implementation_note": "Root overview; import full official lookup for all leaves",
+        "source_url": "https://gdeltproject.org/data.html"
+      }
+    },
+    {
+      "source_row": 13,
+      "values": {
+        "code": "09",
+        "parent_code": null,
+        "level": 1,
+        "quadclass": 3,
+        "quadclass_label": "Verbal conflict",
+        "action_label": "Investigate",
+        "scope": "CAMEO root",
+        "implementation_note": "Root overview; import full official lookup for all leaves",
+        "source_url": "https://gdeltproject.org/data.html"
+      }
+    },
+    {
+      "source_row": 14,
+      "values": {
+        "code": "10",
+        "parent_code": null,
+        "level": 1,
+        "quadclass": 3,
+        "quadclass_label": "Verbal conflict",
+        "action_label": "Demand",
+        "scope": "CAMEO root",
+        "implementation_note": "Root overview; import full official lookup for all leaves",
+        "source_url": "https://gdeltproject.org/data.html"
+      }
+    },
+    {
+      "source_row": 15,
+      "values": {
+        "code": "11",
+        "parent_code": null,
+        "level": 1,
+        "quadclass": 3,
+        "quadclass_label": "Verbal conflict",
+        "action_label": "Disapprove",
+        "scope": "CAMEO root",
+        "implementation_note": "Root overview; import full official lookup for all leaves",
+        "source_url": "https://gdeltproject.org/data.html"
+      }
+    },
+    {
+      "source_row": 16,
+      "values": {
+        "code": "12",
+        "parent_code": null,
+        "level": 1,
+        "quadclass": 3,
+        "quadclass_label": "Verbal conflict",
+        "action_label": "Reject",
+        "scope": "CAMEO root",
+        "implementation_note": "Root overview; import full official lookup for all leaves",
+        "source_url": "https://gdeltproject.org/data.html"
+      }
+    },
+    {
+      "source_row": 17,
+      "values": {
+        "code": "13",
+        "parent_code": null,
+        "level": 1,
+        "quadclass": 3,
+        "quadclass_label": "Verbal conflict",
+        "action_label": "Threaten",
+        "scope": "CAMEO root",
+        "implementation_note": "Root overview; import full official lookup for all leaves",
+        "source_url": "https://gdeltproject.org/data.html"
+      }
+    },
+    {
+      "source_row": 18,
+      "values": {
+        "code": "14",
+        "parent_code": null,
+        "level": 1,
+        "quadclass": 3,
+        "quadclass_label": "Verbal conflict",
+        "action_label": "Protest",
+        "scope": "CAMEO root",
+        "implementation_note": "Root overview; import full official lookup for all leaves",
+        "source_url": "https://gdeltproject.org/data.html"
+      }
+    },
+    {
+      "source_row": 19,
+      "values": {
+        "code": "15",
+        "parent_code": null,
+        "level": 1,
+        "quadclass": 4,
+        "quadclass_label": "Material conflict",
+        "action_label": "Exhibit force posture",
+        "scope": "CAMEO root",
+        "implementation_note": "Root overview; import full official lookup for all leaves",
+        "source_url": "https://gdeltproject.org/data.html"
+      }
+    },
+    {
+      "source_row": 20,
+      "values": {
+        "code": "16",
+        "parent_code": null,
+        "level": 1,
+        "quadclass": 4,
+        "quadclass_label": "Material conflict",
+        "action_label": "Reduce relations",
+        "scope": "CAMEO root",
+        "implementation_note": "Root overview; import full official lookup for all leaves",
+        "source_url": "https://gdeltproject.org/data.html"
+      }
+    },
+    {
+      "source_row": 21,
+      "values": {
+        "code": "17",
+        "parent_code": null,
+        "level": 1,
+        "quadclass": 4,
+        "quadclass_label": "Material conflict",
+        "action_label": "Coerce",
+        "scope": "CAMEO root",
+        "implementation_note": "Root overview; import full official lookup for all leaves",
+        "source_url": "https://gdeltproject.org/data.html"
+      }
+    },
+    {
+      "source_row": 22,
+      "values": {
+        "code": "18",
+        "parent_code": null,
+        "level": 1,
+        "quadclass": 4,
+        "quadclass_label": "Material conflict",
+        "action_label": "Assault",
+        "scope": "CAMEO root",
+        "implementation_note": "Root overview; import full official lookup for all leaves",
+        "source_url": "https://gdeltproject.org/data.html"
+      }
+    },
+    {
+      "source_row": 23,
+      "values": {
+        "code": "19",
+        "parent_code": null,
+        "level": 1,
+        "quadclass": 4,
+        "quadclass_label": "Material conflict",
+        "action_label": "Fight",
+        "scope": "CAMEO root",
+        "implementation_note": "Root overview; import full official lookup for all leaves",
+        "source_url": "https://gdeltproject.org/data.html"
+      }
+    },
+    {
+      "source_row": 24,
+      "values": {
+        "code": "20",
+        "parent_code": null,
+        "level": 1,
+        "quadclass": 4,
+        "quadclass_label": "Material conflict",
+        "action_label": "Engage in unconventional mass violence",
+        "scope": "CAMEO root",
+        "implementation_note": "Root overview; import full official lookup for all leaves",
+        "source_url": "https://gdeltproject.org/data.html"
+      }
+    },
+    {
+      "source_row": 25,
+      "values": {
+        "code": "025",
+        "parent_code": "02",
+        "level": 2,
+        "quadclass": 1,
+        "quadclass_label": "Verbal cooperation",
+        "action_label": "Appeal to yield",
+        "scope": "Codebook example",
+        "implementation_note": "Prefix hierarchy; preserve leading zero",
+        "source_url": "https://data.gdeltproject.org/documentation/GDELT-Event_Codebook-V2.0.pdf"
+      }
+    },
+    {
+      "source_row": 26,
+      "values": {
+        "code": "0251",
+        "parent_code": "025",
+        "level": 3,
+        "quadclass": 1,
+        "quadclass_label": "Verbal cooperation",
+        "action_label": "Appeal for easing of administrative sanctions",
+        "scope": "Codebook example",
+        "implementation_note": "EventBaseCode=025; EventRootCode=02",
+        "source_url": "https://data.gdeltproject.org/documentation/GDELT-Event_Codebook-V2.0.pdf"
+      }
+    }
+  ]
+}

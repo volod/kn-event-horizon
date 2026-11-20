@@ -81,6 +81,15 @@ def read_registry(spec: Path) -> list[Capability]:
     return capabilities
 
 
+def _plan_content(plan: Path) -> str:
+    content = plan.read_text(encoding="utf-8")
+    return re.sub(
+        r"(?m)^- Requires:[^\n]*(?:\n  [^\n]+)+",
+        lambda match: " ".join(line.strip() for line in match.group().splitlines()),
+        content,
+    )
+
+
 def read_tasks(plan: Path) -> list[Task]:
     """Read tasks in document order with their lane, group, and metadata."""
     tasks: list[Task] = []
@@ -88,7 +97,7 @@ def read_tasks(plan: Path) -> list[Task]:
     group = ""
     current: Task | None = None
     fenced = False
-    for line in plan.read_text(encoding="utf-8").splitlines():
+    for line in _plan_content(plan).splitlines():
         if line.lstrip().startswith("```"):
             fenced = not fenced
             continue

@@ -1,0 +1,193 @@
+{
+  "format": "kn.seed-proposal.table",
+  "status": "unreviewed_proposal",
+  "domain": "gdelt",
+  "source": {
+    "file_name": "gdelt_ontology_and_tags_v1.xlsx",
+    "sha256": "c31bba2aad40336c620044c6df5332744aebdce70b415e56bc121096845881a2",
+    "sheet_name": "09_Service_Vocabulary",
+    "sheet_position": 10
+  },
+  "title": "Service vocabulary",
+  "notes": [
+    "Native data/access capabilities distinguished from proposed KB services."
+  ],
+  "header_row": 4,
+  "columns": [
+    {
+      "key": "service_id",
+      "label": "Service ID",
+      "column": "A"
+    },
+    {
+      "key": "service",
+      "label": "Service",
+      "column": "B"
+    },
+    {
+      "key": "input",
+      "label": "Input",
+      "column": "C"
+    },
+    {
+      "key": "origin",
+      "label": "Origin",
+      "column": "D"
+    },
+    {
+      "key": "output_rule",
+      "label": "Output / rule",
+      "column": "E"
+    },
+    {
+      "key": "source_url",
+      "label": "Source URL",
+      "column": "F"
+    }
+  ],
+  "records": [
+    {
+      "source_row": 5,
+      "values": {
+        "service_id": "S01",
+        "service": "Event stream ingestion",
+        "input": "Events; Mentions",
+        "origin": "Native data feed",
+        "output_rule": "Parse ZIP/TSV; idempotent raw load",
+        "source_url": "https://blog.gdeltproject.org/gdelt-2-0-our-global-world-in-realtime/"
+      }
+    },
+    {
+      "source_row": 6,
+      "values": {
+        "service_id": "S02",
+        "service": "Document metadata ingestion",
+        "input": "GKG 2.1 / GCAM",
+        "origin": "Native data feed",
+        "output_rule": "Parse nested fields with raw copies",
+        "source_url": "https://data.gdeltproject.org/documentation/GDELT-Global_Knowledge_Graph_Codebook-V2.1.pdf"
+      }
+    },
+    {
+      "source_row": 7,
+      "values": {
+        "service_id": "S03",
+        "service": "Historical and SQL analytics",
+        "input": "BigQuery",
+        "origin": "Native access",
+        "output_rule": "Partitioned queries; cost controls",
+        "source_url": "https://gdeltproject.org/data.html"
+      }
+    },
+    {
+      "source_row": 8,
+      "values": {
+        "service_id": "S04",
+        "service": "News discovery",
+        "input": "DOC 2.0 API",
+        "origin": "Native access",
+        "output_rule": "Return article links/timelines; query limits",
+        "source_url": "https://blog.gdeltproject.org/gdelt-doc-2-0-api-debuts/"
+      }
+    },
+    {
+      "source_row": 9,
+      "values": {
+        "service_id": "S05",
+        "service": "Geographic discovery",
+        "input": "GEO 2.0 API",
+        "origin": "Native access",
+        "output_rule": "Location-focused query, not verified event location",
+        "source_url": "https://blog.gdeltproject.org/gdelt-geo-2-0-api-debuts/"
+      }
+    },
+    {
+      "source_row": 10,
+      "values": {
+        "service_id": "S06",
+        "service": "TV coverage search",
+        "input": "TV 2.0 API",
+        "origin": "Native access",
+        "output_rule": "Separate broadcast corpus and coverage",
+        "source_url": "https://blog.gdeltproject.org/gdelt-2-0-television-api-debuts/"
+      }
+    },
+    {
+      "source_row": 11,
+      "values": {
+        "service_id": "S07",
+        "service": "Entity resolution",
+        "input": "Actor/organization/place",
+        "origin": "KB service",
+        "output_rule": "Canonical IDs and aliases with evidence",
+        "source_url": "https://blog.gdeltproject.org/gdelt-2-0-our-global-world-in-realtime/"
+      }
+    },
+    {
+      "source_row": 12,
+      "values": {
+        "service_id": "S08",
+        "service": "Topic, technology and application tagging",
+        "input": "GKG themes + local KB",
+        "origin": "KB service",
+        "output_rule": "Classification with version and confidence",
+        "source_url": "https://blog.gdeltproject.org/gdelt-2-0-our-global-world-in-realtime/"
+      }
+    },
+    {
+      "source_row": 13,
+      "values": {
+        "service_id": "S09",
+        "service": "Claim extraction and verification",
+        "input": "Documents and external primary sources",
+        "origin": "KB service",
+        "output_rule": "Evidence links, modality, review status",
+        "source_url": "https://blog.gdeltproject.org/gdelt-2-0-our-global-world-in-realtime/"
+      }
+    },
+    {
+      "source_row": 14,
+      "values": {
+        "service_id": "S10",
+        "service": "Story clustering and deduplication",
+        "input": "URL/text/syndication",
+        "origin": "KB service",
+        "output_rule": "Independent outlets count not article count",
+        "source_url": "https://blog.gdeltproject.org/gdelt-2-0-our-global-world-in-realtime/"
+      }
+    },
+    {
+      "source_row": 15,
+      "values": {
+        "service_id": "S11",
+        "service": "Trend and anomaly detection",
+        "input": "Events / documents / themes",
+        "origin": "KB service",
+        "output_rule": "Denominator, baseline, coverage bias controls",
+        "source_url": "https://blog.gdeltproject.org/gdelt-2-0-our-global-world-in-realtime/"
+      }
+    },
+    {
+      "source_row": 16,
+      "values": {
+        "service_id": "S12",
+        "service": "Technology scouting alerts",
+        "input": "Cross-domain technology/application tags",
+        "origin": "KB service",
+        "output_rule": "Rank novelty, energy relevance, maturity; manual review",
+        "source_url": "https://blog.gdeltproject.org/gdelt-2-0-our-global-world-in-realtime/"
+      }
+    },
+    {
+      "source_row": 17,
+      "values": {
+        "service_id": "S13",
+        "service": "Knowledge graph enrichment",
+        "input": "Industry KB + validated facts",
+        "origin": "KB service",
+        "output_rule": "Preserve source-level provenance and status",
+        "source_url": "https://blog.gdeltproject.org/gdelt-2-0-our-global-world-in-realtime/"
+      }
+    }
+  ]
+}

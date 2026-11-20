@@ -1,0 +1,223 @@
+{
+  "format": "kn.seed-proposal.table",
+  "status": "unreviewed_proposal",
+  "domain": "gdelt",
+  "source": {
+    "file_name": "gdelt_ontology_and_tags_v1.xlsx",
+    "sha256": "c31bba2aad40336c620044c6df5332744aebdce70b415e56bc121096845881a2",
+    "sheet_name": "06_GCAM_Tone_Tags",
+    "sheet_position": 7
+  },
+  "title": "GCAM, tone & extraction measures",
+  "notes": [
+    "GCAM master dictionary could not be decoded in web review. Exact examples come from GKG codebook. Do not fabricate codes."
+  ],
+  "header_row": 4,
+  "columns": [
+    {
+      "key": "key_field",
+      "label": "Key/field",
+      "column": "A"
+    },
+    {
+      "key": "definition",
+      "label": "Definition",
+      "column": "B"
+    },
+    {
+      "key": "type",
+      "label": "Type",
+      "column": "C"
+    },
+    {
+      "key": "scope",
+      "label": "Scope",
+      "column": "D"
+    },
+    {
+      "key": "application",
+      "label": "Application",
+      "column": "E"
+    },
+    {
+      "key": "caution",
+      "label": "Caution",
+      "column": "F"
+    },
+    {
+      "key": "source_url",
+      "label": "Source URL",
+      "column": "G"
+    }
+  ],
+  "records": [
+    {
+      "source_row": 5,
+      "values": {
+        "key_field": "wc",
+        "definition": "Word count (English processing text)",
+        "type": "count",
+        "scope": "GCAM",
+        "application": "Denominator for applicable count dimensions",
+        "caution": "Do not divide by zero",
+        "source_url": "https://data.gdeltproject.org/documentation/GDELT-Global_Knowledge_Graph_Codebook-V2.1.pdf"
+      }
+    },
+    {
+      "source_row": 6,
+      "values": {
+        "key_field": "nwc",
+        "definition": "Native-language word count when supplied",
+        "type": "count",
+        "scope": "GCAM",
+        "application": "Denominator for applicable native dictionaries",
+        "caution": "May be absent",
+        "source_url": "https://data.gdeltproject.org/documentation/GDELT-Global_Knowledge_Graph_Codebook-V2.1.pdf"
+      }
+    },
+    {
+      "source_row": 7,
+      "values": {
+        "key_field": "c{dictionary}.{dimension}",
+        "definition": "Dictionary word-match count",
+        "type": "count",
+        "scope": "GCAM",
+        "application": "Density = count/appropriate word count",
+        "caution": "Use codebook to interpret dictionary; missing/zero semantics depend on successful applicable processing",
+        "source_url": "https://data.gdeltproject.org/documentation/GDELT-Global_Knowledge_Graph_Codebook-V2.1.pdf"
+      }
+    },
+    {
+      "source_row": 8,
+      "values": {
+        "key_field": "v{dictionary}.{dimension}",
+        "definition": "Dictionary-specific mean score",
+        "type": "score",
+        "scope": "GCAM",
+        "application": "Retain raw scale",
+        "caution": "Not universally comparable or normalized by wc",
+        "source_url": "https://data.gdeltproject.org/documentation/GDELT-Global_Knowledge_Graph_Codebook-V2.1.pdf"
+      }
+    },
+    {
+      "source_row": 9,
+      "values": {
+        "key_field": "c2.21",
+        "definition": "General Inquirer \u2013 Bodypt (codebook example)",
+        "type": "count",
+        "scope": "GCAM",
+        "application": "Example exact key; no observed value",
+        "caution": "Not a sentiment score",
+        "source_url": "https://data.gdeltproject.org/documentation/GDELT-Global_Knowledge_Graph_Codebook-V2.1.pdf"
+      }
+    },
+    {
+      "source_row": 10,
+      "values": {
+        "key_field": "c10.1",
+        "definition": "SentiWordNet \u2013 Positive matches (codebook example)",
+        "type": "count",
+        "scope": "GCAM",
+        "application": "Example exact key",
+        "caution": "Pair with score if present",
+        "source_url": "https://data.gdeltproject.org/documentation/GDELT-Global_Knowledge_Graph_Codebook-V2.1.pdf"
+      }
+    },
+    {
+      "source_row": 11,
+      "values": {
+        "key_field": "v10.1",
+        "definition": "SentiWordNet \u2013 Positive average (codebook example)",
+        "type": "score",
+        "scope": "GCAM",
+        "application": "Example exact key",
+        "caution": "Dictionary-specific average",
+        "source_url": "https://data.gdeltproject.org/documentation/GDELT-Global_Knowledge_Graph_Codebook-V2.1.pdf"
+      }
+    },
+    {
+      "source_row": 12,
+      "values": {
+        "key_field": "LIWC / Anxiety",
+        "definition": "Illustrative dimension named in release article",
+        "type": "dictionary-specific",
+        "scope": "GCAM",
+        "application": "Resolve key from master codebook before ingestion",
+        "caution": "No numeric code assumed",
+        "source_url": "https://blog.gdeltproject.org/gdelt-2-0-our-global-world-in-realtime/"
+      }
+    },
+    {
+      "source_row": 13,
+      "values": {
+        "key_field": "Lexicoder / Positivity",
+        "definition": "Illustrative dimension named in release article",
+        "type": "dictionary-specific",
+        "scope": "GCAM",
+        "application": "Resolve key from master codebook",
+        "caution": "No numeric code assumed",
+        "source_url": "https://blog.gdeltproject.org/gdelt-2-0-our-global-world-in-realtime/"
+      }
+    },
+    {
+      "source_row": 14,
+      "values": {
+        "key_field": "V2Tone",
+        "definition": "Tone; positive/negative/polarity; activity reference; self/group reference; word count",
+        "type": "vector",
+        "scope": "GKG",
+        "application": "Parse components per codebook",
+        "caution": "Document tone, not fact or actor attitude",
+        "source_url": "https://data.gdeltproject.org/documentation/GDELT-Global_Knowledge_Graph_Codebook-V2.1.pdf"
+      }
+    },
+    {
+      "source_row": 15,
+      "values": {
+        "key_field": "AvgTone",
+        "definition": "Event-level value based on initial coverage",
+        "type": "score",
+        "scope": "Events",
+        "application": "Keep legacy event metric separately",
+        "caution": "Not actual event severity",
+        "source_url": "https://data.gdeltproject.org/documentation/GDELT-Event_Codebook-V2.0.pdf"
+      }
+    },
+    {
+      "source_row": 16,
+      "values": {
+        "key_field": "MentionDocTone",
+        "definition": "Tone of mention document",
+        "type": "score",
+        "scope": "Mentions",
+        "application": "Document tone as associated with mention",
+        "caution": "Not extraction confidence",
+        "source_url": "https://data.gdeltproject.org/documentation/GDELT-Event_Codebook-V2.0.pdf"
+      }
+    },
+    {
+      "source_row": 17,
+      "values": {
+        "key_field": "GoldsteinScale",
+        "definition": "Theoretical action cooperation/conflict scale",
+        "type": "score",
+        "scope": "Events",
+        "application": "Action code-associated value",
+        "caution": "Not measured actual consequence",
+        "source_url": "https://data.gdeltproject.org/documentation/GDELT-Event_Codebook-V2.0.pdf"
+      }
+    },
+    {
+      "source_row": 18,
+      "values": {
+        "key_field": "Confidence",
+        "definition": "Confidence in event extraction (10\u2013100)",
+        "type": "percent",
+        "scope": "Mentions",
+        "application": "Filter or weight extraction; retain raw",
+        "caution": "Not truth probability",
+        "source_url": "https://data.gdeltproject.org/documentation/GDELT-Event_Codebook-V2.0.pdf"
+      }
+    }
+  ]
+}
