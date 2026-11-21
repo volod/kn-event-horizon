@@ -11,6 +11,15 @@ ROOT = Path(__file__).resolve().parents[2]
 DEPLOY = ROOT / "deploy"
 DIGEST = re.compile(r"^sha256:[0-9a-f]{64}$")
 FLOATING_TAGS = {"latest", "stable", "edge"}
+LOOPBACK = "127.0.0.1"
+LOOPBACK_NETWORK = "loopback"
+DATABASE_PORT = {
+    "target": 5432,
+    "host_ip": LOOPBACK,
+    "published": "${KN_POSTGRES_HOST_PORT:?run through make db-up}",
+    "protocol": "tcp",
+}
+BRIDGE = "com.docker.network.bridge."
 CORE_SCHEMAS = {
     "system",
     "semantic",
@@ -59,22 +68,39 @@ def test_every_service_image_comes_from_the_manifest() -> None:
         assert reference.rsplit(":", 1)[-1] not in FLOATING_TAGS, name
 
 
-def test_no_service_publishes_a_port_or_joins_the_host_network() -> None:
+def test_only_the_database_publishes_a_port_and_only_on_loopback() -> None:
     for name, service in SERVICES.items():
-        assert "ports" not in service, name
         assert "network_mode" not in service, name
         assert service["networks"], name
+    published = {name: service["ports"] for name, service in SERVICES.items() if "ports" in service}
+    assert published == {"postgres": [DATABASE_PORT]}
 
 
-def test_every_network_is_internal_and_unreachable_from_the_host() -> None:
+def test_only_publishing_services_join_the_loopback_network() -> None:
+    publishing = {name for name, service in SERVICES.items() if "ports" in service}
+    joined = {name for name, service in SERVICES.items() if LOOPBACK_NETWORK in service["networks"]}
+    assert joined == publishing
+
+
+def test_loopback_network_binds_to_loopback_without_source_nat() -> None:
+    network = COMPOSE["networks"][LOOPBACK_NETWORK]
+    assert network.get("internal", False) is False, "Docker publishes no port on internal networks"
+    assert network["enable_ipv6"] is False
+    options = network["driver_opts"]
+    assert options[f"{BRIDGE}host_binding_ipv4"] == LOOPBACK
+    assert options[f"{BRIDGE}enable_ip_masquerade"] == "false"
+
+
+def test_every_other_network_is_internal_and_unreachable_from_the_host() -> None:
     networks = COMPOSE["networks"]
     used = {network for service in SERVICES.values() for network in service["networks"]}
     assert used <= set(networks)
     for name, network in networks.items():
+        if name == LOOPBACK_NETWORK:
+            continue
         assert network["internal"] is True, name
         assert network["enable_ipv6"] is False, name
-        options = network["driver_opts"]
-        assert options["com.docker.network.bridge.gateway_mode_ipv4"] == "isolated", name
+        assert network["driver_opts"][f"{BRIDGE}gateway_mode_ipv4"] == "isolated", name
 
 
 @pytest.mark.parametrize("name", sorted(SERVICES))

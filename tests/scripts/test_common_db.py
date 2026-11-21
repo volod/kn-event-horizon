@@ -12,12 +12,13 @@ ROOT = Path(__file__).resolve().parents[2]
 COMMON = ROOT / "scripts" / "shared" / "common.sh"
 COMPOSE_FILE = ROOT / "deploy" / "compose.yaml"
 PASSWORD_HEX = re.compile(r"^[0-9a-f]{64}$")
+DEFAULT_HOST_PORT = "15432"
 
-# Records each call as "<uid>:<gid>|<password file>|<arguments>" and fakes the outcomes.
+# Records each call as "<uid>:<gid>|<password file>|<host port>|<arguments>" and fakes outcomes.
 DOCKER_STUB = r"""
 docker() {
-  printf '%s|%s|%s\n' "${KN_UID:-}:${KN_GID:-}" "${KN_POSTGRES_PASSWORD_FILE:-}" "$*" \
-    >>"$KN_TEST_CALLS"
+  printf '%s|%s|%s|%s\n' "${KN_UID:-}:${KN_GID:-}" "${KN_POSTGRES_PASSWORD_FILE:-}" \
+    "${KN_POSTGRES_HOST_PORT:-}" "$*" >>"$KN_TEST_CALLS"
   case " $* " in
     *" compose version "*) return "${KN_TEST_COMPOSE_STATUS:-0}" ;;
     *" up "*) return "${KN_TEST_UP_STATUS:-0}" ;;
@@ -119,6 +120,34 @@ def test_compose_requires_the_compose_plugin(tmp_path: Path) -> None:
 
 
 @pytest.mark.skipif(os.geteuid() == 0, reason="the helpers refuse to run as root")
+@pytest.mark.parametrize(
+    ("configured", "expected"), [("", DEFAULT_HOST_PORT), ("1", "1"), ("25432", "25432")]
+)
+def test_compose_passes_the_host_port_with_a_non_standard_default(
+    tmp_path: Path, configured: str, expected: str
+) -> None:
+    result = _run(tmp_path, "kn_compose ps", KN_POSTGRES_HOST_PORT=configured)
+
+    assert result.returncode == 0, result.stderr
+    calls = [call for call in _calls(tmp_path) if "compose version" not in call]
+    assert [call.split("|")[2] for call in calls] == [expected]
+
+
+@pytest.mark.skipif(os.geteuid() == 0, reason="the helpers refuse to run as root")
+@pytest.mark.parametrize("command", ["kn_db_up", "kn_db_down"])
+@pytest.mark.parametrize("port", ["0", "015432", "65536", "123456", "5432x", "-1", " 15432"])
+def test_invalid_host_port_is_refused_before_docker_runs(
+    tmp_path: Path, command: str, port: str
+) -> None:
+    result = _run(tmp_path, command, KN_POSTGRES_HOST_PORT=port)
+
+    assert result.returncode == 1
+    assert f"KN_POSTGRES_HOST_PORT must be a port from 1 to 65535, got '{port}'" in result.stderr
+    assert _calls(tmp_path) == []
+    assert not (tmp_path / "data").exists()
+
+
+@pytest.mark.skipif(os.geteuid() == 0, reason="the helpers refuse to run as root")
 def test_db_up_prepares_a_private_volume_then_waits_and_bootstraps(tmp_path: Path) -> None:
     result = _run(tmp_path, "kn_db_up")
 
@@ -126,12 +155,15 @@ def test_db_up_prepares_a_private_volume_then_waits_and_bootstraps(tmp_path: Pat
     assert _mode(tmp_path / "data" / "postgres") == 0o700
     calls = [call for call in _calls(tmp_path) if "compose version" not in call]
     assert len(calls) == 2
-    identity, password_file, up = calls[0].split("|")
+    identity, password_file, port, up = calls[0].split("|")
     assert identity == f"{os.getuid()}:{os.getgid()}"
     assert password_file == str(tmp_path / "data" / "secrets" / "postgres-password")
+    assert port == DEFAULT_HOST_PORT
     assert up == f"compose --file {COMPOSE_FILE} up --detach --wait --wait-timeout 180 postgres"
     assert " exec -T postgres psql " in calls[1]
     assert calls[1].endswith("--file=/docker-entrypoint-initdb.d/10-kn-bootstrap.sql")
+    assert f"127.0.0.1:{DEFAULT_HOST_PORT}" in result.stdout
+    assert password_file in result.stdout
 
 
 @pytest.mark.skipif(os.geteuid() == 0, reason="the helpers refuse to run as root")
@@ -140,6 +172,7 @@ def test_db_up_shows_the_log_and_skips_bootstrap_when_unhealthy(tmp_path: Path) 
 
     assert result.returncode == 1
     assert "LOG TAIL" in result.stdout + result.stderr
+    assert f"127.0.0.1:{DEFAULT_HOST_PORT} is in use" in result.stderr
     assert "make db-reset" in result.stderr
     assert not any(" exec " in call for call in _calls(tmp_path))
 
@@ -170,6 +203,6 @@ def test_reset_replaces_only_the_database_volume(tmp_path: Path) -> None:
     assert list((data / "postgres").iterdir()) == []
     assert (data / "raw" / "keep.warc").read_text() == "archive"
     assert secret.read_text() == "kept"
-    commands = [call.split("|")[2] for call in _calls(tmp_path) if "compose version" not in call]
+    commands = [call.split("|")[3] for call in _calls(tmp_path) if "compose version" not in call]
     assert commands[0] == f"compose --file {COMPOSE_FILE} down"
     assert " up " in f" {commands[1]} "

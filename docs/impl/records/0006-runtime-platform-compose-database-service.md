@@ -135,6 +135,10 @@ reach it from a container on the Compose network or through a mounted socket. It
 `deploy/postgres/verify-roles.sql` as its role test. `runtime-platform` stays `planned` in the
 registry, because the harness and the audit are open.
 
+Later change, 2026-11-21: [record 0007](0007-adhoc-database-loopback-port.md) publishes the
+database on `127.0.0.1:15432` at the owner's request, so the harness connects over TCP from the
+host. The no-published-port evidence above describes the service as accepted in this record.
+
 Notes for later tasks:
 
 - The rebuild task (`development-rebuild-mode`) should run DDL under

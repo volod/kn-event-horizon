@@ -37,7 +37,7 @@ make plan-status
 | `make format` | Apply Ruff formatting |
 | `make ci` | Run required local and CI checks |
 | `make quality` | Run CI checks, coverage, Markdown lint, and package build |
-| `make db-up` | Start the local PostgreSQL and PostGIS service and wait until it is healthy |
+| `make db-up` | Start the local PostgreSQL and PostGIS service on `127.0.0.1:15432` and wait until it is healthy |
 | `make db-down` | Stop the database service and keep its data |
 | `make db-reset` | Delete the local database volume and start from empty |
 | `make db-verify` | Probe the database schemas, roles, and privileges |

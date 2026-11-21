@@ -21,5 +21,6 @@ decision. A record can name a plan task by ID because plan headings disappear on
 | 0004 | `adhoc` InvenTree interchange and object identity specification | [0004-adhoc-inventree-interchange-specification.md](0004-adhoc-inventree-interchange-specification.md) |
 | 0005 | `adhoc` group implementation audit tasks | [0005-adhoc-group-implementation-audits.md](0005-adhoc-group-implementation-audits.md) |
 | 0006 | `compose-database-service` | [0006-runtime-platform-compose-database-service.md](0006-runtime-platform-compose-database-service.md) |
+| 0007 | `adhoc` database loopback port | [0007-adhoc-database-loopback-port.md](0007-adhoc-database-loopback-port.md) |
 
-Next unused sequence is `0007`.
+Next unused sequence is `0008`.

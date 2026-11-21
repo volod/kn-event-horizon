@@ -439,16 +439,19 @@ capabilities: Kestra (orchestration), Superset and Redis if its profile requires
 dashboards), the reverse proxy (operations hardening), the optional inference server (AI
 extraction), and a test-only `inventree` profile with pinned InvenTree releases and their own
 databases (InvenTree exchange). The test profile never connects to an owner instance. Volumes
-live under `DATA_DIR`, services have healthchecks, networks are internal, and no database port is
-published. Secrets come from a local
+live under `DATA_DIR`, services have healthchecks, and services reach each other over internal
+networks. The database port is published only on the host loopback address, on a configurable,
+non-standard default port, so that another PostgreSQL on the same host keeps the standard port.
+Every TCP login needs a password. Secrets come from a local
 `.env` or secret files that are never committed. Role bootstrap creates owner, loader, and reader
 roles per schema. A version manifest records every pinned image, schema, and tool. Integration
 tests run against the Compose database locally and against a PostGIS service container in CI.
 
 Boundary: a single host, not high availability. No Kubernetes and no managed cloud services.
 
-Evaluation: from empty volumes, `make db-up` reaches healthy, and a restart preserves data. No
-database port is reachable from outside the Compose network, and no default production password
+Evaluation: from empty volumes, `make db-up` reaches healthy, and a restart preserves data. The
+database answers on the host loopback port only with a password. It does not answer on another
+host address or to a container on another Docker network, and no default production password
 exists. Integration tests pass locally and in CI.
 
 Negative result: a version conflict is recorded in the manifest with the compatible fallback chosen.
@@ -1661,7 +1664,7 @@ upstream before downstream.
 | 1 | `reproducible-environment` | shipped | A fresh locked environment reaches the complete CI gate without manual repair | [Development guide](../guide/development.md) |
 | 2 | `project-identity` | shipped | Import, CLI, and distribution-build tests agree on the `kn-event-horizon` identity | [Product core](../impl/current/product-core.md) |
 | 3 | `documentation-integrity` | shipped | Link, registry-plan, task-lane, metadata, ordering, prerequisites, forward-language, and closed-research register checks pass over fixtures and the repository tree | [Documentation checks](../guide/development.md#documentation-checks) |
-| 4 | `runtime-platform` | planned | Pinned Compose database reaches healthy from empty volumes, keeps data across restart, exposes no port, and serves integration tests locally and in CI | - |
+| 4 | `runtime-platform` | planned | Pinned Compose database reaches healthy from empty volumes, keeps data across restart, publishes its port on loopback only, and serves integration tests locally and in CI | - |
 | 5 | `localization` | planned | Key coverage, plural, golden-output, and screenshot checks pass in `en` and `uk`; the Kestra waiver is the only English-only path | - |
 | 6 | `data-contracts` | planned | Contracts compile deterministically, invalid contracts fail, drift fails CI, rebuild creates every schema, loaders cannot run DDL | - |
 | 7 | `ontology-taxonomy` | planned | Every proposal row is classified, identifiers are stable, invalid hierarchies are rejected, SKOS round-trips | - |

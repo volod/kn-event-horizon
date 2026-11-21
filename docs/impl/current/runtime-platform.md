@@ -12,16 +12,31 @@ helper. The targets refuse to run as root and need Docker Engine with the Compos
 
 | Command | Behavior |
 | --- | --- |
-| `make db-up` | Creates the password file and `$DATA_DIR/postgres/` if they are missing, starts the service, waits up to 180 s for healthy, then applies the bootstrap again. When the service does not become healthy, it prints the last 30 log lines and exits 1. |
-| `make db-down` | Removes the containers and the network. `$DATA_DIR/postgres/` is kept. |
+| `make db-up` | Creates the password file and `$DATA_DIR/postgres/` if they are missing, starts the service, waits up to 180 s for healthy, then applies the bootstrap again and prints the host address and the password file path. When the service does not become healthy, it prints the last 30 log lines and a hint about a taken port or a failed first initialization, and exits 1. |
+| `make db-down` | Removes the containers and the networks. `$DATA_DIR/postgres/` is kept. |
 | `make db-reset` | Runs `db-down`, deletes `$DATA_DIR/postgres/`, then runs `db-up`. The password file and the rest of `$DATA_DIR` are kept. It refuses a `DATA_DIR` that is empty, relative, or `/`. |
 | `make db-verify` | Runs the role probe against the running database. It prints `kn roles verified: 10 schemas, 30 roles, postgis 3.7.0`, or fails with an error that names the first failed check. |
 
-For an interactive session, run
+Host tools connect to `127.0.0.1:15432` as `postgres` with the password from the password file.
+With a host `psql`, the helpers give the configured port and file:
+
+```bash
+source scripts/shared/common.sh; kn_load_env
+PGPASSWORD="$(cat "$(kn_db_password_file)")" \
+  psql -h 127.0.0.1 -p "$(kn_db_host_port)" -U postgres -d kn
+```
+
+Without a host `psql`, run
 `source scripts/shared/common.sh; kn_load_env; kn_compose exec postgres psql -U postgres -d kn`.
-`kn_compose` passes the runtime user ID and the password file path to
+`kn_compose` passes the runtime user ID, the password file path, and the host port to
 `docker compose --file deploy/compose.yaml`. `kn_db_psql` runs a non-interactive `psql` as the
 superuser in `kn`.
+
+The host port is `15432` by default, so a PostgreSQL that uses the standard port `5432` on the same
+host, such as a system server or another Compose stack, runs beside KN. Set `KN_POSTGRES_HOST_PORT`
+in `.env` to change it. Every helper refuses a value that is not a port from 1 to 65535 before
+Docker runs. A second checkout on the same host needs its own `COMPOSE_PROJECT_NAME`,
+`KN_POSTGRES_HOST_PORT`, and `DATA_DIR`.
 
 ## Service
 
@@ -37,7 +52,8 @@ and service `postgres`.
 | Data | `$DATA_DIR/postgres/` bound to `/var/lib/postgresql`; the cluster is in `18/docker/` |
 | Runtime user | The invoking host user (`KN_UID:KN_GID`), so every file under `$DATA_DIR` stays theirs |
 | Hardening | Read-only root file system, tmpfs for `/tmp` and the socket directory, all capabilities dropped, `no-new-privileges`, no Docker socket |
-| Network | `internal`: internal, no IPv6, `gateway_mode_ipv4: isolated`; no published port |
+| Host port | `127.0.0.1:15432` (`KN_POSTGRES_HOST_PORT`) to container port 5432; no other host address |
+| Networks | `internal`: internal, no IPv6, `gateway_mode_ipv4: isolated`, for traffic between services. `loopback`: not internal, no IPv6, `host_binding_ipv4: 127.0.0.1`, `enable_ip_masquerade: false`; it carries only the published port |
 | Health | TCP `pg_isready` to `127.0.0.1` and the role `kn_system_owner` exists |
 | Restart | `unless-stopped`, 1 min stop grace period, 256 MB shared memory |
 
@@ -46,8 +62,9 @@ The password file defaults to `$DATA_DIR/secrets/postgres-password`. `make db-up
 named by `KN_POSTGRES_PASSWORD_FILE` must already exist and be non-empty. The password takes
 effect only when an empty volume is initialized. After that, change it with `ALTER ROLE`.
 
-Authentication: TCP connections need a SCRAM password, also from inside the container. Unix
-socket connections inside the container are trusted, and only `docker compose exec` reaches them.
+Authentication: TCP connections need a SCRAM password, through the host port and also from inside
+the container. Unix socket connections inside the container are trusted, and only
+`docker compose exec` reaches them. The host port has no TLS, because it listens on loopback only.
 
 ## Schemas and roles
 
@@ -79,11 +96,12 @@ login roles yet. Login roles join these groups in the tasks that first connect.
 
 | Check | Command | Expected result |
 | --- | --- | --- |
-| Compose and manifest rules | `make test` | `tests/deploy/test_compose.py` passes: digest pins match the manifest, no ports, internal isolated networks, unprivileged services, secret files, the volume under `DATA_DIR`, and the schema lists cover `domains/` |
-| Shell helpers | `make test` | `tests/scripts/test_common_db.py` passes against a stubbed `docker` |
+| Compose and manifest rules | `make test` | `tests/deploy/test_compose.py` passes: digest pins match the manifest, only the database publishes one port and only on `127.0.0.1`, only publishing services join `loopback`, the other networks are internal and isolated, unprivileged services, secret files, the volume under `DATA_DIR`, and the schema lists cover `domains/` |
+| Shell helpers | `make test` | `tests/scripts/test_common_db.py` passes against a stubbed `docker`, including the default and configured host port and the refused port values |
 | Healthy from empty | `make db-reset` | exits 0 with the container `Healthy` |
 | Roles and privileges | `make db-verify` | the `kn roles verified` notice |
-| No reachable port | `docker port <container>` and a TCP connect from the host to the container address | no binding; the connection fails |
+| Loopback only | `docker port <container>`; `pg_isready` to the host LAN address and, from a container on the default bridge, to the container addresses and the bridge gateway | `5432/tcp -> 127.0.0.1:15432`; every other probe reports `no response` |
+| Password required | `psql -w -h 127.0.0.1 -p 15432 -U postgres -d kn` | `fe_sendauth: no password supplied` |
 
 `deploy/postgres/verify-roles.sql` runs every probe as one transaction and rolls it back. For each
 schema the owner creates a table with a PostGIS column. The loader inserts, updates, selects, and
@@ -93,7 +111,8 @@ the other. The probe states its expected schema list itself instead of reading i
 bootstrap.
 
 The acceptance run, its planted faults, and its evidence are in
-[record 0006](../records/0006-runtime-platform-compose-database-service.md).
+[record 0006](../records/0006-runtime-platform-compose-database-service.md). The loopback port and
+its parallel-run checks are in [record 0007](../records/0007-adhoc-database-loopback-port.md).
 
 ## Durable findings
 
@@ -107,6 +126,11 @@ The acceptance run, its planted faults, and its evidence are in
   reaches container ports. `gateway_mode_ipv4: isolated` removes it. Engines without bridge
   gateway modes are untested. On such an engine the host could reach the container address,
   still behind SCRAM authentication.
+- Docker publishes no port of a container that is attached to internal networks only. On Engine
+  29.9.3, `docker run --network <internal> -p 127.0.0.1:15499:5432` starts and records the
+  binding, but nothing listens on the host. The database therefore also joins `loopback`.
+- On `loopback`, `host_binding_ipv4: 127.0.0.1` binds a port written without an address to
+  loopback as well. `docker-proxy` serves the loopback port, so it works without IP masquerade.
 - The builtin `C.UTF-8` collation sorts by code point, so the Ukrainian letters U+0490, U+0404,
   U+0406, and U+0407 (Ghe with upturn, Ie, I, and Yi) sort outside the alphabet. Display order
   uses `COLLATE "uk-UA-x-icu"`, which is available in the image. The builtin collation never
@@ -114,6 +138,14 @@ The acceptance run, its planted faults, and its evidence are in
 
 ## Known limitations
 
+- The host reaches the container address on `loopback` directly, as on any non-internal bridge.
+  That path needs the password like the published port. Containers on other Docker networks and
+  other hosts on the LAN got no response.
+- `enable_ip_masquerade: false` is meant to block outbound connections from the database
+  container. This was not measured, because the development host had no outbound route during
+  acceptance.
+- Only the superuser logs in, so host tools connect as `postgres` until the tasks that first
+  connect add login roles.
 - The image is published for `linux/amd64` only. Another architecture needs a different image,
   recorded in the manifest as a fallback.
 - The bootstrap converges what it declares: it re-grants privileges and restores role

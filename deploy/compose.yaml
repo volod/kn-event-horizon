@@ -1,6 +1,7 @@
 # KN Event Horizon runtime stack. Use the make db-up, db-down, and db-reset targets, which source
-# scripts/shared/common.sh to set KN_UID, KN_GID, DATA_DIR, and KN_POSTGRES_PASSWORD_FILE.
-# Image pins must match deploy/versions.yaml. No service publishes a port.
+# scripts/shared/common.sh to set KN_UID, KN_GID, DATA_DIR, KN_POSTGRES_PASSWORD_FILE, and
+# KN_POSTGRES_HOST_PORT. Image pins must match deploy/versions.yaml. Only the database publishes a
+# port, and only on 127.0.0.1.
 name: kn-event-horizon
 
 services:
@@ -39,8 +40,16 @@ services:
     tmpfs:
       - /tmp
       - /var/run/postgresql:uid=${KN_UID},gid=${KN_GID},mode=0775
+    # Host tools and tests connect here. The non-standard default host port leaves 5432 to another
+    # PostgreSQL on the same host. The server inside still listens on 5432.
+    ports:
+      - target: 5432
+        host_ip: 127.0.0.1
+        published: "${KN_POSTGRES_HOST_PORT:?run through make db-up}"
+        protocol: tcp
     networks:
       - internal
+      - loopback
     healthcheck:
       # Healthy means the final server accepts TCP (the init-time server is socket-only) and the
       # bootstrap committed. The bootstrap is one transaction, so one of its roles witnesses it.
@@ -65,6 +74,15 @@ networks:
     driver_opts:
       # Without this, the host's bridge address can still reach container ports.
       com.docker.network.bridge.gateway_mode_ipv4: isolated
+  # Carries only the published port: Docker publishes no port of a container that is attached to
+  # internal networks only. Services reach each other over internal, never over this network.
+  loopback:
+    enable_ipv6: false
+    driver_opts:
+      # Binds every published port to loopback, also one written without an address.
+      com.docker.network.bridge.host_binding_ipv4: 127.0.0.1
+      # No source NAT: outbound packets keep their private address, so outside replies never return.
+      com.docker.network.bridge.enable_ip_masquerade: "false"
 
 secrets:
   postgres_password:

@@ -73,6 +73,22 @@ KN_DB_VERIFY_SQL="$PROJECT_ROOT/deploy/postgres/verify-roles.sql"
 KN_DB_WAIT_TIMEOUT_SECONDS=180
 KN_DB_LOG_TAIL_LINES=30
 KN_DB_PASSWORD_BYTES=32
+KN_DB_HOST_ADDRESS="127.0.0.1"
+# Non-standard, so that another PostgreSQL on the same host keeps 5432.
+KN_DB_HOST_PORT_DEFAULT=15432
+KN_DB_HOST_PORT_MAX=65535
+
+# Print the loopback port that publishes the database; refuse a value that is not a TCP port.
+kn_db_host_port() {
+  local port="${KN_POSTGRES_HOST_PORT:-$KN_DB_HOST_PORT_DEFAULT}"
+  # One to five digits without a leading zero, so the numeric comparison cannot overflow.
+  if [[ "$port" =~ ^[1-9][0-9]{0,4}$ ]] && [ "$port" -le "$KN_DB_HOST_PORT_MAX" ]; then
+    printf '%s\n' "$port"
+    return 0
+  fi
+  echo "ERROR: KN_POSTGRES_HOST_PORT must be a port from 1 to $KN_DB_HOST_PORT_MAX, got '$port'" >&2
+  return 1
+}
 
 kn_db_volume_dir() {
   printf '%s\n' "$DATA_DIR/postgres"
@@ -106,17 +122,19 @@ kn_db_ensure_password() {
 # Run docker compose on the KN stack as the invoking non-root user.
 kn_compose() {
   local uid
+  local port
   uid="$(id -u)"
   if [ "$uid" = "0" ]; then
     echo "ERROR: run the local services as a regular user in the docker group, not root" >&2
     return 1
   fi
+  port="$(kn_db_host_port)" || return 1
   if ! docker compose version >/dev/null 2>&1; then
     echo "ERROR: Docker Engine with the Compose v2 plugin is required" >&2
     return 1
   fi
   KN_UID="$uid" KN_GID="$(id -g)" KN_POSTGRES_PASSWORD_FILE="$(kn_db_password_file)" \
-    docker compose --file "$KN_COMPOSE_FILE" "$@"
+    KN_POSTGRES_HOST_PORT="$port" docker compose --file "$KN_COMPOSE_FILE" "$@"
 }
 
 # Run psql as the superuser in database kn inside the running service container.
@@ -127,18 +145,23 @@ kn_db_psql() {
 
 kn_db_up() {
   local volume
+  local port
   volume="$(kn_db_volume_dir)"
+  port="$(kn_db_host_port)" || return 1
   kn_db_ensure_password || return 1
   mkdir -p "$volume" || return 1
   chmod 0700 "$volume" || return 1
   if ! kn_compose up --detach --wait --wait-timeout "$KN_DB_WAIT_TIMEOUT_SECONDS" \
     "$KN_DB_SERVICE"; then
     kn_compose logs --tail "$KN_DB_LOG_TAIL_LINES" "$KN_DB_SERVICE" >&2
-    echo "ERROR: the database did not become healthy; see the log above." \
+    echo "ERROR: the database did not become healthy; see the output above." \
+      "If $KN_DB_HOST_ADDRESS:$port is in use, set KN_POSTGRES_HOST_PORT in .env." \
       "A failed first initialization needs make db-reset." >&2
     return 1
   fi
-  kn_db_psql --file="$KN_DB_BOOTSTRAP_SQL"
+  kn_db_psql --file="$KN_DB_BOOTSTRAP_SQL" || return 1
+  echo "Database $KN_DB_NAME is on $KN_DB_HOST_ADDRESS:$port" \
+    "(user $KN_DB_SUPERUSER, password in $(kn_db_password_file))"
 }
 
 kn_db_down() {

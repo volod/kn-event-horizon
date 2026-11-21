@@ -41,8 +41,9 @@ Tests that touch SQL need one repeatable database fixture locally and in CI.
 - Serves: `runtime-platform` -- [Runtime platform](../design/spec.md#runtime-platform)
 - Agent status: CLEAR
 - Dependencies: The pinned PostGIS image from the version manifest and the local service in
-  [runtime platform](current/runtime-platform.md). The service publishes no port, so tests reach
-  it from a container on its network or through a mounted socket.
+  [runtime platform](current/runtime-platform.md). The service publishes its port on `127.0.0.1`
+  only (`KN_POSTGRES_HOST_PORT`, default `15432`), so host-run tests connect over TCP with a
+  password.
 - User-visible outcome: `make test-integration` runs database tests against the Compose service,
   and GitHub Actions runs them against a PostGIS service container.
 - Scope boundary: A pytest marker, a fixture that creates and drops a scratch schema set per
@@ -72,7 +73,9 @@ isolation are cheapest to fix before contracts compile against them.
 - Scope boundary: Focus: image pins by tag and digest and the path to a new PostgreSQL or PostGIS
   major; role and default privileges for schemas that later groups add; healthcheck and restart
   behavior; volume ownership and `DATA_DIR` handling; secrets kept out of Compose files and logs;
-  test database isolation, parallel runs, and cleanup; CI parity with local runs. Fixes only; new
+  test database isolation, parallel runs, and cleanup; CI parity with local runs; the loopback-only
+  database port and outbound traffic from the database container, which
+  [record 0007](records/0007-adhoc-database-loopback-port.md) could not measure. Fixes only; new
   behavior becomes plan tasks.
 - Data and artifact paths: `deploy/`, `tests/integration/`, `tests/conftest.py`,
   `.github/workflows/ci.yml`, `Makefile`, `docs/impl/plan.md`, and the task record.
@@ -2529,7 +2532,8 @@ exposes the whole host.
 - User-visible outcome: The host runs on verified security controls. The audit record gives every
   check a result and every finding a disposition. The current-state page lists known limitations,
   and each scheduled finding is a plan task.
-- Scope boundary: Focus: TLS and authentication on every published endpoint; session and cookie
+- Scope boundary: Focus: TLS and authentication on every endpoint published beyond loopback,
+  and authentication on loopback endpoints such as the database port; session and cookie
   settings; schema isolation and least-privilege roles; loader DDL denial; secrets in the
   environment, logs, and backups; dependency and image vulnerability scans; outbound network limits;
   a test for each threat the specification names. Fixes only; new behavior becomes plan tasks.
@@ -2538,7 +2542,8 @@ exposes the whole host.
 - Execution path: Rerun the group's acceptance commands, then work through the audit checks. Run
   `make security`, scan every published port without credentials, try each role against a schema it
   must not reach, and search logs and generated files for a planted secret.
-- Acceptance gates: No published endpoint answers without TLS and authentication. Each role is
+- Acceptance gates: No endpoint published beyond loopback answers without TLS and
+  authentication, and no loopback endpoint answers without authentication. Each role is
   refused outside its grants. No planted secret appears in any output. Every finding has a severity,
   evidence, and a disposition, no `blocker` is accepted, and every fix starts from a failing
   regression test. `make ci` passes with the scheduled tasks in the plan.
