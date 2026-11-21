@@ -1,0 +1,185 @@
+{
+  "format": "kn.seed-proposal.table",
+  "status": "unreviewed_proposal",
+  "domain": "microelectronics",
+  "source": {
+    "file_name": "microelectronics_ontology_and_tags_v1.xlsx",
+    "sha256": "7166aa06791998c692cc6a2ac377692a6687f15e3353ffa70a1c159f2e63c34f",
+    "sheet_name": "09_Observation_Schema",
+    "sheet_position": 10
+  },
+  "title": "Fact-level provenance & normalized observations",
+  "notes": [],
+  "header_row": 4,
+  "columns": [
+    {
+      "key": "field",
+      "label": "Field",
+      "column": "A"
+    },
+    {
+      "key": "type",
+      "label": "Type",
+      "column": "B"
+    },
+    {
+      "key": "rule",
+      "label": "Rule",
+      "column": "C"
+    }
+  ],
+  "records": [
+    {
+      "source_row": 5,
+      "values": {
+        "field": "observation_id",
+        "type": "UUID",
+        "rule": "Unique measurement/claim"
+      }
+    },
+    {
+      "source_row": 6,
+      "values": {
+        "field": "subject_id",
+        "type": "ID",
+        "rule": "MPN, die, IP, board, demo or project"
+      }
+    },
+    {
+      "source_row": 7,
+      "values": {
+        "field": "field_id",
+        "type": "ID",
+        "rule": "Profile + property dictionary ID"
+      }
+    },
+    {
+      "source_row": 8,
+      "values": {
+        "field": "raw_value",
+        "type": "text",
+        "rule": "Verbatim original; retain acquisition provenance"
+      }
+    },
+    {
+      "source_row": 9,
+      "values": {
+        "field": "value_num",
+        "type": "decimal",
+        "rule": "Normalized number, null if missing"
+      }
+    },
+    {
+      "source_row": 10,
+      "values": {
+        "field": "value_min / typ / max",
+        "type": "decimal columns",
+        "rule": "Separate; do not convert typical to guaranteed"
+      }
+    },
+    {
+      "source_row": 11,
+      "values": {
+        "field": "unit_original / unit_si",
+        "type": "unit code",
+        "rule": "Conversion logged; dimensions checked"
+      }
+    },
+    {
+      "source_row": 12,
+      "values": {
+        "field": "qualifier",
+        "type": "enum",
+        "rule": "measured / vendor typical / guaranteed limit / simulated / analyst derived"
+      }
+    },
+    {
+      "source_row": 13,
+      "values": {
+        "field": "condition_set_id",
+        "type": "ID",
+        "rule": "Voltage, temp, clock, ODR/ROI, workload and test boundary"
+      }
+    },
+    {
+      "source_row": 14,
+      "values": {
+        "field": "uncertainty",
+        "type": "numeric + unit",
+        "rule": "Measurement uncertainty, if available"
+      }
+    },
+    {
+      "source_row": 15,
+      "values": {
+        "field": "source_id / source_url",
+        "type": "ID / URL",
+        "rule": "Primary source or secondary; document revision"
+      }
+    },
+    {
+      "source_row": 16,
+      "values": {
+        "field": "locator",
+        "type": "text",
+        "rule": "Page, table, row, result ID or timestamp"
+      }
+    },
+    {
+      "source_row": 17,
+      "values": {
+        "field": "retrieved_at / valid_at",
+        "type": "ISO date/time",
+        "rule": "Bitemporal; preserve history"
+      }
+    },
+    {
+      "source_row": 18,
+      "values": {
+        "field": "confidence",
+        "type": "enum",
+        "rule": "A primary measured/official; B vendor claim; C secondary; U unknown/conflict"
+      }
+    },
+    {
+      "source_row": 19,
+      "values": {
+        "field": "status",
+        "type": "enum",
+        "rule": "known/unknown/not_applicable/conflicted"
+      }
+    },
+    {
+      "source_row": 20,
+      "values": {
+        "field": "review_state",
+        "type": "enum",
+        "rule": "candidate/validated/rejected"
+      }
+    },
+    {
+      "source_row": 21,
+      "values": {
+        "field": "condition_set",
+        "type": "JSON object",
+        "rule": "Rail V, Tj/Ta, mode, clock, load, input, precision, batch, interfaces, firmware/model/hash, boundary"
+      }
+    },
+    {
+      "source_row": 22,
+      "values": {
+        "field": "identity_key",
+        "type": "text",
+        "rule": "Manufacturer legal ID + exact MPN; variant/package parameters separate"
+      }
+    },
+    {
+      "source_row": 23,
+      "values": {
+        "field": "comparison_group_id",
+        "type": "ID",
+        "rule": "Same profile, workload and constraints; no forced ranking across groups"
+      }
+    }
+  ]
+}

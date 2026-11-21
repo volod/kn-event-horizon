@@ -1,0 +1,164 @@
+{
+  "format": "kn.seed-proposal.table",
+  "status": "unreviewed_proposal",
+  "domain": "microelectronics",
+  "source": {
+    "file_name": "microelectronics_ontology_and_tags_v1.xlsx",
+    "sha256": "7166aa06791998c692cc6a2ac377692a6687f15e3353ffa70a1c159f2e63c34f",
+    "sheet_name": "07_Service_Vocabulary",
+    "sheet_position": 8
+  },
+  "title": "Industrial service types",
+  "notes": [],
+  "header_row": 4,
+  "columns": [
+    {
+      "key": "id",
+      "label": "ID",
+      "column": "A"
+    },
+    {
+      "key": "service",
+      "label": "Service",
+      "column": "B"
+    },
+    {
+      "key": "value_chain_stage",
+      "label": "Value-chain stage",
+      "column": "C"
+    },
+    {
+      "key": "compare_store",
+      "label": "Compare / store",
+      "column": "D"
+    }
+  ],
+  "records": [
+    {
+      "source_row": 5,
+      "values": {
+        "id": "S01",
+        "service": "Fabless IC design / ASIC NRE",
+        "value_chain_stage": "Design",
+        "compare_store": "NRE, schedule, IP ownership, process"
+      }
+    },
+    {
+      "source_row": 6,
+      "values": {
+        "id": "S02",
+        "service": "IP licensing / PDK access",
+        "value_chain_stage": "Design",
+        "compare_store": "licence, royalty, node, portability"
+      }
+    },
+    {
+      "source_row": 7,
+      "values": {
+        "id": "S03",
+        "service": "EDA / verification",
+        "value_chain_stage": "Design",
+        "compare_store": "tool versions, licence, supported flows"
+      }
+    },
+    {
+      "source_row": 8,
+      "values": {
+        "id": "S04",
+        "service": "MPW / prototyping / tapeout",
+        "value_chain_stage": "Fab",
+        "compare_store": "node, dates, die area, cost, access"
+      }
+    },
+    {
+      "source_row": 9,
+      "values": {
+        "id": "S05",
+        "service": "Wafer foundry",
+        "value_chain_stage": "Fab",
+        "compare_store": "fabrication site, process, capacity, yield"
+      }
+    },
+    {
+      "source_row": 10,
+      "values": {
+        "id": "S06",
+        "service": "Assembly / test / packaging (OSAT)",
+        "value_chain_stage": "ATP",
+        "compare_store": "site, package, test coverage, capacity"
+      }
+    },
+    {
+      "source_row": 11,
+      "values": {
+        "id": "S07",
+        "service": "Advanced packaging / chiplets",
+        "value_chain_stage": "ATP",
+        "compare_store": "pitch, interposer, thermal, reliability"
+      }
+    },
+    {
+      "source_row": 12,
+      "values": {
+        "id": "S08",
+        "service": "Characterization / qualification",
+        "value_chain_stage": "Test",
+        "compare_store": "standard, grade, equipment, scope"
+      }
+    },
+    {
+      "source_row": 13,
+      "values": {
+        "id": "S09",
+        "service": "Reference designs / board integration",
+        "value_chain_stage": "Downstream",
+        "compare_store": "BOM, supported parts, NRE, lead time"
+      }
+    },
+    {
+      "source_row": 14,
+      "values": {
+        "id": "S10",
+        "service": "Embedded firmware / AI optimization",
+        "value_chain_stage": "Downstream",
+        "compare_store": "toolchain, target, model, accuracy/power"
+      }
+    },
+    {
+      "source_row": 15,
+      "values": {
+        "id": "S11",
+        "service": "FPGA design / RTL/HLS",
+        "value_chain_stage": "Design",
+        "compare_store": "tools, device, verification, IP terms"
+      }
+    },
+    {
+      "source_row": 16,
+      "values": {
+        "id": "S12",
+        "service": "Distributor / sourcing / traceability",
+        "value_chain_stage": "Supply",
+        "compare_store": "authorized status, volume, trace, lead time"
+      }
+    },
+    {
+      "source_row": 17,
+      "values": {
+        "id": "S13",
+        "service": "Lifecycle, failure analysis, repair",
+        "value_chain_stage": "Supply",
+        "compare_store": "PCN/EOL, FA process, response time"
+      }
+    },
+    {
+      "source_row": 18,
+      "values": {
+        "id": "S14",
+        "service": "Pilot line / technology transfer",
+        "value_chain_stage": "R&D",
+        "compare_store": "TRL, access, IP, scale-up route"
+      }
+    }
+  ]
+}

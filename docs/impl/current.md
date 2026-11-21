@@ -14,7 +14,10 @@ change. Write behavior, modules, commands, and durable findings at the narrowest
 
 ## Areas
 
-No product areas yet. The tooling, starter identity, and documentation checks that come with the
-template are described in the [development guide](../guide/development.md). When the first area
-page is added under [`current/`](current/README.md), list it here in a table with one row per page:
-its link and what it owns.
+Each page under [`current/`](current/README.md) is listed here with what it owns. The tooling and
+documentation checks that came with the template are described in the
+[development guide](../guide/development.md).
+
+| Page | Owns |
+| --- | --- |
+| [Product core](current/product-core.md) | Distribution, `kn` import package, `kn` and `kn-plan` commands, and identity verification |

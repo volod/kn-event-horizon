@@ -1,0 +1,125 @@
+{
+  "format": "kn.seed-proposal.table",
+  "status": "unreviewed_proposal",
+  "domain": "microelectronics",
+  "source": {
+    "file_name": "microelectronics_ontology_and_tags_v1.xlsx",
+    "sha256": "7166aa06791998c692cc6a2ac377692a6687f15e3353ffa70a1c159f2e63c34f",
+    "sheet_name": "10_Comparison_Profiles",
+    "sheet_position": 11
+  },
+  "title": "Comparison protocols \u2014 match conditions before ranking",
+  "notes": [],
+  "header_row": 4,
+  "columns": [
+    {
+      "key": "id",
+      "label": "ID",
+      "column": "A"
+    },
+    {
+      "key": "workload",
+      "label": "Workload",
+      "column": "B"
+    },
+    {
+      "key": "required_profiles",
+      "label": "Required profiles",
+      "column": "C"
+    },
+    {
+      "key": "fixed_conditions_gate",
+      "label": "Fixed conditions / gate",
+      "column": "D"
+    },
+    {
+      "key": "decision_metrics",
+      "label": "Decision metrics",
+      "column": "E"
+    },
+    {
+      "key": "candidate_examples",
+      "label": "Candidate examples",
+      "column": "F"
+    }
+  ],
+  "records": [
+    {
+      "source_row": 5,
+      "values": {
+        "id": "C01",
+        "workload": "Always-on acoustic node",
+        "required_profiles": "ALL+ENERGY+MCU_SOC+SENSOR+ACOUSTIC+RF",
+        "fixed_conditions_gate": "Identical sample rate, duty cycle, false alarm target, communication payload; voltage/temp",
+        "decision_metrics": "Energy/day, valid events, wake latency",
+        "candidate_examples": "STM32WL/U5; PSOC; MCX; SPARK external radio (not direct MCU substitute)"
+      }
+    },
+    {
+      "source_row": 6,
+      "values": {
+        "id": "C02",
+        "workload": "Tiny inference MCU",
+        "required_profiles": "ALL+ENERGY+MCU_SOC+AI",
+        "fixed_conditions_gate": "Same MLPerf Tiny version, model, quality target, batch 1; same boundary",
+        "decision_metrics": "uJ/inference, p95 latency, memory, accuracy",
+        "candidate_examples": "STM32N6; MCX N; PSoC Edge (MPN validation)"
+      }
+    },
+    {
+      "source_row": 7,
+      "values": {
+        "id": "C03",
+        "workload": "Edge vision SoC",
+        "required_profiles": "ALL+ENERGY+MCU_SOC+AI+IMAGING",
+        "fixed_conditions_gate": "Same model, resolution, FPS, precision/accuracy, camera I/O and memory boundary",
+        "decision_metrics": "J/frame, FPS, latency, idle W",
+        "candidate_examples": "i.MX 93/95; STM32MP25 (separate classes if requirements differ)"
+      }
+    },
+    {
+      "source_row": 8,
+      "values": {
+        "id": "C04",
+        "workload": "FPGA streaming / vision",
+        "required_profiles": "ALL+ENERGY+FPGA",
+        "fixed_conditions_gate": "Same RTL workload, bit width, data rate, I/O; post-route device config",
+        "decision_metrics": "J/frame or J/sample, throughput, timing margin",
+        "candidate_examples": "GateMate; NanoXplore; external reference only via exception"
+      }
+    },
+    {
+      "source_row": 9,
+      "values": {
+        "id": "C05",
+        "workload": "Image sensor high-speed ROI",
+        "required_profiles": "ALL+ENERGY+IMAGING",
+        "fixed_conditions_gate": "Identical ROI WxH, bit depth, shutter, exposure, output interface; valid image quality",
+        "decision_metrics": "FPS, energy/frame, read noise, data rate",
+        "candidate_examples": "CIS/industrial image sensors"
+      }
+    },
+    {
+      "source_row": 10,
+      "values": {
+        "id": "C06",
+        "workload": "Power subsystem efficiency",
+        "required_profiles": "ALL+POWER",
+        "fixed_conditions_gate": "Identical Vin/Vout, profile, ambient/Tj, load curve, topology",
+        "decision_metrics": "Wh/day losses, quiescent draw, thermals",
+        "candidate_examples": "ST, NXP, Infineon PMIC/switch candidates"
+      }
+    },
+    {
+      "source_row": 11,
+      "values": {
+        "id": "C07",
+        "workload": "Emerging IP / test chip",
+        "required_profiles": "RND_SIGNAL+IP+AI as applicable",
+        "fixed_conditions_gate": "Same workload and quality; compare simulation separately from measured silicon",
+        "decision_metrics": "Evidence-adjusted improvement, next milestone, accessibility",
+        "candidate_examples": "Blumind analog compute; research demonstrators"
+      }
+    }
+  ]
+}

@@ -1,0 +1,279 @@
+{
+  "format": "kn.seed-proposal.table",
+  "status": "unreviewed_proposal",
+  "domain": "microelectronics",
+  "source": {
+    "file_name": "microelectronics_data_sources_v1.xlsx",
+    "sha256": "ab7837e18fc1907a2b977def23d03de78e608787d3125011ab3b38bda2536fba",
+    "sheet_name": "05_Vendor_Watchlist",
+    "sheet_position": 6
+  },
+  "title": "Seed watchlist \u2014 EU/UK/Canada first",
+  "notes": [],
+  "header_row": 4,
+  "columns": [
+    {
+      "key": "actor",
+      "label": "Actor",
+      "column": "A"
+    },
+    {
+      "key": "geography_focus",
+      "label": "Geography focus",
+      "column": "B"
+    },
+    {
+      "key": "product_competence_focus",
+      "label": "Product / competence focus",
+      "column": "C"
+    },
+    {
+      "key": "source_ids",
+      "label": "Source IDs",
+      "column": "D"
+    },
+    {
+      "key": "role",
+      "label": "Role",
+      "column": "E"
+    },
+    {
+      "key": "provenance_caution",
+      "label": "Provenance caution",
+      "column": "F"
+    }
+  ],
+  "records": [
+    {
+      "source_row": 5,
+      "values": {
+        "actor": "NXP",
+        "geography_focus": "NL / EU",
+        "product_competence_focus": "MCX N, i.MX 93/95, RF/PMIC",
+        "source_ids": "V03; V04; V13",
+        "role": "Anchor vendor",
+        "provenance_caution": "IDM/design/outsourcing mix; no MPN site assumed"
+      }
+    },
+    {
+      "source_row": 6,
+      "values": {
+        "actor": "STMicroelectronics",
+        "geography_focus": "EU/CH footprint",
+        "product_competence_focus": "STM32WL/U5/N6/MP25, sensors/optics, power",
+        "source_ids": "V01; V02; V12; V16",
+        "role": "Anchor vendor",
+        "provenance_caution": "Verify legal entity, fab and ATP per part"
+      }
+    },
+    {
+      "source_row": 7,
+      "values": {
+        "actor": "Infineon",
+        "geography_focus": "DE / EU",
+        "product_competence_focus": "PSoC Edge/6, XENSIV, Si/GaN/SiC",
+        "source_ids": "V05; V06; V14; V15",
+        "role": "Anchor vendor",
+        "provenance_caution": "Country of control != country of manufacture"
+      }
+    },
+    {
+      "source_row": 8,
+      "values": {
+        "actor": "Cologne Chip",
+        "geography_focus": "DE / EU",
+        "product_competence_focus": "GateMate FPGA",
+        "source_ids": "V07",
+        "role": "Specialized vendor",
+        "provenance_caution": "Vendor sourcing claim is not lot traceability"
+      }
+    },
+    {
+      "source_row": 9,
+      "values": {
+        "actor": "NanoXplore",
+        "geography_focus": "FR / EU",
+        "product_competence_focus": "SoC FPGA (COTS/RH)",
+        "source_ids": "V08",
+        "role": "Specialized vendor",
+        "provenance_caution": "Variant and CPU/logic documentation must be harmonized"
+      }
+    },
+    {
+      "source_row": 10,
+      "values": {
+        "actor": "Blumind",
+        "geography_focus": "CA",
+        "product_competence_focus": "Analog AI inference IP",
+        "source_ids": "V09; D05",
+        "role": "Emerging technology scout",
+        "provenance_caution": "IP, not necessarily standalone orderable chip"
+      }
+    },
+    {
+      "source_row": 11,
+      "values": {
+        "actor": "SPARK Microsystems",
+        "geography_focus": "CA",
+        "product_competence_focus": "LE-UWB radio",
+        "source_ids": "V10; D05",
+        "role": "Specialized vendor",
+        "provenance_caution": "Canadian design evidence; fab/ATP unverified"
+      }
+    },
+    {
+      "source_row": 12,
+      "values": {
+        "actor": "CMC / FABrIC",
+        "geography_focus": "CA",
+        "product_competence_focus": "MPW, ecosystem, grants, pilot/transfer",
+        "source_ids": "D05; D06; C14",
+        "role": "Ecosystem / discovery",
+        "provenance_caution": "Not a chip manufacturer; identify project performers"
+      }
+    },
+    {
+      "source_row": 13,
+      "values": {
+        "actor": "Photons Canada",
+        "geography_focus": "CA",
+        "product_competence_focus": "Optical/photonic supplier directory",
+        "source_ids": "V11",
+        "role": "Discovery",
+        "provenance_caution": "Verify each legal actor and product individually"
+      }
+    },
+    {
+      "source_row": 14,
+      "values": {
+        "actor": "Bosch Sensortec",
+        "geography_focus": "DE / EU",
+        "product_competence_focus": "MEMS/IMU, smart sensor SiP",
+        "source_ids": "V17",
+        "role": "Sensor specialist",
+        "provenance_caution": "Exact part and assembly site"
+      }
+    },
+    {
+      "source_row": 15,
+      "values": {
+        "actor": "ams OSRAM",
+        "geography_focus": "AT/DE / EU",
+        "product_competence_focus": "Optical/spectral/proximity/imaging",
+        "source_ids": "V18",
+        "role": "Optics specialist",
+        "provenance_caution": "Check technology and site per product"
+      }
+    },
+    {
+      "source_row": 16,
+      "values": {
+        "actor": "Melexis",
+        "geography_focus": "BE / EU",
+        "product_competence_focus": "Magnetic/current/temperature sensors",
+        "source_ids": "V19",
+        "role": "Sensor specialist",
+        "provenance_caution": "Verify exact MPN"
+      }
+    },
+    {
+      "source_row": 17,
+      "values": {
+        "actor": "Sensirion",
+        "geography_focus": "CH / Europe",
+        "product_competence_focus": "Environmental/gas/flow sensors",
+        "source_ids": "V20",
+        "role": "Sensor specialist",
+        "provenance_caution": "CH not EU; verify sourcing"
+      }
+    },
+    {
+      "source_row": 18,
+      "values": {
+        "actor": "LYNRED",
+        "geography_focus": "FR / EU",
+        "product_competence_focus": "IR and thermal detectors",
+        "source_ids": "V21",
+        "role": "Optics specialist",
+        "provenance_caution": "Detector vs module"
+      }
+    },
+    {
+      "source_row": 19,
+      "values": {
+        "actor": "Teledyne DALSA",
+        "geography_focus": "CA operations",
+        "product_competence_focus": "Imaging and MEMS; foundry",
+        "source_ids": "V22",
+        "role": "Conditional / benchmark",
+        "provenance_caution": "US parent; prior production-origin policy requires exception review"
+      }
+    },
+    {
+      "source_row": 20,
+      "values": {
+        "actor": "Teledyne e2v",
+        "geography_focus": "UK operations",
+        "product_competence_focus": "High-speed image sensors",
+        "source_ids": "V23",
+        "role": "Conditional / benchmark",
+        "provenance_caution": "US parent; prior production-origin policy requires exception review"
+      }
+    },
+    {
+      "source_row": 21,
+      "values": {
+        "actor": "Bor\u00e9as Technologies",
+        "geography_focus": "CA",
+        "product_competence_focus": "Low-power piezo drivers and actuation",
+        "source_ids": "V24",
+        "role": "Specialized candidate",
+        "provenance_caution": "Verify fab/ATP and availability"
+      }
+    },
+    {
+      "source_row": 22,
+      "values": {
+        "actor": "Bonsai Micro",
+        "geography_focus": "CA",
+        "product_competence_focus": "Edge AI controller development",
+        "source_ids": "V25",
+        "role": "R&D watch",
+        "provenance_caution": "Development vs shipping product"
+      }
+    },
+    {
+      "source_row": 23,
+      "values": {
+        "actor": "X-FAB",
+        "geography_focus": "EU/global operations",
+        "product_competence_focus": "Specialty foundry CMOS/SOI/MEMS/SiC",
+        "source_ids": "V26",
+        "role": "Manufacturing service",
+        "provenance_caution": "Site must be verified"
+      }
+    },
+    {
+      "source_row": 24,
+      "values": {
+        "actor": "C2MI",
+        "geography_focus": "CA",
+        "product_competence_focus": "MEMS and advanced packaging/test",
+        "source_ids": "V27",
+        "role": "Industrial R&D facility",
+        "provenance_caution": "Facility not chip brand"
+      }
+    },
+    {
+      "source_row": 25,
+      "values": {
+        "actor": "Canada Semiconductor Council",
+        "geography_focus": "CA",
+        "product_competence_focus": "Ecosystem map / suppliers",
+        "source_ids": "V28",
+        "role": "Discovery",
+        "provenance_caution": "Validate actors separately"
+      }
+    }
+  ]
+}

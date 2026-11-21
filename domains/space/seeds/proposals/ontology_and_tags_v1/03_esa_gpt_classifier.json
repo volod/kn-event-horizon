@@ -1,0 +1,730 @@
+{
+  "format": "kn.seed-proposal.table",
+  "status": "unreviewed_proposal",
+  "domain": "space",
+  "source": {
+    "file_name": "space_sector_ontology_and_tags_v1.xlsx",
+    "sha256": "26e7468ee372e9c606ff08910756b2066ef30ac9fea7524e646b52d8529eec28",
+    "sheet_name": "03_ESA_GPT_Classifier",
+    "sheet_position": 4
+  },
+  "title": "ESA Generic Product Tree \u2014 primary industrial/product classifier",
+  "notes": [
+    "Official GPT Level 1 has four segments. The rows below keep those official segment assignments and provide an implementation-oriented product hierarchy. 'OFFICIAL_SYSTEM' uses a named ESA GPT system; 'KB_EXTENSION' is a modern normalization where the 2011 GPT is not explicit enough."
+  ],
+  "header_row": 4,
+  "columns": [
+    {
+      "key": "gpt_segment_code",
+      "label": "GPT segment code",
+      "column": "A"
+    },
+    {
+      "key": "gpt_segment",
+      "label": "GPT segment",
+      "column": "B"
+    },
+    {
+      "key": "node_code",
+      "label": "Node code",
+      "column": "C"
+    },
+    {
+      "key": "parent_node",
+      "label": "Parent node",
+      "column": "D"
+    },
+    {
+      "key": "product_category",
+      "label": "Product category",
+      "column": "E"
+    },
+    {
+      "key": "product_subcategory_leaf",
+      "label": "Product subcategory / leaf",
+      "column": "F"
+    },
+    {
+      "key": "node_status",
+      "label": "Node status",
+      "column": "G"
+    },
+    {
+      "key": "primary_entity_class",
+      "label": "Primary entity class",
+      "column": "H"
+    },
+    {
+      "key": "typical_stored_facts",
+      "label": "Typical stored facts",
+      "column": "I"
+    },
+    {
+      "key": "notes",
+      "label": "Notes",
+      "column": "J"
+    }
+  ],
+  "records": [
+    {
+      "source_row": 5,
+      "values": {
+        "gpt_segment_code": "I",
+        "gpt_segment": "Launchers",
+        "node_code": "I.0",
+        "parent_node": null,
+        "product_category": "Complete launch vehicle",
+        "product_subcategory_leaf": "Launch vehicle / configuration",
+        "node_status": "KB_NORMALIZED",
+        "primary_entity_class": "Launch Vehicle",
+        "typical_stored_facts": "manufacturer; configuration; stages; dimensions; payload performance; status",
+        "notes": "Primary industrial object; ESA GPT classifies subsystems beneath Segment I"
+      }
+    },
+    {
+      "source_row": 6,
+      "values": {
+        "gpt_segment_code": "I",
+        "gpt_segment": "Launchers",
+        "node_code": "I.A",
+        "parent_node": null,
+        "product_category": "Avionics",
+        "product_subcategory_leaf": "On-board computers; data systems & interfaces; power storage/conditioning/distribution; GNC units; TT&C; safeguard electrical systems; TVC electronics",
+        "node_status": "OFFICIAL_SYSTEM",
+        "primary_entity_class": "Component / Subsystem",
+        "typical_stored_facts": "model; supplier; interfaces; qualification; heritage",
+        "notes": "ESA GPT explicitly uses Avionics system"
+      }
+    },
+    {
+      "source_row": 7,
+      "values": {
+        "gpt_segment_code": "I",
+        "gpt_segment": "Launchers",
+        "node_code": "I.B",
+        "parent_node": null,
+        "product_category": "Descent & Recovery",
+        "product_subcategory_leaf": "Descent systems; recovery systems",
+        "node_status": "OFFICIAL_SYSTEM",
+        "primary_entity_class": "Component / Subsystem",
+        "typical_stored_facts": "method; supplier; mass; qualification",
+        "notes": "Relevant to reusable/recoverable launch elements"
+      }
+    },
+    {
+      "source_row": 8,
+      "values": {
+        "gpt_segment_code": "I",
+        "gpt_segment": "Launchers",
+        "node_code": "I.C",
+        "parent_node": null,
+        "product_category": "Electronics",
+        "product_subcategory_leaf": "EEE components",
+        "node_status": "OFFICIAL_SYSTEM",
+        "primary_entity_class": "Component",
+        "typical_stored_facts": "part type; supplier; qualification; radiation/environment class",
+        "notes": "Lowest integration layer"
+      }
+    },
+    {
+      "source_row": 9,
+      "values": {
+        "gpt_segment_code": "I",
+        "gpt_segment": "Launchers",
+        "node_code": "I.D",
+        "parent_node": null,
+        "product_category": "Materials",
+        "product_subcategory_leaf": "Metallic; non-metallic; composite materials",
+        "node_status": "OFFICIAL_SYSTEM",
+        "primary_entity_class": "Component / Material",
+        "typical_stored_facts": "material; process; supplier; properties",
+        "notes": "Material-level industrial capability"
+      }
+    },
+    {
+      "source_row": 10,
+      "values": {
+        "gpt_segment_code": "I",
+        "gpt_segment": "Launchers",
+        "node_code": "I.PROP",
+        "parent_node": null,
+        "product_category": "Propulsion",
+        "product_subcategory_leaf": "Engines; propulsion system; propellant/feed; pumps; valves; tanks interfaces",
+        "node_status": "KB_NORMALIZED",
+        "primary_entity_class": "Component / Subsystem",
+        "typical_stored_facts": "propellant; thrust; Isp; cycle; supplier; stage",
+        "notes": "Mapped within Segment I; detailed GPT branches should be retained when imported"
+      }
+    },
+    {
+      "source_row": 11,
+      "values": {
+        "gpt_segment_code": "I",
+        "gpt_segment": "Launchers",
+        "node_code": "I.STR",
+        "parent_node": null,
+        "product_category": "Structures",
+        "product_subcategory_leaf": "Primary structures; tanks; fairing; interstage; payload adapter",
+        "node_status": "KB_NORMALIZED",
+        "primary_entity_class": "Component / Subsystem",
+        "typical_stored_facts": "material; dimensions; load class; supplier",
+        "notes": "Mapped to Segment I structures-related branches"
+      }
+    },
+    {
+      "source_row": 12,
+      "values": {
+        "gpt_segment_code": "I",
+        "gpt_segment": "Launchers",
+        "node_code": "I.MECH",
+        "parent_node": null,
+        "product_category": "Mechanisms",
+        "product_subcategory_leaf": "Separation; hold-down/release; actuation; pyro/non-pyro",
+        "node_status": "KB_NORMALIZED",
+        "primary_entity_class": "Component / Subsystem",
+        "typical_stored_facts": "interface; mechanism; supplier; heritage",
+        "notes": null
+      }
+    },
+    {
+      "source_row": 13,
+      "values": {
+        "gpt_segment_code": "I",
+        "gpt_segment": "Launchers",
+        "node_code": "I.SW",
+        "parent_node": null,
+        "product_category": "Software",
+        "product_subcategory_leaf": "Flight software; mission analysis; system modelling/simulation; safety/dependability tools",
+        "node_status": "KB_NORMALIZED",
+        "primary_entity_class": "Software / Product",
+        "typical_stored_facts": "version; functions; interfaces; supplier",
+        "notes": null
+      }
+    },
+    {
+      "source_row": 14,
+      "values": {
+        "gpt_segment_code": "I",
+        "gpt_segment": "Launchers",
+        "node_code": "I.GSE",
+        "parent_node": null,
+        "product_category": "Launch ground support",
+        "product_subcategory_leaf": "EGSE/MGSE; propellant ground equipment; test/support equipment",
+        "node_status": "KB_EXTENSION",
+        "primary_entity_class": "Facility / Product",
+        "typical_stored_facts": "site; supported vehicle; supplier; interfaces",
+        "notes": "Modern knowledge-base extension linked to Segment I and IV"
+      }
+    },
+    {
+      "source_row": 15,
+      "values": {
+        "gpt_segment_code": "I",
+        "gpt_segment": "Launchers",
+        "node_code": "I.SVC",
+        "parent_node": null,
+        "product_category": "Launch service",
+        "product_subcategory_leaf": "Dedicated launch; rideshare; deployment/brokerage",
+        "node_status": "SERVICE_EXTENSION",
+        "primary_entity_class": "Service",
+        "typical_stored_facts": "provider; vehicle; mission; price model; customer; contract",
+        "notes": "Service is linked to launch products; not a product-tree leaf"
+      }
+    },
+    {
+      "source_row": 16,
+      "values": {
+        "gpt_segment_code": "II",
+        "gpt_segment": "Satellites & Probes",
+        "node_code": "II.0",
+        "parent_node": null,
+        "product_category": "Complete spacecraft",
+        "product_subcategory_leaf": "Satellite/probe/bus/platform",
+        "node_status": "KB_NORMALIZED",
+        "primary_entity_class": "Spacecraft / Product",
+        "typical_stored_facts": "manufacturer; bus; mass; power; lifetime; orbit class; payload accommodation",
+        "notes": "Top product object linked to GPT systems below"
+      }
+    },
+    {
+      "source_row": 17,
+      "values": {
+        "gpt_segment_code": "II",
+        "gpt_segment": "Satellites & Probes",
+        "node_code": "II.A",
+        "parent_node": null,
+        "product_category": "AOCS & GNC",
+        "product_subcategory_leaf": "Sensors; actuators; control units; star trackers; IMUs; reaction wheels",
+        "node_status": "OFFICIAL_SYSTEM",
+        "primary_entity_class": "Component / Subsystem",
+        "typical_stored_facts": "accuracy; range; interfaces; supplier; heritage",
+        "notes": "Official GPT system"
+      }
+    },
+    {
+      "source_row": 18,
+      "values": {
+        "gpt_segment_code": "II",
+        "gpt_segment": "Satellites & Probes",
+        "node_code": "II.B",
+        "parent_node": null,
+        "product_category": "Electronics",
+        "product_subcategory_leaf": "EEE/electronic equipment",
+        "node_status": "OFFICIAL_SYSTEM",
+        "primary_entity_class": "Component",
+        "typical_stored_facts": "part/product; supplier; qualification",
+        "notes": "Official GPT system"
+      }
+    },
+    {
+      "source_row": 19,
+      "values": {
+        "gpt_segment_code": "II",
+        "gpt_segment": "Satellites & Probes",
+        "node_code": "II.C",
+        "parent_node": null,
+        "product_category": "Materials",
+        "product_subcategory_leaf": "Metallic; non-metallic; composites",
+        "node_status": "OFFICIAL_SYSTEM",
+        "primary_entity_class": "Component / Material",
+        "typical_stored_facts": "material/process/supplier",
+        "notes": "Official GPT system"
+      }
+    },
+    {
+      "source_row": 20,
+      "values": {
+        "gpt_segment_code": "II",
+        "gpt_segment": "Satellites & Probes",
+        "node_code": "II.D",
+        "parent_node": null,
+        "product_category": "Mechanisms",
+        "product_subcategory_leaf": "Deployment; hold-down/release; scanning; drives",
+        "node_status": "OFFICIAL_SYSTEM",
+        "primary_entity_class": "Component / Subsystem",
+        "typical_stored_facts": "mechanism; interface; supplier; heritage",
+        "notes": "Official GPT system"
+      }
+    },
+    {
+      "source_row": 21,
+      "values": {
+        "gpt_segment_code": "II",
+        "gpt_segment": "Satellites & Probes",
+        "node_code": "II.E",
+        "parent_node": null,
+        "product_category": "On-board software",
+        "product_subcategory_leaf": "Flight software / embedded applications",
+        "node_status": "OFFICIAL_SYSTEM",
+        "primary_entity_class": "Software / Product",
+        "typical_stored_facts": "functions; OS; autonomy; safety; supplier",
+        "notes": "Official GPT system"
+      }
+    },
+    {
+      "source_row": 22,
+      "values": {
+        "gpt_segment_code": "II",
+        "gpt_segment": "Satellites & Probes",
+        "node_code": "II.F",
+        "parent_node": null,
+        "product_category": "On-board data management",
+        "product_subcategory_leaf": "On-board computers; storage; networking; control/monitoring",
+        "node_status": "OFFICIAL_SYSTEM",
+        "primary_entity_class": "Component / Subsystem",
+        "typical_stored_facts": "processor; memory; bus; throughput; interfaces",
+        "notes": "Official GPT system"
+      }
+    },
+    {
+      "source_row": 23,
+      "values": {
+        "gpt_segment_code": "II",
+        "gpt_segment": "Satellites & Probes",
+        "node_code": "II.G",
+        "parent_node": null,
+        "product_category": "Optical communication",
+        "product_subcategory_leaf": "Optical terminals; lasers; detectors; telescopes; pointing",
+        "node_status": "OFFICIAL_SYSTEM",
+        "primary_entity_class": "Component / Subsystem",
+        "typical_stored_facts": "wavelength; data rate; aperture; pointing; supplier",
+        "notes": "Official GPT system"
+      }
+    },
+    {
+      "source_row": 24,
+      "values": {
+        "gpt_segment_code": "II",
+        "gpt_segment": "Satellites & Probes",
+        "node_code": "II.H",
+        "parent_node": null,
+        "product_category": "Parts",
+        "product_subcategory_leaf": "Mechanical, optical and magnetic parts",
+        "node_status": "OFFICIAL_SYSTEM",
+        "primary_entity_class": "Component",
+        "typical_stored_facts": "part type; material; supplier; qualification",
+        "notes": "Official GPT system"
+      }
+    },
+    {
+      "source_row": 25,
+      "values": {
+        "gpt_segment_code": "II",
+        "gpt_segment": "Satellites & Probes",
+        "node_code": "II.I",
+        "parent_node": null,
+        "product_category": "Payloads / Instruments",
+        "product_subcategory_leaf": "RF/microwave; IR; optical; radar; scientific instruments",
+        "node_status": "OFFICIAL_SYSTEM",
+        "primary_entity_class": "Payload / Instrument",
+        "typical_stored_facts": "sensor type; band; resolution; swath; mass; power; supplier",
+        "notes": "Use technology tags and EUSPA application tags for mission/use"
+      }
+    },
+    {
+      "source_row": 26,
+      "values": {
+        "gpt_segment_code": "II",
+        "gpt_segment": "Satellites & Probes",
+        "node_code": "II.J",
+        "parent_node": null,
+        "product_category": "Power",
+        "product_subcategory_leaf": "Solar; batteries; power monitoring/control; other generation/storage",
+        "node_status": "OFFICIAL_SYSTEM",
+        "primary_entity_class": "Component / Subsystem",
+        "typical_stored_facts": "power; capacity; efficiency; supplier; heritage",
+        "notes": "Official GPT system"
+      }
+    },
+    {
+      "source_row": 27,
+      "values": {
+        "gpt_segment_code": "II",
+        "gpt_segment": "Satellites & Probes",
+        "node_code": "II.K",
+        "parent_node": null,
+        "product_category": "Propulsion",
+        "product_subcategory_leaf": "Chemical; electric; cold gas; sail and other propulsion",
+        "node_status": "OFFICIAL_SYSTEM",
+        "primary_entity_class": "Component / Subsystem",
+        "typical_stored_facts": "thrust; Isp; propellant; power; supplier",
+        "notes": "Official GPT system"
+      }
+    },
+    {
+      "source_row": 28,
+      "values": {
+        "gpt_segment_code": "II",
+        "gpt_segment": "Satellites & Probes",
+        "node_code": "II.L",
+        "parent_node": null,
+        "product_category": "RF / Microwave Communication",
+        "product_subcategory_leaf": "Antennas; transmitters; receivers; transponders",
+        "node_status": "OFFICIAL_SYSTEM",
+        "primary_entity_class": "Component / Subsystem",
+        "typical_stored_facts": "band; gain; power; throughput; supplier",
+        "notes": "Platform and payload communications"
+      }
+    },
+    {
+      "source_row": 29,
+      "values": {
+        "gpt_segment_code": "II",
+        "gpt_segment": "Satellites & Probes",
+        "node_code": "II.M",
+        "parent_node": null,
+        "product_category": "System Engineering Software",
+        "product_subcategory_leaf": "Mission/system modelling, analysis, RAMS, simulation",
+        "node_status": "OFFICIAL_SYSTEM",
+        "primary_entity_class": "Software / Product",
+        "typical_stored_facts": "function; version; supplier",
+        "notes": "Official GPT system"
+      }
+    },
+    {
+      "source_row": 30,
+      "values": {
+        "gpt_segment_code": "II",
+        "gpt_segment": "Satellites & Probes",
+        "node_code": "II.N",
+        "parent_node": null,
+        "product_category": "Structures",
+        "product_subcategory_leaf": "Bus; primary/secondary; deployable/inflatable; optical bench; tanks",
+        "node_status": "OFFICIAL_SYSTEM",
+        "primary_entity_class": "Component / Subsystem",
+        "typical_stored_facts": "mass; material; stiffness; supplier",
+        "notes": "Official GPT system"
+      }
+    },
+    {
+      "source_row": 31,
+      "values": {
+        "gpt_segment_code": "II",
+        "gpt_segment": "Satellites & Probes",
+        "node_code": "II.O",
+        "parent_node": null,
+        "product_category": "Thermal Control",
+        "product_subcategory_leaf": "TPS; coatings/insulation; radiators; heat pipes; thermal hardware",
+        "node_status": "OFFICIAL_SYSTEM",
+        "primary_entity_class": "Component / Subsystem",
+        "typical_stored_facts": "capacity; temperature range; supplier",
+        "notes": "Official GPT system"
+      }
+    },
+    {
+      "source_row": 32,
+      "values": {
+        "gpt_segment_code": "II",
+        "gpt_segment": "Satellites & Probes",
+        "node_code": "II.P",
+        "parent_node": null,
+        "product_category": "Other",
+        "product_subcategory_leaf": "Other satellite/probe products",
+        "node_status": "OFFICIAL_SYSTEM",
+        "primary_entity_class": "Product",
+        "typical_stored_facts": "specification; supplier",
+        "notes": "Use only when no better official node exists"
+      }
+    },
+    {
+      "source_row": 33,
+      "values": {
+        "gpt_segment_code": "III",
+        "gpt_segment": "Orbital Transportation & Re-entry Systems",
+        "node_code": "III.0",
+        "parent_node": null,
+        "product_category": "Complete in-space/re-entry vehicle",
+        "product_subcategory_leaf": "OTV; tug; service vehicle; re-entry capsule",
+        "node_status": "KB_NORMALIZED",
+        "primary_entity_class": "Product / Spacecraft",
+        "typical_stored_facts": "manufacturer; payload capacity; delta-v; re-entry capability; status",
+        "notes": "Top system object"
+      }
+    },
+    {
+      "source_row": 34,
+      "values": {
+        "gpt_segment_code": "III",
+        "gpt_segment": "Orbital Transportation & Re-entry Systems",
+        "node_code": "III.AV",
+        "parent_node": null,
+        "product_category": "Avionics & control",
+        "product_subcategory_leaf": "Flight computer; GNC; TT&C; data handling",
+        "node_status": "KB_NORMALIZED",
+        "primary_entity_class": "Component / Subsystem",
+        "typical_stored_facts": "performance; interfaces; supplier",
+        "notes": "Mapped to Segment III official branches"
+      }
+    },
+    {
+      "source_row": 35,
+      "values": {
+        "gpt_segment_code": "III",
+        "gpt_segment": "Orbital Transportation & Re-entry Systems",
+        "node_code": "III.PROP",
+        "parent_node": null,
+        "product_category": "Propulsion",
+        "product_subcategory_leaf": "Chemical/electric propulsion and feed systems",
+        "node_status": "KB_NORMALIZED",
+        "primary_entity_class": "Component / Subsystem",
+        "typical_stored_facts": "delta-v; thrust; Isp; power; supplier",
+        "notes": null
+      }
+    },
+    {
+      "source_row": 36,
+      "values": {
+        "gpt_segment_code": "III",
+        "gpt_segment": "Orbital Transportation & Re-entry Systems",
+        "node_code": "III.MECH",
+        "parent_node": null,
+        "product_category": "Mechanisms / docking / capture",
+        "product_subcategory_leaf": "Docking; capture; deployment; release",
+        "node_status": "KB_EXTENSION",
+        "primary_entity_class": "Component / Subsystem",
+        "typical_stored_facts": "interface; mechanism; compatibility; supplier",
+        "notes": "Needed for modern servicing/logistics awareness"
+      }
+    },
+    {
+      "source_row": 37,
+      "values": {
+        "gpt_segment_code": "III",
+        "gpt_segment": "Orbital Transportation & Re-entry Systems",
+        "node_code": "III.SW",
+        "parent_node": null,
+        "product_category": "Software",
+        "product_subcategory_leaf": "Flight SW; mission analysis; system engineering SW",
+        "node_status": "OFFICIAL_SYSTEM",
+        "primary_entity_class": "Software / Product",
+        "typical_stored_facts": "functions; version; supplier",
+        "notes": "ESA GPT includes software branches"
+      }
+    },
+    {
+      "source_row": 38,
+      "values": {
+        "gpt_segment_code": "III",
+        "gpt_segment": "Orbital Transportation & Re-entry Systems",
+        "node_code": "III.STR",
+        "parent_node": null,
+        "product_category": "Structures",
+        "product_subcategory_leaf": "Avionics bay; module structures; tanks; adapters",
+        "node_status": "OFFICIAL_SYSTEM",
+        "primary_entity_class": "Component / Subsystem",
+        "typical_stored_facts": "material; load; mass; supplier",
+        "notes": "ESA GPT structures system"
+      }
+    },
+    {
+      "source_row": 39,
+      "values": {
+        "gpt_segment_code": "III",
+        "gpt_segment": "Orbital Transportation & Re-entry Systems",
+        "node_code": "III.THM",
+        "parent_node": null,
+        "product_category": "Thermal control",
+        "product_subcategory_leaf": "Re-entry TPS; coatings/MLI; radiators; heat pipes",
+        "node_status": "OFFICIAL_SYSTEM",
+        "primary_entity_class": "Component / Subsystem",
+        "typical_stored_facts": "temperature range; TPS class; supplier",
+        "notes": "Official thermal-control branch"
+      }
+    },
+    {
+      "source_row": 40,
+      "values": {
+        "gpt_segment_code": "III",
+        "gpt_segment": "Orbital Transportation & Re-entry Systems",
+        "node_code": "III.SVC",
+        "parent_node": null,
+        "product_category": "In-space transportation / servicing service",
+        "product_subcategory_leaf": "Orbit transfer; deployment; life extension; refuelling; ADR",
+        "node_status": "SERVICE_EXTENSION",
+        "primary_entity_class": "Service",
+        "typical_stored_facts": "provider; supported orbit; client mass; pricing; mission heritage",
+        "notes": "Service layer linked to Segment III products"
+      }
+    },
+    {
+      "source_row": 41,
+      "values": {
+        "gpt_segment_code": "IV",
+        "gpt_segment": "Ground Segment",
+        "node_code": "IV.A",
+        "parent_node": null,
+        "product_category": "Mission Operations",
+        "product_subcategory_leaf": "Mission control; flight dynamics; operations planning and support",
+        "node_status": "OFFICIAL_SYSTEM",
+        "primary_entity_class": "Software / Service",
+        "typical_stored_facts": "missions supported; software stack; SLA; operator",
+        "notes": "Official GPT system"
+      }
+    },
+    {
+      "source_row": 42,
+      "values": {
+        "gpt_segment_code": "IV",
+        "gpt_segment": "Ground Segment",
+        "node_code": "IV.B",
+        "parent_node": null,
+        "product_category": "Ground Station",
+        "product_subcategory_leaf": "Antennas; RF equipment; baseband; frequency/time; monitoring & control",
+        "node_status": "OFFICIAL_SYSTEM",
+        "primary_entity_class": "Ground Station / Component",
+        "typical_stored_facts": "coordinates; bands; antenna; RF chain; operator; supplier",
+        "notes": "Official GPT system"
+      }
+    },
+    {
+      "source_row": 43,
+      "values": {
+        "gpt_segment_code": "IV",
+        "gpt_segment": "Ground Segment",
+        "node_code": "IV.C",
+        "parent_node": null,
+        "product_category": "Ground Segment Network",
+        "product_subcategory_leaf": "Ground communications network / interfaces",
+        "node_status": "OFFICIAL_SYSTEM",
+        "primary_entity_class": "Service / Network",
+        "typical_stored_facts": "nodes; bandwidth; protocols; coverage; operator",
+        "notes": "Official GPT system"
+      }
+    },
+    {
+      "source_row": 44,
+      "values": {
+        "gpt_segment_code": "IV",
+        "gpt_segment": "Ground Segment",
+        "node_code": "IV.D",
+        "parent_node": null,
+        "product_category": "User Operations",
+        "product_subcategory_leaf": "Instrument management; data analysis; PI/user equipment",
+        "node_status": "OFFICIAL_SYSTEM",
+        "primary_entity_class": "Software / Service / Product",
+        "typical_stored_facts": "user workflows; tools; interfaces",
+        "notes": "Official GPT system"
+      }
+    },
+    {
+      "source_row": 45,
+      "values": {
+        "gpt_segment_code": "IV",
+        "gpt_segment": "Ground Segment",
+        "node_code": "IV.E",
+        "parent_node": null,
+        "product_category": "Development and Construction of Space Segment",
+        "product_subcategory_leaf": "AIT; EGSE; MGSE; optical/RF support equipment; general support",
+        "node_status": "OFFICIAL_SYSTEM",
+        "primary_entity_class": "Facility / Product / Service",
+        "typical_stored_facts": "test capability; limits; standards; supplier; location",
+        "notes": "Official GPT system"
+      }
+    },
+    {
+      "source_row": 46,
+      "values": {
+        "gpt_segment_code": "IV",
+        "gpt_segment": "Ground Segment",
+        "node_code": "IV.TERM",
+        "parent_node": null,
+        "product_category": "User terminals",
+        "product_subcategory_leaf": "Fixed; mobile; on-the-move; maritime/airborne; D2D/NTN; GNSS receivers",
+        "node_status": "KB_EXTENSION",
+        "primary_entity_class": "Terminal / User Equipment",
+        "typical_stored_facts": "bands; modem; antenna; throughput; mobility; standards; supplier",
+        "notes": "Modern extension mapped to Ground Segment"
+      }
+    },
+    {
+      "source_row": 47,
+      "values": {
+        "gpt_segment_code": "IV",
+        "gpt_segment": "Ground Segment",
+        "node_code": "IV.GSAA",
+        "parent_node": null,
+        "product_category": "Ground Station as a Service",
+        "product_subcategory_leaf": "Shared antenna/network scheduling and data delivery",
+        "node_status": "SERVICE_EXTENSION",
+        "primary_entity_class": "Service",
+        "typical_stored_facts": "station network; API; bands; SLA; pricing",
+        "notes": "Service enabled by IV.B/IV.C assets"
+      }
+    },
+    {
+      "source_row": 48,
+      "values": {
+        "gpt_segment_code": "IV",
+        "gpt_segment": "Ground Segment",
+        "node_code": "IV.CLOUD",
+        "parent_node": null,
+        "product_category": "Ground/cloud data processing",
+        "product_subcategory_leaf": "Mission cloud; data processing; archive; APIs; dissemination",
+        "node_status": "KB_EXTENSION",
+        "primary_entity_class": "Software / Service",
+        "typical_stored_facts": "compute; data volume; latency; API; security; provider",
+        "notes": "Also tag ESA TD2 Ground Data Processing"
+      }
+    }
+  ]
+}

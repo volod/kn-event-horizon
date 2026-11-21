@@ -1,0 +1,369 @@
+{
+  "format": "kn.seed-proposal.table",
+  "status": "unreviewed_proposal",
+  "domain": "gdelt",
+  "source": {
+    "file_name": "gdelt_ontology_and_tags_v1.xlsx",
+    "sha256": "c31bba2aad40336c620044c6df5332744aebdce70b415e56bc121096845881a2",
+    "sheet_name": "11_Field_Mapping",
+    "sheet_position": 12
+  },
+  "title": "Field mapping | minimum ingestion schema",
+  "notes": [
+    "Selected native fields (BigQuery names or codebook labels), not a complete physical schema. Validate exact headers/types at connector setup."
+  ],
+  "header_row": 4,
+  "columns": [
+    {
+      "key": "input",
+      "label": "Input",
+      "column": "A"
+    },
+    {
+      "key": "field_s",
+      "label": "Field(s)",
+      "column": "B"
+    },
+    {
+      "key": "logical_type",
+      "label": "Logical type",
+      "column": "C"
+    },
+    {
+      "key": "meaning",
+      "label": "Meaning",
+      "column": "D"
+    },
+    {
+      "key": "quality_join_rule",
+      "label": "Quality / join rule",
+      "column": "E"
+    },
+    {
+      "key": "source_url",
+      "label": "Source URL",
+      "column": "F"
+    }
+  ],
+  "records": [
+    {
+      "source_row": 5,
+      "values": {
+        "input": "Events",
+        "field_s": "GlobalEventID",
+        "logical_type": "string/int64",
+        "meaning": "event record identifier",
+        "quality_join_rule": "PK, no date ordering",
+        "source_url": "https://data.gdeltproject.org/documentation/GDELT-Event_Codebook-V2.0.pdf"
+      }
+    },
+    {
+      "source_row": 6,
+      "values": {
+        "input": "Events",
+        "field_s": "SQLDATE (BigQuery) / Day (codebook)",
+        "logical_type": "date YYYYMMDD",
+        "meaning": "event day",
+        "quality_join_rule": "Distinct from discovery",
+        "source_url": "https://data.gdeltproject.org/documentation/GDELT-Event_Codebook-V2.0.pdf"
+      }
+    },
+    {
+      "source_row": 7,
+      "values": {
+        "input": "Events",
+        "field_s": "DATEADDED",
+        "logical_type": "timestamp YYYYMMDDHHMMSS",
+        "meaning": "record discovery/update timestamp",
+        "quality_join_rule": "Not event timestamp",
+        "source_url": "https://data.gdeltproject.org/documentation/GDELT-Event_Codebook-V2.0.pdf"
+      }
+    },
+    {
+      "source_row": 8,
+      "values": {
+        "input": "Events",
+        "field_s": "Actor1* / Actor2*",
+        "logical_type": "structured fields",
+        "meaning": "raw CAMEO attributes",
+        "quality_join_rule": "Keep original role/namespace",
+        "source_url": "https://data.gdeltproject.org/documentation/GDELT-Event_Codebook-V2.0.pdf"
+      }
+    },
+    {
+      "source_row": 9,
+      "values": {
+        "input": "Events",
+        "field_s": "EventCode / EventBaseCode / EventRootCode",
+        "logical_type": "string",
+        "meaning": "action hierarchy",
+        "quality_join_rule": "Preserve zero prefixes",
+        "source_url": "https://data.gdeltproject.org/documentation/GDELT-Event_Codebook-V2.0.pdf"
+      }
+    },
+    {
+      "source_row": 10,
+      "values": {
+        "input": "Events",
+        "field_s": "QuadClass; GoldsteinScale",
+        "logical_type": "int / decimal",
+        "meaning": "class and action scale",
+        "quality_join_rule": "Not actual impact",
+        "source_url": "https://data.gdeltproject.org/documentation/GDELT-Event_Codebook-V2.0.pdf"
+      }
+    },
+    {
+      "source_row": 11,
+      "values": {
+        "input": "Events",
+        "field_s": "Actor1Geo*; Actor2Geo*; ActionGeo*",
+        "logical_type": "structured fields",
+        "meaning": "three geo roles",
+        "quality_join_rule": "Estimated; keep geo type",
+        "source_url": "https://data.gdeltproject.org/documentation/GDELT-Event_Codebook-V2.0.pdf"
+      }
+    },
+    {
+      "source_row": 12,
+      "values": {
+        "input": "Events",
+        "field_s": "NumMentions; NumSources; NumArticles; AvgTone; SOURCEURL",
+        "logical_type": "mixed",
+        "meaning": "legacy coverage metadata",
+        "quality_join_rule": "Prefer Mentions for ongoing coverage",
+        "source_url": "https://data.gdeltproject.org/documentation/GDELT-Event_Codebook-V2.0.pdf"
+      }
+    },
+    {
+      "source_row": 13,
+      "values": {
+        "input": "Mentions",
+        "field_s": "GlobalEventID",
+        "logical_type": "string/int64",
+        "meaning": "event FK",
+        "quality_join_rule": "Join Events",
+        "source_url": "https://data.gdeltproject.org/documentation/GDELT-Event_Codebook-V2.0.pdf"
+      }
+    },
+    {
+      "source_row": 14,
+      "values": {
+        "input": "Mentions",
+        "field_s": "MentionType; MentionIdentifier; MentionSourceName",
+        "logical_type": "mixed",
+        "meaning": "document collection and identifier",
+        "quality_join_rule": "Match collection ID and original identifier",
+        "source_url": "https://data.gdeltproject.org/documentation/GDELT-Event_Codebook-V2.0.pdf"
+      }
+    },
+    {
+      "source_row": 15,
+      "values": {
+        "input": "Mentions",
+        "field_s": "EventTimeDate; MentionTimeDate",
+        "logical_type": "timestamp",
+        "meaning": "event first discovery and mention batch",
+        "quality_join_rule": "Not article publication time",
+        "source_url": "https://data.gdeltproject.org/documentation/GDELT-Event_Codebook-V2.0.pdf"
+      }
+    },
+    {
+      "source_row": 16,
+      "values": {
+        "input": "Mentions",
+        "field_s": "SentenceID; Actor1CharOffset; Actor2CharOffset; ActionCharOffset",
+        "logical_type": "integer",
+        "meaning": "mention context",
+        "quality_join_rule": "Offsets approximate",
+        "source_url": "https://data.gdeltproject.org/documentation/GDELT-Event_Codebook-V2.0.pdf"
+      }
+    },
+    {
+      "source_row": 17,
+      "values": {
+        "input": "Mentions",
+        "field_s": "Confidence; InRawText; MentionDocLen; MentionDocTone",
+        "logical_type": "mixed",
+        "meaning": "extraction detail",
+        "quality_join_rule": "Confidence not truth",
+        "source_url": "https://data.gdeltproject.org/documentation/GDELT-Event_Codebook-V2.0.pdf"
+      }
+    },
+    {
+      "source_row": 18,
+      "values": {
+        "input": "Mentions",
+        "field_s": "MentionDocTranslationInfo",
+        "logical_type": "string",
+        "meaning": "translation provenance",
+        "quality_join_rule": "Blank not universally proof of English original",
+        "source_url": "https://data.gdeltproject.org/documentation/GDELT-Event_Codebook-V2.0.pdf"
+      }
+    },
+    {
+      "source_row": 19,
+      "values": {
+        "input": "GKG",
+        "field_s": "GKGRECORDID; DATE",
+        "logical_type": "string; timestamp",
+        "meaning": "row ID and batch timestamp",
+        "quality_join_rule": "Not document publication time",
+        "source_url": "https://data.gdeltproject.org/documentation/GDELT-Global_Knowledge_Graph_Codebook-V2.1.pdf"
+      }
+    },
+    {
+      "source_row": 20,
+      "values": {
+        "input": "GKG",
+        "field_s": "SourceCollectionIdentifier; SourceCommonName; DocumentIdentifier",
+        "logical_type": "mixed",
+        "meaning": "document provenance and join",
+        "quality_join_rule": "Keep raw and normalized key",
+        "source_url": "https://data.gdeltproject.org/documentation/GDELT-Global_Knowledge_Graph_Codebook-V2.1.pdf"
+      }
+    },
+    {
+      "source_row": 21,
+      "values": {
+        "input": "GKG",
+        "field_s": "Themes; V2Themes",
+        "logical_type": "nested string",
+        "meaning": "themes and offsets",
+        "quality_join_rule": "Theme lookup version; explode rows",
+        "source_url": "https://data.gdeltproject.org/documentation/GDELT-Global_Knowledge_Graph_Codebook-V2.1.pdf"
+      }
+    },
+    {
+      "source_row": 22,
+      "values": {
+        "input": "GKG",
+        "field_s": "Persons; V2Persons; Organizations; V2Organizations; AllNames",
+        "logical_type": "nested string",
+        "meaning": "entity mentions",
+        "quality_join_rule": "No canonical identity guarantee",
+        "source_url": "https://data.gdeltproject.org/documentation/GDELT-Global_Knowledge_Graph_Codebook-V2.1.pdf"
+      }
+    },
+    {
+      "source_row": 23,
+      "values": {
+        "input": "GKG",
+        "field_s": "Locations; V2Locations",
+        "logical_type": "nested string",
+        "meaning": "geocoded mentions",
+        "quality_join_rule": "Separate geography from ActionGeo",
+        "source_url": "https://data.gdeltproject.org/documentation/GDELT-Global_Knowledge_Graph_Codebook-V2.1.pdf"
+      }
+    },
+    {
+      "source_row": 24,
+      "values": {
+        "input": "GKG",
+        "field_s": "Counts; V2Counts; Amounts; Dates; Quotations",
+        "logical_type": "nested string",
+        "meaning": "quantities, dates, quotes",
+        "quality_join_rule": "Claims, not verified totals",
+        "source_url": "https://data.gdeltproject.org/documentation/GDELT-Global_Knowledge_Graph_Codebook-V2.1.pdf"
+      }
+    },
+    {
+      "source_row": 25,
+      "values": {
+        "input": "GKG",
+        "field_s": "GCAM; V2Tone",
+        "logical_type": "nested string/vector",
+        "meaning": "content measures and tone",
+        "quality_join_rule": "Preserve dictionary and units",
+        "source_url": "https://data.gdeltproject.org/documentation/GDELT-Global_Knowledge_Graph_Codebook-V2.1.pdf"
+      }
+    },
+    {
+      "source_row": 26,
+      "values": {
+        "input": "GKG",
+        "field_s": "SharingImage; RelatedImages; SocialImageEmbeds; SocialVideoEmbeds",
+        "logical_type": "string/URLs",
+        "meaning": "associated media",
+        "quality_join_rule": "May be irrelevant or unavailable",
+        "source_url": "https://data.gdeltproject.org/documentation/GDELT-Global_Knowledge_Graph_Codebook-V2.1.pdf"
+      }
+    },
+    {
+      "source_row": 27,
+      "values": {
+        "input": "GKG",
+        "field_s": "TranslationInfo",
+        "logical_type": "string",
+        "meaning": "translation provenance",
+        "quality_join_rule": "Track source language",
+        "source_url": "https://data.gdeltproject.org/documentation/GDELT-Global_Knowledge_Graph_Codebook-V2.1.pdf"
+      }
+    },
+    {
+      "source_row": 28,
+      "values": {
+        "input": "KB",
+        "field_s": "claim_id; subject_id; predicate; object",
+        "logical_type": "mixed",
+        "meaning": "reified assertion",
+        "quality_join_rule": "Never upgrade automatically",
+        "source_url": "https://blog.gdeltproject.org/gdelt-2-0-our-global-world-in-realtime/"
+      }
+    },
+    {
+      "source_row": 29,
+      "values": {
+        "input": "KB",
+        "field_s": "modality; status; evidence_ids; reviewer",
+        "logical_type": "enum/array",
+        "meaning": "announced/planned/reported/validated/disputed",
+        "quality_join_rule": "Separate extraction vs verification",
+        "source_url": "https://blog.gdeltproject.org/gdelt-2-0-our-global-world-in-realtime/"
+      }
+    },
+    {
+      "source_row": 30,
+      "values": {
+        "input": "KB",
+        "field_s": "native_ids; source_url; retrieved_at; schema_version; raw_hash",
+        "logical_type": "mixed",
+        "meaning": "audit trail",
+        "quality_join_rule": "Mandatory for all ingested claims",
+        "source_url": "https://blog.gdeltproject.org/gdelt-2-0-our-global-world-in-realtime/"
+      }
+    },
+    {
+      "source_row": 31,
+      "values": {
+        "input": "KB",
+        "field_s": "tag_namespace; tag_code; tag_version; mapping_method; confidence",
+        "logical_type": "mixed",
+        "meaning": "many-to-many tag assignment",
+        "quality_join_rule": "Record tagging scope",
+        "source_url": "https://blog.gdeltproject.org/gdelt-2-0-our-global-world-in-realtime/"
+      }
+    },
+    {
+      "source_row": 32,
+      "values": {
+        "input": "KB",
+        "field_s": "event_date; publication_time; batch_time; retrieved_at; valid_from/to",
+        "logical_type": "timestamp",
+        "meaning": "time dimensions",
+        "quality_join_rule": "Unknown = null",
+        "source_url": "https://blog.gdeltproject.org/gdelt-2-0-our-global-world-in-realtime/"
+      }
+    },
+    {
+      "source_row": 33,
+      "values": {
+        "input": "KB",
+        "field_s": "source_diversity; story_cluster_id; coverage_denominator; baseline_window",
+        "logical_type": "mixed",
+        "meaning": "trend quality",
+        "quality_join_rule": "Normalize and deduplicate",
+        "source_url": "https://blog.gdeltproject.org/gdelt-2-0-our-global-world-in-realtime/"
+      }
+    }
+  ]
+}

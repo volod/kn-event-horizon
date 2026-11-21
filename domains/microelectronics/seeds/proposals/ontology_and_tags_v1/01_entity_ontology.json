@@ -1,0 +1,313 @@
+{
+  "format": "kn.seed-proposal.table",
+  "status": "unreviewed_proposal",
+  "domain": "microelectronics",
+  "source": {
+    "file_name": "microelectronics_ontology_and_tags_v1.xlsx",
+    "sha256": "7166aa06791998c692cc6a2ac377692a6687f15e3353ffa70a1c159f2e63c34f",
+    "sheet_name": "01_Entity_Ontology",
+    "sheet_position": 2
+  },
+  "title": "Entity classes \u2014 implementation model",
+  "notes": [],
+  "header_row": 4,
+  "columns": [
+    {
+      "key": "id",
+      "label": "ID",
+      "column": "A"
+    },
+    {
+      "key": "entity_class",
+      "label": "Entity class",
+      "column": "B"
+    },
+    {
+      "key": "definition",
+      "label": "Definition",
+      "column": "C"
+    },
+    {
+      "key": "core_fields",
+      "label": "Core fields",
+      "column": "D"
+    },
+    {
+      "key": "outgoing_relations",
+      "label": "Outgoing relations",
+      "column": "E"
+    }
+  ],
+  "records": [
+    {
+      "source_row": 5,
+      "values": {
+        "id": "ORG",
+        "entity_class": "Organization",
+        "definition": "Legal entity / organizational unit",
+        "core_fields": "legal name, ID, parent, HQ, ownership/control, roles",
+        "outgoing_relations": "designs; markets; operates_facility"
+      }
+    },
+    {
+      "source_row": 6,
+      "values": {
+        "id": "FAM",
+        "entity_class": "ProductFamily",
+        "definition": "Family or series",
+        "core_fields": "brand, family, architecture, generation",
+        "outgoing_relations": "contains_model"
+      }
+    },
+    {
+      "source_row": 7,
+      "values": {
+        "id": "MOD",
+        "entity_class": "ProductModel",
+        "definition": "Specific silicon model or variant",
+        "core_fields": "model, die rev, architecture, product class",
+        "outgoing_relations": "has_mpn; implements"
+      }
+    },
+    {
+      "source_row": 8,
+      "values": {
+        "id": "MPN",
+        "entity_class": "OrderablePart",
+        "definition": "Orderable manufacturer part number",
+        "core_fields": "MPN, package, grade, packing, lifecycle",
+        "outgoing_relations": "variant_of; offered_by"
+      }
+    },
+    {
+      "source_row": 9,
+      "values": {
+        "id": "DIE",
+        "entity_class": "Die/Chiplet",
+        "definition": "Physical silicon or chiplet design",
+        "core_fields": "die id, revision, process, material",
+        "outgoing_relations": "fabricated_at; integrated_into"
+      }
+    },
+    {
+      "source_row": 10,
+      "values": {
+        "id": "IP",
+        "entity_class": "IPBlock",
+        "definition": "Licensable RTL, hard macro or analog IP",
+        "core_fields": "IP version, license, PDK, interface",
+        "outgoing_relations": "licensed_by; integrated_into"
+      }
+    },
+    {
+      "source_row": 11,
+      "values": {
+        "id": "DEV",
+        "entity_class": "DevelopmentKit",
+        "definition": "Evaluation board or reference design",
+        "core_fields": "board rev, BOM, power boundary, SDK",
+        "outgoing_relations": "evaluates; contains"
+      }
+    },
+    {
+      "source_row": 12,
+      "values": {
+        "id": "SUB",
+        "entity_class": "Subsystem/Module",
+        "definition": "Packaged module or SiP / board",
+        "core_fields": "BOM, interfaces, power boundary",
+        "outgoing_relations": "contains; integrates"
+      }
+    },
+    {
+      "source_row": 13,
+      "values": {
+        "id": "FAC",
+        "entity_class": "Facility",
+        "definition": "Physical fab, ATP, lab or design centre",
+        "core_fields": "operator, jurisdiction, capability, capacity, status",
+        "outgoing_relations": "supports_process"
+      }
+    },
+    {
+      "source_row": 14,
+      "values": {
+        "id": "PROC",
+        "entity_class": "ProcessPlatform",
+        "definition": "Process technology / PDK",
+        "core_fields": "node label, transistor architecture, wafer, PDK rev",
+        "outgoing_relations": "available_at"
+      }
+    },
+    {
+      "source_row": 15,
+      "values": {
+        "id": "SW",
+        "entity_class": "SoftwareTool",
+        "definition": "SDK, runtime, compiler, RTL tool",
+        "core_fields": "version, OS, supported parts, license",
+        "outgoing_relations": "supports; compiles_for"
+      }
+    },
+    {
+      "source_row": 16,
+      "values": {
+        "id": "TECH",
+        "entity_class": "Technology",
+        "definition": "Reusable technology concept",
+        "core_fields": "tag ID, vocabulary, version",
+        "outgoing_relations": "implemented_by"
+      }
+    },
+    {
+      "source_row": 17,
+      "values": {
+        "id": "APP",
+        "entity_class": "Application",
+        "definition": "End-use category",
+        "core_fields": "tag ID, vocabulary",
+        "outgoing_relations": "served_by"
+      }
+    },
+    {
+      "source_row": 18,
+      "values": {
+        "id": "SVC",
+        "entity_class": "Service",
+        "definition": "Industrial or engineering offering",
+        "core_fields": "provider, scope, qualification, SLA",
+        "outgoing_relations": "provided_by"
+      }
+    },
+    {
+      "source_row": 19,
+      "values": {
+        "id": "PROJECT",
+        "entity_class": "R&DProject",
+        "definition": "Funded research/development initiative",
+        "core_fields": "grant ID, partners, TRL, milestones",
+        "outgoing_relations": "funded_by; develops"
+      }
+    },
+    {
+      "source_row": 20,
+      "values": {
+        "id": "DEMO",
+        "entity_class": "Prototype/Demonstrator",
+        "definition": "Experimental implementation",
+        "core_fields": "silicon/FPGA/simulation, date, proof, maturity",
+        "outgoing_relations": "demonstrates"
+      }
+    },
+    {
+      "source_row": 21,
+      "values": {
+        "id": "PAT",
+        "entity_class": "PatentFamily",
+        "definition": "IP evidence",
+        "core_fields": "family ID, assignee, priority, CPC",
+        "outgoing_relations": "relates_to"
+      }
+    },
+    {
+      "source_row": 22,
+      "values": {
+        "id": "PUB",
+        "entity_class": "Publication",
+        "definition": "Paper, conference or technical report",
+        "core_fields": "DOI, authors, venue, date",
+        "outgoing_relations": "reports"
+      }
+    },
+    {
+      "source_row": 23,
+      "values": {
+        "id": "ROAD",
+        "entity_class": "RoadmapMilestone",
+        "definition": "Future goal, not a product",
+        "core_fields": "target date, target KPI, assumptions",
+        "outgoing_relations": "targets"
+      }
+    },
+    {
+      "source_row": 24,
+      "values": {
+        "id": "AWARD",
+        "entity_class": "Grant/Contract",
+        "definition": "Funding or commercial agreement",
+        "core_fields": "award ID, parties, amount, dates, type",
+        "outgoing_relations": "funds; procures"
+      }
+    },
+    {
+      "source_row": 25,
+      "values": {
+        "id": "OFFER",
+        "entity_class": "DistributorOffer",
+        "definition": "Price and availability snapshot",
+        "core_fields": "seller, MPN, tier, currency, stock, timestamp",
+        "outgoing_relations": "offers"
+      }
+    },
+    {
+      "source_row": 26,
+      "values": {
+        "id": "NOTICE",
+        "entity_class": "LifecycleNotice",
+        "definition": "PCN, PDN, EOL, errata",
+        "core_fields": "notice ID, dates, affected MPNs, revision",
+        "outgoing_relations": "affects"
+      }
+    },
+    {
+      "source_row": 27,
+      "values": {
+        "id": "CERT",
+        "entity_class": "Qualification/Compliance",
+        "definition": "Qualification or regulatory evidence",
+        "core_fields": "standard/version, grade, evidence, scope",
+        "outgoing_relations": "applies_to"
+      }
+    },
+    {
+      "source_row": 28,
+      "values": {
+        "id": "TEST",
+        "entity_class": "BenchmarkRun",
+        "definition": "Repeatable hardware/software test",
+        "core_fields": "workload, board, versions, conditions, raw results",
+        "outgoing_relations": "evaluates"
+      }
+    },
+    {
+      "source_row": 29,
+      "values": {
+        "id": "OBS",
+        "entity_class": "AttributeObservation",
+        "definition": "One measured or declared property",
+        "core_fields": "property ID, value, unit, conditions, source",
+        "outgoing_relations": "describes"
+      }
+    },
+    {
+      "source_row": 30,
+      "values": {
+        "id": "SRC",
+        "entity_class": "EvidenceSource",
+        "definition": "Traceable data source",
+        "core_fields": "URL, document rev, date, page/table, retrieval",
+        "outgoing_relations": "supports_assertion"
+      }
+    },
+    {
+      "source_row": 31,
+      "values": {
+        "id": "CLAIM",
+        "entity_class": "Claim/Assertion",
+        "definition": "Reified fact or edge with evidence",
+        "core_fields": "subject, predicate, object, valid dates, confidence",
+        "outgoing_relations": "supported_by"
+      }
+    }
+  ]
+}

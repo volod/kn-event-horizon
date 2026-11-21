@@ -1,0 +1,51 @@
+{
+  "format": "kn.seed-proposal.workbook",
+  "status": "unreviewed_proposal",
+  "domain": "space",
+  "workbook": {
+    "file_name": "space_sector_data_sources_v1.xlsx",
+    "sha256": "83958f6df5f3e5b0cd969a4fe3206197fe4bf4cee396df62f02dbe394a3040f0",
+    "size_bytes": 20736
+  },
+  "conversion": {
+    "method": "OOXML parsed with the Python standard library; no spreadsheet engine",
+    "cell_text": "verbatim; empty cells are null; numeric cells are JSON numbers",
+    "formulas": "never evaluated; cached values kept; formula text recorded per record",
+    "macros_or_external_links": "none present",
+    "encoding": "ASCII JSON with escaped non-ASCII characters"
+  },
+  "sheets": [
+    {
+      "sheet_name": "00_README",
+      "sheet_position": 1,
+      "file": "00_readme.json",
+      "format": "kn.seed-proposal.notes",
+      "sha256": "26bee9a76f232d23be525fd03b02d013e43b5923c1c8724a6a41d7cbfc9ff890",
+      "row_count": 9
+    },
+    {
+      "sheet_name": "01_Data_Sources",
+      "sheet_position": 2,
+      "file": "01_data_sources.json",
+      "format": "kn.seed-proposal.table",
+      "sha256": "09acb7afa0eb75c46240bdf17b637a0a7daf061b215bc0dd6525f50185a00e34",
+      "record_count": 37
+    },
+    {
+      "sheet_name": "02_Coverage_Map",
+      "sheet_position": 3,
+      "file": "02_coverage_map.json",
+      "format": "kn.seed-proposal.table",
+      "sha256": "2a31f77cd630ec2f643347bdda2312ef281274b12414a06cc7c987cd6ec742e5",
+      "record_count": 14
+    },
+    {
+      "sheet_name": "03_Ingestion_Order",
+      "sheet_position": 4,
+      "file": "03_ingestion_order.json",
+      "format": "kn.seed-proposal.table",
+      "sha256": "78e0dbbaabb1426edb1a6c768926803b9c3059d3d2df9d80aad783ca06a74f2d",
+      "record_count": 8
+    }
+  ]
+}

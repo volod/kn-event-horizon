@@ -1,0 +1,571 @@
+{
+  "format": "kn.seed-proposal.table",
+  "status": "unreviewed_proposal",
+  "domain": "gdelt",
+  "source": {
+    "file_name": "gdelt_ontology_and_tags_v1.xlsx",
+    "sha256": "c31bba2aad40336c620044c6df5332744aebdce70b415e56bc121096845881a2",
+    "sheet_name": "05_GKG_Theme_Tags",
+    "sheet_position": 6
+  },
+  "title": "GKG themes | selected starter vocabulary",
+  "notes": [
+    "Exact codes observed in official lookup; grouping is local. Full lookup has tens of thousands of entries and should be imported separately as a versioned dictionary."
+  ],
+  "header_row": 4,
+  "columns": [
+    {
+      "key": "native_theme_code",
+      "label": "Native theme code",
+      "column": "A"
+    },
+    {
+      "key": "local_grouping",
+      "label": "Local grouping",
+      "column": "B"
+    },
+    {
+      "key": "namespace",
+      "label": "Namespace",
+      "column": "C"
+    },
+    {
+      "key": "fields",
+      "label": "Fields",
+      "column": "D"
+    },
+    {
+      "key": "use_limitation",
+      "label": "Use/limitation",
+      "column": "E"
+    },
+    {
+      "key": "version",
+      "label": "Version",
+      "column": "F"
+    },
+    {
+      "key": "source_url",
+      "label": "Source URL",
+      "column": "G"
+    }
+  ],
+  "records": [
+    {
+      "source_row": 5,
+      "values": {
+        "native_theme_code": "SCIENCE",
+        "local_grouping": "Science/technology",
+        "namespace": "GKG_THEME",
+        "fields": "Themes / V2Themes",
+        "use_limitation": "Document-level filter; verify contextual relevance",
+        "version": "2021 lookup (observed code)",
+        "source_url": "https://data.gdeltproject.org/api/v2/guides/LOOKUP-GKGTHEMES.TXT"
+      }
+    },
+    {
+      "source_row": 6,
+      "values": {
+        "native_theme_code": "WB_133_INFORMATION_AND_COMMUNICATION_TECHNOLOGIES",
+        "local_grouping": "Science/technology",
+        "namespace": "GKG_THEME",
+        "fields": "Themes / V2Themes",
+        "use_limitation": "Document-level filter; verify contextual relevance",
+        "version": "2021 lookup (observed code)",
+        "source_url": "https://data.gdeltproject.org/api/v2/guides/LOOKUP-GKGTHEMES.TXT"
+      }
+    },
+    {
+      "source_row": 7,
+      "values": {
+        "native_theme_code": "WB_678_DIGITAL_GOVERNMENT",
+        "local_grouping": "Science/technology",
+        "namespace": "GKG_THEME",
+        "fields": "Themes / V2Themes",
+        "use_limitation": "Document-level filter; verify contextual relevance",
+        "version": "2021 lookup (observed code)",
+        "source_url": "https://data.gdeltproject.org/api/v2/guides/LOOKUP-GKGTHEMES.TXT"
+      }
+    },
+    {
+      "source_row": 8,
+      "values": {
+        "native_theme_code": "WB_346_COMPETITIVE_INDUSTRIES",
+        "local_grouping": "Economy/industry",
+        "namespace": "GKG_THEME",
+        "fields": "Themes / V2Themes",
+        "use_limitation": "Document-level filter; verify contextual relevance",
+        "version": "2021 lookup (observed code)",
+        "source_url": "https://data.gdeltproject.org/api/v2/guides/LOOKUP-GKGTHEMES.TXT"
+      }
+    },
+    {
+      "source_row": 9,
+      "values": {
+        "native_theme_code": "WB_405_BUSINESS_CLIMATE",
+        "local_grouping": "Economy/industry",
+        "namespace": "GKG_THEME",
+        "fields": "Themes / V2Themes",
+        "use_limitation": "Document-level filter; verify contextual relevance",
+        "version": "2021 lookup (observed code)",
+        "source_url": "https://data.gdeltproject.org/api/v2/guides/LOOKUP-GKGTHEMES.TXT"
+      }
+    },
+    {
+      "source_row": 10,
+      "values": {
+        "native_theme_code": "WB_2530_BUSINESS_ENVIRONMENT",
+        "local_grouping": "Economy/industry",
+        "namespace": "GKG_THEME",
+        "fields": "Themes / V2Themes",
+        "use_limitation": "Document-level filter; verify contextual relevance",
+        "version": "2021 lookup (observed code)",
+        "source_url": "https://data.gdeltproject.org/api/v2/guides/LOOKUP-GKGTHEMES.TXT"
+      }
+    },
+    {
+      "source_row": 11,
+      "values": {
+        "native_theme_code": "WB_698_TRADE",
+        "local_grouping": "Economy/industry",
+        "namespace": "GKG_THEME",
+        "fields": "Themes / V2Themes",
+        "use_limitation": "Document-level filter; verify contextual relevance",
+        "version": "2021 lookup (observed code)",
+        "source_url": "https://data.gdeltproject.org/api/v2/guides/LOOKUP-GKGTHEMES.TXT"
+      }
+    },
+    {
+      "source_row": 12,
+      "values": {
+        "native_theme_code": "ECON_STOCKMARKET",
+        "local_grouping": "Economy/industry",
+        "namespace": "GKG_THEME",
+        "fields": "Themes / V2Themes",
+        "use_limitation": "Document-level filter; verify contextual relevance",
+        "version": "2021 lookup (observed code)",
+        "source_url": "https://data.gdeltproject.org/api/v2/guides/LOOKUP-GKGTHEMES.TXT"
+      }
+    },
+    {
+      "source_row": 13,
+      "values": {
+        "native_theme_code": "ECON_TAXATION",
+        "local_grouping": "Economy/industry",
+        "namespace": "GKG_THEME",
+        "fields": "Themes / V2Themes",
+        "use_limitation": "Document-level filter; verify contextual relevance",
+        "version": "2021 lookup (observed code)",
+        "source_url": "https://data.gdeltproject.org/api/v2/guides/LOOKUP-GKGTHEMES.TXT"
+      }
+    },
+    {
+      "source_row": 14,
+      "values": {
+        "native_theme_code": "TAX_ECON_PRICE",
+        "local_grouping": "Economy/industry",
+        "namespace": "GKG_THEME",
+        "fields": "Themes / V2Themes",
+        "use_limitation": "Document-level filter; verify contextual relevance",
+        "version": "2021 lookup (observed code)",
+        "source_url": "https://data.gdeltproject.org/api/v2/guides/LOOKUP-GKGTHEMES.TXT"
+      }
+    },
+    {
+      "source_row": 15,
+      "values": {
+        "native_theme_code": "WB_1920_FINANCIAL_SECTOR_DEVELOPMENT",
+        "local_grouping": "Economy/industry",
+        "namespace": "GKG_THEME",
+        "fields": "Themes / V2Themes",
+        "use_limitation": "Document-level filter; verify contextual relevance",
+        "version": "2021 lookup (observed code)",
+        "source_url": "https://data.gdeltproject.org/api/v2/guides/LOOKUP-GKGTHEMES.TXT"
+      }
+    },
+    {
+      "source_row": 16,
+      "values": {
+        "native_theme_code": "GENERAL_GOVERNMENT",
+        "local_grouping": "Governance",
+        "namespace": "GKG_THEME",
+        "fields": "Themes / V2Themes",
+        "use_limitation": "Document-level filter; verify contextual relevance",
+        "version": "2021 lookup (observed code)",
+        "source_url": "https://data.gdeltproject.org/api/v2/guides/LOOKUP-GKGTHEMES.TXT"
+      }
+    },
+    {
+      "source_row": 17,
+      "values": {
+        "native_theme_code": "LEGISLATION",
+        "local_grouping": "Governance",
+        "namespace": "GKG_THEME",
+        "fields": "Themes / V2Themes",
+        "use_limitation": "Document-level filter; verify contextual relevance",
+        "version": "2021 lookup (observed code)",
+        "source_url": "https://data.gdeltproject.org/api/v2/guides/LOOKUP-GKGTHEMES.TXT"
+      }
+    },
+    {
+      "source_row": 18,
+      "values": {
+        "native_theme_code": "EPU_POLICY",
+        "local_grouping": "Governance",
+        "namespace": "GKG_THEME",
+        "fields": "Themes / V2Themes",
+        "use_limitation": "Document-level filter; verify contextual relevance",
+        "version": "2021 lookup (observed code)",
+        "source_url": "https://data.gdeltproject.org/api/v2/guides/LOOKUP-GKGTHEMES.TXT"
+      }
+    },
+    {
+      "source_row": 19,
+      "values": {
+        "native_theme_code": "EPU_CATS_REGULATION",
+        "local_grouping": "Governance",
+        "namespace": "GKG_THEME",
+        "fields": "Themes / V2Themes",
+        "use_limitation": "Document-level filter; verify contextual relevance",
+        "version": "2021 lookup (observed code)",
+        "source_url": "https://data.gdeltproject.org/api/v2/guides/LOOKUP-GKGTHEMES.TXT"
+      }
+    },
+    {
+      "source_row": 20,
+      "values": {
+        "native_theme_code": "WB_831_GOVERNANCE",
+        "local_grouping": "Governance",
+        "namespace": "GKG_THEME",
+        "fields": "Themes / V2Themes",
+        "use_limitation": "Document-level filter; verify contextual relevance",
+        "version": "2021 lookup (observed code)",
+        "source_url": "https://data.gdeltproject.org/api/v2/guides/LOOKUP-GKGTHEMES.TXT"
+      }
+    },
+    {
+      "source_row": 21,
+      "values": {
+        "native_theme_code": "WB_832_ANTI_CORRUPTION",
+        "local_grouping": "Governance",
+        "namespace": "GKG_THEME",
+        "fields": "Themes / V2Themes",
+        "use_limitation": "Document-level filter; verify contextual relevance",
+        "version": "2021 lookup (observed code)",
+        "source_url": "https://data.gdeltproject.org/api/v2/guides/LOOKUP-GKGTHEMES.TXT"
+      }
+    },
+    {
+      "source_row": 22,
+      "values": {
+        "native_theme_code": "CORRUPTION",
+        "local_grouping": "Governance",
+        "namespace": "GKG_THEME",
+        "fields": "Themes / V2Themes",
+        "use_limitation": "Document-level filter; verify contextual relevance",
+        "version": "2021 lookup (observed code)",
+        "source_url": "https://data.gdeltproject.org/api/v2/guides/LOOKUP-GKGTHEMES.TXT"
+      }
+    },
+    {
+      "source_row": 23,
+      "values": {
+        "native_theme_code": "WB_507_ENERGY_AND_EXTRACTIVES",
+        "local_grouping": "Energy/environment",
+        "namespace": "GKG_THEME",
+        "fields": "Themes / V2Themes",
+        "use_limitation": "Document-level filter; verify contextual relevance",
+        "version": "2021 lookup (observed code)",
+        "source_url": "https://data.gdeltproject.org/api/v2/guides/LOOKUP-GKGTHEMES.TXT"
+      }
+    },
+    {
+      "source_row": 24,
+      "values": {
+        "native_theme_code": "ENV_OIL",
+        "local_grouping": "Energy/environment",
+        "namespace": "GKG_THEME",
+        "fields": "Themes / V2Themes",
+        "use_limitation": "Document-level filter; verify contextual relevance",
+        "version": "2021 lookup (observed code)",
+        "source_url": "https://data.gdeltproject.org/api/v2/guides/LOOKUP-GKGTHEMES.TXT"
+      }
+    },
+    {
+      "source_row": 25,
+      "values": {
+        "native_theme_code": "UNGP_FORESTS_RIVERS_OCEANS",
+        "local_grouping": "Energy/environment",
+        "namespace": "GKG_THEME",
+        "fields": "Themes / V2Themes",
+        "use_limitation": "Document-level filter; verify contextual relevance",
+        "version": "2021 lookup (observed code)",
+        "source_url": "https://data.gdeltproject.org/api/v2/guides/LOOKUP-GKGTHEMES.TXT"
+      }
+    },
+    {
+      "source_row": 26,
+      "values": {
+        "native_theme_code": "NATURAL_DISASTER",
+        "local_grouping": "Energy/environment",
+        "namespace": "GKG_THEME",
+        "fields": "Themes / V2Themes",
+        "use_limitation": "Document-level filter; verify contextual relevance",
+        "version": "2021 lookup (observed code)",
+        "source_url": "https://data.gdeltproject.org/api/v2/guides/LOOKUP-GKGTHEMES.TXT"
+      }
+    },
+    {
+      "source_row": 27,
+      "values": {
+        "native_theme_code": "WB_135_TRANSPORT",
+        "local_grouping": "Transport/infrastructure",
+        "namespace": "GKG_THEME",
+        "fields": "Themes / V2Themes",
+        "use_limitation": "Document-level filter; verify contextual relevance",
+        "version": "2021 lookup (observed code)",
+        "source_url": "https://data.gdeltproject.org/api/v2/guides/LOOKUP-GKGTHEMES.TXT"
+      }
+    },
+    {
+      "source_row": 28,
+      "values": {
+        "native_theme_code": "WB_1803_TRANSPORT_INFRASTRUCTURE",
+        "local_grouping": "Transport/infrastructure",
+        "namespace": "GKG_THEME",
+        "fields": "Themes / V2Themes",
+        "use_limitation": "Document-level filter; verify contextual relevance",
+        "version": "2021 lookup (observed code)",
+        "source_url": "https://data.gdeltproject.org/api/v2/guides/LOOKUP-GKGTHEMES.TXT"
+      }
+    },
+    {
+      "source_row": 29,
+      "values": {
+        "native_theme_code": "MARITIME",
+        "local_grouping": "Transport/infrastructure",
+        "namespace": "GKG_THEME",
+        "fields": "Themes / V2Themes",
+        "use_limitation": "Document-level filter; verify contextual relevance",
+        "version": "2021 lookup (observed code)",
+        "source_url": "https://data.gdeltproject.org/api/v2/guides/LOOKUP-GKGTHEMES.TXT"
+      }
+    },
+    {
+      "source_row": 30,
+      "values": {
+        "native_theme_code": "URBAN",
+        "local_grouping": "Transport/infrastructure",
+        "namespace": "GKG_THEME",
+        "fields": "Themes / V2Themes",
+        "use_limitation": "Document-level filter; verify contextual relevance",
+        "version": "2021 lookup (observed code)",
+        "source_url": "https://data.gdeltproject.org/api/v2/guides/LOOKUP-GKGTHEMES.TXT"
+      }
+    },
+    {
+      "source_row": 31,
+      "values": {
+        "native_theme_code": "GENERAL_HEALTH",
+        "local_grouping": "Health/education/agriculture",
+        "namespace": "GKG_THEME",
+        "fields": "Themes / V2Themes",
+        "use_limitation": "Document-level filter; verify contextual relevance",
+        "version": "2021 lookup (observed code)",
+        "source_url": "https://data.gdeltproject.org/api/v2/guides/LOOKUP-GKGTHEMES.TXT"
+      }
+    },
+    {
+      "source_row": 32,
+      "values": {
+        "native_theme_code": "MEDICAL",
+        "local_grouping": "Health/education/agriculture",
+        "namespace": "GKG_THEME",
+        "fields": "Themes / V2Themes",
+        "use_limitation": "Document-level filter; verify contextual relevance",
+        "version": "2021 lookup (observed code)",
+        "source_url": "https://data.gdeltproject.org/api/v2/guides/LOOKUP-GKGTHEMES.TXT"
+      }
+    },
+    {
+      "source_row": 33,
+      "values": {
+        "native_theme_code": "EDUCATION",
+        "local_grouping": "Health/education/agriculture",
+        "namespace": "GKG_THEME",
+        "fields": "Themes / V2Themes",
+        "use_limitation": "Document-level filter; verify contextual relevance",
+        "version": "2021 lookup (observed code)",
+        "source_url": "https://data.gdeltproject.org/api/v2/guides/LOOKUP-GKGTHEMES.TXT"
+      }
+    },
+    {
+      "source_row": 34,
+      "values": {
+        "native_theme_code": "WB_1331_HEALTH_TECHNOLOGIES",
+        "local_grouping": "Health/education/agriculture",
+        "namespace": "GKG_THEME",
+        "fields": "Themes / V2Themes",
+        "use_limitation": "Document-level filter; verify contextual relevance",
+        "version": "2021 lookup (observed code)",
+        "source_url": "https://data.gdeltproject.org/api/v2/guides/LOOKUP-GKGTHEMES.TXT"
+      }
+    },
+    {
+      "source_row": 35,
+      "values": {
+        "native_theme_code": "WB_435_AGRICULTURE_AND_FOOD_SECURITY",
+        "local_grouping": "Health/education/agriculture",
+        "namespace": "GKG_THEME",
+        "fields": "Themes / V2Themes",
+        "use_limitation": "Document-level filter; verify contextual relevance",
+        "version": "2021 lookup (observed code)",
+        "source_url": "https://data.gdeltproject.org/api/v2/guides/LOOKUP-GKGTHEMES.TXT"
+      }
+    },
+    {
+      "source_row": 36,
+      "values": {
+        "native_theme_code": "WB_2167_PANDEMICS",
+        "local_grouping": "Health/education/agriculture",
+        "namespace": "GKG_THEME",
+        "fields": "Themes / V2Themes",
+        "use_limitation": "Document-level filter; verify contextual relevance",
+        "version": "2021 lookup (observed code)",
+        "source_url": "https://data.gdeltproject.org/api/v2/guides/LOOKUP-GKGTHEMES.TXT"
+      }
+    },
+    {
+      "source_row": 37,
+      "values": {
+        "native_theme_code": "PROTEST",
+        "local_grouping": "Society/security",
+        "namespace": "GKG_THEME",
+        "fields": "Themes / V2Themes",
+        "use_limitation": "Document-level filter; verify contextual relevance",
+        "version": "2021 lookup (observed code)",
+        "source_url": "https://data.gdeltproject.org/api/v2/guides/LOOKUP-GKGTHEMES.TXT"
+      }
+    },
+    {
+      "source_row": 38,
+      "values": {
+        "native_theme_code": "ARMEDCONFLICT",
+        "local_grouping": "Society/security",
+        "namespace": "GKG_THEME",
+        "fields": "Themes / V2Themes",
+        "use_limitation": "Document-level filter; verify contextual relevance",
+        "version": "2021 lookup (observed code)",
+        "source_url": "https://data.gdeltproject.org/api/v2/guides/LOOKUP-GKGTHEMES.TXT"
+      }
+    },
+    {
+      "source_row": 39,
+      "values": {
+        "native_theme_code": "MILITARY",
+        "local_grouping": "Society/security",
+        "namespace": "GKG_THEME",
+        "fields": "Themes / V2Themes",
+        "use_limitation": "Document-level filter; verify contextual relevance",
+        "version": "2021 lookup (observed code)",
+        "source_url": "https://data.gdeltproject.org/api/v2/guides/LOOKUP-GKGTHEMES.TXT"
+      }
+    },
+    {
+      "source_row": 40,
+      "values": {
+        "native_theme_code": "EPU_CATS_NATIONAL_SECURITY",
+        "local_grouping": "Society/security",
+        "namespace": "GKG_THEME",
+        "fields": "Themes / V2Themes",
+        "use_limitation": "Document-level filter; verify contextual relevance",
+        "version": "2021 lookup (observed code)",
+        "source_url": "https://data.gdeltproject.org/api/v2/guides/LOOKUP-GKGTHEMES.TXT"
+      }
+    },
+    {
+      "source_row": 41,
+      "values": {
+        "native_theme_code": "WB_2432_FRAGILITY_CONFLICT_AND_VIOLENCE",
+        "local_grouping": "Society/security",
+        "namespace": "GKG_THEME",
+        "fields": "Themes / V2Themes",
+        "use_limitation": "Document-level filter; verify contextual relevance",
+        "version": "2021 lookup (observed code)",
+        "source_url": "https://data.gdeltproject.org/api/v2/guides/LOOKUP-GKGTHEMES.TXT"
+      }
+    },
+    {
+      "source_row": 42,
+      "values": {
+        "native_theme_code": "CRISISLEX_C07_SAFETY",
+        "local_grouping": "Society/security",
+        "namespace": "GKG_THEME",
+        "fields": "Themes / V2Themes",
+        "use_limitation": "Document-level filter; verify contextual relevance",
+        "version": "2021 lookup (observed code)",
+        "source_url": "https://data.gdeltproject.org/api/v2/guides/LOOKUP-GKGTHEMES.TXT"
+      }
+    },
+    {
+      "source_row": 43,
+      "values": {
+        "native_theme_code": "MEDIA_MSM",
+        "local_grouping": "Media/actors",
+        "namespace": "GKG_THEME",
+        "fields": "Themes / V2Themes",
+        "use_limitation": "Document-level filter; verify contextual relevance",
+        "version": "2021 lookup (observed code)",
+        "source_url": "https://data.gdeltproject.org/api/v2/guides/LOOKUP-GKGTHEMES.TXT"
+      }
+    },
+    {
+      "source_row": 44,
+      "values": {
+        "native_theme_code": "WB_694_BROADCAST_AND_MEDIA",
+        "local_grouping": "Media/actors",
+        "namespace": "GKG_THEME",
+        "fields": "Themes / V2Themes",
+        "use_limitation": "Document-level filter; verify contextual relevance",
+        "version": "2021 lookup (observed code)",
+        "source_url": "https://data.gdeltproject.org/api/v2/guides/LOOKUP-GKGTHEMES.TXT"
+      }
+    },
+    {
+      "source_row": 45,
+      "values": {
+        "native_theme_code": "TAX_FNCACT",
+        "local_grouping": "Media/actors",
+        "namespace": "GKG_THEME",
+        "fields": "Themes / V2Themes",
+        "use_limitation": "Document-level filter; verify contextual relevance",
+        "version": "2021 lookup (observed code)",
+        "source_url": "https://data.gdeltproject.org/api/v2/guides/LOOKUP-GKGTHEMES.TXT"
+      }
+    },
+    {
+      "source_row": 46,
+      "values": {
+        "native_theme_code": "TAX_FNCACT_EXECUTIVE",
+        "local_grouping": "Media/actors",
+        "namespace": "GKG_THEME",
+        "fields": "Themes / V2Themes",
+        "use_limitation": "Document-level filter; verify contextual relevance",
+        "version": "2021 lookup (observed code)",
+        "source_url": "https://data.gdeltproject.org/api/v2/guides/LOOKUP-GKGTHEMES.TXT"
+      }
+    },
+    {
+      "source_row": 47,
+      "values": {
+        "native_theme_code": "SOC_POINTSOFINTEREST_UNIVERSITY",
+        "local_grouping": "Media/actors",
+        "namespace": "GKG_THEME",
+        "fields": "Themes / V2Themes",
+        "use_limitation": "Document-level filter; verify contextual relevance",
+        "version": "2021 lookup (observed code)",
+        "source_url": "https://data.gdeltproject.org/api/v2/guides/LOOKUP-GKGTHEMES.TXT"
+      }
+    }
+  ]
+}

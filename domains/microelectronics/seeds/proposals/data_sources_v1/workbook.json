@@ -1,0 +1,67 @@
+{
+  "format": "kn.seed-proposal.workbook",
+  "status": "unreviewed_proposal",
+  "domain": "microelectronics",
+  "workbook": {
+    "file_name": "microelectronics_data_sources_v1.xlsx",
+    "sha256": "ab7837e18fc1907a2b977def23d03de78e608787d3125011ab3b38bda2536fba",
+    "size_bytes": 27032
+  },
+  "conversion": {
+    "method": "OOXML parsed with the Python standard library; no spreadsheet engine",
+    "cell_text": "verbatim; empty cells are null; numeric cells are JSON numbers",
+    "formulas": "never evaluated; cached values kept; formula text recorded per record",
+    "macros_or_external_links": "none present",
+    "encoding": "ASCII JSON with escaped non-ASCII characters"
+  },
+  "sheets": [
+    {
+      "sheet_name": "00_README",
+      "sheet_position": 1,
+      "file": "00_readme.json",
+      "format": "kn.seed-proposal.notes",
+      "sha256": "18258a199a2514d7dd22fcbc0e802ac9d3dcf64bf7ab0dd1dfc4b980d06b0e4d",
+      "row_count": 10
+    },
+    {
+      "sheet_name": "01_Data_Sources",
+      "sheet_position": 2,
+      "file": "01_data_sources.json",
+      "format": "kn.seed-proposal.table",
+      "sha256": "5a5ad2e66c6155783acaf79c60868a8f45251a8ae3a34037d5fc6ab98a137fa9",
+      "record_count": 65
+    },
+    {
+      "sheet_name": "02_Coverage_Map",
+      "sheet_position": 3,
+      "file": "02_coverage_map.json",
+      "format": "kn.seed-proposal.table",
+      "sha256": "cde87bd37e1683f9a50d552fdaa44e045fa8f12fa4cc94e7ba04a05dfd4ef27b",
+      "record_count": 11
+    },
+    {
+      "sheet_name": "03_Ingestion_Order",
+      "sheet_position": 4,
+      "file": "03_ingestion_order.json",
+      "format": "kn.seed-proposal.table",
+      "sha256": "5b4c6712b2ea393a6aa374377d559b8c2fab4c35d6fc1e22136a5678716a9fdb",
+      "record_count": 8
+    },
+    {
+      "sheet_name": "04_Prospective_Signals",
+      "sheet_position": 5,
+      "file": "04_prospective_signals.json",
+      "format": "kn.seed-proposal.table",
+      "sha256": "4a1c2fdf98a67638ffd087bddf288f85c9eb6106ec4c02e5bb8b4663ffc3c559",
+      "record_count": 7
+    },
+    {
+      "sheet_name": "05_Vendor_Watchlist",
+      "sheet_position": 6,
+      "file": "05_vendor_watchlist.json",
+      "format": "kn.seed-proposal.table",
+      "sha256": "dfbdeba01c179d530eb3b46745bbb5c641f0f7d9bcb2a07f3e7d9931adc8c35e",
+      "record_count": 21
+    }
+  ]
+}

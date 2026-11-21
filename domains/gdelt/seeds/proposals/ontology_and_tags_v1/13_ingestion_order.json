@@ -1,0 +1,115 @@
+{
+  "format": "kn.seed-proposal.table",
+  "status": "unreviewed_proposal",
+  "domain": "gdelt",
+  "source": {
+    "file_name": "gdelt_ontology_and_tags_v1.xlsx",
+    "sha256": "c31bba2aad40336c620044c6df5332744aebdce70b415e56bc121096845881a2",
+    "sheet_name": "13_Ingestion_Order",
+    "sheet_position": 14
+  },
+  "title": "Recommended ingestion sequence",
+  "notes": [
+    "Scouting-first for integration with industry knowledge bases; event layer provides contextual enrichment rather than sole discovery."
+  ],
+  "header_row": 4,
+  "columns": [
+    {
+      "key": "wave",
+      "label": "Wave",
+      "column": "A"
+    },
+    {
+      "key": "objective",
+      "label": "Objective",
+      "column": "B"
+    },
+    {
+      "key": "sources_input",
+      "label": "Sources / input",
+      "column": "C"
+    },
+    {
+      "key": "acceptance_criterion",
+      "label": "Acceptance criterion",
+      "column": "D"
+    },
+    {
+      "key": "priority",
+      "label": "Priority",
+      "column": "E"
+    }
+  ],
+  "records": [
+    {
+      "source_row": 5,
+      "values": {
+        "wave": "0",
+        "objective": "Load versioned dictionaries",
+        "sources_input": "CAMEO full lookup; GKG themes; GCAM; actor & geo lookups",
+        "acceptance_criterion": "Validate keys/types, source versions; no fabricated tags",
+        "priority": "P0"
+      }
+    },
+    {
+      "source_row": 6,
+      "values": {
+        "wave": "1",
+        "objective": "Topic & technology scouting",
+        "sources_input": "DOC API; GKG English/translation",
+        "acceptance_criterion": "Seed queries by technology/application + entity aliases; retain full provenance",
+        "priority": "P0"
+      }
+    },
+    {
+      "source_row": 7,
+      "values": {
+        "wave": "2",
+        "objective": "Core event context",
+        "sources_input": "Events + Mentions + GKG; BigQuery or manifests",
+        "acceptance_criterion": "Join by GlobalEventID and collection/identifier; test coverage/gaps",
+        "priority": "P0"
+      }
+    },
+    {
+      "source_row": 8,
+      "values": {
+        "wave": "3",
+        "objective": "Normalize & tag",
+        "sources_input": "Claim extraction, entity resolution, technology/application tagging",
+        "acceptance_criterion": "Local KB joins; dedup syndicated stories; evidence-backed claims",
+        "priority": "P0"
+      }
+    },
+    {
+      "source_row": 9,
+      "values": {
+        "wave": "4",
+        "objective": "Historical baseline",
+        "sources_input": "BigQuery partitioned queries or master manifests",
+        "acceptance_criterion": "Start bounded window; normalize media volume; replay late files",
+        "priority": "P1"
+      }
+    },
+    {
+      "source_row": 10,
+      "values": {
+        "wave": "5",
+        "objective": "External validation",
+        "sources_input": "Industry KB primary sources, official announcements, papers, contracts",
+        "acceptance_criterion": "Separate verified fact from media report; validate novelty and maturity",
+        "priority": "P0 for selected claims"
+      }
+    },
+    {
+      "source_row": 11,
+      "values": {
+        "wave": "6",
+        "objective": "Enrichment",
+        "sources_input": "GEO/TV and later GDELT datasets",
+        "acceptance_criterion": "Separate corpus/scope; monitor cost/coverage",
+        "priority": "P2"
+      }
+    }
+  ]
+}

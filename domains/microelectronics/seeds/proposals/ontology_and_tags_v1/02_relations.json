@@ -1,0 +1,333 @@
+{
+  "format": "kn.seed-proposal.table",
+  "status": "unreviewed_proposal",
+  "domain": "microelectronics",
+  "source": {
+    "file_name": "microelectronics_ontology_and_tags_v1.xlsx",
+    "sha256": "7166aa06791998c692cc6a2ac377692a6687f15e3353ffa70a1c159f2e63c34f",
+    "sheet_name": "02_Relations",
+    "sheet_position": 3
+  },
+  "title": "Controlled typed relations",
+  "notes": [],
+  "header_row": 4,
+  "columns": [
+    {
+      "key": "relation",
+      "label": "Relation",
+      "column": "A"
+    },
+    {
+      "key": "from",
+      "label": "From",
+      "column": "B"
+    },
+    {
+      "key": "to",
+      "label": "To",
+      "column": "C"
+    },
+    {
+      "key": "meaning",
+      "label": "Meaning",
+      "column": "D"
+    },
+    {
+      "key": "minimum_evidence",
+      "label": "Minimum evidence",
+      "column": "E"
+    }
+  ],
+  "records": [
+    {
+      "source_row": 5,
+      "values": {
+        "relation": "designs",
+        "from": "ORG",
+        "to": "MOD/DIE/IP",
+        "meaning": "Design responsibility",
+        "minimum_evidence": "vendor / design disclosure"
+      }
+    },
+    {
+      "source_row": 6,
+      "values": {
+        "relation": "markets",
+        "from": "ORG",
+        "to": "FAM/MOD/MPN",
+        "meaning": "Brand or commercial supplier",
+        "minimum_evidence": "catalog; not proof of fab"
+      }
+    },
+    {
+      "source_row": 7,
+      "values": {
+        "relation": "fabricated_at",
+        "from": "DIE/MPN",
+        "to": "FAC",
+        "meaning": "Wafer fab attribution",
+        "minimum_evidence": "lot-specific trace or official disclosure"
+      }
+    },
+    {
+      "source_row": 8,
+      "values": {
+        "relation": "assembled_at",
+        "from": "MPN",
+        "to": "FAC",
+        "meaning": "Assembly/package site",
+        "minimum_evidence": "PCN or trace evidence"
+      }
+    },
+    {
+      "source_row": 9,
+      "values": {
+        "relation": "tested_at",
+        "from": "MPN",
+        "to": "FAC",
+        "meaning": "Final test site",
+        "minimum_evidence": "PCN or trace evidence"
+      }
+    },
+    {
+      "source_row": 10,
+      "values": {
+        "relation": "owns",
+        "from": "ORG",
+        "to": "ORG/FAC/IP",
+        "meaning": "Legal ownership",
+        "minimum_evidence": "filing/registry; as-of date"
+      }
+    },
+    {
+      "source_row": 11,
+      "values": {
+        "relation": "operates_facility",
+        "from": "ORG",
+        "to": "FAC",
+        "meaning": "Operational responsibility",
+        "minimum_evidence": "facility disclosure"
+      }
+    },
+    {
+      "source_row": 12,
+      "values": {
+        "relation": "contains_model",
+        "from": "FAM",
+        "to": "MOD",
+        "meaning": "Family membership",
+        "minimum_evidence": "vendor catalogue"
+      }
+    },
+    {
+      "source_row": 13,
+      "values": {
+        "relation": "has_mpn",
+        "from": "MOD",
+        "to": "MPN",
+        "meaning": "Orderable variant",
+        "minimum_evidence": "datasheet ordering table"
+      }
+    },
+    {
+      "source_row": 14,
+      "values": {
+        "relation": "variant_of",
+        "from": "MPN",
+        "to": "MOD",
+        "meaning": "Model lineage",
+        "minimum_evidence": "datasheet"
+      }
+    },
+    {
+      "source_row": 15,
+      "values": {
+        "relation": "integrated_into",
+        "from": "DIE/IP",
+        "to": "MOD/SUB",
+        "meaning": "Integration",
+        "minimum_evidence": "block diagram/license disclosure"
+      }
+    },
+    {
+      "source_row": 16,
+      "values": {
+        "relation": "contains",
+        "from": "SUB/DEV",
+        "to": "MPN/DIE",
+        "meaning": "Actual BOM relationship",
+        "minimum_evidence": "BOM/board docs"
+      }
+    },
+    {
+      "source_row": 17,
+      "values": {
+        "relation": "implements",
+        "from": "MOD/DEMO/PROC",
+        "to": "TECH",
+        "meaning": "Technology use",
+        "minimum_evidence": "technical evidence"
+      }
+    },
+    {
+      "source_row": 18,
+      "values": {
+        "relation": "serves",
+        "from": "MOD/SVC",
+        "to": "APP",
+        "meaning": "Application relevance",
+        "minimum_evidence": "documented use or analyst tag"
+      }
+    },
+    {
+      "source_row": 19,
+      "values": {
+        "relation": "supports",
+        "from": "SW",
+        "to": "MOD/MPN/DEV",
+        "meaning": "SDK/tool compatibility",
+        "minimum_evidence": "versioned support matrix"
+      }
+    },
+    {
+      "source_row": 20,
+      "values": {
+        "relation": "available_at",
+        "from": "PROC",
+        "to": "FAC",
+        "meaning": "Qualified process platform",
+        "minimum_evidence": "foundry/PDK source"
+      }
+    },
+    {
+      "source_row": 21,
+      "values": {
+        "relation": "licensed_by",
+        "from": "IP",
+        "to": "ORG",
+        "meaning": "Licensor",
+        "minimum_evidence": "license/product documentation"
+      }
+    },
+    {
+      "source_row": 22,
+      "values": {
+        "relation": "provided_by",
+        "from": "SVC",
+        "to": "ORG",
+        "meaning": "Provider",
+        "minimum_evidence": "service catalogue"
+      }
+    },
+    {
+      "source_row": 23,
+      "values": {
+        "relation": "funded_by",
+        "from": "PROJECT",
+        "to": "ORG/AWARD",
+        "meaning": "Funding",
+        "minimum_evidence": "award record"
+      }
+    },
+    {
+      "source_row": 24,
+      "values": {
+        "relation": "performed_by",
+        "from": "PROJECT",
+        "to": "ORG",
+        "meaning": "Participant",
+        "minimum_evidence": "project record"
+      }
+    },
+    {
+      "source_row": 25,
+      "values": {
+        "relation": "develops",
+        "from": "PROJECT",
+        "to": "TECH/IP/DEMO",
+        "meaning": "R&D objective",
+        "minimum_evidence": "project output or proposal, distinguish"
+      }
+    },
+    {
+      "source_row": 26,
+      "values": {
+        "relation": "reports",
+        "from": "PUB",
+        "to": "DEMO/TEST",
+        "meaning": "Reported result",
+        "minimum_evidence": "publication"
+      }
+    },
+    {
+      "source_row": 27,
+      "values": {
+        "relation": "targets",
+        "from": "ROAD",
+        "to": "TECH",
+        "meaning": "Future milestone",
+        "minimum_evidence": "dated roadmap, not promise"
+      }
+    },
+    {
+      "source_row": 28,
+      "values": {
+        "relation": "evaluates",
+        "from": "TEST/DEV",
+        "to": "MPN/MOD/DEV",
+        "meaning": "Test or eval candidate",
+        "minimum_evidence": "test config"
+      }
+    },
+    {
+      "source_row": 29,
+      "values": {
+        "relation": "offers",
+        "from": "OFFER",
+        "to": "MPN",
+        "meaning": "Seller snapshot",
+        "minimum_evidence": "authorized distributor listing"
+      }
+    },
+    {
+      "source_row": 30,
+      "values": {
+        "relation": "affects",
+        "from": "NOTICE",
+        "to": "MPN/MOD",
+        "meaning": "Affected part",
+        "minimum_evidence": "PCN/PDN"
+      }
+    },
+    {
+      "source_row": 31,
+      "values": {
+        "relation": "applies_to",
+        "from": "CERT",
+        "to": "MPN/FAC",
+        "meaning": "Qualification scope",
+        "minimum_evidence": "certificate or datasheet"
+      }
+    },
+    {
+      "source_row": 32,
+      "values": {
+        "relation": "substitute_candidate",
+        "from": "MPN",
+        "to": "MPN",
+        "meaning": "Qualified comparison candidate, not drop-in",
+        "minimum_evidence": "requirements profile; manual validation"
+      }
+    },
+    {
+      "source_row": 33,
+      "values": {
+        "relation": "supported_by",
+        "from": "CLAIM/OBS",
+        "to": "SRC",
+        "meaning": "Provenance",
+        "minimum_evidence": "URL + page/revision + retrieval date"
+      }
+    }
+  ]
+}

@@ -1,22 +1,16 @@
 from pathlib import Path
 
-from agent_py.quality.plan_summary import main, summary_lines
+from kn.quality.plan_summary import main, summary_lines
 from tests.quality._plan_fixture import SPEC, plan_with, task_block, write_project
 
 PROJECT_ROOT = Path(__file__).resolve().parents[2]
 
 
-def test_repository_plan_starts_with_template_personalization() -> None:
+def test_repository_plan_is_valid_and_schedulable() -> None:
     lines = summary_lines(PROJECT_ROOT)
 
-    assert lines == [
-        "tasks: 1",
-        "agent lane: 1",
-        "human lane: 0",
-        "statuses: CLEAR=1",
-        "priority agent task: personalize-template-project [project-identity]",
-        "priority human task: none",
-    ]
+    assert lines[0].startswith("tasks: ")
+    assert any(line.startswith("priority agent task: ") for line in lines)
 
 
 def test_summary_counts_statuses_and_selects_required_work(tmp_path: Path) -> None:

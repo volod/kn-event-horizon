@@ -1,0 +1,91 @@
+{
+  "format": "kn.seed-proposal.workbook",
+  "status": "unreviewed_proposal",
+  "domain": "space",
+  "workbook": {
+    "file_name": "space_sector_ontology_and_tags_v1.xlsx",
+    "sha256": "26e7468ee372e9c606ff08910756b2066ef30ac9fea7524e646b52d8529eec28",
+    "size_bytes": 37281
+  },
+  "conversion": {
+    "method": "OOXML parsed with the Python standard library; no spreadsheet engine",
+    "cell_text": "verbatim; empty cells are null; numeric cells are JSON numbers",
+    "formulas": "never evaluated; cached values kept; formula text recorded per record",
+    "macros_or_external_links": "none present",
+    "encoding": "ASCII JSON with escaped non-ASCII characters"
+  },
+  "sheets": [
+    {
+      "sheet_name": "00_README",
+      "sheet_position": 1,
+      "file": "00_readme.json",
+      "format": "kn.seed-proposal.notes",
+      "sha256": "817e1c4e21ce55f8d88981360f539ac1ecc8a8b2d863121277589d72187cbee9",
+      "row_count": 10
+    },
+    {
+      "sheet_name": "01_Entity_Ontology",
+      "sheet_position": 2,
+      "file": "01_entity_ontology.json",
+      "format": "kn.seed-proposal.table",
+      "sha256": "dfb783db93765c18c519dcac1e86b7d31e89fb87ce63ce310ab0a59c15cc774e",
+      "record_count": 21
+    },
+    {
+      "sheet_name": "02_Relations",
+      "sheet_position": 3,
+      "file": "02_relations.json",
+      "format": "kn.seed-proposal.table",
+      "sha256": "a30bd97fb3ec0c78b7821b390792e8ad03f596985f19633b6223a8c10522a701",
+      "record_count": 19
+    },
+    {
+      "sheet_name": "03_ESA_GPT_Classifier",
+      "sheet_position": 4,
+      "file": "03_esa_gpt_classifier.json",
+      "format": "kn.seed-proposal.table",
+      "sha256": "d0d3a6fd7d3ea8a4e1d77e39330427834461103aca5f6d042ebaadd784b43814",
+      "record_count": 44
+    },
+    {
+      "sheet_name": "04_NASA_TX_Tags",
+      "sheet_position": 5,
+      "file": "04_nasa_tx_tags.json",
+      "format": "kn.seed-proposal.table",
+      "sha256": "af9f412c3f9d117b0c61038b685e712ea96b4ed9ed71efb507a216740900de41",
+      "record_count": 17
+    },
+    {
+      "sheet_name": "05_ESA_Tech_Tags",
+      "sheet_position": 6,
+      "file": "05_esa_tech_tags.json",
+      "format": "kn.seed-proposal.table",
+      "sha256": "3d2a760dde5f543ce42cd993f5c7d15d3c74c9a9f4cec5c8dc6189f039892b82",
+      "record_count": 108
+    },
+    {
+      "sheet_name": "06_EUSPA_App_Tags",
+      "sheet_position": 7,
+      "file": "06_euspa_app_tags.json",
+      "format": "kn.seed-proposal.table",
+      "sha256": "f881a2976ac2893c10d54d33a447b20ce597fdf4854bd46405e36c3c64161a30",
+      "record_count": 16
+    },
+    {
+      "sheet_name": "07_Service_Types",
+      "sheet_position": 8,
+      "file": "07_service_types.json",
+      "format": "kn.seed-proposal.table",
+      "sha256": "2f81be3b5e15d8dc9cb4c06d3435cff0e65292169dd5b7860a9a60ce7c648934",
+      "record_count": 17
+    },
+    {
+      "sheet_name": "08_Tagging_Examples",
+      "sheet_position": 9,
+      "file": "08_tagging_examples.json",
+      "format": "kn.seed-proposal.table",
+      "sha256": "2b4d5a461b3f618e91b6536cbb779244b690451a9023e69a81d80d284e82bc38",
+      "record_count": 6
+    }
+  ]
+}

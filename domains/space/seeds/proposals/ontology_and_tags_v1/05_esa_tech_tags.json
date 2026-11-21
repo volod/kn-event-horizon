@@ -1,0 +1,1236 @@
+{
+  "format": "kn.seed-proposal.table",
+  "status": "unreviewed_proposal",
+  "domain": "space",
+  "source": {
+    "file_name": "space_sector_ontology_and_tags_v1.xlsx",
+    "sha256": "26e7468ee372e9c606ff08910756b2066ef30ac9fea7524e646b52d8529eec28",
+    "sheet_name": "05_ESA_Tech_Tags",
+    "sheet_position": 6
+  },
+  "title": "ESA Technology Tree v4.1 \u2014 Technology Domain/Subdomain tags",
+  "notes": [],
+  "header_row": 3,
+  "columns": [
+    {
+      "key": "td_code",
+      "label": "TD code",
+      "column": "A"
+    },
+    {
+      "key": "technology_domain",
+      "label": "Technology Domain",
+      "column": "B"
+    },
+    {
+      "key": "ts_code",
+      "label": "TS code",
+      "column": "C"
+    },
+    {
+      "key": "technology_subdomain",
+      "label": "Technology Subdomain",
+      "column": "D"
+    },
+    {
+      "key": "recommended_use",
+      "label": "Recommended use",
+      "column": "E"
+    },
+    {
+      "key": "official_source",
+      "label": "Official source",
+      "column": "F"
+    }
+  ],
+  "records": [
+    {
+      "source_row": 4,
+      "values": {
+        "td_code": "TD01",
+        "technology_domain": "On-board Data Subsystems",
+        "ts_code": "A",
+        "technology_subdomain": "Payload Data Processing",
+        "recommended_use": "Many-to-many technology tag on products, projects, organisations or services",
+        "official_source": "https://esamultimedia.esa.int/multimedia/publications/STM-277/STM-277.pdf"
+      }
+    },
+    {
+      "source_row": 5,
+      "values": {
+        "td_code": "TD01",
+        "technology_domain": "On-board Data Subsystems",
+        "ts_code": "B",
+        "technology_subdomain": "On-board Data Management",
+        "recommended_use": "Many-to-many technology tag on products, projects, organisations or services",
+        "official_source": "https://esamultimedia.esa.int/multimedia/publications/STM-277/STM-277.pdf"
+      }
+    },
+    {
+      "source_row": 6,
+      "values": {
+        "td_code": "TD01",
+        "technology_domain": "On-board Data Subsystems",
+        "ts_code": "C",
+        "technology_subdomain": "Microelectronics for Digital and Analogue Applications",
+        "recommended_use": "Many-to-many technology tag on products, projects, organisations or services",
+        "official_source": "https://esamultimedia.esa.int/multimedia/publications/STM-277/STM-277.pdf"
+      }
+    },
+    {
+      "source_row": 7,
+      "values": {
+        "td_code": "TD01",
+        "technology_domain": "On-board Data Subsystems",
+        "ts_code": "D",
+        "technology_subdomain": "Machine Learning and Artificial Intelligence for On-board Data Subsystems",
+        "recommended_use": "Many-to-many technology tag on products, projects, organisations or services",
+        "official_source": "https://esamultimedia.esa.int/multimedia/publications/STM-277/STM-277.pdf"
+      }
+    },
+    {
+      "source_row": 8,
+      "values": {
+        "td_code": "TD02",
+        "technology_domain": "Space System Software",
+        "ts_code": "A",
+        "technology_subdomain": "Software Technologies",
+        "recommended_use": "Many-to-many technology tag on products, projects, organisations or services",
+        "official_source": "https://esamultimedia.esa.int/multimedia/publications/STM-277/STM-277.pdf"
+      }
+    },
+    {
+      "source_row": 9,
+      "values": {
+        "td_code": "TD02",
+        "technology_domain": "Space System Software",
+        "ts_code": "B",
+        "technology_subdomain": "Space Segment Software",
+        "recommended_use": "Many-to-many technology tag on products, projects, organisations or services",
+        "official_source": "https://esamultimedia.esa.int/multimedia/publications/STM-277/STM-277.pdf"
+      }
+    },
+    {
+      "source_row": 10,
+      "values": {
+        "td_code": "TD02",
+        "technology_domain": "Space System Software",
+        "ts_code": "C",
+        "technology_subdomain": "Ground Segment Software",
+        "recommended_use": "Many-to-many technology tag on products, projects, organisations or services",
+        "official_source": "https://esamultimedia.esa.int/multimedia/publications/STM-277/STM-277.pdf"
+      }
+    },
+    {
+      "source_row": 11,
+      "values": {
+        "td_code": "TD02",
+        "technology_domain": "Space System Software",
+        "ts_code": "D",
+        "technology_subdomain": "Ground Data Processing",
+        "recommended_use": "Many-to-many technology tag on products, projects, organisations or services",
+        "official_source": "https://esamultimedia.esa.int/multimedia/publications/STM-277/STM-277.pdf"
+      }
+    },
+    {
+      "source_row": 12,
+      "values": {
+        "td_code": "TD02",
+        "technology_domain": "Space System Software",
+        "ts_code": "E",
+        "technology_subdomain": "Remote Sensing Payload Data Exploitation",
+        "recommended_use": "Many-to-many technology tag on products, projects, organisations or services",
+        "official_source": "https://esamultimedia.esa.int/multimedia/publications/STM-277/STM-277.pdf"
+      }
+    },
+    {
+      "source_row": 13,
+      "values": {
+        "td_code": "TD03",
+        "technology_domain": "Space Systems Electrical Power",
+        "ts_code": "A",
+        "technology_subdomain": "Power Electronics",
+        "recommended_use": "Many-to-many technology tag on products, projects, organisations or services",
+        "official_source": "https://esamultimedia.esa.int/multimedia/publications/STM-277/STM-277.pdf"
+      }
+    },
+    {
+      "source_row": 14,
+      "values": {
+        "td_code": "TD03",
+        "technology_domain": "Space Systems Electrical Power",
+        "ts_code": "B",
+        "technology_subdomain": "Power Generation Technologies",
+        "recommended_use": "Many-to-many technology tag on products, projects, organisations or services",
+        "official_source": "https://esamultimedia.esa.int/multimedia/publications/STM-277/STM-277.pdf"
+      }
+    },
+    {
+      "source_row": 15,
+      "values": {
+        "td_code": "TD03",
+        "technology_domain": "Space Systems Electrical Power",
+        "ts_code": "C",
+        "technology_subdomain": "Energy Storage Technologies",
+        "recommended_use": "Many-to-many technology tag on products, projects, organisations or services",
+        "official_source": "https://esamultimedia.esa.int/multimedia/publications/STM-277/STM-277.pdf"
+      }
+    },
+    {
+      "source_row": 16,
+      "values": {
+        "td_code": "TD04",
+        "technology_domain": "Space Systems Environments and Effects",
+        "ts_code": "A",
+        "technology_subdomain": "Space Environments",
+        "recommended_use": "Many-to-many technology tag on products, projects, organisations or services",
+        "official_source": "https://esamultimedia.esa.int/multimedia/publications/STM-277/STM-277.pdf"
+      }
+    },
+    {
+      "source_row": 17,
+      "values": {
+        "td_code": "TD04",
+        "technology_domain": "Space Systems Environments and Effects",
+        "ts_code": "B",
+        "technology_subdomain": "Environments Effects",
+        "recommended_use": "Many-to-many technology tag on products, projects, organisations or services",
+        "official_source": "https://esamultimedia.esa.int/multimedia/publications/STM-277/STM-277.pdf"
+      }
+    },
+    {
+      "source_row": 18,
+      "values": {
+        "td_code": "TD04",
+        "technology_domain": "Space Systems Environments and Effects",
+        "ts_code": "C",
+        "technology_subdomain": "Space Weather",
+        "recommended_use": "Many-to-many technology tag on products, projects, organisations or services",
+        "official_source": "https://esamultimedia.esa.int/multimedia/publications/STM-277/STM-277.pdf"
+      }
+    },
+    {
+      "source_row": 19,
+      "values": {
+        "td_code": "TD05",
+        "technology_domain": "Space System Control",
+        "ts_code": "A",
+        "technology_subdomain": "Control (Sub-) Systems Engineering",
+        "recommended_use": "Many-to-many technology tag on products, projects, organisations or services",
+        "official_source": "https://esamultimedia.esa.int/multimedia/publications/STM-277/STM-277.pdf"
+      }
+    },
+    {
+      "source_row": 20,
+      "values": {
+        "td_code": "TD05",
+        "technology_domain": "Space System Control",
+        "ts_code": "B",
+        "technology_subdomain": "Control (Sub-) Systems Innovative Technologies",
+        "recommended_use": "Many-to-many technology tag on products, projects, organisations or services",
+        "official_source": "https://esamultimedia.esa.int/multimedia/publications/STM-277/STM-277.pdf"
+      }
+    },
+    {
+      "source_row": 21,
+      "values": {
+        "td_code": "TD05",
+        "technology_domain": "Space System Control",
+        "ts_code": "C",
+        "technology_subdomain": "Control Techniques and Tools",
+        "recommended_use": "Many-to-many technology tag on products, projects, organisations or services",
+        "official_source": "https://esamultimedia.esa.int/multimedia/publications/STM-277/STM-277.pdf"
+      }
+    },
+    {
+      "source_row": 22,
+      "values": {
+        "td_code": "TD05",
+        "technology_domain": "Space System Control",
+        "ts_code": "D",
+        "technology_subdomain": "AOCS/GNC Sensors and Actuators",
+        "recommended_use": "Many-to-many technology tag on products, projects, organisations or services",
+        "official_source": "https://esamultimedia.esa.int/multimedia/publications/STM-277/STM-277.pdf"
+      }
+    },
+    {
+      "source_row": 23,
+      "values": {
+        "td_code": "TD06",
+        "technology_domain": "RF Subsystems, Payloads and Technologies",
+        "ts_code": "A",
+        "technology_subdomain": "Telecommunication Subsystems",
+        "recommended_use": "Many-to-many technology tag on products, projects, organisations or services",
+        "official_source": "https://esamultimedia.esa.int/multimedia/publications/STM-277/STM-277.pdf"
+      }
+    },
+    {
+      "source_row": 24,
+      "values": {
+        "td_code": "TD06",
+        "technology_domain": "RF Subsystems, Payloads and Technologies",
+        "ts_code": "B",
+        "technology_subdomain": "Radio Navigation Subsystems",
+        "recommended_use": "Many-to-many technology tag on products, projects, organisations or services",
+        "official_source": "https://esamultimedia.esa.int/multimedia/publications/STM-277/STM-277.pdf"
+      }
+    },
+    {
+      "source_row": 25,
+      "values": {
+        "td_code": "TD06",
+        "technology_domain": "RF Subsystems, Payloads and Technologies",
+        "ts_code": "C",
+        "technology_subdomain": "TT&C and Payload Data Transmitter (PDT) Subsystems",
+        "recommended_use": "Many-to-many technology tag on products, projects, organisations or services",
+        "official_source": "https://esamultimedia.esa.int/multimedia/publications/STM-277/STM-277.pdf"
+      }
+    },
+    {
+      "source_row": 26,
+      "values": {
+        "td_code": "TD06",
+        "technology_domain": "RF Subsystems, Payloads and Technologies",
+        "ts_code": "D",
+        "technology_subdomain": "RF Payloads",
+        "recommended_use": "Many-to-many technology tag on products, projects, organisations or services",
+        "official_source": "https://esamultimedia.esa.int/multimedia/publications/STM-277/STM-277.pdf"
+      }
+    },
+    {
+      "source_row": 27,
+      "values": {
+        "td_code": "TD06",
+        "technology_domain": "RF Subsystems, Payloads and Technologies",
+        "ts_code": "E",
+        "technology_subdomain": "RF Technologies and Equipment",
+        "recommended_use": "Many-to-many technology tag on products, projects, organisations or services",
+        "official_source": "https://esamultimedia.esa.int/multimedia/publications/STM-277/STM-277.pdf"
+      }
+    },
+    {
+      "source_row": 28,
+      "values": {
+        "td_code": "TD07",
+        "technology_domain": "Electromagnetic Technologies and Techniques",
+        "ts_code": "A",
+        "technology_subdomain": "Antennas",
+        "recommended_use": "Many-to-many technology tag on products, projects, organisations or services",
+        "official_source": "https://esamultimedia.esa.int/multimedia/publications/STM-277/STM-277.pdf"
+      }
+    },
+    {
+      "source_row": 29,
+      "values": {
+        "td_code": "TD07",
+        "technology_domain": "Electromagnetic Technologies and Techniques",
+        "ts_code": "B",
+        "technology_subdomain": "Wave Interaction and Propagation",
+        "recommended_use": "Many-to-many technology tag on products, projects, organisations or services",
+        "official_source": "https://esamultimedia.esa.int/multimedia/publications/STM-277/STM-277.pdf"
+      }
+    },
+    {
+      "source_row": 30,
+      "values": {
+        "td_code": "TD07",
+        "technology_domain": "Electromagnetic Technologies and Techniques",
+        "ts_code": "C",
+        "technology_subdomain": "Electromagnetic and Radio Frequency Compatibility (EMC/RFC) and Electrostatic Discharge (ESD)",
+        "recommended_use": "Many-to-many technology tag on products, projects, organisations or services",
+        "official_source": "https://esamultimedia.esa.int/multimedia/publications/STM-277/STM-277.pdf"
+      }
+    },
+    {
+      "source_row": 31,
+      "values": {
+        "td_code": "TD08",
+        "technology_domain": "System Design & Verification",
+        "ts_code": "A",
+        "technology_subdomain": "Mission and System Specification",
+        "recommended_use": "Many-to-many technology tag on products, projects, organisations or services",
+        "official_source": "https://esamultimedia.esa.int/multimedia/publications/STM-277/STM-277.pdf"
+      }
+    },
+    {
+      "source_row": 32,
+      "values": {
+        "td_code": "TD08",
+        "technology_domain": "System Design & Verification",
+        "ts_code": "B",
+        "technology_subdomain": "Collaborative and Concurrent Engineering",
+        "recommended_use": "Many-to-many technology tag on products, projects, organisations or services",
+        "official_source": "https://esamultimedia.esa.int/multimedia/publications/STM-277/STM-277.pdf"
+      }
+    },
+    {
+      "source_row": 33,
+      "values": {
+        "td_code": "TD08",
+        "technology_domain": "System Design & Verification",
+        "ts_code": "C",
+        "technology_subdomain": "System Analysis and Design",
+        "recommended_use": "Many-to-many technology tag on products, projects, organisations or services",
+        "official_source": "https://esamultimedia.esa.int/multimedia/publications/STM-277/STM-277.pdf"
+      }
+    },
+    {
+      "source_row": 34,
+      "values": {
+        "td_code": "TD08",
+        "technology_domain": "System Design & Verification",
+        "ts_code": "D",
+        "technology_subdomain": "System Verification and Assembly, Integration and Test (AIT)",
+        "recommended_use": "Many-to-many technology tag on products, projects, organisations or services",
+        "official_source": "https://esamultimedia.esa.int/multimedia/publications/STM-277/STM-277.pdf"
+      }
+    },
+    {
+      "source_row": 35,
+      "values": {
+        "td_code": "TD09",
+        "technology_domain": "Mission Operation and Ground Data Systems",
+        "ts_code": "A",
+        "technology_subdomain": "Advanced System and Mission Operation Concepts",
+        "recommended_use": "Many-to-many technology tag on products, projects, organisations or services",
+        "official_source": "https://esamultimedia.esa.int/multimedia/publications/STM-277/STM-277.pdf"
+      }
+    },
+    {
+      "source_row": 36,
+      "values": {
+        "td_code": "TD09",
+        "technology_domain": "Mission Operation and Ground Data Systems",
+        "ts_code": "B",
+        "technology_subdomain": "Mission Operations",
+        "recommended_use": "Many-to-many technology tag on products, projects, organisations or services",
+        "official_source": "https://esamultimedia.esa.int/multimedia/publications/STM-277/STM-277.pdf"
+      }
+    },
+    {
+      "source_row": 37,
+      "values": {
+        "td_code": "TD09",
+        "technology_domain": "Mission Operation and Ground Data Systems",
+        "ts_code": "C",
+        "technology_subdomain": "Ground Data Systems",
+        "recommended_use": "Many-to-many technology tag on products, projects, organisations or services",
+        "official_source": "https://esamultimedia.esa.int/multimedia/publications/STM-277/STM-277.pdf"
+      }
+    },
+    {
+      "source_row": 38,
+      "values": {
+        "td_code": "TD10",
+        "technology_domain": "Flight Dynamics and GNSS",
+        "ts_code": "A",
+        "technology_subdomain": "Flight Dynamics (FD)",
+        "recommended_use": "Many-to-many technology tag on products, projects, organisations or services",
+        "official_source": "https://esamultimedia.esa.int/multimedia/publications/STM-277/STM-277.pdf"
+      }
+    },
+    {
+      "source_row": 39,
+      "values": {
+        "td_code": "TD10",
+        "technology_domain": "Flight Dynamics and GNSS",
+        "ts_code": "B",
+        "technology_subdomain": "GNSS High-Precision Data Processing",
+        "recommended_use": "Many-to-many technology tag on products, projects, organisations or services",
+        "official_source": "https://esamultimedia.esa.int/multimedia/publications/STM-277/STM-277.pdf"
+      }
+    },
+    {
+      "source_row": 40,
+      "values": {
+        "td_code": "TD11",
+        "technology_domain": "Space Debris",
+        "ts_code": "A",
+        "technology_subdomain": "Ground- and Space-based Debris and Meteoroid Measurements",
+        "recommended_use": "Many-to-many technology tag on products, projects, organisations or services",
+        "official_source": "https://esamultimedia.esa.int/multimedia/publications/STM-277/STM-277.pdf"
+      }
+    },
+    {
+      "source_row": 41,
+      "values": {
+        "td_code": "TD11",
+        "technology_domain": "Space Debris",
+        "ts_code": "B",
+        "technology_subdomain": "Modelling and Risk Analysis",
+        "recommended_use": "Many-to-many technology tag on products, projects, organisations or services",
+        "official_source": "https://esamultimedia.esa.int/multimedia/publications/STM-277/STM-277.pdf"
+      }
+    },
+    {
+      "source_row": 42,
+      "values": {
+        "td_code": "TD11",
+        "technology_domain": "Space Debris",
+        "ts_code": "C",
+        "technology_subdomain": "Debris Mitigation",
+        "recommended_use": "Many-to-many technology tag on products, projects, organisations or services",
+        "official_source": "https://esamultimedia.esa.int/multimedia/publications/STM-277/STM-277.pdf"
+      }
+    },
+    {
+      "source_row": 43,
+      "values": {
+        "td_code": "TD11",
+        "technology_domain": "Space Debris",
+        "ts_code": "D",
+        "technology_subdomain": "Debris Remediation and Protection",
+        "recommended_use": "Many-to-many technology tag on products, projects, organisations or services",
+        "official_source": "https://esamultimedia.esa.int/multimedia/publications/STM-277/STM-277.pdf"
+      }
+    },
+    {
+      "source_row": 44,
+      "values": {
+        "td_code": "TD12",
+        "technology_domain": "Ground Station Systems and Networks",
+        "ts_code": "A",
+        "technology_subdomain": "Ground Station System",
+        "recommended_use": "Many-to-many technology tag on products, projects, organisations or services",
+        "official_source": "https://esamultimedia.esa.int/multimedia/publications/STM-277/STM-277.pdf"
+      }
+    },
+    {
+      "source_row": 45,
+      "values": {
+        "td_code": "TD12",
+        "technology_domain": "Ground Station Systems and Networks",
+        "ts_code": "B",
+        "technology_subdomain": "Ground Communications Networks",
+        "recommended_use": "Many-to-many technology tag on products, projects, organisations or services",
+        "official_source": "https://esamultimedia.esa.int/multimedia/publications/STM-277/STM-277.pdf"
+      }
+    },
+    {
+      "source_row": 46,
+      "values": {
+        "td_code": "TD13",
+        "technology_domain": "Automation, Telepresence & Robotics",
+        "ts_code": "A",
+        "technology_subdomain": "Robotic Applications and Concepts",
+        "recommended_use": "Many-to-many technology tag on products, projects, organisations or services",
+        "official_source": "https://esamultimedia.esa.int/multimedia/publications/STM-277/STM-277.pdf"
+      }
+    },
+    {
+      "source_row": 47,
+      "values": {
+        "td_code": "TD13",
+        "technology_domain": "Automation, Telepresence & Robotics",
+        "ts_code": "B",
+        "technology_subdomain": "Automation & Robotics Systems and Subsystems",
+        "recommended_use": "Many-to-many technology tag on products, projects, organisations or services",
+        "official_source": "https://esamultimedia.esa.int/multimedia/publications/STM-277/STM-277.pdf"
+      }
+    },
+    {
+      "source_row": 48,
+      "values": {
+        "td_code": "TD13",
+        "technology_domain": "Automation, Telepresence & Robotics",
+        "ts_code": "C",
+        "technology_subdomain": "Automation & Robotics Components and Technologies",
+        "recommended_use": "Many-to-many technology tag on products, projects, organisations or services",
+        "official_source": "https://esamultimedia.esa.int/multimedia/publications/STM-277/STM-277.pdf"
+      }
+    },
+    {
+      "source_row": 49,
+      "values": {
+        "td_code": "TD14",
+        "technology_domain": "Life & Physical Sciences",
+        "ts_code": "A",
+        "technology_subdomain": "Instrumentation in Support of Life Sciences",
+        "recommended_use": "Many-to-many technology tag on products, projects, organisations or services",
+        "official_source": "https://esamultimedia.esa.int/multimedia/publications/STM-277/STM-277.pdf"
+      }
+    },
+    {
+      "source_row": 50,
+      "values": {
+        "td_code": "TD14",
+        "technology_domain": "Life & Physical Sciences",
+        "ts_code": "B",
+        "technology_subdomain": "Instrumentation in Support of Physical Sciences",
+        "recommended_use": "Many-to-many technology tag on products, projects, organisations or services",
+        "official_source": "https://esamultimedia.esa.int/multimedia/publications/STM-277/STM-277.pdf"
+      }
+    },
+    {
+      "source_row": 51,
+      "values": {
+        "td_code": "TD14",
+        "technology_domain": "Life & Physical Sciences",
+        "ts_code": "C",
+        "technology_subdomain": "Applied Life Science Technology",
+        "recommended_use": "Many-to-many technology tag on products, projects, organisations or services",
+        "official_source": "https://esamultimedia.esa.int/multimedia/publications/STM-277/STM-277.pdf"
+      }
+    },
+    {
+      "source_row": 52,
+      "values": {
+        "td_code": "TD15",
+        "technology_domain": "Mechanisms",
+        "ts_code": "A",
+        "technology_subdomain": "Mechanism Core Technologies",
+        "recommended_use": "Many-to-many technology tag on products, projects, organisations or services",
+        "official_source": "https://esamultimedia.esa.int/multimedia/publications/STM-277/STM-277.pdf"
+      }
+    },
+    {
+      "source_row": 53,
+      "values": {
+        "td_code": "TD15",
+        "technology_domain": "Mechanisms",
+        "ts_code": "B",
+        "technology_subdomain": "Non-Explosive Release Technologies",
+        "recommended_use": "Many-to-many technology tag on products, projects, organisations or services",
+        "official_source": "https://esamultimedia.esa.int/multimedia/publications/STM-277/STM-277.pdf"
+      }
+    },
+    {
+      "source_row": 54,
+      "values": {
+        "td_code": "TD15",
+        "technology_domain": "Mechanisms",
+        "ts_code": "C",
+        "technology_subdomain": "Exploration Tool Technologies",
+        "recommended_use": "Many-to-many technology tag on products, projects, organisations or services",
+        "official_source": "https://esamultimedia.esa.int/multimedia/publications/STM-277/STM-277.pdf"
+      }
+    },
+    {
+      "source_row": 55,
+      "values": {
+        "td_code": "TD15",
+        "technology_domain": "Mechanisms",
+        "ts_code": "D",
+        "technology_subdomain": "Control Electronics Technologies",
+        "recommended_use": "Many-to-many technology tag on products, projects, organisations or services",
+        "official_source": "https://esamultimedia.esa.int/multimedia/publications/STM-277/STM-277.pdf"
+      }
+    },
+    {
+      "source_row": 56,
+      "values": {
+        "td_code": "TD15",
+        "technology_domain": "Mechanisms",
+        "ts_code": "E",
+        "technology_subdomain": "MEMS Technologies",
+        "recommended_use": "Many-to-many technology tag on products, projects, organisations or services",
+        "official_source": "https://esamultimedia.esa.int/multimedia/publications/STM-277/STM-277.pdf"
+      }
+    },
+    {
+      "source_row": 57,
+      "values": {
+        "td_code": "TD15",
+        "technology_domain": "Mechanisms",
+        "ts_code": "F",
+        "technology_subdomain": "Tribology Technologies",
+        "recommended_use": "Many-to-many technology tag on products, projects, organisations or services",
+        "official_source": "https://esamultimedia.esa.int/multimedia/publications/STM-277/STM-277.pdf"
+      }
+    },
+    {
+      "source_row": 58,
+      "values": {
+        "td_code": "TD15",
+        "technology_domain": "Mechanisms",
+        "ts_code": "G",
+        "technology_subdomain": "Mechanism Engineering",
+        "recommended_use": "Many-to-many technology tag on products, projects, organisations or services",
+        "official_source": "https://esamultimedia.esa.int/multimedia/publications/STM-277/STM-277.pdf"
+      }
+    },
+    {
+      "source_row": 59,
+      "values": {
+        "td_code": "TD15",
+        "technology_domain": "Mechanisms",
+        "ts_code": "H",
+        "technology_subdomain": "Pyrotechnic Technologies",
+        "recommended_use": "Many-to-many technology tag on products, projects, organisations or services",
+        "official_source": "https://esamultimedia.esa.int/multimedia/publications/STM-277/STM-277.pdf"
+      }
+    },
+    {
+      "source_row": 60,
+      "values": {
+        "td_code": "TD15",
+        "technology_domain": "Mechanisms",
+        "ts_code": "I",
+        "technology_subdomain": "Flexible Capture Mechanisms",
+        "recommended_use": "Many-to-many technology tag on products, projects, organisations or services",
+        "official_source": "https://esamultimedia.esa.int/multimedia/publications/STM-277/STM-277.pdf"
+      }
+    },
+    {
+      "source_row": 61,
+      "values": {
+        "td_code": "TD16",
+        "technology_domain": "Optics",
+        "ts_code": "A",
+        "technology_subdomain": "Optical Subsystem Engineering",
+        "recommended_use": "Many-to-many technology tag on products, projects, organisations or services",
+        "official_source": "https://esamultimedia.esa.int/multimedia/publications/STM-277/STM-277.pdf"
+      }
+    },
+    {
+      "source_row": 62,
+      "values": {
+        "td_code": "TD16",
+        "technology_domain": "Optics",
+        "ts_code": "B",
+        "technology_subdomain": "Optical Components Technology and Materials",
+        "recommended_use": "Many-to-many technology tag on products, projects, organisations or services",
+        "official_source": "https://esamultimedia.esa.int/multimedia/publications/STM-277/STM-277.pdf"
+      }
+    },
+    {
+      "source_row": 63,
+      "values": {
+        "td_code": "TD16",
+        "technology_domain": "Optics",
+        "ts_code": "C",
+        "technology_subdomain": "Optical Equipment and Instrument Technology",
+        "recommended_use": "Many-to-many technology tag on products, projects, organisations or services",
+        "official_source": "https://esamultimedia.esa.int/multimedia/publications/STM-277/STM-277.pdf"
+      }
+    },
+    {
+      "source_row": 64,
+      "values": {
+        "td_code": "TD17",
+        "technology_domain": "Optoelectronics",
+        "ts_code": "A",
+        "technology_subdomain": "Laser Technologies",
+        "recommended_use": "Many-to-many technology tag on products, projects, organisations or services",
+        "official_source": "https://esamultimedia.esa.int/multimedia/publications/STM-277/STM-277.pdf"
+      }
+    },
+    {
+      "source_row": 65,
+      "values": {
+        "td_code": "TD17",
+        "technology_domain": "Optoelectronics",
+        "ts_code": "B",
+        "technology_subdomain": "Detector Technologies",
+        "recommended_use": "Many-to-many technology tag on products, projects, organisations or services",
+        "official_source": "https://esamultimedia.esa.int/multimedia/publications/STM-277/STM-277.pdf"
+      }
+    },
+    {
+      "source_row": 66,
+      "values": {
+        "td_code": "TD17",
+        "technology_domain": "Optoelectronics",
+        "ts_code": "C",
+        "technology_subdomain": "Photonics",
+        "recommended_use": "Many-to-many technology tag on products, projects, organisations or services",
+        "official_source": "https://esamultimedia.esa.int/multimedia/publications/STM-277/STM-277.pdf"
+      }
+    },
+    {
+      "source_row": 67,
+      "values": {
+        "td_code": "TD17",
+        "technology_domain": "Optoelectronics",
+        "ts_code": "D",
+        "technology_subdomain": "Optical Communication Technologies",
+        "recommended_use": "Many-to-many technology tag on products, projects, organisations or services",
+        "official_source": "https://esamultimedia.esa.int/multimedia/publications/STM-277/STM-277.pdf"
+      }
+    },
+    {
+      "source_row": 68,
+      "values": {
+        "td_code": "TD17",
+        "technology_domain": "Optoelectronics",
+        "ts_code": "E",
+        "technology_subdomain": "Quantum Technologies",
+        "recommended_use": "Many-to-many technology tag on products, projects, organisations or services",
+        "official_source": "https://esamultimedia.esa.int/multimedia/publications/STM-277/STM-277.pdf"
+      }
+    },
+    {
+      "source_row": 69,
+      "values": {
+        "td_code": "TD18",
+        "technology_domain": "Fluid Mechanics",
+        "ts_code": "A",
+        "technology_subdomain": "Fluid Mechanics Tools and Techniques",
+        "recommended_use": "Many-to-many technology tag on products, projects, organisations or services",
+        "official_source": "https://esamultimedia.esa.int/multimedia/publications/STM-277/STM-277.pdf"
+      }
+    },
+    {
+      "source_row": 70,
+      "values": {
+        "td_code": "TD18",
+        "technology_domain": "Fluid Mechanics",
+        "ts_code": "B",
+        "technology_subdomain": "Ground-Based Facilities",
+        "recommended_use": "Many-to-many technology tag on products, projects, organisations or services",
+        "official_source": "https://esamultimedia.esa.int/multimedia/publications/STM-277/STM-277.pdf"
+      }
+    },
+    {
+      "source_row": 71,
+      "values": {
+        "td_code": "TD18",
+        "technology_domain": "Fluid Mechanics",
+        "ts_code": "C",
+        "technology_subdomain": "Sensors and Measurement Techniques for Fluid Mechanics",
+        "recommended_use": "Many-to-many technology tag on products, projects, organisations or services",
+        "official_source": "https://esamultimedia.esa.int/multimedia/publications/STM-277/STM-277.pdf"
+      }
+    },
+    {
+      "source_row": 72,
+      "values": {
+        "td_code": "TD18",
+        "technology_domain": "Fluid Mechanics",
+        "ts_code": "D",
+        "technology_subdomain": "Flight Demonstrators and Flight Data Tools",
+        "recommended_use": "Many-to-many technology tag on products, projects, organisations or services",
+        "official_source": "https://esamultimedia.esa.int/multimedia/publications/STM-277/STM-277.pdf"
+      }
+    },
+    {
+      "source_row": 73,
+      "values": {
+        "td_code": "TD18",
+        "technology_domain": "Fluid Mechanics",
+        "ts_code": "E",
+        "technology_subdomain": "Fluid Mechanics Hardware",
+        "recommended_use": "Many-to-many technology tag on products, projects, organisations or services",
+        "official_source": "https://esamultimedia.esa.int/multimedia/publications/STM-277/STM-277.pdf"
+      }
+    },
+    {
+      "source_row": 74,
+      "values": {
+        "td_code": "TD19",
+        "technology_domain": "Propulsion",
+        "ts_code": "A",
+        "technology_subdomain": "Chemical Propulsion Technologies",
+        "recommended_use": "Many-to-many technology tag on products, projects, organisations or services",
+        "official_source": "https://esamultimedia.esa.int/multimedia/publications/STM-277/STM-277.pdf"
+      }
+    },
+    {
+      "source_row": 75,
+      "values": {
+        "td_code": "TD19",
+        "technology_domain": "Propulsion",
+        "ts_code": "B",
+        "technology_subdomain": "Electric Propulsion Technologies",
+        "recommended_use": "Many-to-many technology tag on products, projects, organisations or services",
+        "official_source": "https://esamultimedia.esa.int/multimedia/publications/STM-277/STM-277.pdf"
+      }
+    },
+    {
+      "source_row": 76,
+      "values": {
+        "td_code": "TD19",
+        "technology_domain": "Propulsion",
+        "ts_code": "C",
+        "technology_subdomain": "Other Propulsion Subsystems",
+        "recommended_use": "Many-to-many technology tag on products, projects, organisations or services",
+        "official_source": "https://esamultimedia.esa.int/multimedia/publications/STM-277/STM-277.pdf"
+      }
+    },
+    {
+      "source_row": 77,
+      "values": {
+        "td_code": "TD19",
+        "technology_domain": "Propulsion",
+        "ts_code": "D",
+        "technology_subdomain": "Supporting Propulsion Technologies and Tools",
+        "recommended_use": "Many-to-many technology tag on products, projects, organisations or services",
+        "official_source": "https://esamultimedia.esa.int/multimedia/publications/STM-277/STM-277.pdf"
+      }
+    },
+    {
+      "source_row": 78,
+      "values": {
+        "td_code": "TD20",
+        "technology_domain": "Structures",
+        "ts_code": "A",
+        "technology_subdomain": "Structural Design and Verification Methods and Tools",
+        "recommended_use": "Many-to-many technology tag on products, projects, organisations or services",
+        "official_source": "https://esamultimedia.esa.int/multimedia/publications/STM-277/STM-277.pdf"
+      }
+    },
+    {
+      "source_row": 79,
+      "values": {
+        "td_code": "TD20",
+        "technology_domain": "Structures",
+        "ts_code": "B",
+        "technology_subdomain": "High Stability and High-Precision Spacecraft Structures",
+        "recommended_use": "Many-to-many technology tag on products, projects, organisations or services",
+        "official_source": "https://esamultimedia.esa.int/multimedia/publications/STM-277/STM-277.pdf"
+      }
+    },
+    {
+      "source_row": 80,
+      "values": {
+        "td_code": "TD20",
+        "technology_domain": "Structures",
+        "ts_code": "C",
+        "technology_subdomain": "Inflatable and Deployable Structures",
+        "recommended_use": "Many-to-many technology tag on products, projects, organisations or services",
+        "official_source": "https://esamultimedia.esa.int/multimedia/publications/STM-277/STM-277.pdf"
+      }
+    },
+    {
+      "source_row": 81,
+      "values": {
+        "td_code": "TD20",
+        "technology_domain": "Structures",
+        "ts_code": "D",
+        "technology_subdomain": "Hot Structures",
+        "recommended_use": "Many-to-many technology tag on products, projects, organisations or services",
+        "official_source": "https://esamultimedia.esa.int/multimedia/publications/STM-277/STM-277.pdf"
+      }
+    },
+    {
+      "source_row": 82,
+      "values": {
+        "td_code": "TD20",
+        "technology_domain": "Structures",
+        "ts_code": "E",
+        "technology_subdomain": "Active/Adaptive Structures",
+        "recommended_use": "Many-to-many technology tag on products, projects, organisations or services",
+        "official_source": "https://esamultimedia.esa.int/multimedia/publications/STM-277/STM-277.pdf"
+      }
+    },
+    {
+      "source_row": 83,
+      "values": {
+        "td_code": "TD20",
+        "technology_domain": "Structures",
+        "ts_code": "F",
+        "technology_subdomain": "Damage Tolerance and Health Monitoring",
+        "recommended_use": "Many-to-many technology tag on products, projects, organisations or services",
+        "official_source": "https://esamultimedia.esa.int/multimedia/publications/STM-277/STM-277.pdf"
+      }
+    },
+    {
+      "source_row": 84,
+      "values": {
+        "td_code": "TD20",
+        "technology_domain": "Structures",
+        "ts_code": "G",
+        "technology_subdomain": "Launchers, Reentry Vehicles, Planetary Vehicles",
+        "recommended_use": "Many-to-many technology tag on products, projects, organisations or services",
+        "official_source": "https://esamultimedia.esa.int/multimedia/publications/STM-277/STM-277.pdf"
+      }
+    },
+    {
+      "source_row": 85,
+      "values": {
+        "td_code": "TD20",
+        "technology_domain": "Structures",
+        "ts_code": "H",
+        "technology_subdomain": "Crew Habitation, Safe Haven and EVA suits",
+        "recommended_use": "Many-to-many technology tag on products, projects, organisations or services",
+        "official_source": "https://esamultimedia.esa.int/multimedia/publications/STM-277/STM-277.pdf"
+      }
+    },
+    {
+      "source_row": 86,
+      "values": {
+        "td_code": "TD20",
+        "technology_domain": "Structures",
+        "ts_code": "I",
+        "technology_subdomain": "Meteoroid and Debris Shield Design and Analysis",
+        "recommended_use": "Many-to-many technology tag on products, projects, organisations or services",
+        "official_source": "https://esamultimedia.esa.int/multimedia/publications/STM-277/STM-277.pdf"
+      }
+    },
+    {
+      "source_row": 87,
+      "values": {
+        "td_code": "TD20",
+        "technology_domain": "Structures",
+        "ts_code": "J",
+        "technology_subdomain": "Advanced Structural Concepts and Materials",
+        "recommended_use": "Many-to-many technology tag on products, projects, organisations or services",
+        "official_source": "https://esamultimedia.esa.int/multimedia/publications/STM-277/STM-277.pdf"
+      }
+    },
+    {
+      "source_row": 88,
+      "values": {
+        "td_code": "TD21",
+        "technology_domain": "Thermal",
+        "ts_code": "A",
+        "technology_subdomain": "Heat Transport Technology",
+        "recommended_use": "Many-to-many technology tag on products, projects, organisations or services",
+        "official_source": "https://esamultimedia.esa.int/multimedia/publications/STM-277/STM-277.pdf"
+      }
+    },
+    {
+      "source_row": 89,
+      "values": {
+        "td_code": "TD21",
+        "technology_domain": "Thermal",
+        "ts_code": "B",
+        "technology_subdomain": "Cryogenics and Refrigeration",
+        "recommended_use": "Many-to-many technology tag on products, projects, organisations or services",
+        "official_source": "https://esamultimedia.esa.int/multimedia/publications/STM-277/STM-277.pdf"
+      }
+    },
+    {
+      "source_row": 90,
+      "values": {
+        "td_code": "TD21",
+        "technology_domain": "Thermal",
+        "ts_code": "C",
+        "technology_subdomain": "Thermal Protection",
+        "recommended_use": "Many-to-many technology tag on products, projects, organisations or services",
+        "official_source": "https://esamultimedia.esa.int/multimedia/publications/STM-277/STM-277.pdf"
+      }
+    },
+    {
+      "source_row": 91,
+      "values": {
+        "td_code": "TD21",
+        "technology_domain": "Thermal",
+        "ts_code": "D",
+        "technology_subdomain": "Heat Storage and Rejection",
+        "recommended_use": "Many-to-many technology tag on products, projects, organisations or services",
+        "official_source": "https://esamultimedia.esa.int/multimedia/publications/STM-277/STM-277.pdf"
+      }
+    },
+    {
+      "source_row": 92,
+      "values": {
+        "td_code": "TD21",
+        "technology_domain": "Thermal",
+        "ts_code": "E",
+        "technology_subdomain": "Thermal Analysis Tools",
+        "recommended_use": "Many-to-many technology tag on products, projects, organisations or services",
+        "official_source": "https://esamultimedia.esa.int/multimedia/publications/STM-277/STM-277.pdf"
+      }
+    },
+    {
+      "source_row": 93,
+      "values": {
+        "td_code": "TD22",
+        "technology_domain": "Environmental Control & Life Support (ECLS) and In Situ Resource Utilisation (ISRU)",
+        "ts_code": "A",
+        "technology_subdomain": "Environmental Control & Life Support (ECLS)",
+        "recommended_use": "Many-to-many technology tag on products, projects, organisations or services",
+        "official_source": "https://esamultimedia.esa.int/multimedia/publications/STM-277/STM-277.pdf"
+      }
+    },
+    {
+      "source_row": 94,
+      "values": {
+        "td_code": "TD22",
+        "technology_domain": "Environmental Control & Life Support (ECLS) and In Situ Resource Utilisation (ISRU)",
+        "ts_code": "B",
+        "technology_subdomain": "In Situ Resource Utilisation (ISRU)",
+        "recommended_use": "Many-to-many technology tag on products, projects, organisations or services",
+        "official_source": "https://esamultimedia.esa.int/multimedia/publications/STM-277/STM-277.pdf"
+      }
+    },
+    {
+      "source_row": 95,
+      "values": {
+        "td_code": "TD23",
+        "technology_domain": "Electrical, Electronic and Electro-mechanical (EEE) Components and Quality",
+        "ts_code": "A",
+        "technology_subdomain": "Methods and Processes for Product Assurance of EEE Components",
+        "recommended_use": "Many-to-many technology tag on products, projects, organisations or services",
+        "official_source": "https://esamultimedia.esa.int/multimedia/publications/STM-277/STM-277.pdf"
+      }
+    },
+    {
+      "source_row": 96,
+      "values": {
+        "td_code": "TD23",
+        "technology_domain": "Electrical, Electronic and Electro-mechanical (EEE) Components and Quality",
+        "ts_code": "B",
+        "technology_subdomain": "EEE Component Technologies",
+        "recommended_use": "Many-to-many technology tag on products, projects, organisations or services",
+        "official_source": "https://esamultimedia.esa.int/multimedia/publications/STM-277/STM-277.pdf"
+      }
+    },
+    {
+      "source_row": 97,
+      "values": {
+        "td_code": "TD24",
+        "technology_domain": "Materials and Manufacturing Processes",
+        "ts_code": "A",
+        "technology_subdomain": "Novel Materials and Materials Technology",
+        "recommended_use": "Many-to-many technology tag on products, projects, organisations or services",
+        "official_source": "https://esamultimedia.esa.int/multimedia/publications/STM-277/STM-277.pdf"
+      }
+    },
+    {
+      "source_row": 98,
+      "values": {
+        "td_code": "TD24",
+        "technology_domain": "Materials and Manufacturing Processes",
+        "ts_code": "B",
+        "technology_subdomain": "Materials Processes",
+        "recommended_use": "Many-to-many technology tag on products, projects, organisations or services",
+        "official_source": "https://esamultimedia.esa.int/multimedia/publications/STM-277/STM-277.pdf"
+      }
+    },
+    {
+      "source_row": 99,
+      "values": {
+        "td_code": "TD24",
+        "technology_domain": "Materials and Manufacturing Processes",
+        "ts_code": "C",
+        "technology_subdomain": "Cleanliness and Sterilisation",
+        "recommended_use": "Many-to-many technology tag on products, projects, organisations or services",
+        "official_source": "https://esamultimedia.esa.int/multimedia/publications/STM-277/STM-277.pdf"
+      }
+    },
+    {
+      "source_row": 100,
+      "values": {
+        "td_code": "TD24",
+        "technology_domain": "Materials and Manufacturing Processes",
+        "ts_code": "D",
+        "technology_subdomain": "Ground and Space Environmental Effects on Materials and Processes",
+        "recommended_use": "Many-to-many technology tag on products, projects, organisations or services",
+        "official_source": "https://esamultimedia.esa.int/multimedia/publications/STM-277/STM-277.pdf"
+      }
+    },
+    {
+      "source_row": 101,
+      "values": {
+        "td_code": "TD24",
+        "technology_domain": "Materials and Manufacturing Processes",
+        "ts_code": "E",
+        "technology_subdomain": "Modelling of Materials Behaviour and Properties",
+        "recommended_use": "Many-to-many technology tag on products, projects, organisations or services",
+        "official_source": "https://esamultimedia.esa.int/multimedia/publications/STM-277/STM-277.pdf"
+      }
+    },
+    {
+      "source_row": 102,
+      "values": {
+        "td_code": "TD24",
+        "technology_domain": "Materials and Manufacturing Processes",
+        "ts_code": "F",
+        "technology_subdomain": "Non-Destructive Inspection",
+        "recommended_use": "Many-to-many technology tag on products, projects, organisations or services",
+        "official_source": "https://esamultimedia.esa.int/multimedia/publications/STM-277/STM-277.pdf"
+      }
+    },
+    {
+      "source_row": 103,
+      "values": {
+        "td_code": "TD24",
+        "technology_domain": "Materials and Manufacturing Processes",
+        "ts_code": "G",
+        "technology_subdomain": "Material and Process Obsolescence",
+        "recommended_use": "Many-to-many technology tag on products, projects, organisations or services",
+        "official_source": "https://esamultimedia.esa.int/multimedia/publications/STM-277/STM-277.pdf"
+      }
+    },
+    {
+      "source_row": 104,
+      "values": {
+        "td_code": "TD24",
+        "technology_domain": "Materials and Manufacturing Processes",
+        "ts_code": "H",
+        "technology_subdomain": "Materials for Electronic Assembly",
+        "recommended_use": "Many-to-many technology tag on products, projects, organisations or services",
+        "official_source": "https://esamultimedia.esa.int/multimedia/publications/STM-277/STM-277.pdf"
+      }
+    },
+    {
+      "source_row": 105,
+      "values": {
+        "td_code": "TD24",
+        "technology_domain": "Materials and Manufacturing Processes",
+        "ts_code": "I",
+        "technology_subdomain": "Advanced Manufacturing Technologies",
+        "recommended_use": "Many-to-many technology tag on products, projects, organisations or services",
+        "official_source": "https://esamultimedia.esa.int/multimedia/publications/STM-277/STM-277.pdf"
+      }
+    },
+    {
+      "source_row": 106,
+      "values": {
+        "td_code": "TD24",
+        "technology_domain": "Materials and Manufacturing Processes",
+        "ts_code": "J",
+        "technology_subdomain": "Reliability and Reusability Aspects of Materials",
+        "recommended_use": "Many-to-many technology tag on products, projects, organisations or services",
+        "official_source": "https://esamultimedia.esa.int/multimedia/publications/STM-277/STM-277.pdf"
+      }
+    },
+    {
+      "source_row": 107,
+      "values": {
+        "td_code": "TD25",
+        "technology_domain": "Quality, Dependability and Safety",
+        "ts_code": "A",
+        "technology_subdomain": "System Dependability and Safety",
+        "recommended_use": "Many-to-many technology tag on products, projects, organisations or services",
+        "official_source": "https://esamultimedia.esa.int/multimedia/publications/STM-277/STM-277.pdf"
+      }
+    },
+    {
+      "source_row": 108,
+      "values": {
+        "td_code": "TD25",
+        "technology_domain": "Quality, Dependability and Safety",
+        "ts_code": "B",
+        "technology_subdomain": "Software Quality",
+        "recommended_use": "Many-to-many technology tag on products, projects, organisations or services",
+        "official_source": "https://esamultimedia.esa.int/multimedia/publications/STM-277/STM-277.pdf"
+      }
+    },
+    {
+      "source_row": 109,
+      "values": {
+        "td_code": "TD25",
+        "technology_domain": "Quality, Dependability and Safety",
+        "ts_code": "C",
+        "technology_subdomain": "Product and Quality Assurance",
+        "recommended_use": "Many-to-many technology tag on products, projects, organisations or services",
+        "official_source": "https://esamultimedia.esa.int/multimedia/publications/STM-277/STM-277.pdf"
+      }
+    },
+    {
+      "source_row": 110,
+      "values": {
+        "td_code": "TD25",
+        "technology_domain": "Quality, Dependability and Safety",
+        "ts_code": "D",
+        "technology_subdomain": "Commercial Off-The-Shelf Components and Subsystems",
+        "recommended_use": "Many-to-many technology tag on products, projects, organisations or services",
+        "official_source": "https://esamultimedia.esa.int/multimedia/publications/STM-277/STM-277.pdf"
+      }
+    },
+    {
+      "source_row": 111,
+      "values": {
+        "td_code": "TD26",
+        "technology_domain": "Others",
+        "ts_code": null,
+        "technology_subdomain": null,
+        "recommended_use": "Use only when no specific ESA technology domain is suitable",
+        "official_source": "https://esamultimedia.esa.int/multimedia/publications/STM-277/STM-277.pdf"
+      }
+    }
+  ]
+}

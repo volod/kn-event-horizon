@@ -1,0 +1,235 @@
+{
+  "format": "kn.seed-proposal.table",
+  "status": "unreviewed_proposal",
+  "domain": "space",
+  "source": {
+    "file_name": "space_sector_ontology_and_tags_v1.xlsx",
+    "sha256": "26e7468ee372e9c606ff08910756b2066ef30ac9fea7524e646b52d8529eec28",
+    "sheet_name": "07_Service_Types",
+    "sheet_position": 8
+  },
+  "title": "Service type vocabulary \u2014 complements ESA GPT product hierarchy",
+  "notes": [],
+  "header_row": 3,
+  "columns": [
+    {
+      "key": "service_code",
+      "label": "Service code",
+      "column": "A"
+    },
+    {
+      "key": "service_type",
+      "label": "Service type",
+      "column": "B"
+    },
+    {
+      "key": "upstream_downstream",
+      "label": "Upstream / downstream",
+      "column": "C"
+    },
+    {
+      "key": "primary_enabling_gpt_segment",
+      "label": "Primary enabling GPT segment",
+      "column": "D"
+    },
+    {
+      "key": "typical_euspa_tags",
+      "label": "Typical EUSPA tags",
+      "column": "E"
+    },
+    {
+      "key": "examples_of_stored_facts",
+      "label": "Examples of stored facts",
+      "column": "F"
+    }
+  ],
+  "records": [
+    {
+      "source_row": 4,
+      "values": {
+        "service_code": "S01",
+        "service_type": "Launch service",
+        "upstream_downstream": "Upstream",
+        "primary_enabling_gpt_segment": "I Launchers",
+        "typical_euspa_tags": null,
+        "examples_of_stored_facts": "provider; vehicle; site; mission; payload class; price model; contract"
+      }
+    },
+    {
+      "source_row": 5,
+      "values": {
+        "service_code": "S02",
+        "service_type": "Rideshare / deployment service",
+        "upstream_downstream": "Upstream",
+        "primary_enabling_gpt_segment": "I / III",
+        "typical_euspa_tags": null,
+        "examples_of_stored_facts": "provider; deployer; orbit; payload interface; schedule"
+      }
+    },
+    {
+      "source_row": 6,
+      "values": {
+        "service_code": "S03",
+        "service_type": "In-space transportation",
+        "upstream_downstream": "Upstream",
+        "primary_enabling_gpt_segment": "III",
+        "typical_euspa_tags": null,
+        "examples_of_stored_facts": "provider; vehicle; delta-v; client mass; target orbit"
+      }
+    },
+    {
+      "source_row": 7,
+      "values": {
+        "service_code": "S04",
+        "service_type": "On-orbit servicing / life extension / refuelling",
+        "upstream_downstream": "Upstream",
+        "primary_enabling_gpt_segment": "III",
+        "typical_euspa_tags": "Space",
+        "examples_of_stored_facts": "provider; servicing mode; client interface; heritage"
+      }
+    },
+    {
+      "source_row": 8,
+      "values": {
+        "service_code": "S05",
+        "service_type": "Satellite / constellation operations",
+        "upstream_downstream": "Midstream",
+        "primary_enabling_gpt_segment": "II / IV",
+        "typical_euspa_tags": "Space",
+        "examples_of_stored_facts": "operator; fleet; SLA; coverage; mission-control stack"
+      }
+    },
+    {
+      "source_row": 9,
+      "values": {
+        "service_code": "S06",
+        "service_type": "Mission operations as a service",
+        "upstream_downstream": "Midstream",
+        "primary_enabling_gpt_segment": "IV",
+        "typical_euspa_tags": "Space",
+        "examples_of_stored_facts": "supported spacecraft; APIs; scheduling; FDS/MCS"
+      }
+    },
+    {
+      "source_row": 10,
+      "values": {
+        "service_code": "S07",
+        "service_type": "Ground Station as a Service",
+        "upstream_downstream": "Midstream",
+        "primary_enabling_gpt_segment": "IV",
+        "typical_euspa_tags": "Space",
+        "examples_of_stored_facts": "station network; bands; API; scheduling; SLA"
+      }
+    },
+    {
+      "source_row": 11,
+      "values": {
+        "service_code": "S08",
+        "service_type": "SATCOM connectivity",
+        "upstream_downstream": "Downstream",
+        "primary_enabling_gpt_segment": "II / IV",
+        "typical_euspa_tags": "Multiple EUSPA segments",
+        "examples_of_stored_facts": "coverage; capacity; terminals; SLA; customer type"
+      }
+    },
+    {
+      "source_row": 12,
+      "values": {
+        "service_code": "S09",
+        "service_type": "EO data service",
+        "upstream_downstream": "Downstream",
+        "primary_enabling_gpt_segment": "II / IV",
+        "typical_euspa_tags": "Multiple EUSPA segments",
+        "examples_of_stored_facts": "sensor; resolution; revisit; licence; API"
+      }
+    },
+    {
+      "source_row": 13,
+      "values": {
+        "service_code": "S10",
+        "service_type": "EO / geospatial analytics",
+        "upstream_downstream": "Downstream",
+        "primary_enabling_gpt_segment": "IV",
+        "typical_euspa_tags": "Multiple EUSPA segments",
+        "examples_of_stored_facts": "input datasets; models; output; latency; API"
+      }
+    },
+    {
+      "source_row": 14,
+      "values": {
+        "service_code": "S11",
+        "service_type": "PNT / augmentation / timing service",
+        "upstream_downstream": "Downstream",
+        "primary_enabling_gpt_segment": "II / IV",
+        "typical_euspa_tags": "Multiple EUSPA segments",
+        "examples_of_stored_facts": "accuracy; integrity; coverage; receiver requirements"
+      }
+    },
+    {
+      "source_row": 15,
+      "values": {
+        "service_code": "S12",
+        "service_type": "SSA / SDA / STM service",
+        "upstream_downstream": "Downstream",
+        "primary_enabling_gpt_segment": "II / IV",
+        "typical_euspa_tags": "Space",
+        "examples_of_stored_facts": "catalog; sensors; update rate; conjunction alerts"
+      }
+    },
+    {
+      "source_row": 16,
+      "values": {
+        "service_code": "S13",
+        "service_type": "Space weather service",
+        "upstream_downstream": "Downstream",
+        "primary_enabling_gpt_segment": "II / IV",
+        "typical_euspa_tags": "Space",
+        "examples_of_stored_facts": "indices; alerts; sensors; cadence"
+      }
+    },
+    {
+      "source_row": 17,
+      "values": {
+        "service_code": "S14",
+        "service_type": "AIT / environmental test service",
+        "upstream_downstream": "Industrial",
+        "primary_enabling_gpt_segment": "IV",
+        "typical_euspa_tags": "Space",
+        "examples_of_stored_facts": "facility; test types; limits; standards; capacity"
+      }
+    },
+    {
+      "source_row": 18,
+      "values": {
+        "service_code": "S15",
+        "service_type": "Engineering / manufacturing service",
+        "upstream_downstream": "Industrial",
+        "primary_enabling_gpt_segment": "I / II / III / IV",
+        "typical_euspa_tags": "Space",
+        "examples_of_stored_facts": "process; qualification; capacity; materials; standards"
+      }
+    },
+    {
+      "source_row": 19,
+      "values": {
+        "service_code": "S16",
+        "service_type": "Data/cloud processing service",
+        "upstream_downstream": "Midstream/downstream",
+        "primary_enabling_gpt_segment": "IV",
+        "typical_euspa_tags": "Multiple EUSPA segments",
+        "examples_of_stored_facts": "compute; storage; APIs; latency; security"
+      }
+    },
+    {
+      "source_row": 20,
+      "values": {
+        "service_code": "S17",
+        "service_type": "Regulatory / spectrum / mission support",
+        "upstream_downstream": "Ecosystem",
+        "primary_enabling_gpt_segment": "IV / non-product",
+        "typical_euspa_tags": "Space",
+        "examples_of_stored_facts": "jurisdiction; filing/licence support; scope"
+      }
+    }
+  ]
+}

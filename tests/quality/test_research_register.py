@@ -2,7 +2,7 @@ from pathlib import Path
 
 import pytest
 
-from agent_py.quality.research_register import main, register_findings
+from kn.quality.research_register import main, register_findings
 from tests.quality._plan_fixture import plan_with, task_block, write_project
 
 PROJECT_ROOT = Path(__file__).resolve().parents[2]

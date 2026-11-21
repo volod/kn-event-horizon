@@ -53,6 +53,8 @@ Use the required `Dependencies` field for external inputs, manual prerequisites,
 needed at acceptance. Use `none.` when there is no additional prerequisite. A human-lane task
 should name the specific input, decision, or authorization required and what an agent can prepare.
 
+Long prerequisite lists can continue on the next line with two spaces of indentation.
+
 `make plan-status` skips tasks with an open `Requires` entry, then lists priority in each lane.
 Check the `Dependencies` field and the task's acceptance gates before starting.
 

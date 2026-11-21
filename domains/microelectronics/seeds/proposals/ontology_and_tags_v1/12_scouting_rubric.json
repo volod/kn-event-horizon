@@ -1,0 +1,85 @@
+{
+  "format": "kn.seed-proposal.table",
+  "status": "unreviewed_proposal",
+  "domain": "microelectronics",
+  "source": {
+    "file_name": "microelectronics_ontology_and_tags_v1.xlsx",
+    "sha256": "7166aa06791998c692cc6a2ac377692a6687f15e3353ffa70a1c159f2e63c34f",
+    "sheet_name": "12_Scouting_Rubric",
+    "sheet_position": 13
+  },
+  "title": "Technology scouting \u2014 proposed weighted prioritization",
+  "notes": [
+    "Weights are proposed analyst policy, not a validated prediction. Unknowns stay unknown; no score until inputs complete. Hard safety/procurement constraints evaluated separately."
+  ],
+  "header_row": 4,
+  "columns": [
+    {
+      "key": "criterion",
+      "label": "Criterion",
+      "column": "A"
+    },
+    {
+      "key": "weight_pct",
+      "label": "Weight %",
+      "column": "B"
+    },
+    {
+      "key": "evidence",
+      "label": "Evidence",
+      "column": "C"
+    },
+    {
+      "key": "rating_anchors_0_5",
+      "label": "Rating anchors 0\u20135",
+      "column": "D"
+    }
+  ],
+  "records": [
+    {
+      "source_row": 5,
+      "values": {
+        "criterion": "Energy improvement potential",
+        "weight_pct": 35,
+        "evidence": "Same task J, standby and duty cycle; estimate clearly marked",
+        "rating_anchors_0_5": "0 no benefit / 5 measured order-of-magnitude potential"
+      }
+    },
+    {
+      "source_row": 6,
+      "values": {
+        "criterion": "Autonomy impact",
+        "weight_pct": 20,
+        "evidence": "Useful local processing, power-neutrality, connectivity, latency",
+        "rating_anchors_0_5": "0 none / 5 transformational"
+      }
+    },
+    {
+      "source_row": 7,
+      "values": {
+        "criterion": "Evidence maturity",
+        "weight_pct": 20,
+        "evidence": "Reproducible measured silicon > simulation/marketing; separate TRL",
+        "rating_anchors_0_5": "0 concept / 5 independent measured & production path"
+      }
+    },
+    {
+      "source_row": 8,
+      "values": {
+        "criterion": "Access / supply",
+        "weight_pct": 15,
+        "evidence": "European/Canadian control, design and origin separately; samples / PDK / licence, export",
+        "rating_anchors_0_5": "0 inaccessible / 5 suitable verified route"
+      }
+    },
+    {
+      "source_row": 9,
+      "values": {
+        "criterion": "Integration feasibility",
+        "weight_pct": 10,
+        "evidence": "Toolchain, interfaces, cost, thermal and design effort",
+        "rating_anchors_0_5": "0 infeasible / 5 low-friction"
+      }
+    }
+  ]
+}

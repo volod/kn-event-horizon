@@ -1,0 +1,281 @@
+{
+  "format": "kn.seed-proposal.table",
+  "status": "unreviewed_proposal",
+  "domain": "gdelt",
+  "source": {
+    "file_name": "gdelt_ontology_and_tags_v1.xlsx",
+    "sha256": "c31bba2aad40336c620044c6df5332744aebdce70b415e56bc121096845881a2",
+    "sheet_name": "12_Sources_Ingestion",
+    "sheet_position": 13
+  },
+  "title": "Source and API matrix",
+  "notes": [
+    "Core 2015 release plus later documented access services. Verification status describes this review, not successful authenticated integration."
+  ],
+  "header_row": 4,
+  "columns": [
+    {
+      "key": "priority",
+      "label": "Priority",
+      "column": "A"
+    },
+    {
+      "key": "resource",
+      "label": "Resource",
+      "column": "B"
+    },
+    {
+      "key": "access",
+      "label": "Access",
+      "column": "C"
+    },
+    {
+      "key": "purpose",
+      "label": "Purpose",
+      "column": "D"
+    },
+    {
+      "key": "url",
+      "label": "URL",
+      "column": "E"
+    },
+    {
+      "key": "cadence",
+      "label": "Cadence",
+      "column": "F"
+    },
+    {
+      "key": "review_status",
+      "label": "Review status",
+      "column": "G"
+    },
+    {
+      "key": "limitation",
+      "label": "Limitation",
+      "column": "H"
+    }
+  ],
+  "records": [
+    {
+      "source_row": 5,
+      "values": {
+        "priority": "P0",
+        "resource": "GDELT 2.0 overview",
+        "access": "Documentation",
+        "purpose": "Native architecture",
+        "url": "https://blog.gdeltproject.org/gdelt-2-0-our-global-world-in-realtime/",
+        "cadence": "Reference",
+        "review_status": "Opened",
+        "limitation": "Release description, not current SLA"
+      }
+    },
+    {
+      "source_row": 6,
+      "values": {
+        "priority": "P0",
+        "resource": "Event codebook",
+        "access": "Documentation",
+        "purpose": "Events + Mentions schema",
+        "url": "https://data.gdeltproject.org/documentation/GDELT-Event_Codebook-V2.0.pdf",
+        "cadence": "On change",
+        "review_status": "Opened",
+        "limitation": "Field mapping authority"
+      }
+    },
+    {
+      "source_row": 7,
+      "values": {
+        "priority": "P0",
+        "resource": "GKG 2.1 codebook",
+        "access": "Documentation",
+        "purpose": "GKG schema + GCAM",
+        "url": "https://data.gdeltproject.org/documentation/GDELT-Global_Knowledge_Graph_Codebook-V2.1.pdf",
+        "cadence": "On change",
+        "review_status": "Opened",
+        "limitation": "Raw vs BigQuery labels differ"
+      }
+    },
+    {
+      "source_row": 8,
+      "values": {
+        "priority": "P0",
+        "resource": "CAMEO lookup",
+        "access": "TSV",
+        "purpose": "Full event code dictionary",
+        "url": "https://www.gdeltproject.org/data/lookups/CAMEO.eventcodes.txt",
+        "cadence": "On change",
+        "review_status": "Link found; retrieval failed",
+        "limitation": "Do not treat starter sheet as complete"
+      }
+    },
+    {
+      "source_row": 9,
+      "values": {
+        "priority": "P0",
+        "resource": "CAMEO actor / FIPS lookups",
+        "access": "TSV links",
+        "purpose": "Actor and geo dictionaries",
+        "url": "https://gdeltproject.org/data.html",
+        "cadence": "On change",
+        "review_status": "Index opened; type file retrieval failed",
+        "limitation": "Namespaces distinct"
+      }
+    },
+    {
+      "source_row": 10,
+      "values": {
+        "priority": "P0",
+        "resource": "GKG themes lookup",
+        "access": "Text/TSV",
+        "purpose": "Theme identifiers; historical counts",
+        "url": "https://data.gdeltproject.org/api/v2/guides/LOOKUP-GKGTHEMES.TXT",
+        "cadence": "On update",
+        "review_status": "Opened",
+        "limitation": "2021 snapshot; sync with current data"
+      }
+    },
+    {
+      "source_row": 11,
+      "values": {
+        "priority": "P0",
+        "resource": "GCAM master codebook",
+        "access": "Text / XLSX",
+        "purpose": "Dictionary IDs, dimensions, key definitions",
+        "url": "https://data.gdeltproject.org/documentation/GCAM-MASTER-CODEBOOK.TXT",
+        "cadence": "On update",
+        "review_status": "Text decoding failed",
+        "limitation": "Use alternate XLSX linked by codebook"
+      }
+    },
+    {
+      "source_row": 12,
+      "values": {
+        "priority": "P0",
+        "resource": "GCAM master XLSX",
+        "access": "XLSX",
+        "purpose": "GCAM dictionary",
+        "url": "https://data.gdeltproject.org/documentation/GCAM-MASTERCODEBOOK.xlsx",
+        "cadence": "On update",
+        "review_status": "Linked in codebook; not opened",
+        "limitation": "Import in production"
+      }
+    },
+    {
+      "source_row": 13,
+      "values": {
+        "priority": "P0",
+        "resource": "English latest manifest",
+        "access": "Text",
+        "purpose": "Three current ZIP/TSV file URLs + hash",
+        "url": "https://data.gdeltproject.org/gdeltv2/lastupdate.txt",
+        "cadence": "15 min target",
+        "review_status": "Opened; 3 records",
+        "limitation": "Track timestamp and retry gaps"
+      }
+    },
+    {
+      "source_row": 14,
+      "values": {
+        "priority": "P0",
+        "resource": "Translated latest manifest",
+        "access": "Text",
+        "purpose": "Three current translated ZIP/TSV files + hash",
+        "url": "https://data.gdeltproject.org/gdeltv2/lastupdate-translation.txt",
+        "cadence": "15 min target",
+        "review_status": "Opened; 3 records",
+        "limitation": "Can lag English stream"
+      }
+    },
+    {
+      "source_row": 15,
+      "values": {
+        "priority": "P1",
+        "resource": "English master manifest",
+        "access": "Text",
+        "purpose": "Historical file list",
+        "url": "https://data.gdeltproject.org/gdeltv2/masterfilelist.txt",
+        "cadence": "Backfill",
+        "review_status": "Link found; too large for web tool",
+        "limitation": "Stream or partition locally; not download repeatedly"
+      }
+    },
+    {
+      "source_row": 16,
+      "values": {
+        "priority": "P1",
+        "resource": "Translated master manifest",
+        "access": "Text",
+        "purpose": "Historical translated list",
+        "url": "https://data.gdeltproject.org/gdeltv2/masterfilelist-translation.txt",
+        "cadence": "Backfill",
+        "review_status": "Link found; too large for web tool",
+        "limitation": "Stream/partition"
+      }
+    },
+    {
+      "source_row": 17,
+      "values": {
+        "priority": "P0",
+        "resource": "BigQuery GDELT v2",
+        "access": "SQL",
+        "purpose": "Events, Mentions, GKG",
+        "url": "https://console.cloud.google.com/bigquery?project=gdelt-bq",
+        "cadence": "Query as needed",
+        "review_status": "Availability documented; queries not run",
+        "limitation": "Use gdelt-bq.gdeltv2 tables; check schema and partitions; billing may apply"
+      }
+    },
+    {
+      "source_row": 18,
+      "values": {
+        "priority": "P0",
+        "resource": "DOC 2.0 API",
+        "access": "HTTP / JSON etc.",
+        "purpose": "News search, article links, timelines",
+        "url": "https://blog.gdeltproject.org/gdelt-doc-2-0-api-debuts/",
+        "cadence": "Scheduled queries",
+        "review_status": "Docs found; endpoint not tested",
+        "limitation": "Check current time window/rate limits"
+      }
+    },
+    {
+      "source_row": 19,
+      "values": {
+        "priority": "P1",
+        "resource": "GEO 2.0 API",
+        "access": "HTTP / GeoJSON etc.",
+        "purpose": "Geographic media analysis",
+        "url": "https://blog.gdeltproject.org/gdelt-geo-2-0-api-debuts/",
+        "cadence": "As needed",
+        "review_status": "Docs found; endpoint not tested",
+        "limitation": "Place mention \u2260 verified incident"
+      }
+    },
+    {
+      "source_row": 20,
+      "values": {
+        "priority": "P2",
+        "resource": "TV 2.0 API",
+        "access": "HTTP",
+        "purpose": "TV search and analytics",
+        "url": "https://blog.gdeltproject.org/gdelt-2-0-television-api-debuts/",
+        "cadence": "As needed",
+        "review_status": "Docs found; endpoint not tested",
+        "limitation": "Different coverage and availability"
+      }
+    },
+    {
+      "source_row": 21,
+      "values": {
+        "priority": "P2",
+        "resource": "GDELT additional datasets",
+        "access": "Dataset directory",
+        "purpose": "VGKG/GFG/GDG/GEG etc.",
+        "url": "https://gdeltproject.org/data.html",
+        "cadence": "As needed",
+        "review_status": "Index opened",
+        "limitation": "Separate later products, not core 2015 release"
+      }
+    }
+  ]
+}

@@ -1,0 +1,391 @@
+{
+  "format": "kn.seed-proposal.table",
+  "status": "unreviewed_proposal",
+  "domain": "gdelt",
+  "source": {
+    "file_name": "gdelt_ontology_and_tags_v1.xlsx",
+    "sha256": "c31bba2aad40336c620044c6df5332744aebdce70b415e56bc121096845881a2",
+    "sheet_name": "01_Ontology",
+    "sheet_position": 2
+  },
+  "title": "Entity ontology",
+  "notes": [
+    "NATIVE_MAPPING means normalized representation of a source field, not a separate native GDELT table."
+  ],
+  "header_row": 4,
+  "columns": [
+    {
+      "key": "entity_class",
+      "label": "Entity class",
+      "column": "A"
+    },
+    {
+      "key": "origin",
+      "label": "Origin",
+      "column": "B"
+    },
+    {
+      "key": "input",
+      "label": "Input",
+      "column": "C"
+    },
+    {
+      "key": "primary_key",
+      "label": "Primary key",
+      "column": "D"
+    },
+    {
+      "key": "core_attributes",
+      "label": "Core attributes",
+      "column": "E"
+    },
+    {
+      "key": "interpretation",
+      "label": "Interpretation",
+      "column": "F"
+    },
+    {
+      "key": "source_url",
+      "label": "Source URL",
+      "column": "G"
+    }
+  ],
+  "records": [
+    {
+      "source_row": 5,
+      "values": {
+        "entity_class": "EventRecord",
+        "origin": "NATIVE",
+        "input": "Events",
+        "primary_key": "GlobalEventID",
+        "core_attributes": "Day/SQLDATE; DATEADDED; action; actors; geo; Goldstein",
+        "interpretation": "Machine-coded event, not verified real-world fact",
+        "source_url": "https://data.gdeltproject.org/documentation/GDELT-Event_Codebook-V2.0.pdf"
+      }
+    },
+    {
+      "source_row": 6,
+      "values": {
+        "entity_class": "EventMention",
+        "origin": "NATIVE",
+        "input": "Mentions",
+        "primary_key": "KB composite/hash of raw record; GlobalEventID FK",
+        "core_attributes": "MentionIdentifier; MentionType; MentionTimeDate; SentenceID; Confidence",
+        "interpretation": "Multiple mentions per event; no guaranteed unique native mention ID",
+        "source_url": "https://data.gdeltproject.org/documentation/GDELT-Event_Codebook-V2.0.pdf"
+      }
+    },
+    {
+      "source_row": 7,
+      "values": {
+        "entity_class": "DocumentRecord",
+        "origin": "NATIVE",
+        "input": "GKG",
+        "primary_key": "GKGRECORDID / GKGRECORDID",
+        "core_attributes": "DATE; SourceCollectionIdentifier; DocumentIdentifier; SourceCommonName",
+        "interpretation": "One processed document per record; repeated URL possible",
+        "source_url": "https://data.gdeltproject.org/documentation/GDELT-Global_Knowledge_Graph_Codebook-V2.1.pdf"
+      }
+    },
+    {
+      "source_row": 8,
+      "values": {
+        "entity_class": "Document",
+        "origin": "KB",
+        "input": "Mentions + GKG",
+        "primary_key": "document_id (collection + original identifier normalized)",
+        "core_attributes": "raw URL/citation/DOI; publication time if known; language; content hash",
+        "interpretation": "Logical source document, not GKG row",
+        "source_url": "https://data.gdeltproject.org/documentation/GDELT-Global_Knowledge_Graph_Codebook-V2.1.pdf"
+      }
+    },
+    {
+      "source_row": 9,
+      "values": {
+        "entity_class": "MediaSource",
+        "origin": "KB",
+        "input": "GKG/Mentions",
+        "primary_key": "source_id",
+        "core_attributes": "SourceCommonName / MentionSourceName; domain; jurisdiction if validated",
+        "interpretation": "Domain is not necessarily legal publisher",
+        "source_url": "https://data.gdeltproject.org/documentation/GDELT-Global_Knowledge_Graph_Codebook-V2.1.pdf"
+      }
+    },
+    {
+      "source_row": 10,
+      "values": {
+        "entity_class": "ActorOccurrence",
+        "origin": "NATIVE_MAPPING",
+        "input": "Events",
+        "primary_key": "event_id + role",
+        "core_attributes": "Actor1/2Code; Name; CountryCode; type codes",
+        "interpretation": "Actor in role; not globally resolved entity",
+        "source_url": "https://data.gdeltproject.org/documentation/GDELT-Event_Codebook-V2.0.pdf"
+      }
+    },
+    {
+      "source_row": 11,
+      "values": {
+        "entity_class": "ActorEntity",
+        "origin": "KB",
+        "input": "Events + GKG",
+        "primary_key": "entity_id",
+        "core_attributes": "name; aliases; type; verified IDs; resolution confidence",
+        "interpretation": "Canonical person/organization/state only after resolution",
+        "source_url": "https://data.gdeltproject.org/documentation/GDELT-Event_Codebook-V2.0.pdf"
+      }
+    },
+    {
+      "source_row": 12,
+      "values": {
+        "entity_class": "EntityMention",
+        "origin": "NATIVE_MAPPING",
+        "input": "GKG",
+        "primary_key": "record_id + field + occurrence ordinal",
+        "core_attributes": "Persons/V2Persons; Organizations/V2Organizations; AllNames",
+        "interpretation": "Text occurrence; offset where available",
+        "source_url": "https://data.gdeltproject.org/documentation/GDELT-Global_Knowledge_Graph_Codebook-V2.1.pdf"
+      }
+    },
+    {
+      "source_row": 13,
+      "values": {
+        "entity_class": "LocationMention",
+        "origin": "NATIVE_MAPPING",
+        "input": "Events/GKG",
+        "primary_key": "record_id + field + ordinal",
+        "core_attributes": "geo type; name; country; ADM; lat/long; feature ID; offset",
+        "interpretation": "Estimated geocode; separate actor/event/document geography",
+        "source_url": "https://data.gdeltproject.org/documentation/GDELT-Global_Knowledge_Graph_Codebook-V2.1.pdf"
+      }
+    },
+    {
+      "source_row": 14,
+      "values": {
+        "entity_class": "Place",
+        "origin": "KB",
+        "input": "Geo resolution",
+        "primary_key": "place_id",
+        "core_attributes": "gazetteer namespace; feature ID; coordinates; country",
+        "interpretation": "Not inferred actual actor location or precise facility",
+        "source_url": "https://data.gdeltproject.org/documentation/GDELT-Event_Codebook-V2.0.pdf"
+      }
+    },
+    {
+      "source_row": 15,
+      "values": {
+        "entity_class": "ActionType",
+        "origin": "NATIVE",
+        "input": "CAMEO",
+        "primary_key": "EventCode (string)",
+        "core_attributes": "root; base; code; QuadClass; Goldstein",
+        "interpretation": "Not product taxonomy",
+        "source_url": "https://data.gdeltproject.org/documentation/GDELT-Event_Codebook-V2.0.pdf"
+      }
+    },
+    {
+      "source_row": 16,
+      "values": {
+        "entity_class": "ThemeTag",
+        "origin": "NATIVE",
+        "input": "GKG Themes",
+        "primary_key": "theme_code",
+        "core_attributes": "Themes; V2Themes offset; vocab snapshot",
+        "interpretation": "Document-level theme, not necessarily event-level",
+        "source_url": "https://data.gdeltproject.org/api/v2/guides/LOOKUP-GKGTHEMES.TXT"
+      }
+    },
+    {
+      "source_row": 17,
+      "values": {
+        "entity_class": "ContentMeasure",
+        "origin": "NATIVE",
+        "input": "GCAM",
+        "primary_key": "record_id + measure key",
+        "core_attributes": "wc; nwc; cX.Y; vX.Y; raw value; dictionary version",
+        "interpretation": "Count or score, not truth",
+        "source_url": "https://data.gdeltproject.org/documentation/GDELT-Global_Knowledge_Graph_Codebook-V2.1.pdf"
+      }
+    },
+    {
+      "source_row": 18,
+      "values": {
+        "entity_class": "ToneObservation",
+        "origin": "NATIVE",
+        "input": "Events/Mentions/GKG",
+        "primary_key": "record_id + field",
+        "core_attributes": "AvgTone; MentionDocTone; V2Tone",
+        "interpretation": "Different aggregation/grain; not severity",
+        "source_url": "https://data.gdeltproject.org/documentation/GDELT-Global_Knowledge_Graph_Codebook-V2.1.pdf"
+      }
+    },
+    {
+      "source_row": 19,
+      "values": {
+        "entity_class": "CountMention",
+        "origin": "NATIVE_MAPPING",
+        "input": "GKG",
+        "primary_key": "record_id + ordinal",
+        "core_attributes": "Counts/V2Counts; raw quantity; context; offset",
+        "interpretation": "Keep claims; no aggregation before validation",
+        "source_url": "https://data.gdeltproject.org/documentation/GDELT-Global_Knowledge_Graph_Codebook-V2.1.pdf"
+      }
+    },
+    {
+      "source_row": 20,
+      "values": {
+        "entity_class": "QuoteMention",
+        "origin": "NATIVE_MAPPING",
+        "input": "GKG",
+        "primary_key": "record_id + ordinal",
+        "core_attributes": "Quotations; raw quote and attributed context",
+        "interpretation": "Attribution may be uncertain",
+        "source_url": "https://data.gdeltproject.org/documentation/GDELT-Global_Knowledge_Graph_Codebook-V2.1.pdf"
+      }
+    },
+    {
+      "source_row": 21,
+      "values": {
+        "entity_class": "DateMention",
+        "origin": "NATIVE_MAPPING",
+        "input": "GKG",
+        "primary_key": "record_id + ordinal",
+        "core_attributes": "Dates; resolution; offset",
+        "interpretation": "Text reference, not event time",
+        "source_url": "https://data.gdeltproject.org/documentation/GDELT-Global_Knowledge_Graph_Codebook-V2.1.pdf"
+      }
+    },
+    {
+      "source_row": 22,
+      "values": {
+        "entity_class": "AmountMention",
+        "origin": "NATIVE_MAPPING",
+        "input": "GKG",
+        "primary_key": "record_id + ordinal",
+        "core_attributes": "Amounts; raw amount; context; offset",
+        "interpretation": "Not normalized monetary transaction",
+        "source_url": "https://data.gdeltproject.org/documentation/GDELT-Global_Knowledge_Graph_Codebook-V2.1.pdf"
+      }
+    },
+    {
+      "source_row": 23,
+      "values": {
+        "entity_class": "MediaReference",
+        "origin": "NATIVE_MAPPING",
+        "input": "GKG",
+        "primary_key": "record_id + media ordinal",
+        "core_attributes": "SharingImage; RelatedImages; SocialImageEmbeds; SocialVideoEmbeds",
+        "interpretation": "Link, not proof of event",
+        "source_url": "https://data.gdeltproject.org/documentation/GDELT-Global_Knowledge_Graph_Codebook-V2.1.pdf"
+      }
+    },
+    {
+      "source_row": 24,
+      "values": {
+        "entity_class": "TranslationInfo",
+        "origin": "NATIVE_MAPPING",
+        "input": "Mentions/GKG",
+        "primary_key": "record_id + pipeline",
+        "core_attributes": "TranslationInfo; MentionDocTranslationInfo; source language",
+        "interpretation": "Keep language/translation provenance",
+        "source_url": "https://data.gdeltproject.org/documentation/GDELT-Global_Knowledge_Graph_Codebook-V2.1.pdf"
+      }
+    },
+    {
+      "source_row": 25,
+      "values": {
+        "entity_class": "Claim",
+        "origin": "KB",
+        "input": "Document + extracted context",
+        "primary_key": "claim_id",
+        "core_attributes": "subject; predicate; object; modality; time; evidence span; status",
+        "interpretation": "Reported assertion with provenance",
+        "source_url": "https://blog.gdeltproject.org/gdelt-2-0-our-global-world-in-realtime/"
+      }
+    },
+    {
+      "source_row": 26,
+      "values": {
+        "entity_class": "Evidence",
+        "origin": "KB",
+        "input": "Source records",
+        "primary_key": "evidence_id",
+        "core_attributes": "document_id; raw ID; snippet/offset; retrieved_at; hash",
+        "interpretation": "Evidence for or against claim; not automatic confirmation",
+        "source_url": "https://blog.gdeltproject.org/gdelt-2-0-our-global-world-in-realtime/"
+      }
+    },
+    {
+      "source_row": 27,
+      "values": {
+        "entity_class": "ValidatedFact",
+        "origin": "KB",
+        "input": "External corroboration",
+        "primary_key": "fact_id",
+        "core_attributes": "subject; predicate; object; validity; reviewer; evidence IDs",
+        "interpretation": "Promoted after explicit validation",
+        "source_url": "https://blog.gdeltproject.org/gdelt-2-0-our-global-world-in-realtime/"
+      }
+    },
+    {
+      "source_row": 28,
+      "values": {
+        "entity_class": "StoryCluster",
+        "origin": "KB",
+        "input": "Document/Event links",
+        "primary_key": "cluster_id",
+        "core_attributes": "similarity; time window; canonical story; syndication flag",
+        "interpretation": "Duplicates/related reporting, not unique factual events",
+        "source_url": "https://blog.gdeltproject.org/gdelt-2-0-our-global-world-in-realtime/"
+      }
+    },
+    {
+      "source_row": 29,
+      "values": {
+        "entity_class": "TechnologyTag",
+        "origin": "KB",
+        "input": "Industry ontology",
+        "primary_key": "namespace + code + version",
+        "core_attributes": "technology; mapping; evidence",
+        "interpretation": "External/local tag; not GCAM/GKG code",
+        "source_url": "https://blog.gdeltproject.org/gdelt-2-0-our-global-world-in-realtime/"
+      }
+    },
+    {
+      "source_row": 30,
+      "values": {
+        "entity_class": "ApplicationTag",
+        "origin": "KB",
+        "input": "Local application vocabulary",
+        "primary_key": "app_code",
+        "core_attributes": "scenario; scope; tag confidence",
+        "interpretation": "Local analytical use case",
+        "source_url": "https://blog.gdeltproject.org/gdelt-2-0-our-global-world-in-realtime/"
+      }
+    },
+    {
+      "source_row": 31,
+      "values": {
+        "entity_class": "Signal",
+        "origin": "KB",
+        "input": "Derived analytics",
+        "primary_key": "signal_id",
+        "core_attributes": "type; baseline; window; score; source diversity",
+        "interpretation": "Candidate for review",
+        "source_url": "https://blog.gdeltproject.org/gdelt-2-0-our-global-world-in-realtime/"
+      }
+    },
+    {
+      "source_row": 32,
+      "values": {
+        "entity_class": "IngestionBatch",
+        "origin": "KB",
+        "input": "File/API manifest",
+        "primary_key": "batch_id",
+        "core_attributes": "stream; timestamp; file URL; checksum; schema; ingest status",
+        "interpretation": "Audit and replay",
+        "source_url": "https://blog.gdeltproject.org/gdelt-2-0-our-global-world-in-realtime/"
+      }
+    }
+  ]
+}

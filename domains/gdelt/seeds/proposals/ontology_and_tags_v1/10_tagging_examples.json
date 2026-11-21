@@ -1,0 +1,164 @@
+{
+  "format": "kn.seed-proposal.table",
+  "status": "unreviewed_proposal",
+  "domain": "gdelt",
+  "source": {
+    "file_name": "gdelt_ontology_and_tags_v1.xlsx",
+    "sha256": "c31bba2aad40336c620044c6df5332744aebdce70b415e56bc121096845881a2",
+    "sheet_name": "10_Tagging_Examples",
+    "sheet_position": 11
+  },
+  "title": "Combined tagging | worked scenarios",
+  "notes": [
+    "All examples are hypothetical mappings, not actual GDELT records. GKG theme candidates must be checked against records; never invent native codes or measures."
+  ],
+  "header_row": 4,
+  "columns": [
+    {
+      "key": "scenario",
+      "label": "Scenario",
+      "column": "A"
+    },
+    {
+      "key": "entities",
+      "label": "Entities",
+      "column": "B"
+    },
+    {
+      "key": "cameo_handling",
+      "label": "CAMEO handling",
+      "column": "C"
+    },
+    {
+      "key": "candidate_native_themes",
+      "label": "Candidate native themes",
+      "column": "D"
+    },
+    {
+      "key": "kb_technology_tags",
+      "label": "KB technology tags",
+      "column": "E"
+    },
+    {
+      "key": "kb_application_tags",
+      "label": "KB application tags",
+      "column": "F"
+    },
+    {
+      "key": "service_ids",
+      "label": "Service IDs",
+      "column": "G"
+    },
+    {
+      "key": "evidence_caveat",
+      "label": "Evidence / caveat",
+      "column": "H"
+    }
+  ],
+  "records": [
+    {
+      "source_row": 5,
+      "values": {
+        "scenario": "Hypothetical: European chip vendor announces an ultra-low-power NPU research prototype",
+        "entities": "Document; Claim; ActorEntity",
+        "cameo_handling": "No forced CAMEO; only populate if actual event row exists",
+        "candidate_native_themes": "SCIENCE; WB_133_INFORMATION_AND_COMMUNICATION_TECHNOLOGIES (candidate)",
+        "kb_technology_tags": "TECH.SEMI.AI; TECH.SEMI.ULP",
+        "kb_application_tags": "APP.SCOUT; APP.SEMI",
+        "service_ids": "S04; S08; S09; S12",
+        "evidence_caveat": "Prototype/announcement; verify vendor release, paper and measurement conditions"
+      }
+    },
+    {
+      "source_row": 6,
+      "values": {
+        "scenario": "Hypothetical: Canadian laboratory receives a public research grant for MEMS sensors",
+        "entities": "Document; Claim; ActorEntity",
+        "cameo_handling": "07 root only if GDELT actually emits aid event; do not infer",
+        "candidate_native_themes": "SCIENCE; WB_346_COMPETITIVE_INDUSTRIES (candidate)",
+        "kb_technology_tags": "TECH.SEMI.SENSOR; TECH.SEMI.ULP",
+        "kb_application_tags": "APP.SCOUT; APP.INVEST",
+        "service_ids": "S04; S09",
+        "evidence_caveat": "Grant award notice; distinguish grant from purchase and research from marketed part"
+      }
+    },
+    {
+      "source_row": 7,
+      "values": {
+        "scenario": "Hypothetical: two civilian aerospace firms announce a launch-service partnership",
+        "entities": "Document; Claim; ActorEntity",
+        "cameo_handling": "03/05 candidates only if source coding supports; no synthetic EventCode",
+        "candidate_native_themes": "WB_346_COMPETITIVE_INDUSTRIES; SCIENCE (candidate)",
+        "kb_technology_tags": "TECH.SPACE.LAUNCH",
+        "kb_application_tags": "APP.SPACE; APP.SUPPLY",
+        "service_ids": "S04; S09; S13",
+        "evidence_caveat": "Company statements; MoU vs binding contract"
+      }
+    },
+    {
+      "source_row": 8,
+      "values": {
+        "scenario": "Hypothetical: EO provider releases agricultural monitoring product",
+        "entities": "Document; Claim; ActorEntity",
+        "cameo_handling": "Not required",
+        "candidate_native_themes": "WB_435_AGRICULTURE_AND_FOOD_SECURITY; SCIENCE (candidate)",
+        "kb_technology_tags": "TECH.SPACE.EOSVC",
+        "kb_application_tags": "APP.AGRI; APP.SPACE; APP.MARKET",
+        "service_ids": "S08; S09; S13",
+        "evidence_caveat": "Confirm product availability and API/license; no inference of owned satellites"
+      }
+    },
+    {
+      "source_row": 9,
+      "values": {
+        "scenario": "Hypothetical: government proposes new semiconductor export rules",
+        "entities": "Document; Claim",
+        "cameo_handling": "01/03 candidate only, use observed code",
+        "candidate_native_themes": "LEGISLATION; EPU_CATS_REGULATION (candidate)",
+        "kb_technology_tags": "TECH.SEMI",
+        "kb_application_tags": "APP.REG; APP.SUPPLY",
+        "service_ids": "S04; S09",
+        "evidence_caveat": "Proposal vs enacted law; check official legal text"
+      }
+    },
+    {
+      "source_row": 10,
+      "values": {
+        "scenario": "Hypothetical: flood reports disrupt electricity supply",
+        "entities": "EventRecord if present; Document; Claim",
+        "cameo_handling": "No forced CAMEO: disaster itself may be outside action taxonomy",
+        "candidate_native_themes": "NATURAL_DISASTER; WB_507_ENERGY_AND_EXTRACTIVES (candidate)",
+        "kb_technology_tags": "TECH.ENERGY",
+        "kb_application_tags": "APP.CRISIS; APP.ENERGY",
+        "service_ids": "S02; S05; S09",
+        "evidence_caveat": "Location role and time; verify quantities independently"
+      }
+    },
+    {
+      "source_row": 11,
+      "values": {
+        "scenario": "Hypothetical: article describes a new low-power FPGA for industrial sensing",
+        "entities": "Document; Claim",
+        "cameo_handling": "Not required",
+        "candidate_native_themes": "SCIENCE; WB_133_INFORMATION_AND_COMMUNICATION_TECHNOLOGIES (candidate)",
+        "kb_technology_tags": "TECH.SEMI.FPGA; TECH.SEMI.ULP; TECH.AUTONOMY",
+        "kb_application_tags": "APP.SCOUT; APP.CIV_AUTONOMY",
+        "service_ids": "S04; S08; S12",
+        "evidence_caveat": "Datasheet and measured energy per workload; tag not a performance observation"
+      }
+    },
+    {
+      "source_row": 12,
+      "values": {
+        "scenario": "Hypothetical: repeated press release across 30 news sites",
+        "entities": "Document; StoryCluster; Signal",
+        "cameo_handling": "Any observed event; do not multiply unique events",
+        "candidate_native_themes": "Observed native themes only",
+        "kb_technology_tags": "As supported by text",
+        "kb_application_tags": "APP.MEDIA",
+        "service_ids": "S10; S11",
+        "evidence_caveat": "30 documents may reflect one syndicated story; no invented independent corroboration"
+      }
+    }
+  ]
+}

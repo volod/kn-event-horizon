@@ -1,0 +1,331 @@
+{
+  "format": "kn.seed-proposal.table",
+  "status": "unreviewed_proposal",
+  "domain": "space",
+  "source": {
+    "file_name": "space_sector_ontology_and_tags_v1.xlsx",
+    "sha256": "26e7468ee372e9c606ff08910756b2066ef30ac9fea7524e646b52d8529eec28",
+    "sheet_name": "01_Entity_Ontology",
+    "sheet_position": 2
+  },
+  "title": "Ontology classes \u2014 entity types stored in the knowledge base",
+  "notes": [],
+  "header_row": 3,
+  "columns": [
+    {
+      "key": "class",
+      "label": "Class",
+      "column": "A"
+    },
+    {
+      "key": "definition_purpose",
+      "label": "Definition / purpose",
+      "column": "B"
+    },
+    {
+      "key": "core_attributes",
+      "label": "Core attributes",
+      "column": "C"
+    },
+    {
+      "key": "primary_product_classifier",
+      "label": "Primary product classifier?",
+      "column": "D"
+    },
+    {
+      "key": "technology_tags",
+      "label": "Technology tags?",
+      "column": "E"
+    },
+    {
+      "key": "euspa_application_tags",
+      "label": "EUSPA application tags?",
+      "column": "F"
+    },
+    {
+      "key": "key_relations",
+      "label": "Key relations",
+      "column": "G"
+    },
+    {
+      "key": "example",
+      "label": "Example",
+      "column": "H"
+    }
+  ],
+  "records": [
+    {
+      "source_row": 4,
+      "values": {
+        "class": "Organization",
+        "definition_purpose": "Legal or organizational actor",
+        "core_attributes": "legal_name; aliases; country; ownership; status; identifiers",
+        "primary_product_classifier": "No",
+        "technology_tags": "Yes: competences",
+        "euspa_application_tags": "Yes: markets served",
+        "key_relations": "manufactures; owns; operates; supplies; partners_with; receives_award",
+        "example": "SpaceX / Airbus / ICEYE"
+      }
+    },
+    {
+      "source_row": 5,
+      "values": {
+        "class": "Program",
+        "definition_purpose": "Coordinated initiative or capability programme",
+        "core_attributes": "name; sponsor; objectives; dates; budget; status",
+        "primary_product_classifier": "No",
+        "technology_tags": "Yes",
+        "euspa_application_tags": "Yes",
+        "key_relations": "funds; procures; develops; includes_mission",
+        "example": "Copernicus / Artemis"
+      }
+    },
+    {
+      "source_row": 6,
+      "values": {
+        "class": "Mission",
+        "definition_purpose": "Defined operational or scientific mission",
+        "core_attributes": "purpose; dates; orbit; payload; operator",
+        "primary_product_classifier": "Via its spacecraft/payload",
+        "technology_tags": "Yes",
+        "euspa_application_tags": "Yes",
+        "key_relations": "uses_spacecraft; carries_payload; launched_by; operated_by",
+        "example": "Sentinel mission"
+      }
+    },
+    {
+      "source_row": 7,
+      "values": {
+        "class": "Product",
+        "definition_purpose": "Generic reusable commercial/industrial product",
+        "core_attributes": "product_name; model; version; manufacturer; specs; lifecycle",
+        "primary_product_classifier": "Yes \u2014 ESA GPT",
+        "technology_tags": "Yes",
+        "euspa_application_tags": "Sometimes",
+        "key_relations": "manufactured_by; supplied_by; compatible_with",
+        "example": "satellite bus / terminal"
+      }
+    },
+    {
+      "source_row": 8,
+      "values": {
+        "class": "Launch Vehicle",
+        "definition_purpose": "Launch product / configuration",
+        "core_attributes": "family; config; stages; payload performance; status",
+        "primary_product_classifier": "Yes \u2014 Segment I",
+        "technology_tags": "Yes",
+        "euspa_application_tags": "No/Launch",
+        "key_relations": "manufactured_by; operated_by; launches",
+        "example": "Falcon 9 / Spectrum"
+      }
+    },
+    {
+      "source_row": 9,
+      "values": {
+        "class": "Spacecraft",
+        "definition_purpose": "Physical space object / satellite",
+        "core_attributes": "COSPAR; catalog_id; bus; mass; orbit; status",
+        "primary_product_classifier": "Yes \u2014 Segment II/III",
+        "technology_tags": "Yes",
+        "euspa_application_tags": "Yes",
+        "key_relations": "manufactured_by; owned_by; operated_by; carries_payload",
+        "example": "individual SAR satellite"
+      }
+    },
+    {
+      "source_row": 10,
+      "values": {
+        "class": "Constellation / Fleet",
+        "definition_purpose": "System of multiple spacecraft",
+        "core_attributes": "operator; planned/active count; shells; status",
+        "primary_product_classifier": "No \u2014 link member products",
+        "technology_tags": "Yes",
+        "euspa_application_tags": "Yes",
+        "key_relations": "contains_spacecraft; operated_by; provides_service",
+        "example": "Starlink"
+      }
+    },
+    {
+      "source_row": 11,
+      "values": {
+        "class": "Launch Event",
+        "definition_purpose": "Occurrence of a launch",
+        "core_attributes": "time; pad; vehicle; payloads; outcome",
+        "primary_product_classifier": "No",
+        "technology_tags": "No",
+        "euspa_application_tags": "No",
+        "key_relations": "uses_vehicle; launches_spacecraft; occurs_at",
+        "example": "Transporter mission"
+      }
+    },
+    {
+      "source_row": 12,
+      "values": {
+        "class": "Component / Subsystem",
+        "definition_purpose": "Equipment, building block or component/part",
+        "core_attributes": "model; specs; interfaces; qualification; heritage",
+        "primary_product_classifier": "Yes \u2014 ESA GPT",
+        "technology_tags": "Yes",
+        "euspa_application_tags": "Indirect",
+        "key_relations": "integrated_into; supplied_by; compatible_with",
+        "example": "star tracker / engine / PCDU"
+      }
+    },
+    {
+      "source_row": 13,
+      "values": {
+        "class": "Payload / Instrument",
+        "definition_purpose": "Mission payload or sensor",
+        "core_attributes": "type; band; resolution; mass; power; supplier",
+        "primary_product_classifier": "Yes \u2014 Segment II",
+        "technology_tags": "Yes",
+        "euspa_application_tags": "Yes",
+        "key_relations": "carried_by; manufactured_by; produces_dataset",
+        "example": "SAR payload"
+      }
+    },
+    {
+      "source_row": 14,
+      "values": {
+        "class": "Facility",
+        "definition_purpose": "Physical infrastructure",
+        "core_attributes": "location; capabilities; owner/operator; licences",
+        "primary_product_classifier": "Usually Segment IV / extension",
+        "technology_tags": "Yes",
+        "euspa_application_tags": "Indirect",
+        "key_relations": "owned_by; operated_by; supports; hosts",
+        "example": "spaceport / AIT lab / teleport"
+      }
+    },
+    {
+      "source_row": 15,
+      "values": {
+        "class": "Ground Station",
+        "definition_purpose": "Ground communications / TT&C node",
+        "core_attributes": "coordinates; antennas; bands; services; operator",
+        "primary_product_classifier": "Yes \u2014 Segment IV",
+        "technology_tags": "Yes",
+        "euspa_application_tags": "Indirect",
+        "key_relations": "operated_by; communicates_with; part_of_network",
+        "example": "TT&C station"
+      }
+    },
+    {
+      "source_row": 16,
+      "values": {
+        "class": "Terminal / User Equipment",
+        "definition_purpose": "End-user access hardware",
+        "core_attributes": "bands; antenna; modem; throughput; mobility; standards",
+        "primary_product_classifier": "Segment IV + KB extension",
+        "technology_tags": "Yes",
+        "euspa_application_tags": "Yes",
+        "key_relations": "manufactured_by; accesses_network; compatible_with",
+        "example": "LEO satcom terminal"
+      }
+    },
+    {
+      "source_row": 17,
+      "values": {
+        "class": "Service",
+        "definition_purpose": "Commercial/public capability delivered to a user",
+        "core_attributes": "service_type; coverage; SLA; pricing; API; customer segment",
+        "primary_product_classifier": "No \u2014 link enabling products",
+        "technology_tags": "Yes",
+        "euspa_application_tags": "Yes",
+        "key_relations": "provided_by; uses_asset; serves_market",
+        "example": "launch service / EO analytics"
+      }
+    },
+    {
+      "source_row": 18,
+      "values": {
+        "class": "Dataset / Data Product",
+        "definition_purpose": "Data artefact/product",
+        "core_attributes": "source; sensor; resolution; cadence; licence; API",
+        "primary_product_classifier": "No",
+        "technology_tags": "Yes: processing tech",
+        "euspa_application_tags": "Yes",
+        "key_relations": "produced_by; distributed_by; consumed_by",
+        "example": "SAR imagery product"
+      }
+    },
+    {
+      "source_row": 19,
+      "values": {
+        "class": "Contract / Award",
+        "definition_purpose": "Binding procurement/funding relationship",
+        "core_attributes": "buyer; supplier; value; dates; scope; award_id",
+        "primary_product_classifier": "No",
+        "technology_tags": "May reference",
+        "euspa_application_tags": "May reference",
+        "key_relations": "awarded_by; awarded_to; procures",
+        "example": "satellite manufacturing award"
+      }
+    },
+    {
+      "source_row": 20,
+      "values": {
+        "class": "Partnership / MoU / LoI",
+        "definition_purpose": "Non-procurement cooperation relationship",
+        "core_attributes": "parties; date; scope; binding_status",
+        "primary_product_classifier": "No",
+        "technology_tags": "May reference",
+        "euspa_application_tags": "May reference",
+        "key_relations": "between; concerns_program; may_precede_contract",
+        "example": "strategic partnership / LoI"
+      }
+    },
+    {
+      "source_row": 21,
+      "values": {
+        "class": "Licence / Regulatory Filing",
+        "definition_purpose": "Permission or declared regulatory intent",
+        "core_attributes": "authority; holder; network/object/site; frequencies; status",
+        "primary_product_classifier": "No",
+        "technology_tags": "No",
+        "euspa_application_tags": "May reference",
+        "key_relations": "issued_to; authorizes; files_for",
+        "example": "launch licence / ITU filing"
+      }
+    },
+    {
+      "source_row": 22,
+      "values": {
+        "class": "Patent / IP Family",
+        "definition_purpose": "Technology/IP signal",
+        "core_attributes": "assignee; inventor; CPC/IPC; family; priority_date; citations",
+        "primary_product_classifier": "No",
+        "technology_tags": "Yes",
+        "euspa_application_tags": "Indirect",
+        "key_relations": "owned_by; relates_to_technology; cites",
+        "example": "electric propulsion patent"
+      }
+    },
+    {
+      "source_row": 23,
+      "values": {
+        "class": "R&D Project",
+        "definition_purpose": "Research or technology-development project",
+        "core_attributes": "performers; funding; TRL; dates; outputs",
+        "primary_product_classifier": "No",
+        "technology_tags": "Yes",
+        "euspa_application_tags": "Sometimes",
+        "key_relations": "funded_by; performed_by; develops_technology",
+        "example": "TechPort / CORDIS project"
+      }
+    },
+    {
+      "source_row": 24,
+      "values": {
+        "class": "Technology",
+        "definition_purpose": "Reusable technology concept/tag",
+        "core_attributes": "taxonomy_code; name; description; maturity",
+        "primary_product_classifier": "No",
+        "technology_tags": "Is the tag itself",
+        "euspa_application_tags": "No",
+        "key_relations": "implemented_by; developed_in; enabled_by",
+        "example": "electric propulsion"
+      }
+    }
+  ]
+}

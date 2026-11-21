@@ -1,0 +1,2195 @@
+{
+  "format": "kn.seed-proposal.table",
+  "status": "unreviewed_proposal",
+  "domain": "microelectronics",
+  "source": {
+    "file_name": "microelectronics_ontology_and_tags_v1.xlsx",
+    "sha256": "7166aa06791998c692cc6a2ac377692a6687f15e3353ffa70a1c159f2e63c34f",
+    "sheet_name": "08_Attribute_Dictionary",
+    "sheet_position": 9
+  },
+  "title": "Normalized property dictionary \u2014 vendor comparison",
+  "notes": [
+    "M = required for an eligible comparison (unknown is explicit; cannot pass gate); R = recommended. ALL + applicable profiles. Explicit N/A when not applicable."
+  ],
+  "header_row": 4,
+  "columns": [
+    {
+      "key": "profile",
+      "label": "Profile",
+      "column": "A"
+    },
+    {
+      "key": "field_id",
+      "label": "Field ID",
+      "column": "B"
+    },
+    {
+      "key": "canonical_unit_type",
+      "label": "Canonical unit/type",
+      "column": "C"
+    },
+    {
+      "key": "required_conditions_note",
+      "label": "Required conditions / note",
+      "column": "D"
+    },
+    {
+      "key": "requirement",
+      "label": "Requirement",
+      "column": "E"
+    },
+    {
+      "key": "reference",
+      "label": "Reference",
+      "column": "F"
+    }
+  ],
+  "records": [
+    {
+      "source_row": 5,
+      "values": {
+        "profile": "ALL",
+        "field_id": "mpn",
+        "canonical_unit_type": "text",
+        "required_conditions_note": "Exact manufacturer order code, no family alias",
+        "requirement": "M",
+        "reference": "https://cdd.iec.ch ; local profile"
+      }
+    },
+    {
+      "source_row": 6,
+      "values": {
+        "profile": "ALL",
+        "field_id": "model_id",
+        "canonical_unit_type": "text",
+        "required_conditions_note": "Die/model + revision",
+        "requirement": "M",
+        "reference": "https://cdd.iec.ch ; local profile"
+      }
+    },
+    {
+      "source_row": 7,
+      "values": {
+        "profile": "ALL",
+        "field_id": "product_form",
+        "canonical_unit_type": "enum",
+        "required_conditions_note": "die/chiplet/IC/IP/module/board",
+        "requirement": "M",
+        "reference": "https://cdd.iec.ch ; local profile"
+      }
+    },
+    {
+      "source_row": 8,
+      "values": {
+        "profile": "ALL",
+        "field_id": "manufacturer_legal_id",
+        "canonical_unit_type": "text",
+        "required_conditions_note": "Brand versus legal entity",
+        "requirement": "M",
+        "reference": "https://cdd.iec.ch ; local profile"
+      }
+    },
+    {
+      "source_row": 9,
+      "values": {
+        "profile": "ALL",
+        "field_id": "product_class_id",
+        "canonical_unit_type": "text",
+        "required_conditions_note": "One primary classifier node",
+        "requirement": "M",
+        "reference": "https://cdd.iec.ch ; local profile"
+      }
+    },
+    {
+      "source_row": 10,
+      "values": {
+        "profile": "ALL",
+        "field_id": "technology_tags",
+        "canonical_unit_type": "IDs",
+        "required_conditions_note": "Many-to-many; version and origin",
+        "requirement": "M",
+        "reference": "https://cdd.iec.ch ; local profile"
+      }
+    },
+    {
+      "source_row": 11,
+      "values": {
+        "profile": "ALL",
+        "field_id": "application_tags",
+        "canonical_unit_type": "IDs",
+        "required_conditions_note": "Many-to-many; evidence/inferred",
+        "requirement": "R",
+        "reference": "https://cdd.iec.ch ; local profile"
+      }
+    },
+    {
+      "source_row": 12,
+      "values": {
+        "profile": "ALL",
+        "field_id": "lifecycle",
+        "canonical_unit_type": "enum",
+        "required_conditions_note": "research/announced/sampling/active/NRND/EOL/obsolete",
+        "requirement": "M",
+        "reference": "https://cdd.iec.ch ; local profile"
+      }
+    },
+    {
+      "source_row": 13,
+      "values": {
+        "profile": "ALL",
+        "field_id": "release_date",
+        "canonical_unit_type": "date",
+        "required_conditions_note": "Announcement vs sample vs volume separately",
+        "requirement": "R",
+        "reference": "https://cdd.iec.ch ; local profile"
+      }
+    },
+    {
+      "source_row": 14,
+      "values": {
+        "profile": "ALL",
+        "field_id": "package",
+        "canonical_unit_type": "text",
+        "required_conditions_note": "Package code and pin count",
+        "requirement": "M",
+        "reference": "https://cdd.iec.ch ; local profile"
+      }
+    },
+    {
+      "source_row": 15,
+      "values": {
+        "profile": "ALL",
+        "field_id": "size_xyz",
+        "canonical_unit_type": "mm",
+        "required_conditions_note": "Actual body dimensions, not board",
+        "requirement": "R",
+        "reference": "https://cdd.iec.ch ; local profile"
+      }
+    },
+    {
+      "source_row": 16,
+      "values": {
+        "profile": "ALL",
+        "field_id": "supply_v_min_max",
+        "canonical_unit_type": "V",
+        "required_conditions_note": "Rails separately; operating limits",
+        "requirement": "M",
+        "reference": "https://cdd.iec.ch ; local profile"
+      }
+    },
+    {
+      "source_row": 17,
+      "values": {
+        "profile": "ALL",
+        "field_id": "operating_temp_min_max",
+        "canonical_unit_type": "\u00b0C",
+        "required_conditions_note": "Ambient vs junction, grade",
+        "requirement": "M",
+        "reference": "https://cdd.iec.ch ; local profile"
+      }
+    },
+    {
+      "source_row": 18,
+      "values": {
+        "profile": "ALL",
+        "field_id": "process_node",
+        "canonical_unit_type": "nm or label",
+        "required_conditions_note": "Vendor node label, no cross-node equivalence",
+        "requirement": "R",
+        "reference": "https://cdd.iec.ch ; local profile"
+      }
+    },
+    {
+      "source_row": 19,
+      "values": {
+        "profile": "ALL",
+        "field_id": "process_material",
+        "canonical_unit_type": "enum",
+        "required_conditions_note": "Si/FD-SOI/SiC/GaN/etc; evidence",
+        "requirement": "R",
+        "reference": "https://cdd.iec.ch ; local profile"
+      }
+    },
+    {
+      "source_row": 20,
+      "values": {
+        "profile": "ALL",
+        "field_id": "qualification",
+        "canonical_unit_type": "text",
+        "required_conditions_note": "AEC-Q100 grade, JEDEC, other; exact MPN",
+        "requirement": "R",
+        "reference": "https://cdd.iec.ch ; local profile"
+      }
+    },
+    {
+      "source_row": 21,
+      "values": {
+        "profile": "ALL",
+        "field_id": "security_features",
+        "canonical_unit_type": "text",
+        "required_conditions_note": "Secure boot, key storage, update; cert scope",
+        "requirement": "R",
+        "reference": "https://cdd.iec.ch ; local profile"
+      }
+    },
+    {
+      "source_row": 22,
+      "values": {
+        "profile": "ALL",
+        "field_id": "hq_country",
+        "canonical_unit_type": "ISO 3166",
+        "required_conditions_note": "As of date; legal HQ",
+        "requirement": "M",
+        "reference": "https://cdd.iec.ch ; local profile"
+      }
+    },
+    {
+      "source_row": 23,
+      "values": {
+        "profile": "ALL",
+        "field_id": "control_country",
+        "canonical_unit_type": "ISO 3166",
+        "required_conditions_note": "Ultimate parent/control, evidence",
+        "requirement": "M",
+        "reference": "https://cdd.iec.ch ; local profile"
+      }
+    },
+    {
+      "source_row": 24,
+      "values": {
+        "profile": "ALL",
+        "field_id": "design_country",
+        "canonical_unit_type": "ISO 3166",
+        "required_conditions_note": "Specific model/die design; unknown allowed",
+        "requirement": "R",
+        "reference": "https://cdd.iec.ch ; local profile"
+      }
+    },
+    {
+      "source_row": 25,
+      "values": {
+        "profile": "ALL",
+        "field_id": "wafer_fab_id",
+        "canonical_unit_type": "ID",
+        "required_conditions_note": "Specific site or lot; do not infer from brand",
+        "requirement": "M",
+        "reference": "https://cdd.iec.ch ; local profile"
+      }
+    },
+    {
+      "source_row": 26,
+      "values": {
+        "profile": "ALL",
+        "field_id": "assembly_site_id",
+        "canonical_unit_type": "ID",
+        "required_conditions_note": "Actual site/lot if known",
+        "requirement": "M",
+        "reference": "https://cdd.iec.ch ; local profile"
+      }
+    },
+    {
+      "source_row": 27,
+      "values": {
+        "profile": "ALL",
+        "field_id": "final_test_site_id",
+        "canonical_unit_type": "ID",
+        "required_conditions_note": "Actual site/lot if known",
+        "requirement": "R",
+        "reference": "https://cdd.iec.ch ; local profile"
+      }
+    },
+    {
+      "source_row": 28,
+      "values": {
+        "profile": "ALL",
+        "field_id": "export_classification",
+        "canonical_unit_type": "text",
+        "required_conditions_note": "Jurisdiction, ECCN/classification evidence",
+        "requirement": "R",
+        "reference": "https://cdd.iec.ch ; local profile"
+      }
+    },
+    {
+      "source_row": 29,
+      "values": {
+        "profile": "ALL",
+        "field_id": "pcn_eol",
+        "canonical_unit_type": "ID/date",
+        "required_conditions_note": "Notice/last buy/last ship; version",
+        "requirement": "R",
+        "reference": "https://cdd.iec.ch ; local profile"
+      }
+    },
+    {
+      "source_row": 30,
+      "values": {
+        "profile": "ALL",
+        "field_id": "longevity_end",
+        "canonical_unit_type": "date",
+        "required_conditions_note": "Exact eligible SKU, not blanket promise",
+        "requirement": "R",
+        "reference": "https://cdd.iec.ch ; local profile"
+      }
+    },
+    {
+      "source_row": 31,
+      "values": {
+        "profile": "ALL",
+        "field_id": "availability",
+        "canonical_unit_type": "count",
+        "required_conditions_note": "Seller, location, date, qty available",
+        "requirement": "R",
+        "reference": "https://cdd.iec.ch ; local profile"
+      }
+    },
+    {
+      "source_row": 32,
+      "values": {
+        "profile": "ALL",
+        "field_id": "unit_price",
+        "canonical_unit_type": "currency/unit",
+        "required_conditions_note": "Qty tier, date, incoterms, taxes separate",
+        "requirement": "R",
+        "reference": "https://cdd.iec.ch ; local profile"
+      }
+    },
+    {
+      "source_row": 33,
+      "values": {
+        "profile": "ALL",
+        "field_id": "lead_time",
+        "canonical_unit_type": "days",
+        "required_conditions_note": "Source, region, quote date",
+        "requirement": "R",
+        "reference": "https://cdd.iec.ch ; local profile"
+      }
+    },
+    {
+      "source_row": 34,
+      "values": {
+        "profile": "ALL",
+        "field_id": "moq",
+        "canonical_unit_type": "count",
+        "required_conditions_note": "Seller, date, package",
+        "requirement": "R",
+        "reference": "https://cdd.iec.ch ; local profile"
+      }
+    },
+    {
+      "source_row": 35,
+      "values": {
+        "profile": "ALL",
+        "field_id": "sdk_support",
+        "canonical_unit_type": "text",
+        "required_conditions_note": "Exact SDK/version, OS, compiler",
+        "requirement": "R",
+        "reference": "https://cdd.iec.ch ; local profile"
+      }
+    },
+    {
+      "source_row": 36,
+      "values": {
+        "profile": "ALL",
+        "field_id": "source_doc",
+        "canonical_unit_type": "URL/ID",
+        "required_conditions_note": "Datasheet revision, page/table, retrieved date",
+        "requirement": "M",
+        "reference": "https://cdd.iec.ch ; local profile"
+      }
+    },
+    {
+      "source_row": 37,
+      "values": {
+        "profile": "ENERGY",
+        "field_id": "active_current",
+        "canonical_unit_type": "uA or mA",
+        "required_conditions_note": "Rail, voltage, clock, temp, workload",
+        "requirement": "M",
+        "reference": "https://cdd.iec.ch ; local profile"
+      }
+    },
+    {
+      "source_row": 38,
+      "values": {
+        "profile": "ENERGY",
+        "field_id": "sleep_current",
+        "canonical_unit_type": "uA",
+        "required_conditions_note": "Exact mode, retention, RTC, wake source, V/T",
+        "requirement": "M",
+        "reference": "https://cdd.iec.ch ; local profile"
+      }
+    },
+    {
+      "source_row": 39,
+      "values": {
+        "profile": "ENERGY",
+        "field_id": "shutdown_current",
+        "canonical_unit_type": "uA",
+        "required_conditions_note": "Power state, retained blocks, rail",
+        "requirement": "R",
+        "reference": "https://cdd.iec.ch ; local profile"
+      }
+    },
+    {
+      "source_row": 40,
+      "values": {
+        "profile": "ENERGY",
+        "field_id": "wake_latency",
+        "canonical_unit_type": "us",
+        "required_conditions_note": "From state to first useful output",
+        "requirement": "M",
+        "reference": "https://cdd.iec.ch ; local profile"
+      }
+    },
+    {
+      "source_row": 41,
+      "values": {
+        "profile": "ENERGY",
+        "field_id": "wake_energy",
+        "canonical_unit_type": "uJ",
+        "required_conditions_note": "Boundary, supply, start/end, no double counting",
+        "requirement": "R",
+        "reference": "https://cdd.iec.ch ; local profile"
+      }
+    },
+    {
+      "source_row": 42,
+      "values": {
+        "profile": "ENERGY",
+        "field_id": "active_power",
+        "canonical_unit_type": "mW",
+        "required_conditions_note": "All relevant rails, task and boundary",
+        "requirement": "M",
+        "reference": "https://cdd.iec.ch ; local profile"
+      }
+    },
+    {
+      "source_row": 43,
+      "values": {
+        "profile": "ENERGY",
+        "field_id": "idle_power",
+        "canonical_unit_type": "mW",
+        "required_conditions_note": "Clocks/peripherals, radio and memory state",
+        "requirement": "M",
+        "reference": "https://cdd.iec.ch ; local profile"
+      }
+    },
+    {
+      "source_row": 44,
+      "values": {
+        "profile": "ENERGY",
+        "field_id": "energy_per_task",
+        "canonical_unit_type": "uJ/task",
+        "required_conditions_note": "Task, model, accuracy, boundary, excludes/ includes wake",
+        "requirement": "M",
+        "reference": "https://cdd.iec.ch ; local profile"
+      }
+    },
+    {
+      "source_row": 45,
+      "values": {
+        "profile": "ENERGY",
+        "field_id": "peak_current",
+        "canonical_unit_type": "mA",
+        "required_conditions_note": "Burst duration and rail",
+        "requirement": "R",
+        "reference": "https://cdd.iec.ch ; local profile"
+      }
+    },
+    {
+      "source_row": 46,
+      "values": {
+        "profile": "ENERGY",
+        "field_id": "duty_cycle",
+        "canonical_unit_type": "%",
+        "required_conditions_note": "State schedule, sample/report period",
+        "requirement": "M",
+        "reference": "https://cdd.iec.ch ; local profile"
+      }
+    },
+    {
+      "source_row": 47,
+      "values": {
+        "profile": "ENERGY",
+        "field_id": "energy_per_day",
+        "canonical_unit_type": "J/day",
+        "required_conditions_note": "Derived from measured state times; no overlap",
+        "requirement": "R",
+        "reference": "https://cdd.iec.ch ; local profile"
+      }
+    },
+    {
+      "source_row": 48,
+      "values": {
+        "profile": "ENERGY",
+        "field_id": "battery_capacity_usable",
+        "canonical_unit_type": "Wh",
+        "required_conditions_note": "Temperature, aging, conversion, discharge profile",
+        "requirement": "R",
+        "reference": "https://cdd.iec.ch ; local profile"
+      }
+    },
+    {
+      "source_row": 49,
+      "values": {
+        "profile": "ENERGY",
+        "field_id": "harvested_energy",
+        "canonical_unit_type": "J/day",
+        "required_conditions_note": "Environmental profile, losses, confidence",
+        "requirement": "R",
+        "reference": "https://cdd.iec.ch ; local profile"
+      }
+    },
+    {
+      "source_row": 50,
+      "values": {
+        "profile": "MCU_SOC",
+        "field_id": "cpu_isa_core",
+        "canonical_unit_type": "text",
+        "required_conditions_note": "ISA, core count/types; frequencies per core",
+        "requirement": "M",
+        "reference": "https://cdd.iec.ch ; local profile"
+      }
+    },
+    {
+      "source_row": 51,
+      "values": {
+        "profile": "MCU_SOC",
+        "field_id": "cpu_frequency",
+        "canonical_unit_type": "MHz",
+        "required_conditions_note": "Operating point; voltage and temperature",
+        "requirement": "M",
+        "reference": "https://cdd.iec.ch ; local profile"
+      }
+    },
+    {
+      "source_row": 52,
+      "values": {
+        "profile": "MCU_SOC",
+        "field_id": "sram_usable",
+        "canonical_unit_type": "KiB",
+        "required_conditions_note": "Usable per core, ECC, shared/reserved",
+        "requirement": "M",
+        "reference": "https://cdd.iec.ch ; local profile"
+      }
+    },
+    {
+      "source_row": 53,
+      "values": {
+        "profile": "MCU_SOC",
+        "field_id": "flash_usable",
+        "canonical_unit_type": "KiB",
+        "required_conditions_note": "Embedded/external; boot requirements",
+        "requirement": "M",
+        "reference": "https://cdd.iec.ch ; local profile"
+      }
+    },
+    {
+      "source_row": 54,
+      "values": {
+        "profile": "MCU_SOC",
+        "field_id": "external_memory",
+        "canonical_unit_type": "text",
+        "required_conditions_note": "Type, max rate/bus width, bandwidth, idle power",
+        "requirement": "R",
+        "reference": "https://cdd.iec.ch ; local profile"
+      }
+    },
+    {
+      "source_row": 55,
+      "values": {
+        "profile": "MCU_SOC",
+        "field_id": "accelerators",
+        "canonical_unit_type": "text",
+        "required_conditions_note": "DSP/NPU/GPU/ISP; exact variant",
+        "requirement": "M",
+        "reference": "https://cdd.iec.ch ; local profile"
+      }
+    },
+    {
+      "source_row": 56,
+      "values": {
+        "profile": "MCU_SOC",
+        "field_id": "peripherals",
+        "canonical_unit_type": "text",
+        "required_conditions_note": "ADC, timers, DMA, SPI, I2C/I3C, UART, PWM",
+        "requirement": "M",
+        "reference": "https://cdd.iec.ch ; local profile"
+      }
+    },
+    {
+      "source_row": 57,
+      "values": {
+        "profile": "MCU_SOC",
+        "field_id": "interfaces",
+        "canonical_unit_type": "text",
+        "required_conditions_note": "MIPI CSI-2 lanes/rate, Ethernet MAC/PHY, USB/PCIe",
+        "requirement": "M",
+        "reference": "https://cdd.iec.ch ; local profile"
+      }
+    },
+    {
+      "source_row": 58,
+      "values": {
+        "profile": "MCU_SOC",
+        "field_id": "rt_latency_jitter",
+        "canonical_unit_type": "us",
+        "required_conditions_note": "IRQ or task latency; worst case runtime/load",
+        "requirement": "R",
+        "reference": "https://cdd.iec.ch ; local profile"
+      }
+    },
+    {
+      "source_row": 59,
+      "values": {
+        "profile": "MCU_SOC",
+        "field_id": "coremark",
+        "canonical_unit_type": "score",
+        "required_conditions_note": "Compiler, clock, memory, benchmark version",
+        "requirement": "R",
+        "reference": "https://cdd.iec.ch ; local profile"
+      }
+    },
+    {
+      "source_row": 60,
+      "values": {
+        "profile": "MCU_SOC",
+        "field_id": "ulpmark",
+        "canonical_unit_type": "score",
+        "required_conditions_note": "CP/PP/CM separate; official config",
+        "requirement": "R",
+        "reference": "https://cdd.iec.ch ; local profile"
+      }
+    },
+    {
+      "source_row": 61,
+      "values": {
+        "profile": "MCU_SOC",
+        "field_id": "boot_time",
+        "canonical_unit_type": "ms",
+        "required_conditions_note": "Cold vs retained, image, storage",
+        "requirement": "R",
+        "reference": "https://cdd.iec.ch ; local profile"
+      }
+    },
+    {
+      "source_row": 62,
+      "values": {
+        "profile": "MCU_SOC",
+        "field_id": "os_rtos",
+        "canonical_unit_type": "text",
+        "required_conditions_note": "Bare metal, RTOS/Linux, versions",
+        "requirement": "R",
+        "reference": "https://cdd.iec.ch ; local profile"
+      }
+    },
+    {
+      "source_row": 63,
+      "values": {
+        "profile": "AI",
+        "field_id": "accelerator_arch",
+        "canonical_unit_type": "text",
+        "required_conditions_note": "Digital NPU, analog, CIM, neuromorphic, GPU",
+        "requirement": "M",
+        "reference": "https://cdd.iec.ch ; local profile"
+      }
+    },
+    {
+      "source_row": 64,
+      "values": {
+        "profile": "AI",
+        "field_id": "precision_supported",
+        "canonical_unit_type": "text",
+        "required_conditions_note": "INT8/INT4/FP16/etc; accumulation precision",
+        "requirement": "M",
+        "reference": "https://cdd.iec.ch ; local profile"
+      }
+    },
+    {
+      "source_row": 65,
+      "values": {
+        "profile": "AI",
+        "field_id": "peak_compute",
+        "canonical_unit_type": "GOPS/TOPS",
+        "required_conditions_note": "Ops definition MAC=1 or 2; precision; sparsity",
+        "requirement": "R",
+        "reference": "https://cdd.iec.ch ; local profile"
+      }
+    },
+    {
+      "source_row": 66,
+      "values": {
+        "profile": "AI",
+        "field_id": "model_id",
+        "canonical_unit_type": "text",
+        "required_conditions_note": "Exact model/hash, input shape, dataset",
+        "requirement": "M",
+        "reference": "https://cdd.iec.ch ; local profile"
+      }
+    },
+    {
+      "source_row": 67,
+      "values": {
+        "profile": "AI",
+        "field_id": "accuracy",
+        "canonical_unit_type": "% or task metric",
+        "required_conditions_note": "Dataset split, quantization, quality target",
+        "requirement": "M",
+        "reference": "https://cdd.iec.ch ; local profile"
+      }
+    },
+    {
+      "source_row": 68,
+      "values": {
+        "profile": "AI",
+        "field_id": "inference_latency",
+        "canonical_unit_type": "ms",
+        "required_conditions_note": "Batch, warm/cold, preprocessing boundary, p50/p95/p99",
+        "requirement": "M",
+        "reference": "https://cdd.iec.ch ; local profile"
+      }
+    },
+    {
+      "source_row": 69,
+      "values": {
+        "profile": "AI",
+        "field_id": "throughput",
+        "canonical_unit_type": "inference/s",
+        "required_conditions_note": "Batch, concurrency, latency constraints",
+        "requirement": "M",
+        "reference": "https://cdd.iec.ch ; local profile"
+      }
+    },
+    {
+      "source_row": 70,
+      "values": {
+        "profile": "AI",
+        "field_id": "energy_per_inference",
+        "canonical_unit_type": "uJ/inference",
+        "required_conditions_note": "Measured power integral; die/board/system boundary",
+        "requirement": "M",
+        "reference": "https://cdd.iec.ch ; local profile"
+      }
+    },
+    {
+      "source_row": 71,
+      "values": {
+        "profile": "AI",
+        "field_id": "memory_peak",
+        "canonical_unit_type": "MiB",
+        "required_conditions_note": "Weights, activations, external RAM, OS",
+        "requirement": "M",
+        "reference": "https://cdd.iec.ch ; local profile"
+      }
+    },
+    {
+      "source_row": 72,
+      "values": {
+        "profile": "AI",
+        "field_id": "memory_traffic",
+        "canonical_unit_type": "MB/inference",
+        "required_conditions_note": "Measured/estimated label; memory technology",
+        "requirement": "R",
+        "reference": "https://cdd.iec.ch ; local profile"
+      }
+    },
+    {
+      "source_row": 73,
+      "values": {
+        "profile": "AI",
+        "field_id": "operator_coverage",
+        "canonical_unit_type": "% or list",
+        "required_conditions_note": "Compiler/tool, fallback, unsupported ops",
+        "requirement": "M",
+        "reference": "https://cdd.iec.ch ; local profile"
+      }
+    },
+    {
+      "source_row": 74,
+      "values": {
+        "profile": "AI",
+        "field_id": "benchmark_id",
+        "canonical_unit_type": "text",
+        "required_conditions_note": "MLPerf Tiny/Edge version/division, scenario, result ID",
+        "requirement": "R",
+        "reference": "https://cdd.iec.ch ; local profile"
+      }
+    },
+    {
+      "source_row": 75,
+      "values": {
+        "profile": "AI",
+        "field_id": "calibration_drift",
+        "canonical_unit_type": "text",
+        "required_conditions_note": "Analog calibration state, temp/age, retraining",
+        "requirement": "R",
+        "reference": "https://cdd.iec.ch ; local profile"
+      }
+    },
+    {
+      "source_row": 76,
+      "values": {
+        "profile": "AI",
+        "field_id": "power_boundary",
+        "canonical_unit_type": "enum",
+        "required_conditions_note": "chip/board/system/wall; peripherals and host",
+        "requirement": "M",
+        "reference": "https://cdd.iec.ch ; local profile"
+      }
+    },
+    {
+      "source_row": 77,
+      "values": {
+        "profile": "FPGA",
+        "field_id": "logic_native",
+        "canonical_unit_type": "count",
+        "required_conditions_note": "LUT size, vendor logic cell/CLB; not equivalent counts",
+        "requirement": "M",
+        "reference": "https://cdd.iec.ch ; local profile"
+      }
+    },
+    {
+      "source_row": 78,
+      "values": {
+        "profile": "FPGA",
+        "field_id": "flip_flops",
+        "canonical_unit_type": "count",
+        "required_conditions_note": "Device resources",
+        "requirement": "M",
+        "reference": "https://cdd.iec.ch ; local profile"
+      }
+    },
+    {
+      "source_row": 79,
+      "values": {
+        "profile": "FPGA",
+        "field_id": "bram",
+        "canonical_unit_type": "KiB",
+        "required_conditions_note": "Block types, widths, ports, ECC",
+        "requirement": "M",
+        "reference": "https://cdd.iec.ch ; local profile"
+      }
+    },
+    {
+      "source_row": 80,
+      "values": {
+        "profile": "FPGA",
+        "field_id": "dsp_blocks",
+        "canonical_unit_type": "count",
+        "required_conditions_note": "Native widths, MAC modes; not directly equal",
+        "requirement": "M",
+        "reference": "https://cdd.iec.ch ; local profile"
+      }
+    },
+    {
+      "source_row": 81,
+      "values": {
+        "profile": "FPGA",
+        "field_id": "serdes_lanes",
+        "canonical_unit_type": "count",
+        "required_conditions_note": "Rate per lane, standard; transceiver availability",
+        "requirement": "M",
+        "reference": "https://cdd.iec.ch ; local profile"
+      }
+    },
+    {
+      "source_row": 82,
+      "values": {
+        "profile": "FPGA",
+        "field_id": "io_count",
+        "canonical_unit_type": "count",
+        "required_conditions_note": "Banks, voltage, signaling standard and package",
+        "requirement": "M",
+        "reference": "https://cdd.iec.ch ; local profile"
+      }
+    },
+    {
+      "source_row": 83,
+      "values": {
+        "profile": "FPGA",
+        "field_id": "hard_cores",
+        "canonical_unit_type": "text",
+        "required_conditions_note": "CPU, PCIe, Ethernet, memory controllers",
+        "requirement": "R",
+        "reference": "https://cdd.iec.ch ; local profile"
+      }
+    },
+    {
+      "source_row": 84,
+      "values": {
+        "profile": "FPGA",
+        "field_id": "configuration",
+        "canonical_unit_type": "text",
+        "required_conditions_note": "SRAM/flash, boot time, external configuration",
+        "requirement": "M",
+        "reference": "https://cdd.iec.ch ; local profile"
+      }
+    },
+    {
+      "source_row": 85,
+      "values": {
+        "profile": "FPGA",
+        "field_id": "fmax_postroute",
+        "canonical_unit_type": "MHz",
+        "required_conditions_note": "Actual design, device/speed grade, tool version, timing",
+        "requirement": "M",
+        "reference": "https://cdd.iec.ch ; local profile"
+      }
+    },
+    {
+      "source_row": 86,
+      "values": {
+        "profile": "FPGA",
+        "field_id": "lut_ff_bram_dsp_used",
+        "canonical_unit_type": "count",
+        "required_conditions_note": "Same reference pipeline after place-and-route",
+        "requirement": "M",
+        "reference": "https://cdd.iec.ch ; local profile"
+      }
+    },
+    {
+      "source_row": 87,
+      "values": {
+        "profile": "FPGA",
+        "field_id": "pipeline_throughput",
+        "canonical_unit_type": "sample/s or frame/s",
+        "required_conditions_note": "Same algorithm, precision, I/O and data width",
+        "requirement": "M",
+        "reference": "https://cdd.iec.ch ; local profile"
+      }
+    },
+    {
+      "source_row": 88,
+      "values": {
+        "profile": "FPGA",
+        "field_id": "pipeline_latency",
+        "canonical_unit_type": "us",
+        "required_conditions_note": "Clock, pipeline configuration, workload",
+        "requirement": "M",
+        "reference": "https://cdd.iec.ch ; local profile"
+      }
+    },
+    {
+      "source_row": 89,
+      "values": {
+        "profile": "FPGA",
+        "field_id": "power_static_dynamic",
+        "canonical_unit_type": "mW",
+        "required_conditions_note": "Measured vs tool estimate, activity, clock, voltage/temp",
+        "requirement": "M",
+        "reference": "https://cdd.iec.ch ; local profile"
+      }
+    },
+    {
+      "source_row": 90,
+      "values": {
+        "profile": "FPGA",
+        "field_id": "toolchain",
+        "canonical_unit_type": "text",
+        "required_conditions_note": "Synth/place/route RTL/HLS, license, OS, version",
+        "requirement": "M",
+        "reference": "https://cdd.iec.ch ; local profile"
+      }
+    },
+    {
+      "source_row": 91,
+      "values": {
+        "profile": "FPGA",
+        "field_id": "interface_implementation",
+        "canonical_unit_type": "enum",
+        "required_conditions_note": "Native hard IP vs soft IP vs external bridge",
+        "requirement": "M",
+        "reference": "https://cdd.iec.ch ; local profile"
+      }
+    },
+    {
+      "source_row": 92,
+      "values": {
+        "profile": "FPGA",
+        "field_id": "bitstream_security",
+        "canonical_unit_type": "text",
+        "required_conditions_note": "Encryption/authentication/configuration",
+        "requirement": "R",
+        "reference": "https://cdd.iec.ch ; local profile"
+      }
+    },
+    {
+      "source_row": 93,
+      "values": {
+        "profile": "SENSOR",
+        "field_id": "modality",
+        "canonical_unit_type": "enum",
+        "required_conditions_note": "Optical/acoustic/inertial/magnetic/environmental/etc",
+        "requirement": "M",
+        "reference": "https://cdd.iec.ch ; local profile"
+      }
+    },
+    {
+      "source_row": 94,
+      "values": {
+        "profile": "SENSOR",
+        "field_id": "measurement_range",
+        "canonical_unit_type": "native SI",
+        "required_conditions_note": "Min/max, per axis, linearity conditions",
+        "requirement": "M",
+        "reference": "https://cdd.iec.ch ; local profile"
+      }
+    },
+    {
+      "source_row": 95,
+      "values": {
+        "profile": "SENSOR",
+        "field_id": "resolution",
+        "canonical_unit_type": "native SI",
+        "required_conditions_note": "Effective vs nominal; bandwidth/ODR",
+        "requirement": "M",
+        "reference": "https://cdd.iec.ch ; local profile"
+      }
+    },
+    {
+      "source_row": 96,
+      "values": {
+        "profile": "SENSOR",
+        "field_id": "noise_density",
+        "canonical_unit_type": "native SI/sqrt(Hz)",
+        "required_conditions_note": "Axis, band, gain, temperature",
+        "requirement": "M",
+        "reference": "https://cdd.iec.ch ; local profile"
+      }
+    },
+    {
+      "source_row": 97,
+      "values": {
+        "profile": "SENSOR",
+        "field_id": "accuracy",
+        "canonical_unit_type": "native SI or %FS",
+        "required_conditions_note": "Temp, calibration, range, typical/max",
+        "requirement": "M",
+        "reference": "https://cdd.iec.ch ; local profile"
+      }
+    },
+    {
+      "source_row": 98,
+      "values": {
+        "profile": "SENSOR",
+        "field_id": "odr",
+        "canonical_unit_type": "Hz",
+        "required_conditions_note": "Mode, bandwidth, channel count",
+        "requirement": "M",
+        "reference": "https://cdd.iec.ch ; local profile"
+      }
+    },
+    {
+      "source_row": 99,
+      "values": {
+        "profile": "SENSOR",
+        "field_id": "bandwidth",
+        "canonical_unit_type": "Hz",
+        "required_conditions_note": "Filter/config, -3 dB definition",
+        "requirement": "M",
+        "reference": "https://cdd.iec.ch ; local profile"
+      }
+    },
+    {
+      "source_row": 100,
+      "values": {
+        "profile": "SENSOR",
+        "field_id": "sensitivity",
+        "canonical_unit_type": "native SI",
+        "required_conditions_note": "Gain, reference condition",
+        "requirement": "R",
+        "reference": "https://cdd.iec.ch ; local profile"
+      }
+    },
+    {
+      "source_row": 101,
+      "values": {
+        "profile": "SENSOR",
+        "field_id": "power_at_odr",
+        "canonical_unit_type": "mW",
+        "required_conditions_note": "Voltage, ODR, sample mode, FIFO/processing",
+        "requirement": "M",
+        "reference": "https://cdd.iec.ch ; local profile"
+      }
+    },
+    {
+      "source_row": 102,
+      "values": {
+        "profile": "SENSOR",
+        "field_id": "wake_on_event",
+        "canonical_unit_type": "text",
+        "required_conditions_note": "Threshold/filter, false wake rate, wake latency",
+        "requirement": "R",
+        "reference": "https://cdd.iec.ch ; local profile"
+      }
+    },
+    {
+      "source_row": 103,
+      "values": {
+        "profile": "SENSOR",
+        "field_id": "startup_settling",
+        "canonical_unit_type": "ms",
+        "required_conditions_note": "Power-on to valid sample",
+        "requirement": "R",
+        "reference": "https://cdd.iec.ch ; local profile"
+      }
+    },
+    {
+      "source_row": 104,
+      "values": {
+        "profile": "SENSOR",
+        "field_id": "interface",
+        "canonical_unit_type": "text",
+        "required_conditions_note": "SPI/I2C/I3C/PDM etc; clock, FIFO size",
+        "requirement": "M",
+        "reference": "https://cdd.iec.ch ; local profile"
+      }
+    },
+    {
+      "source_row": 105,
+      "values": {
+        "profile": "SENSOR",
+        "field_id": "calibration_drift",
+        "canonical_unit_type": "native SI/year",
+        "required_conditions_note": "Temp range, time, method",
+        "requirement": "R",
+        "reference": "https://cdd.iec.ch ; local profile"
+      }
+    },
+    {
+      "source_row": 106,
+      "values": {
+        "profile": "IMAGING",
+        "field_id": "pixels_active",
+        "canonical_unit_type": "px x px",
+        "required_conditions_note": "Active array, crop/ROI",
+        "requirement": "M",
+        "reference": "https://cdd.iec.ch ; local profile"
+      }
+    },
+    {
+      "source_row": 107,
+      "values": {
+        "profile": "IMAGING",
+        "field_id": "pixel_pitch",
+        "canonical_unit_type": "um",
+        "required_conditions_note": "Native pixel",
+        "requirement": "M",
+        "reference": "https://cdd.iec.ch ; local profile"
+      }
+    },
+    {
+      "source_row": 108,
+      "values": {
+        "profile": "IMAGING",
+        "field_id": "shutter",
+        "canonical_unit_type": "enum",
+        "required_conditions_note": "Global/rolling/event",
+        "requirement": "M",
+        "reference": "https://cdd.iec.ch ; local profile"
+      }
+    },
+    {
+      "source_row": 109,
+      "values": {
+        "profile": "IMAGING",
+        "field_id": "frame_rate",
+        "canonical_unit_type": "fps",
+        "required_conditions_note": "Exact ROI WxH, bit depth, lanes, binning, exposure/readout",
+        "requirement": "M",
+        "reference": "https://cdd.iec.ch ; local profile"
+      }
+    },
+    {
+      "source_row": 110,
+      "values": {
+        "profile": "IMAGING",
+        "field_id": "roi_min_increment",
+        "canonical_unit_type": "px",
+        "required_conditions_note": "Min ROI; horizontal/vertical alignment",
+        "requirement": "R",
+        "reference": "https://cdd.iec.ch ; local profile"
+      }
+    },
+    {
+      "source_row": 111,
+      "values": {
+        "profile": "IMAGING",
+        "field_id": "readout_mode",
+        "canonical_unit_type": "text",
+        "required_conditions_note": "Full/ROI, binning, skipping, HDR, trigger",
+        "requirement": "M",
+        "reference": "https://cdd.iec.ch ; local profile"
+      }
+    },
+    {
+      "source_row": 112,
+      "values": {
+        "profile": "IMAGING",
+        "field_id": "exposure_range",
+        "canonical_unit_type": "us",
+        "required_conditions_note": "Mode and shutter",
+        "requirement": "R",
+        "reference": "https://cdd.iec.ch ; local profile"
+      }
+    },
+    {
+      "source_row": 113,
+      "values": {
+        "profile": "IMAGING",
+        "field_id": "read_noise",
+        "canonical_unit_type": "e- rms",
+        "required_conditions_note": "Gain, temp, readout, bandwidth",
+        "requirement": "M",
+        "reference": "https://cdd.iec.ch ; local profile"
+      }
+    },
+    {
+      "source_row": 114,
+      "values": {
+        "profile": "IMAGING",
+        "field_id": "full_well",
+        "canonical_unit_type": "e-",
+        "required_conditions_note": "Gain/mode",
+        "requirement": "R",
+        "reference": "https://cdd.iec.ch ; local profile"
+      }
+    },
+    {
+      "source_row": 115,
+      "values": {
+        "profile": "IMAGING",
+        "field_id": "dynamic_range",
+        "canonical_unit_type": "dB",
+        "required_conditions_note": "Method and HDR configuration",
+        "requirement": "M",
+        "reference": "https://cdd.iec.ch ; local profile"
+      }
+    },
+    {
+      "source_row": 116,
+      "values": {
+        "profile": "IMAGING",
+        "field_id": "qe_spectral",
+        "canonical_unit_type": "% vs nm",
+        "required_conditions_note": "Wavelength/temp and optics",
+        "requirement": "R",
+        "reference": "https://cdd.iec.ch ; local profile"
+      }
+    },
+    {
+      "source_row": 117,
+      "values": {
+        "profile": "IMAGING",
+        "field_id": "spectrum",
+        "canonical_unit_type": "nm",
+        "required_conditions_note": "Band response/filters",
+        "requirement": "R",
+        "reference": "https://cdd.iec.ch ; local profile"
+      }
+    },
+    {
+      "source_row": 118,
+      "values": {
+        "profile": "IMAGING",
+        "field_id": "output_bitdepth",
+        "canonical_unit_type": "bit",
+        "required_conditions_note": "ADC/output format separate",
+        "requirement": "M",
+        "reference": "https://cdd.iec.ch ; local profile"
+      }
+    },
+    {
+      "source_row": 119,
+      "values": {
+        "profile": "IMAGING",
+        "field_id": "output_data_rate",
+        "canonical_unit_type": "Gb/s",
+        "required_conditions_note": "Actual payload vs line rate, overhead",
+        "requirement": "M",
+        "reference": "https://cdd.iec.ch ; local profile"
+      }
+    },
+    {
+      "source_row": 120,
+      "values": {
+        "profile": "IMAGING",
+        "field_id": "interface",
+        "canonical_unit_type": "text",
+        "required_conditions_note": "MIPI CSI-2, LVDS, SLVS-EC, parallel; lanes/rate",
+        "requirement": "M",
+        "reference": "https://cdd.iec.ch ; local profile"
+      }
+    },
+    {
+      "source_row": 121,
+      "values": {
+        "profile": "IMAGING",
+        "field_id": "sensor_power",
+        "canonical_unit_type": "mW",
+        "required_conditions_note": "ROI, fps, exposure, rails; exclude/include ISP",
+        "requirement": "M",
+        "reference": "https://cdd.iec.ch ; local profile"
+      }
+    },
+    {
+      "source_row": 122,
+      "values": {
+        "profile": "IMAGING",
+        "field_id": "thermal_netd",
+        "canonical_unit_type": "mK",
+        "required_conditions_note": "Thermal imaging only; optics/f-number/temp",
+        "requirement": "R",
+        "reference": "https://cdd.iec.ch ; local profile"
+      }
+    },
+    {
+      "source_row": 123,
+      "values": {
+        "profile": "IMU",
+        "field_id": "gyro_range",
+        "canonical_unit_type": "deg/s",
+        "required_conditions_note": "Per axis full scale",
+        "requirement": "M",
+        "reference": "https://cdd.iec.ch ; local profile"
+      }
+    },
+    {
+      "source_row": 124,
+      "values": {
+        "profile": "IMU",
+        "field_id": "accel_range",
+        "canonical_unit_type": "g",
+        "required_conditions_note": "Per axis full scale",
+        "requirement": "M",
+        "reference": "https://cdd.iec.ch ; local profile"
+      }
+    },
+    {
+      "source_row": 125,
+      "values": {
+        "profile": "IMU",
+        "field_id": "bias_instability",
+        "canonical_unit_type": "deg/h or ug",
+        "required_conditions_note": "Allan deviation; axis/temp",
+        "requirement": "M",
+        "reference": "https://cdd.iec.ch ; local profile"
+      }
+    },
+    {
+      "source_row": 126,
+      "values": {
+        "profile": "IMU",
+        "field_id": "arw",
+        "canonical_unit_type": "deg/sqrt(h)",
+        "required_conditions_note": "Gyro Allan variance conditions",
+        "requirement": "R",
+        "reference": "https://cdd.iec.ch ; local profile"
+      }
+    },
+    {
+      "source_row": 127,
+      "values": {
+        "profile": "IMU",
+        "field_id": "vrw",
+        "canonical_unit_type": "m/s/sqrt(h)",
+        "required_conditions_note": "Accelerometer Allan variance conditions",
+        "requirement": "R",
+        "reference": "https://cdd.iec.ch ; local profile"
+      }
+    },
+    {
+      "source_row": 128,
+      "values": {
+        "profile": "IMU",
+        "field_id": "scale_factor_error",
+        "canonical_unit_type": "ppm",
+        "required_conditions_note": "Calibration and temperature",
+        "requirement": "R",
+        "reference": "https://cdd.iec.ch ; local profile"
+      }
+    },
+    {
+      "source_row": 129,
+      "values": {
+        "profile": "IMU",
+        "field_id": "vibration_shock",
+        "canonical_unit_type": "g",
+        "required_conditions_note": "Test standard, duration, axes",
+        "requirement": "R",
+        "reference": "https://cdd.iec.ch ; local profile"
+      }
+    },
+    {
+      "source_row": 130,
+      "values": {
+        "profile": "ACOUSTIC",
+        "field_id": "snr",
+        "canonical_unit_type": "dB(A)",
+        "required_conditions_note": "Reference 94 dB SPL, weighting",
+        "requirement": "M",
+        "reference": "https://cdd.iec.ch ; local profile"
+      }
+    },
+    {
+      "source_row": 131,
+      "values": {
+        "profile": "ACOUSTIC",
+        "field_id": "aop",
+        "canonical_unit_type": "dB SPL",
+        "required_conditions_note": "THD criterion",
+        "requirement": "M",
+        "reference": "https://cdd.iec.ch ; local profile"
+      }
+    },
+    {
+      "source_row": 132,
+      "values": {
+        "profile": "ACOUSTIC",
+        "field_id": "sensitivity",
+        "canonical_unit_type": "dBV/Pa or dBFS",
+        "required_conditions_note": "Analog/digital definitions, reference",
+        "requirement": "M",
+        "reference": "https://cdd.iec.ch ; local profile"
+      }
+    },
+    {
+      "source_row": 133,
+      "values": {
+        "profile": "ACOUSTIC",
+        "field_id": "frequency_response",
+        "canonical_unit_type": "Hz",
+        "required_conditions_note": "Tolerance and mode",
+        "requirement": "M",
+        "reference": "https://cdd.iec.ch ; local profile"
+      }
+    },
+    {
+      "source_row": 134,
+      "values": {
+        "profile": "ACOUSTIC",
+        "field_id": "noise_floor",
+        "canonical_unit_type": "dB SPL",
+        "required_conditions_note": "Weighting, bandwidth",
+        "requirement": "R",
+        "reference": "https://cdd.iec.ch ; local profile"
+      }
+    },
+    {
+      "source_row": 135,
+      "values": {
+        "profile": "ACOUSTIC",
+        "field_id": "sample_rate",
+        "canonical_unit_type": "Hz",
+        "required_conditions_note": "PDM clock or PCM rate, interface",
+        "requirement": "M",
+        "reference": "https://cdd.iec.ch ; local profile"
+      }
+    },
+    {
+      "source_row": 136,
+      "values": {
+        "profile": "RANGE_RADAR",
+        "field_id": "range_max",
+        "canonical_unit_type": "min/max m",
+        "required_conditions_note": "Reflectivity, ambient/light or target conditions",
+        "requirement": "M",
+        "reference": "https://cdd.iec.ch ; local profile"
+      }
+    },
+    {
+      "source_row": 137,
+      "values": {
+        "profile": "RANGE_RADAR",
+        "field_id": "range_accuracy",
+        "canonical_unit_type": "mm",
+        "required_conditions_note": "Distance, reflectivity, mode",
+        "requirement": "M",
+        "reference": "https://cdd.iec.ch ; local profile"
+      }
+    },
+    {
+      "source_row": 138,
+      "values": {
+        "profile": "RANGE_RADAR",
+        "field_id": "update_rate",
+        "canonical_unit_type": "Hz",
+        "required_conditions_note": "Mode and integration time",
+        "requirement": "M",
+        "reference": "https://cdd.iec.ch ; local profile"
+      }
+    },
+    {
+      "source_row": 139,
+      "values": {
+        "profile": "RANGE_RADAR",
+        "field_id": "field_of_view",
+        "canonical_unit_type": "deg",
+        "required_conditions_note": "Optics/antenna and configuration",
+        "requirement": "M",
+        "reference": "https://cdd.iec.ch ; local profile"
+      }
+    },
+    {
+      "source_row": 140,
+      "values": {
+        "profile": "RANGE_RADAR",
+        "field_id": "rf_bandwidth",
+        "canonical_unit_type": "MHz",
+        "required_conditions_note": "Center frequency, usable bandwidth (radar only)",
+        "requirement": "R",
+        "reference": "https://cdd.iec.ch ; local profile"
+      }
+    },
+    {
+      "source_row": 141,
+      "values": {
+        "profile": "RANGE_RADAR",
+        "field_id": "channels",
+        "canonical_unit_type": "count",
+        "required_conditions_note": "Tx/Rx configuration (radar only)",
+        "requirement": "R",
+        "reference": "https://cdd.iec.ch ; local profile"
+      }
+    },
+    {
+      "source_row": 142,
+      "values": {
+        "profile": "RANGE_RADAR",
+        "field_id": "power_per_measurement",
+        "canonical_unit_type": "uJ",
+        "required_conditions_note": "Mode, range, update rate and boundary",
+        "requirement": "M",
+        "reference": "https://cdd.iec.ch ; local profile"
+      }
+    },
+    {
+      "source_row": 143,
+      "values": {
+        "profile": "RF",
+        "field_id": "frequency_band",
+        "canonical_unit_type": "MHz",
+        "required_conditions_note": "Region and regulatory settings",
+        "requirement": "M",
+        "reference": "https://cdd.iec.ch ; local profile"
+      }
+    },
+    {
+      "source_row": 144,
+      "values": {
+        "profile": "RF",
+        "field_id": "protocol",
+        "canonical_unit_type": "text",
+        "required_conditions_note": "Version, modulation, PHY, supported bands",
+        "requirement": "M",
+        "reference": "https://cdd.iec.ch ; local profile"
+      }
+    },
+    {
+      "source_row": 145,
+      "values": {
+        "profile": "RF",
+        "field_id": "tx_power",
+        "canonical_unit_type": "dBm",
+        "required_conditions_note": "Conducted vs radiated; mode",
+        "requirement": "M",
+        "reference": "https://cdd.iec.ch ; local profile"
+      }
+    },
+    {
+      "source_row": 146,
+      "values": {
+        "profile": "RF",
+        "field_id": "rx_sensitivity",
+        "canonical_unit_type": "dBm",
+        "required_conditions_note": "PER/BER, data rate, bandwidth, mode",
+        "requirement": "M",
+        "reference": "https://cdd.iec.ch ; local profile"
+      }
+    },
+    {
+      "source_row": 147,
+      "values": {
+        "profile": "RF",
+        "field_id": "data_rate",
+        "canonical_unit_type": "bit/s",
+        "required_conditions_note": "Net payload vs PHY, packet size",
+        "requirement": "M",
+        "reference": "https://cdd.iec.ch ; local profile"
+      }
+    },
+    {
+      "source_row": 148,
+      "values": {
+        "profile": "RF",
+        "field_id": "energy_per_delivered_bit",
+        "canonical_unit_type": "nJ/bit",
+        "required_conditions_note": "Packet size, link condition, retries, Tx/Rx states",
+        "requirement": "M",
+        "reference": "https://cdd.iec.ch ; local profile"
+      }
+    },
+    {
+      "source_row": 149,
+      "values": {
+        "profile": "RF",
+        "field_id": "rx_tx_current",
+        "canonical_unit_type": "mA",
+        "required_conditions_note": "Supply, Tx power, receive mode",
+        "requirement": "M",
+        "reference": "https://cdd.iec.ch ; local profile"
+      }
+    },
+    {
+      "source_row": 150,
+      "values": {
+        "profile": "RF",
+        "field_id": "latency",
+        "canonical_unit_type": "ms",
+        "required_conditions_note": "Payload, setup/sync, link quality",
+        "requirement": "R",
+        "reference": "https://cdd.iec.ch ; local profile"
+      }
+    },
+    {
+      "source_row": 151,
+      "values": {
+        "profile": "RF",
+        "field_id": "rf_frontend",
+        "canonical_unit_type": "text",
+        "required_conditions_note": "PA/LNA/matching/antenna external needs",
+        "requirement": "R",
+        "reference": "https://cdd.iec.ch ; local profile"
+      }
+    },
+    {
+      "source_row": 152,
+      "values": {
+        "profile": "ANALOG",
+        "field_id": "input_range",
+        "canonical_unit_type": "V",
+        "required_conditions_note": "Gain, common-mode, rails",
+        "requirement": "M",
+        "reference": "https://cdd.iec.ch ; local profile"
+      }
+    },
+    {
+      "source_row": 153,
+      "values": {
+        "profile": "ANALOG",
+        "field_id": "sample_rate",
+        "canonical_unit_type": "MS/s",
+        "required_conditions_note": "Channel count, mode",
+        "requirement": "M",
+        "reference": "https://cdd.iec.ch ; local profile"
+      }
+    },
+    {
+      "source_row": 154,
+      "values": {
+        "profile": "ANALOG",
+        "field_id": "enob",
+        "canonical_unit_type": "bit",
+        "required_conditions_note": "Input frequency, sample rate, gain",
+        "requirement": "M",
+        "reference": "https://cdd.iec.ch ; local profile"
+      }
+    },
+    {
+      "source_row": 155,
+      "values": {
+        "profile": "ANALOG",
+        "field_id": "snr_sinad",
+        "canonical_unit_type": "dB",
+        "required_conditions_note": "Input amplitude/frequency; bandwidth",
+        "requirement": "M",
+        "reference": "https://cdd.iec.ch ; local profile"
+      }
+    },
+    {
+      "source_row": 156,
+      "values": {
+        "profile": "ANALOG",
+        "field_id": "noise",
+        "canonical_unit_type": "nV/sqrt(Hz)",
+        "required_conditions_note": "Frequency, gain, temp",
+        "requirement": "R",
+        "reference": "https://cdd.iec.ch ; local profile"
+      }
+    },
+    {
+      "source_row": 157,
+      "values": {
+        "profile": "ANALOG",
+        "field_id": "linearity",
+        "canonical_unit_type": "LSB or dB",
+        "required_conditions_note": "INL/DNL or SFDR; test conditions",
+        "requirement": "R",
+        "reference": "https://cdd.iec.ch ; local profile"
+      }
+    },
+    {
+      "source_row": 158,
+      "values": {
+        "profile": "ANALOG",
+        "field_id": "power",
+        "canonical_unit_type": "mW",
+        "required_conditions_note": "Sample rate, modes, rails",
+        "requirement": "M",
+        "reference": "https://cdd.iec.ch ; local profile"
+      }
+    },
+    {
+      "source_row": 159,
+      "values": {
+        "profile": "POWER",
+        "field_id": "input_voltage_range",
+        "canonical_unit_type": "V",
+        "required_conditions_note": "Operating vs absolute max",
+        "requirement": "M",
+        "reference": "https://cdd.iec.ch ; local profile"
+      }
+    },
+    {
+      "source_row": 160,
+      "values": {
+        "profile": "POWER",
+        "field_id": "output_voltage_current",
+        "canonical_unit_type": "V/A",
+        "required_conditions_note": "Load/temperature and configuration",
+        "requirement": "M",
+        "reference": "https://cdd.iec.ch ; local profile"
+      }
+    },
+    {
+      "source_row": 161,
+      "values": {
+        "profile": "POWER",
+        "field_id": "quiescent_current",
+        "canonical_unit_type": "uA",
+        "required_conditions_note": "Input/output V, load, mode",
+        "requirement": "M",
+        "reference": "https://cdd.iec.ch ; local profile"
+      }
+    },
+    {
+      "source_row": 162,
+      "values": {
+        "profile": "POWER",
+        "field_id": "shutdown_current",
+        "canonical_unit_type": "uA",
+        "required_conditions_note": "Enable state and temperature",
+        "requirement": "R",
+        "reference": "https://cdd.iec.ch ; local profile"
+      }
+    },
+    {
+      "source_row": 163,
+      "values": {
+        "profile": "POWER",
+        "field_id": "efficiency_curve",
+        "canonical_unit_type": "%",
+        "required_conditions_note": "Vin/Vout/load/temp; dataset not one peak",
+        "requirement": "M",
+        "reference": "https://cdd.iec.ch ; local profile"
+      }
+    },
+    {
+      "source_row": 164,
+      "values": {
+        "profile": "POWER",
+        "field_id": "cold_start_voltage",
+        "canonical_unit_type": "V",
+        "required_conditions_note": "Available source power, startup load",
+        "requirement": "R",
+        "reference": "https://cdd.iec.ch ; local profile"
+      }
+    },
+    {
+      "source_row": 165,
+      "values": {
+        "profile": "POWER",
+        "field_id": "switching_frequency",
+        "canonical_unit_type": "kHz",
+        "required_conditions_note": "Mode and frequency range",
+        "requirement": "R",
+        "reference": "https://cdd.iec.ch ; local profile"
+      }
+    },
+    {
+      "source_row": 166,
+      "values": {
+        "profile": "POWER",
+        "field_id": "rds_on",
+        "canonical_unit_type": "mOhm",
+        "required_conditions_note": "Vgs, Tj and current; switch only",
+        "requirement": "R",
+        "reference": "https://cdd.iec.ch ; local profile"
+      }
+    },
+    {
+      "source_row": 167,
+      "values": {
+        "profile": "POWER",
+        "field_id": "gate_charge",
+        "canonical_unit_type": "nC",
+        "required_conditions_note": "Vgs, Vds; switch only",
+        "requirement": "R",
+        "reference": "https://cdd.iec.ch ; local profile"
+      }
+    },
+    {
+      "source_row": 168,
+      "values": {
+        "profile": "POWER",
+        "field_id": "switching_energy",
+        "canonical_unit_type": "uJ",
+        "required_conditions_note": "Eon/Eoff, V/I/temp, test circuit",
+        "requirement": "R",
+        "reference": "https://cdd.iec.ch ; local profile"
+      }
+    },
+    {
+      "source_row": 169,
+      "values": {
+        "profile": "POWER",
+        "field_id": "thermal_resistance",
+        "canonical_unit_type": "K/W",
+        "required_conditions_note": "Junction-to-case/ambient, PCB conditions",
+        "requirement": "M",
+        "reference": "https://cdd.iec.ch ; local profile"
+      }
+    },
+    {
+      "source_row": 170,
+      "values": {
+        "profile": "MEMORY",
+        "field_id": "capacity",
+        "canonical_unit_type": "MiB/GiB",
+        "required_conditions_note": "Usable capacity and organization",
+        "requirement": "M",
+        "reference": "https://cdd.iec.ch ; local profile"
+      }
+    },
+    {
+      "source_row": 171,
+      "values": {
+        "profile": "MEMORY",
+        "field_id": "bandwidth",
+        "canonical_unit_type": "MB/s",
+        "required_conditions_note": "Read/write separately, random/sequential",
+        "requirement": "M",
+        "reference": "https://cdd.iec.ch ; local profile"
+      }
+    },
+    {
+      "source_row": 172,
+      "values": {
+        "profile": "MEMORY",
+        "field_id": "latency",
+        "canonical_unit_type": "ns",
+        "required_conditions_note": "Access mode; read/write",
+        "requirement": "M",
+        "reference": "https://cdd.iec.ch ; local profile"
+      }
+    },
+    {
+      "source_row": 173,
+      "values": {
+        "profile": "MEMORY",
+        "field_id": "retention",
+        "canonical_unit_type": "years",
+        "required_conditions_note": "Temperature, powered/unpowered",
+        "requirement": "R",
+        "reference": "https://cdd.iec.ch ; local profile"
+      }
+    },
+    {
+      "source_row": 174,
+      "values": {
+        "profile": "MEMORY",
+        "field_id": "endurance",
+        "canonical_unit_type": "cycles",
+        "required_conditions_note": "Write/erase granularity, temperature",
+        "requirement": "R",
+        "reference": "https://cdd.iec.ch ; local profile"
+      }
+    },
+    {
+      "source_row": 175,
+      "values": {
+        "profile": "MEMORY",
+        "field_id": "energy_per_access",
+        "canonical_unit_type": "nJ",
+        "required_conditions_note": "Read/write, word width, voltage",
+        "requirement": "M",
+        "reference": "https://cdd.iec.ch ; local profile"
+      }
+    },
+    {
+      "source_row": 176,
+      "values": {
+        "profile": "MEMORY",
+        "field_id": "standby_power",
+        "canonical_unit_type": "mW",
+        "required_conditions_note": "Retention, refresh, temperature",
+        "requirement": "M",
+        "reference": "https://cdd.iec.ch ; local profile"
+      }
+    },
+    {
+      "source_row": 177,
+      "values": {
+        "profile": "RND_SIGNAL",
+        "field_id": "trl_reported",
+        "canonical_unit_type": "integer 1-9",
+        "required_conditions_note": "Source-reported scale; null if absent",
+        "requirement": "R",
+        "reference": "https://cdd.iec.ch ; local profile"
+      }
+    },
+    {
+      "source_row": 178,
+      "values": {
+        "profile": "RND_SIGNAL",
+        "field_id": "maturity_evidence",
+        "canonical_unit_type": "enum",
+        "required_conditions_note": "Concept/simulation/test chip/prototype/sample/production",
+        "requirement": "M",
+        "reference": "https://cdd.iec.ch ; local profile"
+      }
+    },
+    {
+      "source_row": 179,
+      "values": {
+        "profile": "RND_SIGNAL",
+        "field_id": "claimed_improvement",
+        "canonical_unit_type": "numeric + unit",
+        "required_conditions_note": "Baseline, conditions, source claim",
+        "requirement": "R",
+        "reference": "https://cdd.iec.ch ; local profile"
+      }
+    },
+    {
+      "source_row": 180,
+      "values": {
+        "profile": "RND_SIGNAL",
+        "field_id": "baseline_id",
+        "canonical_unit_type": "ID",
+        "required_conditions_note": "Comparator exact part/platform/workload",
+        "requirement": "M",
+        "reference": "https://cdd.iec.ch ; local profile"
+      }
+    },
+    {
+      "source_row": 181,
+      "values": {
+        "profile": "RND_SIGNAL",
+        "field_id": "measurement_boundary",
+        "canonical_unit_type": "enum",
+        "required_conditions_note": "Simulation/die/board/system; measured or claimed",
+        "requirement": "M",
+        "reference": "https://cdd.iec.ch ; local profile"
+      }
+    },
+    {
+      "source_row": 182,
+      "values": {
+        "profile": "RND_SIGNAL",
+        "field_id": "next_milestone_date",
+        "canonical_unit_type": "date",
+        "required_conditions_note": "Target vs actual; dated roadmap",
+        "requirement": "R",
+        "reference": "https://cdd.iec.ch ; local profile"
+      }
+    },
+    {
+      "source_row": 183,
+      "values": {
+        "profile": "RND_SIGNAL",
+        "field_id": "commercial_access",
+        "canonical_unit_type": "enum",
+        "required_conditions_note": "IP/licence/eval/sample/volume/unknown",
+        "requirement": "M",
+        "reference": "https://cdd.iec.ch ; local profile"
+      }
+    },
+    {
+      "source_row": 184,
+      "values": {
+        "profile": "RND_SIGNAL",
+        "field_id": "scale_up_path",
+        "canonical_unit_type": "text",
+        "required_conditions_note": "Foundry, MPW, fab/packaging, funding; verified separately",
+        "requirement": "R",
+        "reference": "https://cdd.iec.ch ; local profile"
+      }
+    },
+    {
+      "source_row": 185,
+      "values": {
+        "profile": "OPTO",
+        "field_id": "wavelength",
+        "canonical_unit_type": "nm",
+        "required_conditions_note": "Operating center/range",
+        "requirement": "M",
+        "reference": "https://cdd.iec.ch ; local profile"
+      }
+    },
+    {
+      "source_row": 186,
+      "values": {
+        "profile": "OPTO",
+        "field_id": "optical_loss",
+        "canonical_unit_type": "dB",
+        "required_conditions_note": "Coupling/insertion loss; setup",
+        "requirement": "M",
+        "reference": "https://cdd.iec.ch ; local profile"
+      }
+    },
+    {
+      "source_row": 187,
+      "values": {
+        "profile": "OPTO",
+        "field_id": "responsivity",
+        "canonical_unit_type": "A/W",
+        "required_conditions_note": "Wavelength & bias",
+        "requirement": "R",
+        "reference": "https://cdd.iec.ch ; local profile"
+      }
+    },
+    {
+      "source_row": 188,
+      "values": {
+        "profile": "OPTO",
+        "field_id": "optical_power",
+        "canonical_unit_type": "mW",
+        "required_conditions_note": "Input/output; bias and temp",
+        "requirement": "M",
+        "reference": "https://cdd.iec.ch ; local profile"
+      }
+    },
+    {
+      "source_row": 189,
+      "values": {
+        "profile": "OPTO",
+        "field_id": "energy_per_bit",
+        "canonical_unit_type": "pJ/bit",
+        "required_conditions_note": "Boundary, data rate, modulation and BER",
+        "requirement": "R",
+        "reference": "https://cdd.iec.ch ; local profile"
+      }
+    },
+    {
+      "source_row": 190,
+      "values": {
+        "profile": "FACILITY",
+        "field_id": "facility_country",
+        "canonical_unit_type": "ISO 3166",
+        "required_conditions_note": "Actual site jurisdiction",
+        "requirement": "M",
+        "reference": "https://cdd.iec.ch ; local profile"
+      }
+    },
+    {
+      "source_row": 191,
+      "values": {
+        "profile": "FACILITY",
+        "field_id": "process_platform",
+        "canonical_unit_type": "text",
+        "required_conditions_note": "Node, device/material, wafer size",
+        "requirement": "M",
+        "reference": "https://cdd.iec.ch ; local profile"
+      }
+    },
+    {
+      "source_row": 192,
+      "values": {
+        "profile": "FACILITY",
+        "field_id": "capacity",
+        "canonical_unit_type": "wafers/month",
+        "required_conditions_note": "Installed vs actual, date",
+        "requirement": "R",
+        "reference": "https://cdd.iec.ch ; local profile"
+      }
+    },
+    {
+      "source_row": 193,
+      "values": {
+        "profile": "FACILITY",
+        "field_id": "facility_status",
+        "canonical_unit_type": "enum",
+        "required_conditions_note": "announced/construction/operational/paused",
+        "requirement": "M",
+        "reference": "https://cdd.iec.ch ; local profile"
+      }
+    },
+    {
+      "source_row": 194,
+      "values": {
+        "profile": "FACILITY",
+        "field_id": "access_terms",
+        "canonical_unit_type": "text",
+        "required_conditions_note": "MPW/open/contracted; export conditions",
+        "requirement": "R",
+        "reference": "https://cdd.iec.ch ; local profile"
+      }
+    },
+    {
+      "source_row": 195,
+      "values": {
+        "profile": "IP",
+        "field_id": "ip_type",
+        "canonical_unit_type": "enum",
+        "required_conditions_note": "RTL/soft macro/hard macro/analog IP",
+        "requirement": "M",
+        "reference": "https://cdd.iec.ch ; local profile"
+      }
+    },
+    {
+      "source_row": 196,
+      "values": {
+        "profile": "IP",
+        "field_id": "supported_pdk",
+        "canonical_unit_type": "text",
+        "required_conditions_note": "Foundry, process, IP version",
+        "requirement": "M",
+        "reference": "https://cdd.iec.ch ; local profile"
+      }
+    },
+    {
+      "source_row": 197,
+      "values": {
+        "profile": "IP",
+        "field_id": "ppa",
+        "canonical_unit_type": "text",
+        "required_conditions_note": "Area, power, performance; synthesis/test conditions",
+        "requirement": "R",
+        "reference": "https://cdd.iec.ch ; local profile"
+      }
+    },
+    {
+      "source_row": 198,
+      "values": {
+        "profile": "IP",
+        "field_id": "license_terms",
+        "canonical_unit_type": "text",
+        "required_conditions_note": "Availability, territory, royalties, restrictions",
+        "requirement": "R",
+        "reference": "https://cdd.iec.ch ; local profile"
+      }
+    },
+    {
+      "source_row": 199,
+      "values": {
+        "profile": "IP",
+        "field_id": "silicon_validation",
+        "canonical_unit_type": "enum",
+        "required_conditions_note": "Simulation or measured test chip",
+        "requirement": "M",
+        "reference": "https://cdd.iec.ch ; local profile"
+      }
+    }
+  ]
+}

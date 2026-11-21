@@ -1,0 +1,235 @@
+{
+  "format": "kn.seed-proposal.table",
+  "status": "unreviewed_proposal",
+  "domain": "space",
+  "source": {
+    "file_name": "space_sector_ontology_and_tags_v1.xlsx",
+    "sha256": "26e7468ee372e9c606ff08910756b2066ef30ac9fea7524e646b52d8529eec28",
+    "sheet_name": "04_NASA_TX_Tags",
+    "sheet_position": 5
+  },
+  "title": "NASA 2024 Technology Taxonomy \u2014 Level 1 tags",
+  "notes": [],
+  "header_row": 3,
+  "columns": [
+    {
+      "key": "code",
+      "label": "Code",
+      "column": "A"
+    },
+    {
+      "key": "technology_area",
+      "label": "Technology area",
+      "column": "B"
+    },
+    {
+      "key": "use_as_tag_for",
+      "label": "Use as tag for",
+      "column": "C"
+    },
+    {
+      "key": "typical_esa_gpt_products",
+      "label": "Typical ESA GPT products",
+      "column": "D"
+    },
+    {
+      "key": "tagging_note",
+      "label": "Tagging note",
+      "column": "E"
+    },
+    {
+      "key": "official_source",
+      "label": "Official source",
+      "column": "F"
+    }
+  ],
+  "records": [
+    {
+      "source_row": 4,
+      "values": {
+        "code": "TX01",
+        "technology_area": "Propulsion Systems",
+        "use_as_tag_for": "Chemical/non-chemical launch and in-space propulsion",
+        "typical_esa_gpt_products": "Launchers; satellite propulsion; OTV propulsion",
+        "tagging_note": "Tag propulsion products/projects; do not use as product category",
+        "official_source": "https://www.nasa.gov/otps/2024-nasa-technology-taxonomy/"
+      }
+    },
+    {
+      "source_row": 5,
+      "values": {
+        "code": "TX02",
+        "technology_area": "Flight Computing and Avionics",
+        "use_as_tag_for": "Flight electronics and computing hardware",
+        "typical_esa_gpt_products": "Avionics; OBC; data handling",
+        "tagging_note": "Often combined with TX11 for software-heavy systems",
+        "official_source": "https://www.nasa.gov/otps/2024-nasa-technology-taxonomy/"
+      }
+    },
+    {
+      "source_row": 6,
+      "values": {
+        "code": "TX03",
+        "technology_area": "Aerospace Power and Energy Storage",
+        "use_as_tag_for": "Power generation, storage, conditioning/distribution",
+        "typical_esa_gpt_products": "Satellite/launcher power systems",
+        "tagging_note": "Use for solar/battery/power electronics",
+        "official_source": "https://www.nasa.gov/otps/2024-nasa-technology-taxonomy/"
+      }
+    },
+    {
+      "source_row": 7,
+      "values": {
+        "code": "TX04",
+        "technology_area": "Robotic Systems",
+        "use_as_tag_for": "Space robotics and robotic servicing",
+        "typical_esa_gpt_products": "Robotic payloads; servicing vehicles; manipulators",
+        "tagging_note": "Useful for ISAM/servicing",
+        "official_source": "https://www.nasa.gov/otps/2024-nasa-technology-taxonomy/"
+      }
+    },
+    {
+      "source_row": 8,
+      "values": {
+        "code": "TX05",
+        "technology_area": "Communications, Navigation, and Orbital Debris Tracking and Characterization Systems",
+        "use_as_tag_for": "RF/optical communications, navigation, debris tracking",
+        "typical_esa_gpt_products": "TT&C; satcom payloads; ground stations; PNT; SSA sensors",
+        "tagging_note": "Very broad tag; combine with ESA TD6/7/10/11/12",
+        "official_source": "https://www.nasa.gov/otps/2024-nasa-technology-taxonomy/"
+      }
+    },
+    {
+      "source_row": 9,
+      "values": {
+        "code": "TX06",
+        "technology_area": "Human Health, Life Support, and Habitation Systems",
+        "use_as_tag_for": "Crew health, life support and habitation",
+        "typical_esa_gpt_products": "Crewed systems / habitats",
+        "tagging_note": "Low priority for unmanned industrial awareness unless scope expands",
+        "official_source": "https://www.nasa.gov/otps/2024-nasa-technology-taxonomy/"
+      }
+    },
+    {
+      "source_row": 10,
+      "values": {
+        "code": "TX07",
+        "technology_area": "Exploration Destination Systems",
+        "use_as_tag_for": "Surface/exploration destination technologies",
+        "typical_esa_gpt_products": "Exploration systems / ISRU / surface assets",
+        "tagging_note": "Use for lunar/planetary programmes",
+        "official_source": "https://www.nasa.gov/otps/2024-nasa-technology-taxonomy/"
+      }
+    },
+    {
+      "source_row": 11,
+      "values": {
+        "code": "TX08",
+        "technology_area": "Sensors and Instruments",
+        "use_as_tag_for": "Remote sensing and scientific sensors/instruments",
+        "typical_esa_gpt_products": "EO/SAR/optical/RF/science payloads",
+        "tagging_note": "Primary payload/instrument tag",
+        "official_source": "https://www.nasa.gov/otps/2024-nasa-technology-taxonomy/"
+      }
+    },
+    {
+      "source_row": 12,
+      "values": {
+        "code": "TX09",
+        "technology_area": "Entry, Descent, and Landing",
+        "use_as_tag_for": "EDL and re-entry technologies",
+        "typical_esa_gpt_products": "Re-entry vehicles; descent/recovery; TPS",
+        "tagging_note": "Use for capsules and planetary EDL",
+        "official_source": "https://www.nasa.gov/otps/2024-nasa-technology-taxonomy/"
+      }
+    },
+    {
+      "source_row": 13,
+      "values": {
+        "code": "TX10",
+        "technology_area": "Autonomous Systems",
+        "use_as_tag_for": "Autonomy in spacecraft, aircraft and robotics",
+        "typical_esa_gpt_products": "Flight software; autonomous operations; robotics",
+        "tagging_note": "Combine with TX11 and ESA TD1/2/13",
+        "official_source": "https://www.nasa.gov/otps/2024-nasa-technology-taxonomy/"
+      }
+    },
+    {
+      "source_row": 14,
+      "values": {
+        "code": "TX11",
+        "technology_area": "Software, Modeling, Simulation, and Information Processing",
+        "use_as_tag_for": "Software, simulation, AI, information processing",
+        "typical_esa_gpt_products": "Flight SW; mission SW; EO analytics; modelling",
+        "tagging_note": "Primary digital/software tag",
+        "official_source": "https://www.nasa.gov/otps/2024-nasa-technology-taxonomy/"
+      }
+    },
+    {
+      "source_row": 15,
+      "values": {
+        "code": "TX12",
+        "technology_area": "Materials, Structures, Mechanical Systems, and Manufacturing",
+        "use_as_tag_for": "Materials, structures, mechanisms, manufacturing",
+        "typical_esa_gpt_products": "Structures; mechanisms; materials; manufacturing",
+        "tagging_note": "Broad industrial manufacturing tag",
+        "official_source": "https://www.nasa.gov/otps/2024-nasa-technology-taxonomy/"
+      }
+    },
+    {
+      "source_row": 16,
+      "values": {
+        "code": "TX13",
+        "technology_area": "Ground, Test, and Surface Systems",
+        "use_as_tag_for": "Ground/test/support systems and facilities",
+        "typical_esa_gpt_products": "AIT; ground support; ground stations; surface systems",
+        "tagging_note": "Useful for facilities/test infrastructure",
+        "official_source": "https://www.nasa.gov/otps/2024-nasa-technology-taxonomy/"
+      }
+    },
+    {
+      "source_row": 17,
+      "values": {
+        "code": "TX14",
+        "technology_area": "Thermal Management Systems",
+        "use_as_tag_for": "Heat acquisition/transport/rejection and insulation",
+        "typical_esa_gpt_products": "Thermal control; TPS",
+        "tagging_note": "Use for spacecraft and launch/re-entry thermal systems",
+        "official_source": "https://www.nasa.gov/otps/2024-nasa-technology-taxonomy/"
+      }
+    },
+    {
+      "source_row": 18,
+      "values": {
+        "code": "TX15",
+        "technology_area": "Flight Vehicle Systems",
+        "use_as_tag_for": "Vehicle aerosciences and flight mechanics",
+        "typical_esa_gpt_products": "Launchers; re-entry/flight vehicles",
+        "tagging_note": "Vehicle-level design/performance tag",
+        "official_source": "https://www.nasa.gov/otps/2024-nasa-technology-taxonomy/"
+      }
+    },
+    {
+      "source_row": 19,
+      "values": {
+        "code": "TX16",
+        "technology_area": "Air Traffic Management and Range Tracking Systems",
+        "use_as_tag_for": "Range safety/tracking and integration with airspace",
+        "typical_esa_gpt_products": "Launch range; tracking; range systems",
+        "tagging_note": "Useful for launch infrastructure/regulation interfaces",
+        "official_source": "https://www.nasa.gov/otps/2024-nasa-technology-taxonomy/"
+      }
+    },
+    {
+      "source_row": 20,
+      "values": {
+        "code": "TX17",
+        "technology_area": "Guidance, Navigation, and Control (GN&C)",
+        "use_as_tag_for": "GN&C technologies and sensors/actuators",
+        "typical_esa_gpt_products": "AOCS/GNC; launcher GNC; navigation",
+        "tagging_note": "Primary GNC tag",
+        "official_source": "https://www.nasa.gov/otps/2024-nasa-technology-taxonomy/"
+      }
+    }
+  ]
+}

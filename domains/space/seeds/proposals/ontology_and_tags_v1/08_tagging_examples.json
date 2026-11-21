@@ -1,0 +1,147 @@
+{
+  "format": "kn.seed-proposal.table",
+  "status": "unreviewed_proposal",
+  "domain": "space",
+  "source": {
+    "file_name": "space_sector_ontology_and_tags_v1.xlsx",
+    "sha256": "26e7468ee372e9c606ff08910756b2066ef30ac9fea7524e646b52d8529eec28",
+    "sheet_name": "08_Tagging_Examples",
+    "sheet_position": 9
+  },
+  "title": "Tagging examples \u2014 how the three axes work together",
+  "notes": [],
+  "header_row": 3,
+  "columns": [
+    {
+      "key": "example_record",
+      "label": "Example record",
+      "column": "A"
+    },
+    {
+      "key": "entity_class",
+      "label": "Entity class",
+      "column": "B"
+    },
+    {
+      "key": "esa_gpt_primary_path",
+      "label": "ESA GPT primary path",
+      "column": "C"
+    },
+    {
+      "key": "nasa_tx_tags",
+      "label": "NASA TX tags",
+      "column": "D"
+    },
+    {
+      "key": "esa_technology_tags",
+      "label": "ESA Technology tags",
+      "column": "E"
+    },
+    {
+      "key": "euspa_application_tags",
+      "label": "EUSPA application tags",
+      "column": "F"
+    },
+    {
+      "key": "service_type",
+      "label": "Service type",
+      "column": "G"
+    },
+    {
+      "key": "key_relations",
+      "label": "Key relations",
+      "column": "H"
+    },
+    {
+      "key": "why_this_is_useful",
+      "label": "Why this is useful",
+      "column": "I"
+    }
+  ],
+  "records": [
+    {
+      "source_row": 4,
+      "values": {
+        "example_record": "LEO launch vehicle",
+        "entity_class": "Launch Vehicle",
+        "esa_gpt_primary_path": "I Launchers \u2192 complete vehicle + subsystem paths",
+        "nasa_tx_tags": "TX01; TX02; TX12; TX15; TX17",
+        "esa_technology_tags": "TD19; TD20; TD01; TD05; TD08; TD25",
+        "euspa_application_tags": null,
+        "service_type": "S01 if sold as service",
+        "key_relations": "manufactured_by; operated_by; uses_component",
+        "why_this_is_useful": "Separates vehicle product from launch service and supplier chain"
+      }
+    },
+    {
+      "source_row": 5,
+      "values": {
+        "example_record": "SAR satellite",
+        "entity_class": "Spacecraft",
+        "esa_gpt_primary_path": "II Satellites & Probes \u2192 II.I Payloads + platform systems",
+        "nasa_tx_tags": "TX08; TX02; TX03; TX05; TX17",
+        "esa_technology_tags": "TD06; TD07; TD16/17 as applicable; TD01; TD03; TD05",
+        "euspa_application_tags": "Agriculture; Energy and Raw Materials; EU Border and Internal Security; Space",
+        "service_type": "S09 / S10 via related provider",
+        "key_relations": "carries_payload; operated_by; produces_dataset",
+        "why_this_is_useful": "One spacecraft can serve many markets without changing product class"
+      }
+    },
+    {
+      "source_row": 6,
+      "values": {
+        "example_record": "LEO user terminal",
+        "entity_class": "Terminal / User Equipment",
+        "esa_gpt_primary_path": "IV Ground Segment \u2192 IV.TERM KB extension",
+        "nasa_tx_tags": "TX05; TX02",
+        "esa_technology_tags": "TD06; TD07; TD12; TD23",
+        "euspa_application_tags": "Infrastructure; Emergency Management; Maritime; Aviation and Drones",
+        "service_type": "S08",
+        "key_relations": "manufactured_by; accesses_network; compatible_with",
+        "why_this_is_useful": "Captures strategically important terminal industry missing from orbital catalogs"
+      }
+    },
+    {
+      "source_row": 7,
+      "values": {
+        "example_record": "EO analytics platform",
+        "entity_class": "Service",
+        "esa_gpt_primary_path": "No GPT product path; link to enabling IV cloud/ground products",
+        "nasa_tx_tags": "TX11; TX08",
+        "esa_technology_tags": "TD02-D; TD02-E",
+        "euspa_application_tags": "Agriculture; Forestry; Infrastructure; Climate, Environment and Biodiversity",
+        "service_type": "S10",
+        "key_relations": "provided_by; consumes_dataset; serves_application",
+        "why_this_is_useful": "Prevents downstream software from being forced into a hardware product tree"
+      }
+    },
+    {
+      "source_row": 8,
+      "values": {
+        "example_record": "Electric propulsion thruster",
+        "entity_class": "Component / Subsystem",
+        "esa_gpt_primary_path": "II.K Propulsion or III propulsion",
+        "nasa_tx_tags": "TX01",
+        "esa_technology_tags": "TD19-B; TD23/24 as relevant",
+        "euspa_application_tags": "Space",
+        "service_type": "S15 if sold as engineering/manufacturing service",
+        "key_relations": "manufactured_by; integrated_into; implements_technology",
+        "why_this_is_useful": "Allows technology scouting across many spacecraft programmes"
+      }
+    },
+    {
+      "source_row": 9,
+      "values": {
+        "example_record": "Ground station network",
+        "entity_class": "Ground Station / Service",
+        "esa_gpt_primary_path": "IV.B Ground Station + IV.C Ground Segment Network",
+        "nasa_tx_tags": "TX05; TX13",
+        "esa_technology_tags": "TD12; TD09",
+        "euspa_application_tags": "Space",
+        "service_type": "S07",
+        "key_relations": "operated_by; communicates_with; provides_service",
+        "why_this_is_useful": "Separates physical nodes from network/service layer"
+      }
+    }
+  ]
+}

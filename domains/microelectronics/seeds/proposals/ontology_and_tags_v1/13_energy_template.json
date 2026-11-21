@@ -1,0 +1,124 @@
+{
+  "format": "kn.seed-proposal.table",
+  "status": "unreviewed_proposal",
+  "domain": "microelectronics",
+  "source": {
+    "file_name": "microelectronics_ontology_and_tags_v1.xlsx",
+    "sha256": "7166aa06791998c692cc6a2ac377692a6687f15e3353ffa70a1c159f2e63c34f",
+    "sheet_name": "13_Energy_Template",
+    "sheet_position": 14
+  },
+  "title": "Energy comparison \u2014 editable example (hypothetical)",
+  "notes": [
+    "Exactly 86,400 s/day. Active and idle powers are normalized to battery boundary, or corrected for conversion losses upstream. Same workload and useful output mandatory."
+  ],
+  "header_row": 4,
+  "columns": [
+    {
+      "key": "candidate",
+      "label": "Candidate",
+      "column": "A"
+    },
+    {
+      "key": "active_mw",
+      "label": "Active mW",
+      "column": "B"
+    },
+    {
+      "key": "idle_mw",
+      "label": "Idle mW",
+      "column": "C"
+    },
+    {
+      "key": "active_seconds_day",
+      "label": "Active seconds/day",
+      "column": "D"
+    },
+    {
+      "key": "idle_seconds_day",
+      "label": "Idle seconds/day",
+      "column": "E"
+    },
+    {
+      "key": "wake_count_day",
+      "label": "Wake count/day",
+      "column": "F"
+    },
+    {
+      "key": "wake_uj_event",
+      "label": "Wake uJ/event",
+      "column": "G"
+    },
+    {
+      "key": "energy_j_day",
+      "label": "Energy J/day",
+      "column": "H"
+    },
+    {
+      "key": "usable_battery_wh",
+      "label": "Usable battery Wh",
+      "column": "I"
+    },
+    {
+      "key": "runtime_days",
+      "label": "Runtime days",
+      "column": "J"
+    },
+    {
+      "key": "gate",
+      "label": "Gate",
+      "column": "K"
+    },
+    {
+      "key": "notes",
+      "label": "Notes",
+      "column": "L"
+    }
+  ],
+  "records": [
+    {
+      "source_row": 5,
+      "values": {
+        "candidate": "Illustration A",
+        "active_mw": 20,
+        "idle_mw": 0.05,
+        "active_seconds_day": 864,
+        "idle_seconds_day": 85536,
+        "wake_count_day": 100,
+        "wake_uj_event": 10,
+        "energy_j_day": 21.5578,
+        "usable_battery_wh": 10,
+        "runtime_days": 1669.9292135561143,
+        "gate": "CHECK WORKLOAD",
+        "notes": "Synthetic values. Wake energy incremental; active/idle intervals exclude separate wake duration or include it with no double count."
+      },
+      "formulas_not_evaluated": {
+        "energy_j_day": "IF(COUNT(B5:G5)<6,\"\",IF(D5+E5<>86400,\"\",(B5*D5+C5*E5)/1000+F5*G5/1000000))",
+        "runtime_days": "IFERROR(IF(OR(H5=\"\",I5=\"\",H5<=0),\"\",I5*3600/H5),\"\")",
+        "gate": "IF(COUNT(B5:G5)<6,\"MISSING\",IF(OR(D5+E5<>86400,MIN(B5:G5)<0),\"CHECK INPUT\",\"CHECK WORKLOAD\"))"
+      }
+    },
+    {
+      "source_row": 6,
+      "values": {
+        "candidate": "Illustration B",
+        "active_mw": 10,
+        "idle_mw": 0.1,
+        "active_seconds_day": 864,
+        "idle_seconds_day": 85536,
+        "wake_count_day": 100,
+        "wake_uj_event": 10,
+        "energy_j_day": 17.1946,
+        "usable_battery_wh": 10,
+        "runtime_days": 2093.6805741337394,
+        "gate": "CHECK WORKLOAD",
+        "notes": "Synthetic values. Battery usable energy at defined boundary; no harvesting."
+      },
+      "formulas_not_evaluated": {
+        "energy_j_day": "IF(COUNT(B6:G6)<6,\"\",IF(D6+E6<>86400,\"\",(B6*D6+C6*E6)/1000+F6*G6/1000000))",
+        "runtime_days": "IFERROR(IF(OR(H6=\"\",I6=\"\",H6<=0),\"\",I6*3600/H6),\"\")",
+        "gate": "IF(COUNT(B6:G6)<6,\"MISSING\",IF(OR(D6+E6<>86400,MIN(B6:G6)<0),\"CHECK INPUT\",\"CHECK WORKLOAD\"))"
+      }
+    }
+  ]
+}
