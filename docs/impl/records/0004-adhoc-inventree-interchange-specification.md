@@ -128,10 +128,32 @@ Resolutions:
 | --- | --- |
 | Owner entries rank higher | `owner_entered` becomes the highest rank class, above `first_party`. An owner value that differs from a first-party value is flagged `owner_override` and listed by `kn review list --overrides`. Echo suppression in the exchange ledger keeps values KN wrote from coming back as owner entries. An owner edit in InvenTree to a KN-owned field becomes an owner claim, not a conflict. |
 | "Verified" undefined | Verification states are now derived labels, defined in the [update policy](../../design/spec.md#update-policy), and are not ranking criteria. A review decision is an `owner_entered` assertion. A candidate value ranks by its best supporting claim: source rank, then evidence class, then data time within one source. Equal-rank disagreement between different sources is a conflict. Repetition never adds rank. |
-| Upgrade prompt | [vl-itree upgrade prompt](../../design/integrations/vl-itree-upgrade-prompt.md): pin every image by tag and digest, vendor the `Caddyfile`, and document the upgrade and restore procedure, including the secret key. The prompt reports the tag and digest for the owner's release tag. `deploy/versions.yaml` records the InvenTree tag, digest, and `vl-itree` release tag. |
+| Upgrade prompt | Pin every image by tag and digest, vendor the `Caddyfile`, and document the upgrade and restore procedure, including the secret key. The prompt reports the tag and digest for the owner's release tag. `deploy/versions.yaml` records the InvenTree tag, digest, and `vl-itree` release tag. |
 | TLS and password guard | [vl-itree requirements](../../design/integrations/inventree.md#vl-itree-requirements): HTTPS for any non-loopback listener, an owner certificate or an internal CA with an exported root, and a bind address defaulting to loopback. Secrets live in an untracked local file. The launcher refuses missing, placeholder, default, or short passwords outside a loopback-only development mode, and existing databases get a scripted rotation. KN refuses plain HTTP and failed certificate verification for non-loopback instances. |
 
 Plan changes: `canonical-fact-selection`, `exchange-binding-ledger`, `inventree-test-service` (now
 with a test CA), `inventree-read-import`, `inventree-write-export`, `vl-itree-read-acceptance`,
 `provide-inventree-instance-access`, and `align-vl-itree-release` are revised. Task counts are
 unchanged at 96 (85 agent, 11 human).
+
+## Third revision: vl-itree release
+
+The owner released `vl-itree` and asked KN to pin its tag `v0.1.0`.
+
+The tag was read at commit `c85fb56`. `docker/versions.env` pins InvenTree `1.7.3`, PostgreSQL
+`17.12`, Redis `7.4.12-alpine`, and Caddy `2.11.9-alpine` by tag and digest. The InvenTree 1.7.3
+source declares API version 570. Every
+[vl-itree requirement](../../design/integrations/inventree.md#vl-itree-requirements) is met in
+the repository, as the design page's new column shows.
+
+| Finding | Resolution |
+| --- | --- |
+| The target was "the newest stable release at pin time", with no value | The [target release](../../design/integrations/inventree.md#target-release) is InvenTree `1.7.3` through `v0.1.0`, with the four image digests. The spec, `inventree-test-service`, and `align-vl-itree-release` name it. The test service runs the same four images. |
+| The design page described the initial `vl-itree` commit | The deployment facts now describe `v0.1.0`. The running instance moves to it only through the release's one-time migration, so KN does not connect before the owner reports that migration. |
+| In 1.7.3, companies and supplier price breaks need the `purchase_order` role, not `pricing` | The API facts list the 1.7.3 roles. The mapping note, the API user requirement, and `provide-inventree-instance-access` name `part_category`, `part`, and `purchase_order` as view-only roles. The `vl-itree` API user guide lists `purchase_order` as optional, so the owner adds it when creating the group. |
+| The API 579 fixture (`barcode_hash` read-only) comes after the target | The fixture section notes that it is the first known change that the next upgrade check meets. |
+| Token lifetime and MFA affect the `kn-exchange` token | The API facts note expiry within 365 days and revocation on reissue. MFA enforcement is a verification item. |
+
+`align-vl-itree-release` stays HUMAN-GATED: the release exists, but the owner still deploys it on
+the instance and reports the site URL and certificate. Task counts are unchanged at 96 (85 agent,
+11 human).

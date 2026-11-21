@@ -1219,11 +1219,12 @@ mapping and the `vl-itree` deployment facts.
 **Target release.** Each joint KN and `vl-itree` release names one target InvenTree release, by
 exact image tag and digest, and the `vl-itree` release tag that pins it. The KN test service, the
 reviewed schema snapshot, the adapter profile, and the `vl-itree` image reference all name the
-same release, and `deploy/versions.yaml` records all three values. `vl-itree` currently runs the
-floating `stable` tag. The [vl-itree requirements](integrations/inventree.md#vl-itree-requirements)
-replace it with the exact tag and add TLS and a password guard. A
-[ready prompt](integrations/vl-itree-upgrade-prompt.md) prepares that change in the `vl-itree`
-repository, and the owner reviews it and creates the `vl-itree` release tag.
+same release, and `deploy/versions.yaml` records all three values. The current target is
+InvenTree `1.7.3` (API version 570), pinned by the `vl-itree` release `v0.1.0`. The
+[target release](integrations/inventree.md#target-release) table lists its image digests. That
+release meets the [vl-itree requirements](integrations/inventree.md#vl-itree-requirements): exact
+image pins, TLS, and a password guard. A later target passes the upgrade check first, and the owner
+then creates the next `vl-itree` release tag.
 
 **Probe and capture.** Every session starts with `GET /api/`, which returns the software `version`
 and the integer `apiVersion`. It then captures the instance's OpenAPI schema. Both responses are
@@ -1275,7 +1276,8 @@ export profile.
 
 **Connectivity.** An instance can run on another machine. KN then reaches it only over HTTPS with
 certificate verification. The instance profile may name a non-secret CA certificate file, such as
-the root of the instance proxy's internal CA, and verification is never disabled. Plain HTTP is
+the root of the instance proxy's internal CA, and verification is never disabled. KN connects by
+the host name of the instance's site URL, which is the name the certificate covers. Plain HTTP is
 allowed only over loopback or a private Docker network on the same host. A token never crosses a
 network in plain HTTP.
 

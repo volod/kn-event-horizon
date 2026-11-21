@@ -925,8 +925,10 @@ instance.
 - Serves: `inventree-exchange` -- [InvenTree exchange](../design/spec.md#inventree-exchange)
 - Agent status: CLEAR
 - Requires: `compose-database-service`
-- Dependencies: Docker Engine with Compose v2. The newest stable InvenTree release at pin time is
-  the joint target release.
+- Dependencies: Docker Engine with Compose v2. The joint target release is InvenTree `1.7.3` (API
+  version 570), pinned by the `vl-itree` release `v0.1.0`. Its
+  [target release](../design/integrations/inventree.md#target-release) table gives the InvenTree,
+  PostgreSQL, Redis, and Caddy image tags and digests.
 - User-visible outcome: `make inventree-up` and `make inventree-down` run the target release in
   the Compose `inventree` profile with its own database. `INVENTREE_RELEASE=<tag>` starts a
   candidate release beside it for the upgrade check. A seed command loads one synthetic catalogue:
@@ -934,13 +936,14 @@ instance.
   categories, parts, and attachment links.
 - Scope boundary: Test-only services on an internal network with loopback access for tests, a
   TLS proxy with a generated test CA so that certificate verification is exercised, generated
-  non-secret credentials, the seed script, and the target tag and digest in
-  `deploy/versions.yaml`. No connection to an owner instance.
+  non-secret credentials, the seed script, and the four image tags and digests plus the
+  `vl-itree` release tag in `deploy/versions.yaml`. No connection to an owner instance.
 - Data and artifact paths: `deploy/compose.yaml`, `deploy/inventree/`, `deploy/versions.yaml`,
   `tests/fixtures/inventree/seed/`, `Makefile`.
-- Execution path: Pin the target image by tag and digest, start it from empty volumes, and seed it
-  through the API.
-- Acceptance gates: The target release reaches healthy from empty volumes. The seed loads the
+- Execution path: Pin the four images by the tags and digests of `vl-itree` `v0.1.0`, start them
+  from empty volumes, and seed the service through the API.
+- Acceptance gates: The target release reaches healthy from empty volumes, and `GET /api/` reports
+  version `1.7.3` and API version 570. The seed loads the
   catalogue, and the API reports the expected counts. No port is published beyond loopback.
   `make ci` stays green without Docker.
 - Documentation target: A new `current/inventree-exchange.md` page listed in the
@@ -2004,12 +2007,14 @@ sets.
 
 - Serves: `inventree-exchange` -- [InvenTree exchange](../design/spec.md#inventree-exchange)
 - Agent status: BLOCKED BY HUMAN
-- Dependencies: The owner provides the instance's HTTPS base URL and, when the proxy uses its
-  internal CA, the exported root certificate for the instance profile. The owner also provides a
-  dedicated `kn-exchange` InvenTree user with read-only roles, its token in the local environment,
-  and the list of allowed resources. An agent prepares the access checklist and the instance profile
-  template from the [vl-itree deployment
-  facts](../design/integrations/inventree.md#the-vl-itree-deployment).
+- Dependencies: The owner provides the instance's HTTPS site URL and, when the proxy uses its
+  internal CA, the exported root certificate and its SHA-256 fingerprint for the instance profile.
+  The owner also provides a dedicated `kn-exchange` InvenTree user with view-only roles
+  `part_category`, `part`, and `purchase_order`, its token in the local environment, and the list
+  of allowed resources. An agent prepares the access checklist and the instance profile template
+  from the [vl-itree deployment
+  facts](../design/integrations/inventree.md#the-vl-itree-deployment) and the `vl-itree` API user
+  guide.
 - User-visible outcome: A non-secret instance profile draft and a recorded access decision.
 - Scope boundary: Access and facts only. Credentials stay out of Git. Write access is a separate
   decision in `approve-inventree-write-exchange`.
@@ -2029,25 +2034,25 @@ with changed passwords, because it can run on another machine.
 - Serves: `inventree-exchange` -- [InvenTree exchange](../design/spec.md#inventree-exchange)
 - Agent status: HUMAN-GATED
 - Requires: `inventree-test-service`
-- Dependencies: The owner runs the
-  [vl-itree upgrade prompt](../design/integrations/vl-itree-upgrade-prompt.md) in the `vl-itree`
-  repository, reviews the change, takes an offline backup, and deploys. The owner then creates the
-  `vl-itree` release tag that pins the InvenTree release, and reports the InvenTree tag, image
-  digest, and release tag. If the prompt finds a newer stable release than the test service pins,
-  the test service is re-pinned through `inventree-upgrade-check` first.
+- Dependencies: The `vl-itree` release `v0.1.0` pins InvenTree `1.7.3` and meets the
+  [vl-itree requirements](../design/integrations/inventree.md#vl-itree-requirements) in the
+  repository. The owner deploys it on the instance through the release's one-time migration:
+  offline backup, password rotation, TLS settings, and start. The owner then reports the HTTPS
+  site URL, the certificate mode, and, in `internal` mode, the root certificate fingerprint. A
+  later target passes `inventree-upgrade-check` and gets a new `vl-itree` release tag.
 - User-visible outcome: `vl-itree` runs the target release from pinned images, serves HTTPS to
-  other machines, and refuses to start with unchanged passwords. `deploy/versions.yaml` records the
-  InvenTree tag, image digest, and `vl-itree` release tag.
+  other machines, and refuses to start with unchanged passwords. `deploy/versions.yaml` records
+  InvenTree `1.7.3`, its image digest, and the `vl-itree` release tag `v0.1.0`.
 - Scope boundary: The
   [vl-itree requirements](../design/integrations/inventree.md#vl-itree-requirements) and their
   deployment, in the `vl-itree` repository. KN never deploys `vl-itree`.
-- Data and artifact paths: The `vl-itree` repository change and release tag,
-  `deploy/versions.yaml`, and the task record.
-- Execution path: The owner runs the prompt, reviews, deploys, and tags. The agent records the
-  versions that the instance reports over HTTPS.
-- Acceptance gates: The instance reports the target release and API version over verified TLS
-  from another machine. Its image reference matches `deploy/versions.yaml`. The launcher's refusal
-  of a default password is shown in the prompt's verification output.
+- Data and artifact paths: The `vl-itree` release tag `v0.1.0`, `deploy/versions.yaml`, and the
+  task record.
+- Execution path: The owner migrates and deploys the release. The agent records the versions that
+  the instance reports over HTTPS.
+- Acceptance gates: The instance reports version `1.7.3` and API version 570 over verified TLS
+  from another machine. Its image reference matches `deploy/versions.yaml`. The launcher refuses
+  a default password.
 - Documentation target: `current/inventree-exchange.md` listed in the
   [areas index](current.md#areas).
 
