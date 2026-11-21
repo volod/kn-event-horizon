@@ -13,6 +13,10 @@ COMMON = ROOT / "scripts" / "shared" / "common.sh"
 COMPOSE_FILE = ROOT / "deploy" / "compose.yaml"
 PASSWORD_HEX = re.compile(r"^[0-9a-f]{64}$")
 DEFAULT_HOST_PORT = "15432"
+PRINT_TEST_ENV = (
+    'kn_db_test_env && printf "%s\\n%s\\n" '
+    '"$KN_TEST_DATABASE_URL" "$KN_TEST_DATABASE_PASSWORD_FILE"'
+)
 
 # Records each call as "<uid>:<gid>|<password file>|<host port>|<arguments>" and fakes outcomes.
 DOCKER_STUB = r"""
@@ -145,6 +149,34 @@ def test_invalid_host_port_is_refused_before_docker_runs(
     assert f"KN_POSTGRES_HOST_PORT must be a port from 1 to 65535, got '{port}'" in result.stderr
     assert _calls(tmp_path) == []
     assert not (tmp_path / "data").exists()
+
+
+@pytest.mark.parametrize(("configured", "expected"), [("", DEFAULT_HOST_PORT), ("25432", "25432")])
+def test_test_env_names_the_loopback_port_and_the_password_file(
+    tmp_path: Path, configured: str, expected: str
+) -> None:
+    result = _run(tmp_path, PRINT_TEST_ENV, KN_POSTGRES_HOST_PORT=configured)
+
+    assert result.returncode == 0, result.stderr
+    assert result.stdout.splitlines() == [
+        f"postgresql://postgres@127.0.0.1:{expected}/kn",
+        str(tmp_path / "data" / "secrets" / "postgres-password"),
+    ]
+    assert _calls(tmp_path) == []
+
+
+def test_test_env_uses_the_configured_password_file(tmp_path: Path) -> None:
+    result = _run(tmp_path, PRINT_TEST_ENV, KN_POSTGRES_PASSWORD_FILE="local/password")
+
+    assert result.stdout.splitlines()[1] == str(ROOT / "local" / "password")
+
+
+def test_test_env_refuses_an_invalid_port(tmp_path: Path) -> None:
+    result = _run(tmp_path, PRINT_TEST_ENV, KN_POSTGRES_HOST_PORT="5432x")
+
+    assert result.returncode == 1
+    assert "KN_POSTGRES_HOST_PORT must be a port" in result.stderr
+    assert result.stdout == ""
 
 
 @pytest.mark.skipif(os.geteuid() == 0, reason="the helpers refuse to run as root")

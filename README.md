@@ -32,10 +32,12 @@ make plan-status
 | `make help` | List supported workflows |
 | `make bootstrap` | Create or update the locked development environment |
 | `make run` | Run `kn info` |
-| `make test` | Run the unit test suite |
+| `make test` | Run the lightweight unit tests, the set that GitHub Actions runs |
+| `make test-integration` | Run the database integration tests locally against the database from `make db-up` |
 | `make coverage` | Run tests with the coverage gate |
 | `make format` | Apply Ruff formatting |
 | `make ci` | Run required local and CI checks |
+| `make ci-local` | Run `make ci`, then every local-only test (database and heavy tests) |
 | `make quality` | Run CI checks, coverage, Markdown lint, and package build |
 | `make db-up` | Start the local PostgreSQL and PostGIS service on `127.0.0.1:15432` and wait until it is healthy |
 | `make db-down` | Stop the database service and keep its data |
@@ -78,7 +80,7 @@ Keep these files focused on their integration. [CLAUDE.md](CLAUDE.md), [GEMINI.m
 
 ```text
 src/kn/                    production package and kn CLI
-tests/                     unit and governance tests
+tests/                     unit, governance, and database integration tests
 domains/                   domain packages; seeds/proposals/ holds the converted workbooks
 deploy/                    Compose stack, service configuration, and the version manifest
 docs/design/               product specification and domain design pages

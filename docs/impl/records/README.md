@@ -22,5 +22,7 @@ decision. A record can name a plan task by ID because plan headings disappear on
 | 0005 | `adhoc` group implementation audit tasks | [0005-adhoc-group-implementation-audits.md](0005-adhoc-group-implementation-audits.md) |
 | 0006 | `compose-database-service` | [0006-runtime-platform-compose-database-service.md](0006-runtime-platform-compose-database-service.md) |
 | 0007 | `adhoc` database loopback port | [0007-adhoc-database-loopback-port.md](0007-adhoc-database-loopback-port.md) |
+| 0008 | `database-integration-harness` | [0008-runtime-platform-database-integration-harness.md](0008-runtime-platform-database-integration-harness.md) |
+| 0009 | `adhoc` local-only service tests | [0009-adhoc-local-only-service-tests.md](0009-adhoc-local-only-service-tests.md) |
 
-Next unused sequence is `0008`.
+Next unused sequence is `0010`.

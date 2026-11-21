@@ -34,29 +34,6 @@ recorded decision before later groups build on the group.
 
 ### Runtime platform -- `runtime-platform`
 
-#### database-integration-harness
-
-Tests that touch SQL need one repeatable database fixture locally and in CI.
-
-- Serves: `runtime-platform` -- [Runtime platform](../design/spec.md#runtime-platform)
-- Agent status: CLEAR
-- Dependencies: The pinned PostGIS image from the version manifest and the local service in
-  [runtime platform](current/runtime-platform.md). The service publishes its port on `127.0.0.1`
-  only (`KN_POSTGRES_HOST_PORT`, default `15432`), so host-run tests connect over TCP with a
-  password.
-- User-visible outcome: `make test-integration` runs database tests against the Compose service,
-  and GitHub Actions runs them against a PostGIS service container.
-- Scope boundary: A pytest marker, a fixture that creates and drops a scratch schema set per
-  session, and the CI job. No product schemas yet.
-- Data and artifact paths: `tests/integration/`, `tests/conftest.py`, `.github/workflows/ci.yml`,
-  `Makefile`, `pyproject.toml`, `uv.lock`.
-- Execution path: Add psycopg 3 as the justified dependency. Unit tests stay network-free and
-  database-free, and integration tests skip with a clear reason when no database is configured.
-- Acceptance gates: An integration smoke test passes locally and in CI. `make ci` stays green with
-  and without a database. Coverage still meets its floor.
-- Documentation target: `current/runtime-platform.md` listed in the
-  [areas index](current.md#areas).
-
 #### runtime-platform-implementation-audit (optional)
 
 The database service and test harness carry every later group, so defects in pinning, roles, or test
@@ -64,7 +41,6 @@ isolation are cheapest to fix before contracts compile against them.
 
 - Serves: `runtime-platform` -- [Runtime platform](../design/spec.md#runtime-platform)
 - Agent status: CLEAR
-- Requires: `database-integration-harness`
 - Dependencies: The accepted task records of the group and the [implementation
   audit](../guide/planning-workflow.md#implementation-audits) checks. Docker Engine with Compose v2.
 - User-visible outcome: Later groups build on a verified database service and test harness. The
@@ -73,10 +49,10 @@ isolation are cheapest to fix before contracts compile against them.
 - Scope boundary: Focus: image pins by tag and digest and the path to a new PostgreSQL or PostGIS
   major; role and default privileges for schemas that later groups add; healthcheck and restart
   behavior; volume ownership and `DATA_DIR` handling; secrets kept out of Compose files and logs;
-  test database isolation, parallel runs, and cleanup; CI parity with local runs; the loopback-only
-  database port and outbound traffic from the database container, which
-  [record 0007](records/0007-adhoc-database-loopback-port.md) could not measure. Fixes only; new
-  behavior becomes plan tasks.
+  test database isolation, parallel runs, and cleanup; the split between the GitHub unit gate and
+  the local-only tests; the loopback-only database port and outbound traffic from the database
+  container, which [record 0007](records/0007-adhoc-database-loopback-port.md) could not measure.
+  Fixes only; new behavior becomes plan tasks.
 - Data and artifact paths: `deploy/`, `tests/integration/`, `tests/conftest.py`,
   `.github/workflows/ci.yml`, `Makefile`, `docs/impl/plan.md`, and the task record.
 - Execution path: Rerun the group's acceptance commands, then work through the audit checks. Start
@@ -193,8 +169,10 @@ Generated DDL and models must come only from contracts, deterministically.
 
 - Serves: `data-contracts` -- [Data contracts](../design/spec.md#data-contracts)
 - Agent status: CLEAR
-- Requires: `contract-toolchain-pin`, `database-integration-harness`
-- Dependencies: The pinned Data Contract CLI export coverage for PostgreSQL.
+- Requires: `contract-toolchain-pin`
+- Dependencies: The pinned Data Contract CLI export coverage for PostgreSQL. Generated DDL
+  applies to scratch schemas of the
+  [integration test harness](current/runtime-platform.md#integration-tests).
 - User-visible outcome: `kn contract compile` writes DDL, Pydantic models, JSON Schema, dbt source
   definitions, and contract docs into `generated/`, and `--check` fails on drift.
 - Scope boundary: Reference checks, canonical serialization, the contract digest, and templates
@@ -1054,13 +1032,13 @@ Schema changes during development must cost a rebuild, never a re-fetch or a los
 - Dependencies: none.
 - User-visible outcome: `kn db rebuild` replays the raw ledger, curated files, and decision logs
   through current code, and reports orphaned decisions.
-- Scope boundary: Replay ordering, the replay of every source suite in CI, and canonical row-hash
-  comparison. No network access during rebuild.
+- Scope boundary: Replay ordering, the replay of every source suite in `make ci-local`, and
+  canonical row-hash comparison. No network access during rebuild.
 - Data and artifact paths: `src/kn/db/`, `src/kn/engine/replay.py`, `tests/integration/`.
 - Execution path: Rebuild the fixture archive twice and compare row hashes of all canonical tables.
 - Acceptance gates: Two rebuilds are identical. A network call during rebuild fails the test.
   A tombstoned input stays suppressed after reindex and replay. Decisions re-attach or are reported.
-  CI runs the rebuild on every change.
+  `make ci-local` runs the rebuild on every change, and `make ci` stays green without a database.
 - Documentation target: `current/ingestion-engine.md` listed in the
   [areas index](current.md#areas).
 

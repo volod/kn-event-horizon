@@ -23,6 +23,7 @@ dependencies = []
 dev = [
   "complexipy==6.0.0",
   "mypy>=1.15,<2",
+  "psycopg[binary]>=3.3,<4",
   "pymarkdownlnt>=0.9.32,<1",
   "pytest>=8,<10",
   "pytest-cov>=6,<8",
@@ -67,7 +68,7 @@ show_error_codes = true
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]
-addopts = "-q"
+addopts = "-q -rfEs --strict-markers"
 
 [tool.coverage.run]
 branch = true

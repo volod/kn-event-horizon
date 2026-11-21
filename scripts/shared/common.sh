@@ -172,6 +172,16 @@ kn_db_verify() {
   kn_db_psql <"$KN_DB_VERIFY_SQL"
 }
 
+# Export the integration test connection (tests/integration/harness.py): the loopback port as a
+# URI without a password, and the password file that holds it.
+kn_db_test_env() {
+  local port
+  port="$(kn_db_host_port)" || return 1
+  KN_TEST_DATABASE_URL="postgresql://$KN_DB_SUPERUSER@$KN_DB_HOST_ADDRESS:$port/$KN_DB_NAME"
+  KN_TEST_DATABASE_PASSWORD_FILE="$(kn_db_password_file)"
+  export KN_TEST_DATABASE_URL KN_TEST_DATABASE_PASSWORD_FILE
+}
+
 # Delete the database volume and start from empty. The password file is kept.
 kn_db_reset() {
   local volume

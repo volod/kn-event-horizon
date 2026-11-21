@@ -7,6 +7,15 @@ PYTHON_VERSION ?= 3.12
 DATA_DIR ?= .data
 DATA_ROOT := $(if $(filter /%,$(DATA_DIR)),$(DATA_DIR),$(PROJECT_ROOT)/$(DATA_DIR))
 PYTEST_CACHE := -o cache_dir=$(DATA_ROOT)/cache/pytest
+# GitHub Actions runs only the lightweight unit tests. Tests that need a service endpoint
+# (integration) or large memory or a long run time (heavy) run only locally. tests/conftest.py
+# defines the same expressions, and tests/deploy/test_ci_workflow.py checks that they agree.
+UNIT_TESTS := not integration and not heavy
+LOCAL_TESTS := integration or heavy
+# pytest with the integration database of make db-up configured.
+LOCAL_PYTEST = test -x "$(PY)" || { echo "ERROR: run 'make bootstrap' first"; exit 1; }; \
+	source "$(PROJECT_ROOT)/scripts/shared/common.sh"; kn_load_env; kn_db_test_env || exit 1; \
+	"$(PY)" -m pytest $(PYTEST_CACHE)
 
 export RUFF_CACHE_DIR := $(DATA_ROOT)/cache/ruff
 export MYPY_CACHE_DIR := $(DATA_ROOT)/cache/mypy
@@ -14,6 +23,7 @@ export MYPY_CACHE_DIR := $(DATA_ROOT)/cache/mypy
 .DEFAULT_GOAL := help
 
 .PHONY: help bootstrap venv lock run doctor format format-check lint typecheck test coverage \
+	test-integration ci-local \
 	complexity-gate shell-lint-gate lint-md lint-doc-links lint-spec-plan plan-status \
 	ci-checks ci ci-github build quality code-quality quality-report \
 	db-up db-down db-reset db-verify
@@ -56,11 +66,14 @@ lint: ## Run Ruff lint checks
 typecheck: ## Run mypy over production code
 	@"$(VENV)/bin/mypy" --python-version "$(PYTHON_VERSION)"
 
-test: ## Run deterministic unit tests
-	@"$(PY)" -m pytest $(PYTEST_CACHE)
+test: ## Run the lightweight unit tests, the set that GitHub Actions runs
+	@"$(PY)" -m pytest $(PYTEST_CACHE) -m "$(UNIT_TESTS)"
 
-coverage: ## Run tests and enforce the coverage floor
-	@"$(PY)" -m pytest $(PYTEST_CACHE) --cov=kn --cov-report=term-missing
+coverage: ## Run the lightweight unit tests and enforce the coverage floor
+	@"$(PY)" -m pytest $(PYTEST_CACHE) -m "$(UNIT_TESTS)" --cov=kn --cov-report=term-missing
+
+test-integration: ## Run the database integration tests locally against make db-up
+	@$(LOCAL_PYTEST) -m integration
 
 complexity-gate: ## Fail on Radon D-or-worse or cognitive complexity above 15
 	@output="$$($(VENV)/bin/radon cc src tests -s -n D)"; \
@@ -92,9 +105,12 @@ plan-status: ## Count tasks by lane/status and show declared priority
 
 ci-checks: format-check lint typecheck complexity-gate shell-lint-gate lint-doc-links lint-spec-plan
 
-ci: ci-checks test ## Run the required local and GitHub CI gate
+ci: ci-checks test ## Run the required gate: checks and lightweight unit tests
 
-ci-github: ci ## Explicit GitHub Actions entrypoint
+ci-github: ci ## GitHub Actions entrypoint, the same gate as make ci
+
+ci-local: ci ## Run make ci, then every local-only test: database and heavy (make db-up first)
+	@$(LOCAL_PYTEST) -m "$(LOCAL_TESTS)"
 
 build: ## Build source and wheel distributions
 	@source "$(PROJECT_ROOT)/scripts/shared/common.sh"; kn_load_env; uv build
