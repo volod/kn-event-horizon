@@ -5,12 +5,17 @@
 KN Event Horizon is a domain knowledge aggregator for industrial and technology awareness. It
 collects evidence from public or legitimately licensed sources and normalizes it into domain
 knowledge models governed by an explicit ontology and taxonomy. It preserves the provenance and
-history of every claim. Results are available through SQL, bilingual English/Ukrainian dashboards
-and time-enabled maps, and read-only Obsidian vault exports. The design favors small-team
-maintenance, agent-assisted development, and reproducibility.
+history of every claim. Every real-world object has one durable KN identity. Data about that
+object from different sources is matched to it with explained, scored evidence, and its full
+lifecycle and partial updates are tracked. Results are available through SQL, bilingual
+English/Ukrainian dashboards and time-enabled maps, and read-only Obsidian vault exports.
+Knowledge is exchanged with [InvenTree](https://inventree.org/) inventory instances through a
+versioned interchange contract that tolerates InvenTree version changes. The first counterpart is
+the owner's `vl-itree` instance. The design favors small-team maintenance, agent-assisted
+development, and reproducibility.
 
-It is not a general-purpose data lake, an autonomous agent framework, a media archive, or a
-real-time tracking or operations system.
+It is not a general-purpose data lake, an autonomous agent framework, a media archive, a
+real-time tracking or operations system, or an inventory, purchasing, or ERP system.
 
 | Domain ID | Scope | Order |
 | --- | --- | --- |
@@ -53,12 +58,22 @@ Product principles:
 - **Fetch once, transform many.** Source bytes are archived once. Every later transformation reads
   the archive.
 - **Unknown is not zero.** A missing value carries a reason, and no default fills it.
+- **Identity first.** Each object gets one KN ID that is minted once, never reused, and kept
+  through rebuilds. Matching source data to an object is a recorded, scored, reviewable decision.
+  It is never a side effect of loading. See [Object identity](#object-identity).
+- **Partial is not absent.** Sources declare nothing about completeness. A field a record does not
+  mention is "not stated", and absence never clears or deletes anything. KN decides how each
+  incoming value updates an object through declared [update policies](#update-policy).
 - **Disabled by default.** A source collects nothing until its terms, limits, and permission are
   documented and a maintainer approves it.
 - **Bilingual by design.** Every operator and user workflow works in `en` and `uk`, and facts are
   never duplicated per locale.
-- **Simple until release.** Development uses rebuild-from-archive instead of versioned schemas and
-  compatibility code. See [Development and release phases](#development-and-release-phases).
+- **Versioned at the boundary.** The interchange contract and every adapter for an external system
+  are versioned and compatibility-tested from their first task. KN does not control the external
+  versions. See [Data interchange](#data-interchange).
+- **Simple until release inside the boundary.** KN's own storage schemas use rebuild-from-archive
+  instead of versioned schemas and compatibility code during development. See
+  [Development and release phases](#development-and-release-phases).
 
 ## Scope
 
@@ -72,8 +87,10 @@ The repository foundation includes:
 - a living capability registry and forward-plan/current-state lifecycle.
 
 The product adds, in implementation order: a runtime platform, localization, data contracts, an
-ontology and taxonomy model, a raw archive, an evidence model, source management, an ingestion
-engine, and Obsidian export (the core engine). After the core come space ELT, orchestration, and
+ontology and taxonomy model, object identity, a raw archive, an evidence model, a part and supply
+model, source management, an ingestion engine, data interchange, InvenTree exchange, and Obsidian
+export (the core engine). Identity, partial-update tracking, interchange, and compatibility are
+initial requirements, not later refinements. After the core come space ELT, orchestration, and
 space dashboards; then GDELT and microelectronics ELT and dashboards; then operations hardening and
 release readiness. Optional local AI extraction comes last.
 
@@ -82,6 +99,9 @@ or full GDELT replication. No satellite tasking or operations control. No public
 frontend; a minimal bilingual page is justified only where Superset, Kestra, and the CLI cannot meet
 an acceptance test. No runtime dependency on a coding agent. No claims of comprehensive coverage or
 ownership. No private customer data, private end-user terminal locations, or tracking of people.
+No stock control, purchasing, sales, or build management inside KN. No real-time bidirectional
+synchronization, and no deletion in a counterpart system. No personal contact data (people's
+names, emails, phone numbers) is exchanged.
 
 Target host: one Linux server with at least 32 GB RAM, 4 TB disk, and an NVIDIA GPU with 16 GB
 VRAM used only by optional AI extraction. It runs Docker Engine with Compose v2. CPU is unspecified;
@@ -90,22 +110,25 @@ plan for 8-16 logical cores and confirm by measurement.
 ## Architecture
 
 ```text
- Git (reviewed)                                        $DATA_DIR (durable runtime inputs)
- contracts, seeds, crawler configs, curation files     raw WARC archive, ledger, decision logs
-        |                                                     ^             |
-        v                                                     | fetch       | replay
- kn compiler --> generated DDL and models               approved sources    |
-        |                                                                   v
-        +--------------> PostgreSQL + PostGIS, database `kn` <---- kn engine: parse, map,
-                         schemas: system, semantic, evidence,      validate, resolve, load
-                         <domain>, analytics                        (CLI; Kestra when scheduled)
-                                  |
-                  +---------------+----------------+
-                  v                                v
-           dbt Core marts                   Obsidian export (ZIP)
-                  |
-                  v
-           Superset: en/uk dashboards, maps, read-only SQL Lab
+ Git (reviewed)                                   $DATA_DIR (durable runtime inputs)
+ contracts, interchange contract versions,        raw WARC archive, ledger, decision logs,
+ seeds, match profiles, crawler configs,          identity event log, exchange ledger
+ adapter profiles, external schema snapshots          ^             |
+        |                                             | fetch       | replay
+        v                                     approved sources,     |
+ kn compiler --> generated DDL and models     InvenTree instances   |
+        |                                                           v
+        +-----------> PostgreSQL + PostGIS, database `kn` <--- kn engine: parse, map, change set,
+                      schemas: system, semantic, identity,     validate, resolve identity, load
+                      evidence, supply, interchange,           (CLI; Kestra when scheduled)
+                      <domain>, analytics
+                               |
+          +--------------------+----------------------+-------------------------+
+          v                    v                      v                         v
+   dbt Core marts      Obsidian export (ZIP)   interchange packages    InvenTree adapter: probe,
+          |                                    (versioned contract)    schema diff, profile,
+          v                                                            plan, apply, read back
+   Superset: en/uk dashboards, maps, read-only SQL Lab                 (vl-itree and others)
 ```
 
 | Component | Choice | Boundary |
@@ -115,6 +138,9 @@ plan for 8-16 logical cores and confirm by measurement.
 | Storage | PostgreSQL with PostGIS, newest major that has an official PostGIS image at pin time; one database `kn` with one schema per domain | ACID, constraints, geometry, time series; no cross-database transactions needed |
 | Raw archive | WARC 1.1 (ISO 28500:2017) via `warcio`; Parquet fetch ledger | Original bytes plus origin URI and fetch time; the only fetch output |
 | Engine | Python 3.12+, HTTPX, Pydantic, psycopg 3 | Deterministic extract, parse, map, load |
+| Identity | KN identity registry and append-only identity event log; declared match profiles with Fellegi-Sunter style weights | Deterministic resolution and scoring; no machine-learned matcher without a calibration gate |
+| Interchange | KN interchange contract (ODCS, semantic versions from `0.1.0`), JSON Lines packages, schema-diff classifier | Versioned external boundary; never a second internal storage schema |
+| InvenTree adapter | Versioned adapter profiles over the InvenTree REST API, selected by the probed API version; the `inventree` Python client is not required | Reads through the engine; writes only by approved, dry-run plans |
 | Orchestration | Kestra OSS standalone, Process task runner, own `kestra` metadata database | Schedules, retries, concurrency; introduced with scheduled ingestion |
 | Analytics | dbt Core with dbt-postgres in an isolated, pinned tool environment | Reviewed marts, tests, freshness |
 | BI | Apache Superset OSS with `en` and `uk` enabled; own `superset` metadata database | Read-only `analytics` access, dashboards, maps, SQL Lab |
@@ -137,9 +163,16 @@ The loader records the archive record IDs and commits the claims and cursor toge
 crash between these steps, recovery reads the finalized batch and retries the load. An incomplete
 archive file cannot advance the cursor. Curation enters at the evidence mapping step with a
 reviewed locator. A review decision enters after identity resolution and cites its claim keys.
+Identity events (mint, link, merge, split, retire) are appended to the identity log before the SQL
+transaction that applies them commits. Replay applies the log before it replays raw records, so
+every record resolves to the KN ID it received the first time. An outbound exchange writes its plan
+to the exchange ledger before the first counterpart call, and its receipt after read-back. A
+crash between the call and the receipt is recovered by reading the counterpart state, never by
+blind resending.
 
 At publication, each mart row or exported fact must have supporting evidence permitted for that
-audience and use. Recompute the selection using eligible evidence. A restricted source cannot
+audience and use. This covers interchange packages and values written to a counterpart such as
+InvenTree. Recompute the selection using eligible evidence. A restricted source cannot
 supply the winning value through an unrestricted citation. Rebuild and restore apply the current
 rights decisions and tombstones before opening reader access.
 
@@ -148,14 +181,24 @@ rights decisions and tombstones before opening reader access.
 | Space | Service offering in a market for a stated period and customer segment | Two offers use the same constellation. Count the constellation once and retain both offers. |
 | GDELT | Document revision for provenance, story cluster for independent-story counts | Two outlets syndicate one story. Preserve both document locators and count one cluster. |
 | Microelectronics | Measurement of a device configuration under a specified condition set | Two measurements share a part number and differ in power boundary. Keep both and rank only within compatible conditions. |
+| Supply (shared) | Orderable manufacturer part, and a supplier offer of it for a stated date and quantity | Two distributors sell one MPN, in tape-and-reel and cut-tape packaging. Keep one manufacturer part, two orderable variants, and two offers. Count the part once. |
+| Interchange | Bound object pair (KN ID and counterpart object) and its field-level sync state | Two InvenTree parts are bound to two KN objects, and the objects are later merged. Report one redirect and one duplicate-binding conflict. Write nothing to either part until the owner resolves it. |
 
 ### Repository layout
 
 ```text
-src/kn/                          core package: cli, compiler, archive, engine, semantic, export, i18n
+src/kn/                          core package: cli, compiler, archive, engine, semantic, identity,
+                                 supply, interchange, export, i18n
+src/kn/interchange/inventree/    InvenTree probe, schema capture, adapter, plan and apply
 src/kn/domains/<domain>/         reviewed domain parsers and mapping helpers
-contracts/core/                  core ODCS contracts: system, semantic, evidence, export
+contracts/core/                  core ODCS contracts: system, semantic, identity, evidence, supply,
+                                 interchange ledger, export
+contracts/core/identity/match-profiles/   reviewed match profiles per entity class
+contracts/interchange/<version>/ versioned KN interchange contract and its upgrade steps
 contracts/supplemental/          approved supplemental SQL with its approval note
+interchange/inventree/schemas/<api-version>/   normalized InvenTree schema snapshots and digests
+interchange/inventree/profiles/  adapter profiles, one per supported API version range
+interchange/inventree/instances/ instance profiles (non-secret), such as vl-itree.yaml
 domains/<domain>/contracts/      domain ODCS contracts
 domains/<domain>/seeds/          reviewed seed data; seeds/proposals/ holds the converted workbooks
 domains/<domain>/sources/        crawler configurations, one YAML file per source
@@ -175,6 +218,10 @@ Runtime data, relative to `$DATA_DIR`:
 raw/<domain>/<source-id>/<run-id>/   WARC files of one source run, never rewritten
 raw/ledger/                          Parquet fetch ledger, rebuildable from WARC files
 decisions/<domain>/                  append-only review decision logs (JSON Lines)
+identity/                            append-only identity event log (JSON Lines), never rewritten
+exchange/<counterpart>/              append-only exchange ledger: bindings, plans, receipts
+exchange/<counterpart>/<run-id>/     dry-run plans, change reports, and loss reports of one run
+interchange/<run-id>/                interchange packages (ZIP) and manifests
 runs/<run-id>/                       run manifests and redacted quarantine samples
 exports/<profile>/<run-id>/          Obsidian vault ZIP and manifest
 ```
@@ -194,17 +241,29 @@ The project has two phases. The switch between them is the
   generated DDL, loads the reviewed seeds, and replays the raw archive, curation files, and
   decision logs through current code. Rebuild never fetches, and it does not touch the Kestra or
   Superset metadata databases.
-- The raw archive, Git-managed seeds and curation files, and decision logs are the durable inputs.
-  The database is a reproducible projection of them.
+- The raw archive, Git-managed seeds and curation files, decision logs, the identity event log, and
+  the exchange ledger are the durable inputs. The database is a reproducible projection of them.
 - Review decisions re-attach after rebuild by deterministic claim keys. A decision that no longer
   matches is reported as orphaned and is never silently dropped.
+- KN IDs survive every rebuild because they come from the identity event log, not from load order.
+  Rebuild does not merge, split, or retire objects on its own. When current code would group
+  records differently from the log, the difference is reported as identity drift and becomes a
+  review candidate. A mint during rebuild is logged and reported.
+- **Boundary exception.** The development-phase rule covers KN's own storage schemas only. The
+  [interchange contract](#data-interchange) has semantic versions from `0.1.0`. Its changes are
+  classified by a contract diff, and each breaking change ships an upgrade step from the previous
+  version. External adapter profiles, such as the [InvenTree profiles](#inventree-exchange), each
+  declare the counterpart API versions they support. This code is required because counterpart
+  systems change versions on their own schedule. It does not version internal tables.
 - The ontology, taxonomy, and source-catalogue "data migrations" are the idempotent seed loads
   that every rebuild runs, using deterministic identifiers.
 - Rebuild is refused in an environment marked as released.
 
 **Release phase** (after release approval):
 
-- Contracts get semantic versions starting at `1.0.0`, and datasets record their versions.
+- Contracts get semantic versions starting at `1.0.0`, and datasets record their versions. The
+  interchange contract is frozen at `1.0.0`, and later breaking changes need a new major version
+  with an upgrade step and a deprecation window.
 - Schema changes go through reviewed, versioned migrations generated from the contract diff. The
   migration tool is selected by [release readiness](#release-readiness); Atlas Community Edition
   is the leading candidate. Destructive changes and incompatible releases are refused by default.
@@ -218,10 +277,11 @@ The project has two phases. The switch between them is the
 These rules bind every capability and every domain.
 
 1. **Entity types stay distinct.** Organization, program, mission, product model, physical asset,
-   constellation, service, contract, filing, and document are different classes. Identifiers are
-   qualified strings (namespace plus native ID). Resolution uses an exact authoritative key first,
-   then a source-qualified native ID, then an alias candidate. Ambiguous matches go to review.
-   Nothing merges by name alone. Split and merge history is kept.
+   constellation, service, contract, filing, document, manufacturer part, orderable variant, and
+   supplier offer are different classes. Identifiers are qualified strings (namespace plus native
+   ID). Resolution uses an exact authoritative key first, then an existing source-qualified link,
+   then a scored match over the class's declared identity attributes, then an alias candidate.
+   Ambiguous matches go to review. Nothing merges by name alone. Split and merge history is kept.
 2. **Relations stay distinct.** Legal ownership, operation, service provision and access,
    registration, launch event versus vehicle versus provider, program membership, partnership
    (MoU or LoI) versus contract or award, and filing versus licence versus deployment are separate
@@ -231,7 +291,8 @@ These rules bind every capability and every domain.
    conversion rule, and the event, published, observed, valid-from, valid-to, and recorded times.
    It also records the parser code digest, the contract digest, the assertion type (declared,
    observed, derived, or reported), the extraction confidence, and the verification state
-   (unreviewed, corroborated, verified, disputed, or rejected).
+   (unreviewed, corroborated, verified, disputed, or rejected, as the
+   [update policy](#update-policy) defines them).
 4. **Origin on all data.** Source-derived rows carry their origin URI and fetch time, directly or
    through a non-null evidence reference. Seed rows carry their file path, SHA-256, sheet, and row.
    Curated observations carry the cited URI, capture time, and curator. Derived and aggregated rows
@@ -239,9 +300,9 @@ These rules bind every capability and every domain.
    are stored after credential redaction.
 5. **Unknown is not zero.** Each value field holds either a value or a missing reason. No zero
    defaults, no clamping, no truncation. Lack of evidence is not absence of a capability.
-6. **Conflicts are reviewed.** Contradictory claims are kept. Canonical selection uses
-   field-specific policies (source authority, evidence type, conditions, date, verification), not
-   the latest or most repeated value. High-impact facts (ownership, contracts, availability,
+6. **Conflicts are reviewed.** Contradictory claims are kept. Canonical selection uses the
+   field's [update policy](#update-policy) (source rank, evidence class, data time, conditions),
+   not the latest or most repeated value. High-impact facts (ownership, contracts, availability,
    product performance) require primary evidence or human review.
 7. **Time semantics are explicit.** Times are UTC `timestamptz` with precision markers, and
    validity intervals are half-open. Effective time is never manufactured from publication time.
@@ -253,6 +314,19 @@ These rules bind every capability and every domain.
    proposals are test fixtures, never facts.
 10. **One fact, many labels.** Locale changes labels only. Canonical codes, identifiers, MPNs, and
     source text are preserved as published.
+11. **Identity is durable and explained.** A KN ID is minted once, never reused, and never derived
+    from a label. Every link from source data to an object records its method, features, score,
+    probability, match-profile digest, and decision. Merged and retired IDs stay resolvable through
+    redirects.
+12. **Partial is not absent.** Sources do not declare whether a delivery is complete. A field a
+    record does not mention is not stated, and a record that stops appearing only stops being
+    confirmed. The field's update policy decides whether an incoming value fills a gap, replaces
+    the current value, or stays evidence only. Arrival order never decides. Absence never deletes
+    an object.
+13. **Exchange preserves meaning.** Data sent to or received from another system keeps its KN ID,
+    provenance reference, and rights. A value the counterpart cannot represent appears in a loss
+    report and is never approximated silently. Imported counterpart data is evidence like any other
+    source and never overwrites canonical facts directly.
 
 ## Source safety and data rights
 
@@ -273,6 +347,16 @@ These rules bind every capability and every domain.
   query parameters are redacted from origin URIs.
 - **Reviewed code only.** Agent-generated adapters reach production only after review and merge.
   The runtime never executes generated or downloaded code.
+- **Counterpart instances.** An InvenTree instance is the owner's private operational data. Its
+  rights default to `owner_private`, so nothing read from it reaches dashboards, Obsidian vaults,
+  or interchange packages unless the owner opts in. Reading uses a model allowlist. Users,
+  contacts, addresses beyond country, orders, builds, and personal notes are never fetched.
+- **Outbound writes.** KN writes only to an instance whose profile has an owner approval reference
+  for writing. It uses a dedicated counterpart user with the least role permissions the export
+  profile needs, and a token from the environment. Every write follows an approved dry-run plan.
+  KN never deletes counterpart objects and never overwrites a counterpart edit to a field it owns
+  without a review decision. It honors counterpart throttling and stays within a request budget.
+  Vendor data whose licence forbids redistribution or caching never leaves KN.
 - **Runtime isolation.** No host Docker socket and no root services where avoidable. Each schema has
   separate database roles: owner, loader, and reader. Loaders cannot run DDL. UI authorization
   (proxy authentication and Superset roles) and database least privilege are both required. CLI
@@ -349,11 +433,14 @@ Each capability below states its behavior, boundary, evaluation, and valid negat
 ### Runtime platform
 
 A Compose stack pinned by image tag and digest. The first service is PostgreSQL with PostGIS,
-running database `kn` with schemas `system`, `semantic`, `evidence`, one schema per domain, and
-`analytics`. Later services are added by their capabilities: Kestra (orchestration), Superset and
-Redis if its profile requires it (space dashboards), the reverse proxy (operations hardening), and
-the optional inference server (AI extraction). Volumes live under `DATA_DIR`, services have
-healthchecks, networks are internal, and no database port is published. Secrets come from a local
+running database `kn` with schemas `system`, `semantic`, `identity`, `evidence`, `supply`,
+`interchange`, one schema per domain, and `analytics`. Later services are added by their
+capabilities: Kestra (orchestration), Superset and Redis if its profile requires it (space
+dashboards), the reverse proxy (operations hardening), the optional inference server (AI
+extraction), and a test-only `inventree` profile with pinned InvenTree releases and their own
+databases (InvenTree exchange). The test profile never connects to an owner instance. Volumes
+live under `DATA_DIR`, services have healthchecks, networks are internal, and no database port is
+published. Secrets come from a local
 `.env` or secret files that are never committed. Role bootstrap creates owner, loader, and reader
 roles per schema. A version manifest records every pinned image, schema, and tool. Integration
 tests run against the Compose database locally and against a PostGIS service container in CI.
@@ -415,7 +502,9 @@ KN extension JSON Schemas. No top-level keys are added to ODCS. The extension fa
 | Extension | Required behavior |
 | --- | --- |
 | `kn.entityClass`, `kn.relation` | Resolve against the ontology; compile references and endpoint validation |
-| `kn.fieldId`, `kn.identity` | Stable logical field identity, external key definition, identity strategy |
+| `kn.fieldId`, `kn.identity` | Stable logical field identity; external key definition; identity strategy; source record key and version field; the class's identity attributes with their normalizer, comparator, and authority level; the match profile reference |
+| `kn.updatePolicy` | Field update mode, priority criteria order, minimum source rank and evidence class, time basis, value tolerance, freshness threshold, and empty-value handling |
+| `kn.interchange` | Interchange exposure, field compatibility class (`stable`, `experimental`, `deprecated`), aliases of renamed fields, and counterpart mapping references |
 | `kn.units`, `kn.comparisonProfile` | Original and normalized unit, quantity type, conversion rule, comparison gate |
 | `kn.temporalProfile` | Event, published, observed, valid, and recorded times; as-of behavior; null semantics |
 | `kn.spatialProfile` | Geometry type, SRID 4326, precision and coverage semantics, validity |
@@ -433,6 +522,11 @@ JSON Schema for load validation, dbt source definitions, and contract documentat
 PostGIS geometry, check constraints, comments, and indexes. Supplemental SQL (extensions, roles,
 grants, functions) lives in `contracts/supplemental/` and needs an approval note. No handwritten DDL
 may redefine a contract, and nothing alters schemas at runtime.
+
+The KN interchange contract in `contracts/interchange/<version>/` is also ODCS. It compiles to
+JSON Schema for packages and adapters, and to no DDL. Each interchange field references a storage
+field ID. A storage field can change through rebuild without changing the interchange contract,
+as long as its mapping is kept.
 
 Boundary: not a general schema registry; no schema editing through a UI or a crawler. Data Contract
 CLI is a pinned build-time tool, not a runtime dependency.
@@ -514,6 +608,132 @@ Evaluation:
 Negative result: unmappable rows stay `needs_mapping`. A scheme whose official source cannot be
 verified stays `unverified` and is labeled so in every interface.
 
+### Object identity
+
+Object identity is the core data model, and every other capability builds on it. Every real-world
+object has one KN ID. Data about that object from any source, curated file, or counterpart system
+is matched to that ID through recorded, scored decisions. The object's identity lifecycle and
+every partial update of its data are tracked from the first load.
+
+The `identity` schema holds:
+
+- **object**: KN ID (a UUIDv7 minted on first sight, displayed as `kn:<uuid>`), entity class,
+  identity lifecycle state, mint event, and current redirect;
+- **identifier**: namespace and native ID, issuing authority, authority level, validity interval,
+  and evidence. The authority levels are `authoritative`, `source_qualified`, and `weak`.
+  Examples: an LEI, a NORAD ID, or a legal manufacturer plus exact MPN (authoritative);
+  `inventree:vl-itree:part:42` or a distributor product ID (source-qualified); a SKU without its
+  supplier, or a name (weak);
+- **identity attribute**: the original value, normalized value, and evidence of each attribute
+  that the class's match profile declares. For a manufacturer part these are the resolved legal
+  manufacturer, the exact and normalized MPN, the package code, the packaging suffix, and the GTIN.
+  For an organization they are the LEI, tax ID, registrable web domain, normalized legal name, and
+  country;
+- **source record**: a source-qualified record key, its versions with content and per-field
+  hashes, its `last_seen` time, and its link to an object;
+- **link**: the method (`authoritative_key`, `existing_link`, `scored_match`, `review_decision`,
+  or `minted`), score, probability, match-profile digest, and decision reference;
+- **match record**: the candidate set, the feature values, each comparator outcome and weight, the
+  total score and probability, and the decision;
+- **lifecycle event**: `minted`, `linked`, `unlinked`, `merged`, `split`, `reclassified`,
+  `retired`, or `restored`, with its actor (engine or reviewer), reason, evidence, and time.
+
+The identity event log in `$DATA_DIR/identity/` is append-only and is a durable input. The tables
+are its projection. Rebuild applies the log before it replays raw records.
+
+**Lifecycle.** Identity lifecycle is about the record of an object, and it is separate from the
+object's real-world lifecycle. Announced, active, NRND, end-of-life, launched, and decommissioned
+are claims with evidence, not identity states. The identity states are:
+
+| State | Entered by | Rules |
+| --- | --- | --- |
+| `active` | `minted`, `restored` | Accepts links, claims, and bindings |
+| `merged` | `merged` into an active object of the same class | Terminal; redirects to the survivor; its links and claims move with lineage |
+| `split` | `split` into two or more active objects of the same class | Terminal; each link and claim moves to exactly one successor; a lookup by the old ID returns the successors for review |
+| `retired` | `retired` (created in error, or the source asserts non-existence) | Still resolvable; no new links without `restored` |
+
+A class change never mutates an object. A `reclassified` event retires the object and mints a
+successor of the new class, linked by lineage. Merges, splits, and restorations are review
+decisions, except a merge forced by two objects sharing one authoritative identifier. Redirect
+chains resolve in one step. KN IDs are never reused or derived from labels.
+
+**Matching.** Each entity class has a reviewed match profile in
+`contracts/core/identity/match-profiles/`. A profile declares blocking keys and identity
+attributes. Each attribute has a normalizer and a comparator (exact, normalized exact, graded
+string similarity, numeric tolerance, date window, or set overlap). Each comparator's agreement
+levels carry m and u probabilities in the Fellegi-Sunter sense. The profile also declares a prior,
+a review threshold, a link threshold, and the attributes that discriminate. Resolution runs in
+order:
+
+1. An exact authoritative identifier links.
+2. A record already linked through its source-qualified key keeps that link.
+3. A scored match computes the summed log-likelihood weight and the posterior probability for
+   each blocked candidate. It auto-links only when all of these hold: the probability reaches the
+   link threshold, a discriminating attribute agrees, one candidate leads all others by the
+   declared margin, and the profile is `calibrated`. A probability between the thresholds, or two
+   close candidates, opens a review item. A lower probability mints a new object.
+4. Alias candidates without a discriminating attribute never link automatically.
+
+Profile validation rejects a profile whose link threshold can be reached by name or description
+similarity alone. Until a class's profile passes calibration, every scored match goes to review.
+Calibration uses held-out ground truth: pairs proven by authoritative identifiers, with those
+identifiers masked during evaluation, plus reviewer decisions. It reports precision and recall at
+both thresholds and the calibration error per probability band. A profile becomes `calibrated`
+when precision at the link threshold is at least 0.99 on at least 200 held-out positive pairs. The
+owner may change this gate in this section.
+
+**Partial-update tracking.** Sources declare nothing about how complete a delivery is, so KN never
+infers clearing or deletion from absence. The crawler configuration mapping names each source's
+record key and, when the source supplies one, its version or `updated` field. Versions of one
+record are ordered by that field, or by fetch time otherwise. For each mapped record the engine
+compares every field with the record's previous version:
+
+| Change | Effect on claims |
+| --- | --- |
+| `added`, `changed` | New claim superseding this record's previous claim for the field |
+| `unchanged` | Confirmation of the existing claim with the new observed time; no new claim |
+| `emptied` | New claim with missing reason `source_empty`; it changes the object only as its update policy allows |
+| `not_stated` | No effect |
+
+Each record has a `last_seen` time. A record that stops appearing keeps its claims. Those claims
+stop being confirmed and age against each field's freshness threshold, and the object is never
+deleted. An older version that arrives after a newer one is stored as history and does not become
+current. A fragment that carries only a weak key, such as a price break with a SKU, resolves
+through its record's existing link or its parent record. Weak keys alone never drive scored
+matching. Each change set records its record version, fetch ID, archive record ID, and code
+digest. The change set decides which claims exist. The [update policy](#update-policy) decides the
+object's current value for each field.
+
+**Lineage.** `kn lineage <kn-id|qualified-identifier> [--field <field-id>]` returns the identity
+history, the identifiers, every link with its match record, the record versions and change sets,
+the claims, the selected canonical fact, and any outbound exchange receipts. It is the identity
+half of "Why this fact?". `kn identity show|resolve|history|merge|split|retire|restore` works in
+both locales. A command that changes state writes a review decision and the identity event that
+cites it.
+
+Boundary: no merges across entity classes and no matching of people. No golden record overwrites
+canonical facts, which still come from [fact selection](#evidence-model). No learned matcher
+without the calibration gate.
+
+Evaluation:
+
+- Two rebuilds, and a rebuild after dropping the database, produce identical KN IDs, links,
+  lifecycle states, and redirects.
+- Fixtures cover one MPN from two manufacturers (two objects), packaging variants (distinct
+  orderables), a renamed organization with a stable LEI (one object), name-only similarity
+  (never auto-links), and permuted input order (same decisions).
+- A merge and then a split restores links deterministically with history. A cross-class merge is
+  refused. A redirect chain resolves in one step.
+- Partial-update fixtures cover a price-only record, an emptied field, a field a record omits, a
+  record that stops appearing, an identical re-delivery, and an out-of-order version.
+- A match record reproduces its score and probability from its stored features and profile.
+- Each calibrated class has a report with precision and recall at both thresholds.
+
+Negative result: a class whose profile cannot reach the precision gate stays review-only for
+scored matches, and exact authoritative keys still link. A source with no stable record key
+cannot be change-tracked. Each of its records is new evidence, and identity resolution alone links
+it.
+
 ### Raw archive
 
 Payloads approved for retention are written once as WARC 1.1 (ISO 28500:2017), gzip per record,
@@ -555,13 +775,13 @@ the same ledger fields, and the reason is recorded.
 
 ### Evidence model
 
-Core and domain contracts define:
+Core and domain contracts define the datasets below. Objects, identifiers, identity attributes, and
+links come from the [identity registry](#object-identity), and every claim refers to a KN ID.
 
-- entity (UUID, class, canonical label, lifecycle);
-- external ID (namespace plus native ID, unique within its domain);
-- alias (language and normalized key; not unique);
+- alias (language and normalized key; not unique), as a weak identifier of an object;
 - claim: immutable, holding the [integrity-rule](#knowledge-integrity-rules) fields plus
-  `supersedes`;
+  `supersedes`, the source record version, and the change kind that produced it;
+- claim confirmation: a re-observation of an unchanged value, with its observed time and fetch ID;
 - evidence: fetch ID, origin URI, fetch time, locator (JSON pointer, row, page, or offset), excerpt
   only when licensed, rights, and code and contract digests;
 - relation assertion: subject, relation type, object, qualifiers, validity interval, evidence, and
@@ -576,9 +796,10 @@ selected value links to a claim. Condition-dependent metrics use bounded observa
 by approved field IDs and condition sets, not a generic entity-attribute-value store.
 
 Claim keys are deterministic, so re-running the same raw record with the same code creates no
-duplicates. Fact selection follows [rule 6](#knowledge-integrity-rules), and unresolved fields stay
-null or conflicted with a reason. `kn review list|decide` is bilingual. Each decision is appended to
-the decision log and replayed by rebuild.
+duplicates. Fact selection follows [rule 6](#knowledge-integrity-rules) through the
+[update policy](#update-policy), and unresolved fields stay null or conflicted with a reason.
+`kn review list|decide` is bilingual. Each decision is appended to the decision log and replayed
+by rebuild.
 
 In the first release, an analyst can open "Why this fact?" from a canonical value in any domain
 dashboard. The view preserves the dashboard snapshot and shows the selected value and unit, the
@@ -602,6 +823,167 @@ Evaluation:
 Negative result: a field with no defensible selection policy stays conflicted with its reason
 recorded. The model never picks a winner arbitrarily.
 
+#### Update policy
+
+Sources declare nothing about their deliveries. KN therefore decides, field by field, how a new
+claim changes an object. Each contract field declares an update policy through `kn.updatePolicy`.
+The canonical value is computed over all eligible claims with a total order, so the result never
+depends on arrival order and a rebuild reproduces it. Claims whose values agree within the field's
+tolerance support one candidate value. Candidates are ranked, and repetition never adds rank. Each
+change is explained by one of these outcomes:
+
+| Outcome | When |
+| --- | --- |
+| `filled` | The field had no eligible value, and the new claim is eligible |
+| `replaced` | The new claim's value outranks the current winner under the priority rule |
+| `ignored` | The new claim's value ranks lower; it stays visible as competing evidence |
+| `corroborated` | The new claim supports the winning value; a confirmation from the same record never counts as independent support |
+| `conflict` | The top candidates tie on every criterion and differ beyond tolerance, or a `fixed` field receives a different value; a review item opens |
+
+A claim is eligible when it meets the field's minimum source rank and evidence class, is permitted
+for the audience, matches the field's condition set, and is not rejected. High-impact fields
+require primary evidence or a review decision ([rule 6](#knowledge-integrity-rules)). Signals and
+AI candidates are never eligible for canonical fields.
+
+**Source rank.** Each claim takes its rank from the reviewed source rank table
+`contracts/core/policies/source-ranks.yaml`. The rank classes, highest first, are:
+
+| Rank class | Sources |
+| --- | --- |
+| `owner_entered` | The owner's own entries, such as values typed into the owner's InvenTree instance, and every review decision |
+| `first_party` | The source that issues the fact: a manufacturer for its part specifications, a distributor for its own prices and stock |
+| `authorized_channel` | Authorized distributors and official registries reporting facts they do not issue |
+| `third_party` | Aggregators, other databases, and other reports |
+| `unranked` | Sources the table does not list yet |
+
+A curated observation takes the rank of the source it cites. The table may override the class of
+a single source or field group. A source's dispute rate, measured from review decisions, is
+reported to support those overrides, and it never changes a rank by itself.
+
+**Priority rule.** A candidate value's rank is the highest rank among its supporting claims. A
+value that a higher-ranked source verifies therefore wins. The default criteria, in order:
+
+1. **Source rank** of the candidate's best supporting claim.
+2. **Evidence class** of that claim: a primary declaration or measurement, then a secondary report,
+   then a derived value, then an extracted candidate.
+3. **Data time**, using the field's time basis (valid-from, published, or observed). A newer value
+   wins only over an older value from the same source, such as a newer datasheet revision.
+4. **Tie.** Candidates from different sources with equal rank and evidence class, whose values
+   differ beyond tolerance, give `conflict`.
+
+**Verification states.** The verification states of [rule 3](#knowledge-integrity-rules) are
+derived labels for display and filtering. They are not separate ranking criteria.
+
+| State | Meaning |
+| --- | --- |
+| `unreviewed` | Supported by one source and no review decision |
+| `corroborated` | Supported by two or more independent sources; confirmations, syndicated copies, and curated rows citing the same source are not independent |
+| `verified` | Accepted by a review decision; it ranks through the decision's `owner_entered` class |
+| `disputed` | Part of an open conflict |
+| `rejected` | Rejected by a review decision; never eligible |
+
+**Owner overrides.** When an `owner_entered` value wins over a `first_party` value that differs
+beyond tolerance, the canonical fact is flagged `owner_override`. `kn review list --overrides`
+lists these, so a typing error can be found and corrected at its source.
+
+Each field uses one mode:
+
+| Mode | Fields | Rule |
+| --- | --- | --- |
+| `priority` | Default; descriptive and technical facts | The priority rule above |
+| `latest_observed` | Prices, stock, lead time, declared lifecycle status | Claims below the field's minimum rank are skipped. Data time decides first, then source rank, then evidence class. A winner older than the freshness threshold shows as `stale` with its age, never as current. |
+| `accumulate` | Aliases, identifiers, documents, tags, substitutes, categories | The union of eligible items. A record's latest version replaces only that record's own earlier set. An item leaves only by a rejecting review decision or when no record still supports it. |
+| `fixed` | Identity attributes such as legal manufacturer and exact MPN | The first authoritative value holds. A different value opens a review item and is never applied automatically. |
+
+An empty claim (`source_empty`) never fills a field. By default, an empty claim that outranks the
+current value opens a review item and does not clear it. A field may allow clearing only through
+its `kn.updatePolicy`. Each canonical fact records its policy, mode, outcome, deciding criterion,
+and the criteria values of the winner and the runner-up. "Why this fact?" shows them.
+
+Evaluation:
+
+- The first eligible claim fills an empty field (`filled`). A higher-ranked value replaces it
+  (`replaced`). A lower-ranked value is ignored (`ignored`) and stays visible.
+- An owner-entered value outranks a manufacturer value and is flagged `owner_override`. A
+  third-party value that a first-party source also supports outranks an `authorized_channel`
+  value.
+- Two claims for one value from the same source, or a confirmation, never outrank one claim from
+  a higher-ranked source.
+- Under `latest_observed`, a newer price wins, and an old winner shows as `stale`.
+- Different values from two sources of equal rank and evidence class give `conflict`. A newer
+  datasheet revision from the same manufacturer replaces the older one. A different value on a
+  `fixed` field opens review.
+- An outranking empty claim opens review and does not clear the value.
+- Every permutation of the claims' arrival order gives identical canonical values and outcomes.
+- A signal never fills a canonical field.
+
+Negative result: a field whose sources cannot be ranked defensibly uses `priority` with every
+source at the same rank. Its disagreements then surface as conflicts rather than silent choices.
+
+### Part and supply model
+
+The `supply` schema is a cross-domain model of manufactured items and their supply. It serves
+microelectronics, space components and terminals where needed, and InvenTree exchange. It holds as
+complete a set of the information vendors deliver as permitted sources can supply. Every value is
+a claim with the same provenance as any other fact.
+
+Classes: organization roles (manufacturer, brand owner, distributor, authorized reseller, contract
+manufacturer), product family, product model, manufacturer part (legal manufacturer plus exact
+MPN), orderable variant (packaging or ordering suffix), supplier offer (supplier plus SKU for one
+orderable variant), document reference, and typed substitute and cross-reference relations. The
+[microelectronics domain](#microelectronics-elt) extends these classes and does not redefine them.
+
+Vendor information coverage:
+
+| Group | Content |
+| --- | --- |
+| Organization | Legal name, brands, aliases, LEI, tax or VAT ID, website, country, roles, parent or control |
+| Part identity | Legal manufacturer, exact MPN, normalized MPN, family, series, model, revision, package or case code, ordering suffix, GTIN or EAN where published, vendor category with native code |
+| Description | Short and long text in the original language, keywords, vendor last-updated time |
+| Declared lifecycle | Preview, active, NRND, last-time-buy with dates, end-of-life, obsolete; product change and discontinuation notices with dates and documents |
+| Technical parameters | Attribute-dictionary field IDs with raw value, unit, min, typical, max, qualifier, and condition set |
+| Physical and packaging | Package type, pin count, dimensions, weight, moisture sensitivity level, packaging type, standard pack quantity, minimum order quantity, order multiple |
+| Compliance and trade | RoHS status and directive version, REACH SVHC, halogen-free, conflict-minerals report, declared country of origin, ECCN, HTS or customs code, each per jurisdiction and cited |
+| Documents and models | Datasheet, errata, application notes, reference manual, PCN or PDN, CAD symbol, footprint, and 3D model, each with URI, revision, publication date, hash, and rights |
+| Supply offer | Supplier, SKU, packaging, pack quantity, minimum order quantity, multiple, price breaks (quantity, unit price, currency, customer class, tax basis, observed time), stock on hand, factory lead time, ship-from region, authorized-channel flag, product URI |
+| Alternates | Manufacturer, distributor, or analyst substitutes, typed as drop-in, functional equivalent, upgrade, or cross-reference |
+| Media | Product images and diagrams, link and hash only unless the licence permits copies |
+
+Rules:
+
+- The coverage matrix `contracts/core/supply/coverage.yaml` maps every group to contract field IDs
+  or records an exclusion reason. A source's investigation report classifies every native field it
+  delivers as mapped, kept raw-only with a reason, or excluded with a reason. Nothing a vendor
+  delivers is dropped without a recorded reason.
+- Prices, stock, and lead times are observations with an observed time. They never overwrite each
+  other, and they are not shown as current past their source's freshness threshold.
+- Declared lifecycle status is a cited claim, separate from [identity lifecycle](#object-identity).
+- Country of origin and trade classifications are cited per jurisdiction and never inferred.
+- Parameters use the attribute dictionary and observation model. A distributor's parametric value
+  and a datasheet measurement are compared only under the comparison rules.
+- Substitutes and cross-references are relations with their declaring source and never merge
+  identities.
+- Documents and media are link-and-hash references. Bytes are copied only where the licence
+  permits.
+
+Boundary: no pricing engine, quoting, purchasing, stock control, or BOM costing. No distributor
+site scraping. Distributor data comes only through permitted APIs under their account terms, or
+through curated observations. Pricing and stock licence limits, such as no caching or no
+redistribution, are enforced through `kn.licensePolicy`.
+
+Evaluation:
+
+- A test fails when any coverage group has neither field IDs nor an exclusion.
+- Fixtures: one MPN from two manufacturers is two parts. Packaging variants form one manufacturer
+  part, two orderable variants, and two offers, and the part is counted once. A price break
+  without quantity, currency, or observed time is rejected. Stock observations form a time series
+  with stale labels. A substitute does not merge. Origin is never inferred.
+- An interchange round trip preserves every mapped supply field.
+
+Negative result: a group that no permitted source delivers stays in the matrix as
+`no_permitted_source` with the reason. A group the contracts cannot type safely stays raw-only
+with the reason.
+
 ### Source management
 
 Sources are managed in two layers.
@@ -620,12 +1002,12 @@ Sources are managed in two layers.
 | Block | Content |
 | --- | --- |
 | identity | Catalogue reference, labels in `en` and `uk`, owner |
-| access | Method (`http_json`, `http_csv`, `http_xml`, `feed`, `bulk_file`, `curated_file`, `html_permitted`), endpoints, allowed hosts, redirect policy, auth environment alias, request budget, rate limits, conditional requests |
+| access | Method (`http_json`, `http_csv`, `http_xml`, `feed`, `bulk_file`, `curated_file`, `html_permitted`, `adapter_api` with a named reviewed adapter such as `inventree`), endpoints, allowed hosts, redirect policy, auth environment alias, request budget, rate limits, conditional requests |
 | schedule | Cron in UTC, freshness threshold (default twice the schedule interval) |
 | cursor | `snapshot_hash`, `updated_since`, `id_range`, or `window` with overlap; separate backfill namespace |
 | raw | Format (`warc` or `blob`), retention, redistribution |
 | parse | Parser entry point under `kn.domains.<domain>`, native schema or codebook edition, schema fingerprint |
-| mapping | Native field -> contract field ID; units; native code -> concept with mapping type; class and relation mapping; identity keys; time-field semantics |
+| mapping | Native field -> contract field ID; units; native code -> concept with mapping type; class and relation mapping; source record key and version field; identifiers with authority level and identity attributes; time-field semantics |
 | quality | Required fields, ranges, expected volume, quarantine limit, batch-stop conditions |
 | errors | Source conditions -> standard error codes and retry class |
 | monitoring | Freshness SLA, alert thresholds, expected record counts |
@@ -677,9 +1059,11 @@ Each run executes these steps:
 2. Discover requests.
 3. Fetch into WARC, or read from the archive in replay.
 4. Parse native records with locators, and check the native schema fingerprint.
-5. Map them to candidate entities, claims, relations, and tags through the crawler configuration.
+5. Map them to candidate objects, claims, relations, and tags through the crawler configuration.
+   Compute each record's field-level change set against its previous version.
 6. Validate against the compiled models and the ontology rules.
-7. Resolve identities.
+7. Resolve identities through the [identity registry](#object-identity) and match profiles, and
+   append identity events.
 8. Load in one transaction with the checkpoint, record quality results, and write a run summary.
 
 Run statuses are `success`, `partial`, `not_modified`, `blocked`, `failed`, and `skipped`. A run with
@@ -719,6 +1103,214 @@ Evaluation:
 
 Negative result: when a source cannot be expressed by configuration plus a parser, the engine gains
 a general mechanism with tests, or the source stays disabled.
+
+### Data interchange
+
+Interchange separates three layers so that a change in one is absorbed by one mapping:
+
+```text
+KN storage schemas          KN interchange contract           counterpart adapter profiles
+(rebuild-evolved,     <-->  (semantic versions from     <-->  (one per counterpart API
+ internal only)              0.1.0, upgrade steps)             version range, e.g. InvenTree)
+```
+
+Adapters never read KN tables directly. KN tables hold counterpart-shaped data only in the raw
+archive and the exchange ledger.
+
+**Interchange contract.** Each object record carries its KN ID, class, identity lifecycle state and
+redirects, identifiers with authority level, and identity attributes. It also carries fields keyed
+by interchange field ID with a value or missing reason, unit, qualifier, condition set, validity,
+provenance reference (claim key, origin URI, fetch time, licence), and record version. Relations
+are records too. Retired and merged objects are exported as state, never as deletions.
+
+**Package.** `kn interchange export` writes a ZIP with `manifest.json` and one JSON Lines file per
+class in deterministic order. The manifest holds the contract version, producer instance ID, as-of
+snapshot, watermark, scope and filters, counts and excluded counts, per-file SHA-256, rights
+profile, and generator digest. A package is full or a delta since a watermark, is written
+atomically and verified, and is never partial. `kn interchange validate` checks a package against
+its declared version. `kn interchange import` treats a package as a source through the
+[ingestion engine](#ingestion-engine) under the same update policies. A package never clears or
+deletes anything by omission.
+
+**Contract versioning.** `kn interchange diff` compares compiled contract versions field by field:
+
+| Class | Examples | Required version change |
+| --- | --- | --- |
+| Compatible | Documentation; a constraint clarification that accepts the same packages | Patch |
+| Additive | New optional field or class; new value in an open enum; rename that keeps the field ID and an alias; deprecation | Minor |
+| Breaking | Removal; type, unit, or meaning change; optional to required; closed enum narrowed | Major (minor while `0.x`), plus an upgrade step |
+
+CI fails when a version bump is smaller than its classification. An upgrade step in
+`contracts/interchange/upgrades/` is a pure data transformation with fixtures. Readers accept any
+supported version by chaining steps. Fields from a newer minor are kept as extension data and
+round-tripped, and a newer major is refused with a diagnostic. During development every version
+with an upgrade chain to the current one is supported. After release the current and previous
+majors are supported for a declared deprecation window. An export may target an older supported
+version only when every exported field maps back. Otherwise it is refused with a loss report.
+
+**External schema evolution.** Counterpart API schemas are captured and normalized into schema
+facts: resource, operation, method, field, type, format, required, read-only, nullable, enum,
+filter, pagination, and authentication. Reviewed snapshots are keyed by the counterpart API
+version and carry a digest. The contract diff classifier also compares two snapshots, limited to
+what an adapter profile maps, and reports `compatible`, `compatible_with_review` (for example, a
+new required-on-create field or a new enum value), or `breaking` (a field removed, renamed, moved,
+retyped, or made read-only; a filter renamed; an endpoint moved or its method changed).
+
+**Adapter profiles.** Each profile maps counterpart resources and fields to interchange field IDs
+for a declared API version range, with capability flags. The probed API version and schema digest
+select the profile. For a version that no profile covers, reads proceed only when the mapped
+subset's diff against the nearest reviewed snapshot is `compatible`. Writes need a reviewed
+profile that covers the exact version. Anything else stops with `schema_drift` and the
+compatibility report.
+
+**Exchange ledger.** The append-only ledger in `$DATA_DIR/exchange/<counterpart>/` is a durable
+input. It records bindings (KN ID to counterpart instance, resource, and key, with binding time
+and redirect state), per-field sync state, plans, and receipts. Sync state holds the last value KN
+wrote and its hash, the last counterpart value seen and its hash, and the field owner. Each mapped
+export field is owned by `kn` (KN may write it) or by the `counterpart` (KN only reads it). No
+field has two owners.
+
+**Echo suppression.** When an import reads a counterpart value equal to the last value KN wrote to
+that bound field, the value is an echo of KN's own data. It confirms the binding and creates no
+claim. Only values that differ from KN's last write are counterpart claims, at the counterpart's
+source rank. KN's own exports therefore never come back as owner entries that would freeze them.
+
+A three-way comparison of base, KN current, and counterpart current gives:
+
+| State | Action |
+| --- | --- |
+| `in_sync` | Nothing |
+| `kn_changed` | Update when KN owns the field |
+| `counterpart_changed`, `both_changed` | Import the counterpart value as a claim. When it wins under the update policy, nothing is written back. When it loses on a KN-owned field, a review item opens, and KN does not overwrite it. |
+
+Boundary: not a message bus and not real-time synchronization. No deletion is propagated. KN
+storage is never generated from counterpart schemas. The contract is the only interchange format.
+
+Evaluation:
+
+- Contract versions compile deterministically. Diff fixtures cover each change class, and CI fails
+  on an undersized bump.
+- Two exports of one snapshot are byte-identical. Exporting and then importing into an empty
+  rebuild reproduces objects, KN IDs, values, missing reasons, and provenance references.
+- A `0.1.0` fixture package read through the upgrade chain equals a current export of the same
+  data. Unknown newer-minor fields round-trip, and a newer major is refused.
+- Restricted-rights fields are absent and counted as excluded in the manifest.
+- Snapshot diff fixtures classify each external change type correctly.
+- Three-way fixtures cover every sync state, and the ledger replays to identical bindings. An
+  echoed value creates no claim.
+
+Negative result: a change that no upgrade step can carry without loss needs a new major version
+with a documented loss report. A counterpart version whose diff breaks a mapped field gets a new
+profile, or it stays blocked for that field with the report.
+
+### InvenTree exchange
+
+KN exchanges part, supply, and parameter knowledge with [InvenTree](https://inventree.org/)
+instances. The first counterpart is the owner's `vl-itree` instance
+([repository](https://github.com/volod/vl-itree)). It is released together with KN on one pinned
+InvenTree release, the newest stable release at release time, so no earlier InvenTree release is
+supported. InvenTree is still a third-party application. Its releases, API, and schema change
+outside KN's control, and any instance can be upgraded on its own. Each instance has a non-secret
+instance profile at `interchange/inventree/instances/<instance-id>.yaml`. The profile uses the
+crawler configuration blocks plus an `exchange` block: direction, export profile, field ownership,
+and write approval reference. The [InvenTree design](integrations/inventree.md) holds the model
+mapping and the `vl-itree` deployment facts.
+
+**Target release.** Each joint KN and `vl-itree` release names one target InvenTree release, by
+exact image tag and digest, and the `vl-itree` release tag that pins it. The KN test service, the
+reviewed schema snapshot, the adapter profile, and the `vl-itree` image reference all name the
+same release, and `deploy/versions.yaml` records all three values. `vl-itree` currently runs the
+floating `stable` tag. The [vl-itree requirements](integrations/inventree.md#vl-itree-requirements)
+replace it with the exact tag and add TLS and a password guard. A
+[ready prompt](integrations/vl-itree-upgrade-prompt.md) prepares that change in the `vl-itree`
+repository, and the owner reviews it and creates the `vl-itree` release tag.
+
+**Probe and capture.** Every session starts with `GET /api/`, which returns the software `version`
+and the integer `apiVersion`. It then captures the instance's OpenAPI schema. Both responses are
+archived to WARC. The schema is normalized, and its digest is compared with the target release's
+reviewed snapshot. A mismatch means the instance changed outside the joint release. Reads continue
+only when the diff of the mapped subset is `compatible`, writes stop, and the compatibility report
+is raised to the operator. Earlier InvenTree API changes serve only as diff-classifier fixtures.
+
+**Upgrade check.** A new InvenTree release is adopted only after
+`kn inventree upgrade-check --release <tag>` passes. The check starts the candidate release in the
+test service, seeds the synthetic catalogue, and captures and diffs the schema against the current
+target. It then runs the import and export suite and writes a compatibility report. A profile is
+extended, or a new profile replaces it, before `vl-itree` moves to the candidate. The candidate then
+becomes the next joint target.
+
+**Mapping.** Companies with manufacturer and supplier roles map to organization roles. Manufacturer
+parts map to manufacturer parts (legal manufacturer plus MPN). Supplier parts and their price
+breaks map to supplier offers and price observations. Generic parameters and parameter templates
+map to attribute-dictionary field IDs with units. Part categories map to a KN classification
+scheme through analyst crosswalks. Attachments map to document references, as links by default,
+and tags map to tag concepts. An InvenTree part is the owner's internal part. It binds to a
+product model or manufacturer part, and its fields are counterpart-owned by default. Stock is an
+optional, read-only aggregate availability. Values that InvenTree cannot represent are listed in
+the profile's loss report.
+
+**Binding.** The exchange ledger is authoritative. Where the target release exposes model metadata,
+KN also writes its KN ID and binding version under a `kn` key in the object's metadata. A metadata
+KN ID with no matching ledger binding, such as on a duplicated InvenTree part, is a conflict.
+
+**Import.** An instance is an `adapter_api` source with `owner_private` rights. Values the owner
+entered in InvenTree take the `owner_entered` source rank, the highest one, so they win over vendor
+data and are flagged `owner_override` where they differ from first-party values. Values KN wrote
+earlier come back as echoes and create no claim. The source has a resource allowlist and required
+`limit` pagination. It uses
+`updated_since` cursors where the profile declares them, and otherwise full listings compared by
+record hash. Identity resolves by binding first, then by `inventree:<instance>:<model>:<pk>`,
+then by MPN and manufacturer or by supplier and SKU, then by scored match. Imported values change
+KN objects only through their update policies. A bound InvenTree object that disappears marks its
+binding `counterpart_missing`, and the report names it. KN does not delete its own object, and it
+does not recreate the InvenTree object without an approved plan.
+
+**Export.** `kn inventree plan --instance <id> --profile <id>` writes a dry-run plan. The plan lists
+creates and updates per object and field, with before and after values, owners, conflicts, the
+loss report, and the request estimate. `kn inventree apply --plan <id>` runs an approved plan in
+dependency order: companies, parameter templates, manufacturer parts, supplier parts, price breaks,
+then parameters. Each write is idempotent through bindings, read back, and compared, and a receipt
+is appended. Creating internal parts and categories is off by default. The owner can enable it per
+export profile.
+
+**Connectivity.** An instance can run on another machine. KN then reaches it only over HTTPS with
+certificate verification. The instance profile may name a non-secret CA certificate file, such as
+the root of the instance proxy's internal CA, and verification is never disabled. Plain HTTP is
+allowed only over loopback or a private Docker network on the same host. A token never crosses a
+network in plain HTTP.
+
+**Test service and fixtures.** The Compose `inventree` profile runs the target release, and the
+upgrade check runs a candidate release beside it. A seed script loads one synthetic catalogue.
+Recorded WARC fixtures from the target release keep CI network-free, and `make test-inventree` runs
+the live suite.
+
+Boundary: no stock, order, build, or BOM-costing management in KN. No support for InvenTree
+releases before the target. No InvenTree plugin is required; an optional read-only panel belongs to
+the `vl-itree` repository. No write without an approved plan. No deletion and no personal data. KN
+does not deploy or upgrade `vl-itree`. It prepares the version change and the compatibility report.
+
+Evaluation:
+
+- Probe and capture on the target release give a reviewed snapshot with a stable digest.
+- The synthetic catalogue imports to the same KN objects, IDs, and claims on every run, and a
+  second import is idempotent. Replay without network reproduces it.
+- A plan is deterministic. A second apply is a no-op. Every written value reads back equal. An
+  owner edit in InvenTree to a KN-owned field is imported as an owner claim and never overwritten.
+  A value KN wrote is not re-imported as an owner claim. A value with a no-redistribution licence
+  never leaves KN.
+- A connection to a non-loopback instance over plain HTTP, or with a certificate that fails
+  verification, is refused.
+- An instance whose schema digest differs from the target allows reads only on a compatible diff
+  and refuses writes. Planted removals, renames, read-only changes, and endpoint moves are
+  classified `breaking`.
+- The upgrade check reports a candidate release's differences and runs the exchange suite on it.
+- `vl-itree` on the target release, reached over verified TLS, passes a read import and an
+  approved write exchange with read-back.
+
+Negative result: when the upgrade check finds that a needed field became read-only or disappeared,
+the new profile marks that resource read-only and the loss report names it. The joint target stays
+on the current release until the owner accepts the loss. An instance that cannot be reached or
+authorized stays disabled with the reason.
 
 ### Obsidian export
 
@@ -905,6 +1497,9 @@ Low-power sensing, compute, FPGA, edge AI, power, and RF. Prospective technology
 product baselines in parallel; see the [microelectronics design](domains/microelectronics.md).
 
 - Products, families, models, MPNs, dies, IP blocks, and development kits are typed separately.
+  Families, models, manufacturer parts, orderable variants, and supplier offers are the shared
+  [part and supply model](#part-and-supply-model) classes. The domain adds dies, IP blocks, kits,
+  facilities, projects, benchmarks, and condition-bound observations.
 - Condition-bound observations follow the attribute dictionary and comparison profiles.
 - Legal manufacturer, design location, wafer fab, assembly and test site, and parent ownership are
   separate facts.
@@ -950,9 +1545,10 @@ missing conditions.
 - **Access.** A reverse proxy with TLS and authentication fronts Superset and Kestra on a private
   network. Superset roles are `analyst_read`, `dashboard_author`, and `admin`.
 - **Backups.** Nightly compressed per-database backups plus globals, the raw ledger and changed WARC
-  files, decision logs, and Git release artifacts. Copies are kept for 7 days daily and 4 weeks
-  weekly. Proposed objectives are RPO <= 24 h and RTO <= 8 h, validated by a restore drill. An
-  off-host encrypted destination is required beyond development.
+  files, decision logs, the identity event log, the exchange ledger, and Git release artifacts.
+  Copies are kept for 7 days daily and 4 weeks weekly. Proposed objectives are RPO <= 24 h and
+  RTO <= 8 h, validated by a restore drill. An off-host encrypted destination is required beyond
+  development.
 - **Disk.** Logical quotas over 4,000 GB:
 
 | Use | GB |
@@ -991,7 +1587,8 @@ Non-essential ingestion stops at 80% usage, and non-critical writes stop at 90%.
   - no DDL by loaders;
   - denied restricted facts and unauthorized users;
   - secrets absent from logs and ZIPs;
-  - SSRF, archive-traversal, and decompression-bomb limits.
+  - SSRF, archive-traversal, and decompression-bomb limits;
+  - no counterpart write without an approved plan, and no personal data in counterpart reads.
 
 Boundary: no high availability and no promise of zero downtime.
 
@@ -1003,12 +1600,16 @@ adjusts the objective or the hardware.
 
 ### Release readiness
 
-The owner approves a release scope, which by default covers the core engine, all three domains'
-ELT and dashboards, Obsidian export, localization, and operations hardening.
+The owner approves a release scope, which by default covers the core engine (including object
+identity, data interchange, and InvenTree exchange), all three domains' ELT and dashboards,
+Obsidian export, localization, and operations hardening.
 
 - **Migration tool.** Selected by a bounded comparison against the contract diff. Atlas Community
   Edition is the leading candidate; supplemental SQL stays versioned.
 - **Baseline.** Contracts are baselined at `1.0.0`, and dataset version recording begins.
+- **Interchange freeze.** The interchange contract is frozen at `1.0.0` with an upgrade chain from
+  every development version that has been exchanged. The joint release names its target InvenTree
+  release, and `vl-itree` pins the same image tag.
 - **Switch.** The environment is marked released, which refuses rebuild.
 - **Checklist.** Every capability's evaluation has evidence.
 
@@ -1062,21 +1663,25 @@ upstream before downstream.
 | 5 | `localization` | planned | Key coverage, plural, golden-output, and screenshot checks pass in `en` and `uk`; the Kestra waiver is the only English-only path | - |
 | 6 | `data-contracts` | planned | Contracts compile deterministically, invalid contracts fail, drift fails CI, rebuild creates every schema, loaders cannot run DDL | - |
 | 7 | `ontology-taxonomy` | planned | Every proposal row is classified, identifiers are stable, invalid hierarchies are rejected, SKOS round-trips | - |
-| 8 | `raw-archive` | planned | WARC round trip, atomic write, ledger reindex, redaction, revisit, and corruption checks pass | - |
-| 9 | `evidence-model` | planned | Identity, conflict, time, provenance-lookup, idempotence, and decision-replay fixtures pass | - |
-| 10 | `source-management` | planned | Catalogue import is complete; configuration validation refuses unapproved enablement; error and status mapping fixtures pass | - |
-| 11 | `ingestion-engine` | planned | Failure-mode fixtures yield declared statuses without cursor jumps; two rebuilds produce identical canonical tables | - |
-| 12 | `obsidian-export` | planned | Fixture vault verifies hashes and links, excludes restricted rights and secrets, and reproduces identically | - |
-| 13 | `space-elt` | planned | Permitted live samples load; launch, catalog, count, and tariff semantics are never conflated; rebuild reproduces the domain | - |
-| 14 | `orchestration` | planned | Generated flows are deterministic; a scheduled window respects budgets; killed runs retry without duplicates | - |
-| 15 | `space-dashboards` | planned | Bilingual bundles deploy reproducibly with equal filter results; maps render licensed boundaries; SQL Lab stays read-only | - |
-| 16 | `gdelt-elt` | planned | Dictionaries carry edition and checksum; DOC queries handle caps and truncation; signals stay unverified | - |
-| 17 | `gdelt-dashboards` | planned | Watch dashboards deploy in both locales with stated denominators and story-level counts | - |
-| 18 | `microelectronics-elt` | planned | MPN identity, condition-bound observations, and matched-comparison exclusion fixtures pass | - |
-| 19 | `microelectronics-dashboards` | planned | Bilingual comparison bundles never rank incomparable records | - |
-| 20 | `operations-hardening` | planned | Restore drill, performance gate, and security suite pass on the target host with measured objectives | - |
-| 21 | `release-readiness` | planned | Migration mode preserves data, refuses breaking changes and rebuild, and every evaluation has evidence | - |
-| 22 | `ai-extraction` | planned | Labeled fixtures show zero unsupported published claims within the VRAM budget; ingestion is unaffected without it | - |
+| 8 | `object-identity` | planned | KN IDs survive rebuilds; lifecycle, matching, partial-update, and lineage fixtures pass; calibrated classes meet the precision gate | - |
+| 9 | `raw-archive` | planned | WARC round trip, atomic write, ledger reindex, redaction, revisit, and corruption checks pass | - |
+| 10 | `evidence-model` | planned | Conflict, time, provenance-lookup, idempotence, confirmation, update-policy, and decision-replay fixtures pass | - |
+| 11 | `part-supply-model` | planned | Every vendor coverage group maps or records an exclusion; part, variant, offer, price, and substitute fixtures pass | - |
+| 12 | `source-management` | planned | Catalogue import is complete; configuration validation refuses unapproved enablement; error and status mapping fixtures pass | - |
+| 13 | `ingestion-engine` | planned | Failure-mode fixtures yield declared statuses without cursor jumps; two rebuilds produce identical canonical tables | - |
+| 14 | `data-interchange` | planned | Contract diffs enforce version bumps; packages reproduce and round-trip; upgrade chains and three-way sync fixtures pass | - |
+| 15 | `inventree-exchange` | planned | The target release imports deterministically; approved plans apply idempotently with read-back; schema drift blocks writes; the upgrade check classifies candidate releases; `vl-itree` passes read and write exchange | - |
+| 16 | `obsidian-export` | planned | Fixture vault verifies hashes and links, excludes restricted rights and secrets, and reproduces identically | - |
+| 17 | `space-elt` | planned | Permitted live samples load; launch, catalog, count, and tariff semantics are never conflated; rebuild reproduces the domain | - |
+| 18 | `orchestration` | planned | Generated flows are deterministic; a scheduled window respects budgets; killed runs retry without duplicates | - |
+| 19 | `space-dashboards` | planned | Bilingual bundles deploy reproducibly with equal filter results; maps render licensed boundaries; SQL Lab stays read-only | - |
+| 20 | `gdelt-elt` | planned | Dictionaries carry edition and checksum; DOC queries handle caps and truncation; signals stay unverified | - |
+| 21 | `gdelt-dashboards` | planned | Watch dashboards deploy in both locales with stated denominators and story-level counts | - |
+| 22 | `microelectronics-elt` | planned | MPN identity, condition-bound observations, and matched-comparison exclusion fixtures pass | - |
+| 23 | `microelectronics-dashboards` | planned | Bilingual comparison bundles never rank incomparable records | - |
+| 24 | `operations-hardening` | planned | Restore drill, performance gate, and security suite pass on the target host with measured objectives | - |
+| 25 | `release-readiness` | planned | Migration mode preserves data, refuses breaking changes and rebuild, freezes the interchange contract, and every evaluation has evidence | - |
+| 26 | `ai-extraction` | planned | Labeled fixtures show zero unsupported published claims within the VRAM budget; ingestion is unaffected without it | - |
 
 ## Extending This Specification
 
@@ -1131,3 +1736,9 @@ domain (for example, SATCOM systems, launches, services, tariffs, and coverage) 
 value came from. They can see when each value was fetched, which values are unknown or disputed,
 and how fresh each source is. They can do this without the system ever presenting a signal,
 example, or unverified proposal as a fact.
+
+For any object, the operator can see its one KN ID and every source record matched to it, with
+the match method, score, and decision. They can see its identity history and each partial update
+as it arrived. The same part knowledge moves between KN and the owner's InvenTree instance in both
+directions with its identity and provenance intact, across InvenTree upgrades, and nothing is
+overwritten or lost without a report.

@@ -32,7 +32,10 @@ From the proposals in `domains/microelectronics/seeds/proposals/`:
 
 - Product family, product model, orderable MPN, die or chiplet, IP block, development kit, and
   module are distinct classes. Identity requires the legal manufacturer plus the exact MPN, with
-  package and version where appropriate. Nothing merges on a family label.
+  package and version where appropriate. Nothing merges on a family label. Family, model,
+  manufacturer part, orderable variant, and supplier offer are the shared
+  [part and supply model](../spec.md#part-and-supply-model) classes, matched through the
+  [object identity](../spec.md#object-identity) profiles.
 - Legal manufacturer, brand, design location, wafer fab, assembly site, final test site, parent
   ownership or control, and export classification are separate facts. Unknown stays unknown, and
   origin is never assumed from headquarters.

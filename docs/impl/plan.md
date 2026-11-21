@@ -15,7 +15,11 @@ the highest-priority candidate in each lane after filtering open task prerequisi
 external and manual dependencies before starting.
 
 The project is in the [development phase](../design/spec.md#development-and-release-phases). No
-task adds versioned schemas, migration files, or compatibility code before `release-migration-mode`.
+task adds versioned storage schemas, migration files, or storage compatibility code before
+`release-migration-mode`. The single exception is the external boundary: the interchange contract,
+its upgrade steps, and counterpart adapter profiles are versioned from their first task, as the
+specification requires. Object identity, partial-update tracking, interchange, and InvenTree
+compatibility are core work and come before the domain pipelines.
 Source tasks follow the [onboarding workflow](../design/spec.md#source-management) and the
 [TDD growth rule](../design/spec.md#ingestion-engine). Each source adds failing fixtures first, then
 general engine changes, and reruns every earlier source suite plus a rebuild from the fixture
@@ -100,11 +104,12 @@ Release needs one end-to-end proof that every operator path works in both locale
 
 - Serves: `localization` -- [Localization](../design/spec.md#localization)
 - Agent status: CLEAR
-- Requires: `obsidian-space-profile`, `microelectronics-comparison-dashboards`
+- Requires: `obsidian-space-profile`, `microelectronics-comparison-dashboards`,
+  `inventree-write-export`
 - Dependencies: A browser automation tool justified as a development dependency.
 - User-visible outcome: One command produces screenshots and golden outputs for the CLI, the review
-  queue, source status, the dashboards with filters and the map, and the export README, in both
-  locales.
+  queue, source status, lineage, InvenTree plans and reports, the dashboards with filters and the
+  map, and the export README, in both locales.
 - Scope boundary: Verification and fixing of missing translations. The Kestra UI is excluded under
   the approved waiver.
 - Data and artifact paths: `tests/e2e/`, `$DATA_DIR/e2e/<run-id>/` for screenshots, and
@@ -277,6 +282,165 @@ Vocabularies need a standard interchange format.
 - Documentation target: `current/ontology-taxonomy.md` listed in the
   [areas index](current.md#areas).
 
+### Object identity -- `object-identity`
+
+#### identity-registry-contracts
+
+Every later capability needs one durable KN ID per object before any claim refers to it.
+
+- Serves: `object-identity` -- [Object identity](../design/spec.md#object-identity)
+- Agent status: CLEAR
+- Requires: `semantic-model-contracts`, `development-rebuild-mode`
+- Dependencies: none.
+- User-visible outcome: The `identity` schema holds objects, identifiers with authority levels,
+  identity attributes, source records with versions, links, match records, lifecycle events, and
+  redirects. `kn db rebuild` replays the append-only identity event log in `$DATA_DIR/identity/`
+  before any raw record, so every KN ID survives a rebuild.
+- Scope boundary: Contracts with the `kn.identity` extension, including source record keys;
+  constraints (no reused KN ID, one active link per source record, identifiers unique per
+  namespace within their validity, links only to active objects); the event log format and its
+  replay; UUIDv7 minting keyed by the anchoring record. Lifecycle commands, matching, and change
+  sets come in later tasks.
+- Data and artifact paths: `contracts/core/identity/`, `src/kn/identity/`, `$DATA_DIR/identity/`,
+  `tests/identity/`.
+- Execution path: Write the contracts and the log schema, compile, and test replay against the
+  integration database. Fixture logs cover every event type and every invalid transition.
+- Acceptance gates: Replaying one log twice gives identical tables. Dropping the database and
+  rebuilding keeps every KN ID. A reused ID, a link to a retired object, and a merge into a merged
+  object are rejected. A merged ID resolves to its survivor. `make ci` passes.
+- Documentation target: A new `current/object-identity.md` page listed in the
+  [areas index](current.md#areas).
+
+#### object-lifecycle-operations
+
+Merges, splits, and retirements must be explicit, reviewed, and kept as reversible history.
+
+- Serves: `object-identity` -- [Object identity](../design/spec.md#object-identity)
+- Agent status: CLEAR
+- Requires: `identity-registry-contracts`, `message-catalog-core`
+- Dependencies: none.
+- User-visible outcome: `kn identity show|resolve|history|merge|split|retire|restore` work in `en`
+  and `uk`. Each state change writes a review decision and the identity event that cites it. It
+  moves links, so claims follow their source records, and old IDs stay resolvable.
+- Scope boundary: The lifecycle state machine from the specification; merge and split semantics,
+  with each link assigned to exactly one successor; reclassification as retirement plus a successor
+  mint; forced merges on a shared authoritative identifier; redirect collapse. Review queue items
+  for match candidates come in `review-queue-cli`.
+- Data and artifact paths: `src/kn/identity/lifecycle.py`, `src/kn/cli.py`, `$DATA_DIR/decisions/`,
+  `tests/identity/`.
+- Execution path: Write fixture-first tests for each transition in the specification table, then
+  the state machine and the CLI with localized messages.
+- Acceptance gates: A merge followed by a split restores links deterministically with full history.
+  A cross-class merge is refused. A redirect chain resolves in one step. A lookup by a split ID
+  returns its successors. Golden outputs exist in both locales.
+- Documentation target: `current/object-identity.md` listed in the [areas index](current.md#areas).
+
+#### identity-match-engine
+
+Data about one object from different sources must meet at one KN ID through explained, scored
+decisions.
+
+- Serves: `object-identity` -- [Object identity](../design/spec.md#object-identity)
+- Agent status: CLEAR
+- Requires: `object-lifecycle-operations`
+- Dependencies: The smallest justified string-similarity dependency, or a local comparator with
+  tests.
+- User-visible outcome: The resolver applies exact authoritative identifiers, existing
+  source-qualified links, scored matching over declared identity attributes, and alias candidates,
+  in that order. Each decision writes a match record with features, comparator outcomes, weights,
+  score, probability, profile digest, and the outcome: auto-link, review, or new object.
+- Scope boundary: The match profile format and its validation, which rejects name-only link paths.
+  Normalizers for MPNs, organization names, web domains, and identifiers. Blocking, comparators,
+  Fellegi-Sunter weights, thresholds and margin, the `calibrated` flag that keeps uncalibrated
+  profiles review-only, and deterministic tie-breaking. Profiles for organization, manufacturer
+  part, orderable variant, and supplier offer. Calibration on real records comes in
+  `identity-match-calibration`.
+- Data and artifact paths: `src/kn/identity/matching/`, `contracts/core/identity/match-profiles/`,
+  `tests/identity/`, `tests/fixtures/identity/`.
+- Execution path: Write labeled synthetic fixtures first, then the resolver.
+- Acceptance gates: Fixtures with one MPN from two manufacturers, packaging variants, a renamed
+  organization with a stable LEI, name-only similarity, and two close candidates produce their
+  declared decisions. Permuted input order gives identical decisions. A match record reproduces its
+  score and probability. A profile whose link threshold names alone can reach fails validation.
+- Documentation target: `current/object-identity.md` listed in the [areas index](current.md#areas).
+
+#### partial-update-tracking
+
+Sources send partial records and declare nothing about completeness. Every change must still be
+detected per field and traced back to its record version.
+
+- Serves: `object-identity` -- [Object identity](../design/spec.md#object-identity)
+- Agent status: CLEAR
+- Requires: `identity-match-engine`, `evidence-claim-contracts`
+- Dependencies: none.
+- User-visible outcome: For each mapped record, the engine computes a field-level change set
+  (added, changed, unchanged, emptied, or not stated) against the record's previous version. Only
+  added, changed, and emptied fields create claims. Unchanged fields record confirmations, and
+  omitted fields have no effect. Each record keeps a `last_seen` time, and absence never clears or
+  deletes anything.
+- Scope boundary: Record keys and version fields from the crawler mapping, version ordering by
+  source version or `updated` time and then fetch time, per-field hashes, confirmations, late
+  older versions kept as history, weak-key fragments resolved through existing or parent links,
+  and change-set lineage (record version, fetch ID, archive record ID, code digest). How a claim
+  changes the object belongs to `canonical-fact-selection`. Engine wiring comes in
+  `mapping-and-quality-rules`.
+- Data and artifact paths: `src/kn/identity/tracking/`, `contracts/core/identity/`,
+  `contracts/core/evidence/`, `tests/identity/`.
+- Execution path: Write one fixture per row of the specification's change table, plus a record
+  that stops appearing and an out-of-order version, before the tracker.
+- Acceptance gates: A price-only record leaves parameter claims untouched. An emptied field creates
+  a `source_empty` claim and no clearing. An omitted field changes nothing. A record that stops
+  appearing keeps its claims, its `last_seen` time stops advancing, and nothing is deleted. An
+  identical re-delivery adds a confirmation and no claim. An older version that arrives late does
+  not become current.
+- Documentation target: `current/object-identity.md` listed in the [areas index](current.md#areas).
+
+#### object-lineage-lookup
+
+Operators must be able to trace any object or field back to every record and decision behind it.
+
+- Serves: `object-identity` -- [Object identity](../design/spec.md#object-identity)
+- Agent status: CLEAR
+- Requires: `partial-update-tracking`, `canonical-fact-selection`
+- Dependencies: none.
+- User-visible outcome: `kn lineage <kn-id|qualified-identifier> [--field <field-id>]` shows, in
+  both locales and as JSON, the identity history, identifiers, links with match records, record
+  versions and change sets, claims, and the selected canonical fact. Outbound exchange receipts
+  join the view once the exchange ledger exists.
+- Scope boundary: A read-only, rights-filtered query layer and CLI over the identity and evidence
+  schemas. The dashboards reuse it in `analyst-fact-explanation`.
+- Data and artifact paths: `src/kn/identity/lineage.py`, `src/kn/cli.py`, `tests/identity/`.
+- Execution path: Use fixture objects with a merge, a split, a partial update, and a conflict.
+- Acceptance gates: Each fixture returns the complete chain down to archive record IDs. A merged ID
+  shows its survivor's lineage with the merge event. Restricted evidence is withheld and counted.
+  Golden outputs exist in both locales.
+- Documentation target: `current/object-identity.md` listed in the [areas index](current.md#areas).
+
+#### identity-match-calibration
+
+Match probabilities mean something only after they are measured on real records.
+
+- Serves: `object-identity` -- [Object identity](../design/spec.md#object-identity)
+- Agent status: RUN NEEDED
+- Research: yes
+- Requires: `vl-itree-read-acceptance`, `object-lineage-lookup`
+- Dependencies: Archived authorized samples that carry authoritative identifiers, starting with the
+  `vl-itree` read import and the first vendor sources. Owner-labeled pairs are optional.
+- User-visible outcome: A calibration report per class gives precision and recall at both
+  thresholds and the calibration error per probability band. Profiles that meet the gate are marked
+  `calibrated` and may auto-link.
+- Scope boundary: Ground truth comes from pairs proven by authoritative identifiers, with those
+  identifiers masked, plus reviewer decisions. Weights and thresholds change only through reviewed
+  profile edits. No learned matcher.
+- Data and artifact paths: `contracts/core/identity/match-profiles/`,
+  `$DATA_DIR/identity-eval/<run-id>/`, `tests/identity/`, and the task record.
+- Execution path: Replay the archived samples, build masked pair sets, and fit and evaluate weights
+  on held-out folds.
+- Acceptance gates: Each calibrated class reaches at least 0.99 precision at the link threshold on
+  at least 200 held-out positive pairs. A class that misses the gate stays review-only. That is a
+  valid negative result, recorded in the closed-research register.
+- Documentation target: `current/object-identity.md` listed in the [areas index](current.md#areas).
+
 ### Raw archive -- `raw-archive`
 
 #### warc-raw-store
@@ -309,13 +473,14 @@ Claims, evidence, and canonical facts need contracts that carry every provenance
 
 - Serves: `evidence-model` -- [Evidence model](../design/spec.md#evidence-model)
 - Agent status: CLEAR
-- Requires: `semantic-model-contracts`
+- Requires: `semantic-model-contracts`, `identity-registry-contracts`
 - Dependencies: none.
-- User-visible outcome: The `evidence` schema and the shared entity, external ID, alias, claim,
-  evidence, relation assertion, canonical fact, and review item datasets exist with
-  value-or-missing-reason constraints.
-- Scope boundary: Contracts, constraints, deterministic claim keys, and as-of views. Selection
-  policies come in the next task.
+- User-visible outcome: The `evidence` schema holds alias, claim, claim confirmation, evidence,
+  relation assertion, canonical fact, and review item datasets with value-or-missing-reason
+  constraints. Every claim refers to a KN ID and to its source record version.
+- Scope boundary: Contracts, constraints, deterministic claim keys, and as-of views. Objects and
+  identifiers come from the identity registry. Selection policies come in
+  `canonical-fact-selection`.
 - Data and artifact paths: `contracts/core/evidence/`, `src/kn/evidence/`, `tests/evidence/`.
 - Execution path: Write the contracts with `kn.temporalProfile` and `kn.evidence` extensions, and
   compile and test the constraints against the integration database.
@@ -324,25 +489,42 @@ Claims, evidence, and canonical facts need contracts that carry every provenance
 - Documentation target: A new `current/evidence-model.md` page listed in the
   [areas index](current.md#areas).
 
-#### identity-and-fact-selection
+#### canonical-fact-selection
 
-Resolved identities and canonical facts must follow explicit rules, not latest-wins.
+Sources declare nothing, so KN must decide by explicit rules how each new claim fills, replaces, or
+leaves an object's value. Arrival order must never decide.
 
 - Serves: `evidence-model` -- [Evidence model](../design/spec.md#evidence-model)
 - Agent status: CLEAR
-- Requires: `evidence-claim-contracts`
+- Requires: `evidence-claim-contracts`, `identity-match-engine`
 - Dependencies: none.
-- User-visible outcome: The engine resolves identities in the declared order, routes ambiguity and
-  conflicts to review, and projects canonical facts by field-specific policy.
-- Scope boundary: The resolution order, no name-only merges, split and merge history, the
-  selection policy registry, and high-impact review rules. Domain policies come with domain
-  contracts.
-- Data and artifact paths: `src/kn/evidence/`, `tests/evidence/`.
-- Execution path: Write fixture-first tests for each rule in the specification, then the resolver
-  and selector.
-- Acceptance gates: Fixtures keep organization, model, spacecraft, constellation, program, and
-  service distinct. Aliases merge only with evidence. A contradictory ownership claim stays
-  conflicted. Times stay separate.
+- User-visible outcome: The engine projects each field's canonical value through its update
+  policy. The modes are `priority`, `latest_observed`, `accumulate`, and `fixed`. A candidate value
+  ranks by its best supporting claim: source rank, then evidence class, then data time within one
+  source. Every change is explained as filled, replaced, ignored, corroborated, or conflict, with
+  the deciding criterion. Owner overrides of first-party values are flagged and listed by
+  `kn review list --overrides`. Identity redirects are followed. Conflicts, and high-impact facts
+  without primary evidence, go to review.
+- Scope boundary: The `kn.updatePolicy` semantics; the reviewed source rank table
+  `contracts/core/policies/source-ranks.yaml`, with `owner_entered` as the highest class and review
+  decisions ranked through it; evidence classes; verification states derived from support and
+  review; eligibility (minimum rank and evidence class, rights, conditions); empty-claim handling;
+  freshness and `stale` labels; audience-specific selection from eligible evidence. Identity
+  resolution belongs to `identity-match-engine`. Domain policies come with domain contracts.
+- Data and artifact paths: `src/kn/evidence/`, `contracts/core/policies/`, `tests/evidence/`.
+- Execution path: Write fixture-first tests for each outcome, mode, and verification state in the
+  specification, then the selector.
+- Acceptance gates: An empty field is filled by the first eligible claim. A higher-ranked value
+  replaces it, and a lower-ranked value is ignored and stays visible. An owner-entered value
+  outranks a manufacturer value and is flagged `owner_override`. A value that a higher-ranked
+  source also supports wins, while repeated claims or confirmations from one source add no rank.
+  A newer datasheet revision from the same source replaces the older one. Different values from
+  two sources of equal rank and evidence class conflict. Under `latest_observed`, a newer price
+  wins, and an old winner shows as `stale`. A different value on a `fixed` field opens review, and
+  an outranking empty claim opens review without clearing. Every permutation of arrival order
+  gives identical canonical values. Fixtures keep organization, model, spacecraft, constellation,
+  program, and service distinct, and a contradictory ownership claim stays conflicted. Claims
+  about a merged object are selected under its survivor. Signals never fill canonical fields.
 - Documentation target: `current/evidence-model.md` listed in the [areas index](current.md#areas).
 
 #### review-queue-cli
@@ -351,12 +533,14 @@ Human decisions on conflicts and candidates need a bilingual workflow that survi
 
 - Serves: `evidence-model` -- [Evidence model](../design/spec.md#evidence-model)
 - Agent status: CLEAR
-- Requires: `identity-and-fact-selection`, `message-catalog-core`
+- Requires: `canonical-fact-selection`, `object-lifecycle-operations`, `message-catalog-core`
 - Dependencies: none.
-- User-visible outcome: `kn review list` and `kn review decide` work in `en` and `uk`. Decisions are
-  appended to `$DATA_DIR/decisions/<domain>/` and applied to review items.
+- User-visible outcome: `kn review list` and `kn review decide` work in `en` and `uk` for fact
+  conflicts, identity match candidates, and identity drift. Decisions are appended to
+  `$DATA_DIR/decisions/<domain>/` and applied to review items.
 - Scope boundary: The CLI, the decision log format, and re-attachment by deterministic keys with an
-  orphan report. Rebuild-time replay comes in `rebuild-from-raw`.
+  orphan report. Item types are registered, so later capabilities such as exchange conflicts reuse
+  the queue. Rebuild-time replay comes in `rebuild-from-raw`.
 - Data and artifact paths: `src/kn/review/`, `src/kn/cli.py`, `$DATA_DIR/decisions/`,
   `tests/review/`.
 - Execution path: Write an append-only JSON Lines log with the reviewer, reason, and time, and
@@ -364,6 +548,63 @@ Human decisions on conflicts and candidates need a bilingual workflow that survi
 - Acceptance gates: Decisions apply idempotently. A decision whose claim key disappears is
   reported as orphaned. Golden outputs exist in both locales.
 - Documentation target: `current/evidence-model.md` listed in the [areas index](current.md#areas).
+
+### Part and supply model -- `part-supply-model`
+
+#### vendor-information-coverage
+
+The knowledge base must hold everything vendors publish about a part, so the target field set has
+to be known before the contracts are fixed.
+
+- Serves: `part-supply-model` -- [Part and supply model](../design/spec.md#part-and-supply-model)
+- Agent status: CLEAR
+- Research: yes
+- Requires: `contract-toolchain-pin`
+- Dependencies: Public documentation of representative vendor channels: manufacturer product pages
+  and datasheets for the watchlist families, distributor API documentation for the catalogue rows
+  C01-C03, and the InvenTree API schema. The microelectronics attribute dictionary proposal.
+- User-visible outcome: The coverage matrix `contracts/core/supply/coverage.yaml` maps every
+  information group in the specification to field IDs or an exclusion. It lists each studied
+  channel's documented fields with a classification and licence notes on caching and
+  redistribution.
+- Scope boundary: Documentation reading only; no data endpoints are called. Field IDs are proposed
+  here and fixed in `supply-model-contracts`.
+- Data and artifact paths: `contracts/core/supply/coverage.yaml`, `tests/supply/`, and the task
+  record.
+- Execution path: Read each channel's public field documentation and classify every field. Add a
+  test that fails on an unclassified group or field.
+- Acceptance gates: Every group has field IDs or an exclusion reason. Every documented channel field
+  is mapped, raw-only, or excluded with a reason. A channel whose documentation is inaccessible is
+  recorded as a blocker, which is a valid negative result.
+- Documentation target: A new `current/part-supply-model.md` page listed in the
+  [areas index](current.md#areas).
+
+#### supply-model-contracts
+
+Parts, orderable variants, and supplier offers need typed, identity-aware contracts that every
+domain and counterpart shares.
+
+- Serves: `part-supply-model` -- [Part and supply model](../design/spec.md#part-and-supply-model)
+- Agent status: CLEAR
+- Requires: `vendor-information-coverage`, `evidence-claim-contracts`, `identity-match-engine`,
+  `seed-vocabulary-import`
+- Dependencies: none.
+- User-visible outcome: The `supply` schema holds organization roles, product families and models,
+  manufacturer parts, orderable variants, and supplier offers. It also holds price, stock, and
+  lead-time observations, declared lifecycle, compliance and trade claims, physical and packaging
+  attributes, document references, and substitute relations. Each identity class has a match
+  profile.
+- Scope boundary: Contracts, constraints, selection policies for supply fields, and fixtures.
+  Parameters reuse the attribute dictionary and observation model. No source parsers.
+- Data and artifact paths: `contracts/core/supply/`, `src/kn/supply/`, `tests/supply/`.
+- Execution path: Write the contracts from the coverage matrix, compile, and rebuild. Add
+  fixture-first tests for the specification's rules.
+- Acceptance gates: One MPN from two manufacturers is two parts. Packaging variants give one
+  manufacturer part, two orderable variants, two offers, and one part count. A price break without
+  quantity, currency, or observed time is rejected. Stock observations form a time series with
+  stale labels. A substitute never merges identities. Origin is never inferred from headquarters.
+- Documentation target: `current/part-supply-model.md` listed in the
+  [areas index](current.md#areas).
 
 ### Source management -- `source-management`
 
@@ -378,7 +619,8 @@ Every candidate source must be visible and disabled before any crawler exists.
 - User-visible outcome: Every rebuild loads `system.source_catalogue` with 37 space, 65
   microelectronics, and 17 GDELT candidates. `kn source list` shows them in both locales.
 - Scope boundary: The catalogue contract, original IDs, lifecycle states, and access notes marked
-  unverified. No crawler configuration and no enablement.
+  unverified. Source rank overrides are validated against catalogue IDs. No crawler
+  configuration and no enablement.
 - Data and artifact paths: `contracts/core/system/`, `domains/<domain>/seeds/sources.json`,
   `src/kn/sources/`, `tests/sources/`.
 - Execution path: Write reviewed seed files from the proposals and add a catalogue loader to the
@@ -399,9 +641,10 @@ validated.
 - Dependencies: none.
 - User-visible outcome: `kn source validate` checks a crawler YAML against its schema and refuses
   enablement without a rights review, an approval reference, fixtures, and passing tests.
-- Scope boundary: The JSON Schema for every block in the specification and the standard error-code
-  table. Record whether the dlt REST client and paginators are adopted for HTTP pagination, given
-  the raw-archive constraint. No runtime execution.
+- Scope boundary: The JSON Schema for every block in the specification, including source record
+  keys and the `adapter_api` method, and the standard error-code table. Record whether the dlt
+  REST client and paginators are adopted for HTTP pagination, given the raw-archive constraint. No
+  runtime execution.
 - Data and artifact paths: `src/kn/sources/config/`, `domains/<domain>/sources/`,
   `tests/sources/`.
 - Execution path: Use a schema-first design with valid and invalid fixture configurations, plus an
@@ -461,11 +704,12 @@ The core engine must run end to end on a synthetic source before any real source
 
 - Serves: `ingestion-engine` -- [Ingestion engine](../design/spec.md#ingestion-engine)
 - Agent status: CLEAR
-- Requires: `warc-raw-store`, `crawler-config-schema`, `evidence-claim-contracts`
+- Requires: `warc-raw-store`, `crawler-config-schema`, `evidence-claim-contracts`,
+  `identity-match-engine`
 - Dependencies: none.
 - User-visible outcome: `kn source run` and `kn source replay` process a synthetic fixture source
-  served locally. They write WARC records, claims with evidence, a checkpoint, and a run summary
-  with a declared status.
+  served locally. They write WARC records, identity events, claims with evidence linked to KN IDs,
+  a checkpoint, and a run summary with a declared status.
 - Scope boundary: Lock, run registration, fetch to archive, parse, a minimal mapping, validation,
   load, checkpoint, and status. Fetch safety, full mapping, curated input, and rebuild replay come
   in the next tasks.
@@ -506,12 +750,12 @@ Most source-specific behavior must live in configuration, not code.
 
 - Serves: `ingestion-engine` -- [Ingestion engine](../design/spec.md#ingestion-engine)
 - Agent status: CLEAR
-- Requires: `http-fetch-safety`, `seed-vocabulary-import`
+- Requires: `http-fetch-safety`, `seed-vocabulary-import`, `partial-update-tracking`
 - Dependencies: none.
 - User-visible outcome: Crawler configurations map native fields to contract field IDs. They also
   map units with logged conversions, native codes to concepts with mapping types, classes and
-  relations, identity keys, and time semantics. Quality rules quarantine records or stop batches as
-  declared.
+  relations, identifiers and identity attributes, time semantics, and source record keys with
+  field-level change sets. Quality rules quarantine records or stop batches as declared.
 - Scope boundary: The general mapping and quality engine, with no source-specific branches. The
   units table covers the dimensions that contracts declare.
 - Data and artifact paths: `src/kn/engine/mapping/`, `src/kn/engine/quality/`, `tests/engine/`.
@@ -562,6 +806,350 @@ Schema changes during development must cost a rebuild, never a re-fetch or a los
 - Documentation target: `current/ingestion-engine.md` listed in the
   [areas index](current.md#areas).
 
+### Data interchange -- `data-interchange`
+
+#### interchange-contract
+
+Exchange with any counterpart needs one versioned, documented shape for KN objects.
+
+- Serves: `data-interchange` -- [Data interchange](../design/spec.md#data-interchange)
+- Agent status: CLEAR
+- Requires: `supply-model-contracts`, `partial-update-tracking`
+- Dependencies: none.
+- User-visible outcome: The interchange contract `0.1.0` in `contracts/interchange/` compiles to
+  JSON Schema. `kn interchange export` writes a verified, deterministic ZIP package with its
+  manifest from one snapshot. `kn interchange validate` checks a package against its declared
+  version.
+- Scope boundary: Object, identifier, field, relation, and provenance-reference records for the
+  supply classes and their organizations; full and delta packages; rights filtering with excluded
+  counts; atomic writes. Version diffs come in `interchange-schema-evolution`, and import comes in
+  `interchange-package-import`.
+- Data and artifact paths: `contracts/interchange/`, `src/kn/interchange/`,
+  `$DATA_DIR/interchange/<run-id>/`, `tests/interchange/`.
+- Execution path: Work fixture-first from a rebuilt fixture domain that has supply objects, a
+  merged object, a retired object, and restricted evidence.
+- Acceptance gates: Two exports of one snapshot are byte-identical. Every manifest hash verifies.
+  Restricted fields are absent and counted. Merged and retired objects are exported as state with
+  redirects. A delta holds only records changed since its watermark.
+- Documentation target: A new `current/data-interchange.md` page listed in the
+  [areas index](current.md#areas).
+
+#### interchange-schema-evolution
+
+Both the interchange contract and counterpart schemas will change. Each change must be classified
+before it can break an exchange.
+
+- Serves: `data-interchange` -- [Data interchange](../design/spec.md#data-interchange)
+- Agent status: CLEAR
+- Requires: `interchange-contract`
+- Dependencies: none.
+- User-visible outcome: `kn interchange diff` classifies contract changes as compatible, additive,
+  or breaking, and CI fails on an undersized version bump. Upgrade steps chain older packages to
+  the current version. The same classifier compares normalized external schema snapshots for
+  adapter profiles.
+- Scope boundary: A diff keyed by field ID; the version-bump gate; the upgrade-step format and
+  runner; extension data for unknown newer-minor fields; refusal of newer majors; older-version
+  export with a loss report; the external schema-fact model with its `compatible`,
+  `compatible_with_review`, and `breaking` classes. A second contract version exists only as a test
+  fixture.
+- Data and artifact paths: `contracts/interchange/upgrades/`, `src/kn/interchange/evolution/`,
+  `tests/interchange/`, `tests/fixtures/interchange/`.
+- Execution path: Write diff fixtures for every row of the specification's change table and every
+  external change type, then the classifier and the upgrade runner.
+- Acceptance gates: Each fixture change gets its declared class. An undersized bump fails the check.
+  A `0.1.0` fixture package read through the chain equals a direct export at the fixture version.
+  Unknown newer-minor fields round-trip byte-identically, and a newer major is refused. An
+  older-version export with an unmappable field is refused with a loss report.
+- Documentation target: `current/data-interchange.md` listed in the
+  [areas index](current.md#areas).
+
+#### exchange-binding-ledger
+
+Repeated exchanges need durable bindings and sync state, so nothing is resent blindly or
+overwritten unseen.
+
+- Serves: `data-interchange` -- [Data interchange](../design/spec.md#data-interchange)
+- Agent status: CLEAR
+- Requires: `interchange-contract`, `object-lineage-lookup`
+- Dependencies: none.
+- User-visible outcome: The append-only exchange ledger in `$DATA_DIR/exchange/<counterpart>/`
+  records bindings, per-field sync state, plans, and receipts, and rebuild replays it into the
+  `interchange` schema. `kn lineage` shows outbound receipts.
+- Scope boundary: The ledger format and replay, field ownership, echo suppression of values KN
+  wrote, the three-way comparison, redirect handling for bindings of merged objects,
+  duplicate-binding detection, and crash recovery that reads counterpart state instead of resending.
+  No counterpart adapter.
+- Data and artifact paths: `contracts/core/interchange/`, `src/kn/interchange/ledger/`,
+  `$DATA_DIR/exchange/`, `tests/interchange/`.
+- Execution path: Use fixture ledgers and a fake counterpart that records calls. Cover every sync
+  state and a crash between a call and its receipt.
+- Acceptance gates: Replay reproduces bindings and sync state. Each three-way fixture gives its
+  declared action. A counterpart value equal to KN's last write creates no claim, and a different
+  value becomes a counterpart claim. Two bound objects that merge produce one redirect and one
+  duplicate-binding conflict, and no write. A simulated crash recovers without a duplicate call.
+- Documentation target: `current/data-interchange.md` listed in the
+  [areas index](current.md#areas).
+
+#### interchange-package-import
+
+A package must come back into KN as evidence, with its identity and provenance intact.
+
+- Serves: `data-interchange` -- [Data interchange](../design/spec.md#data-interchange)
+- Agent status: CLEAR
+- Requires: `interchange-schema-evolution`, `mapping-and-quality-rules`
+- Dependencies: none.
+- User-visible outcome: `kn interchange import <package>` archives the package as a WARC resource
+  record and loads it through the engine. KN IDs resolve directly for the same producer, and
+  identifiers and attributes resolve them for other producers. Each imported claim cites the
+  package and the original provenance reference.
+- Scope boundary: The package source method under the same update policies (a package never
+  clears or deletes by omission), rights checks on import, and round-trip tests. Packages from
+  other producers default to `owner_private` rights until reviewed.
+- Data and artifact paths: `src/kn/interchange/importer.py`, `tests/interchange/`,
+  `tests/integration/`.
+- Execution path: Export a fixture domain, rebuild empty, import, and compare.
+- Acceptance gates: The round trip into an empty rebuild reproduces objects, KN IDs, values, missing
+  reasons, and provenance references. A second import is idempotent. A delta package changes only
+  its fields. An older upgradable package imports through the chain. A package with a forbidden
+  licence is refused.
+- Documentation target: `current/data-interchange.md` listed in the
+  [areas index](current.md#areas).
+
+### InvenTree exchange -- `inventree-exchange`
+
+#### inventree-test-service
+
+Compatibility claims need the target InvenTree release to test against, isolated from the owner's
+instance.
+
+- Serves: `inventree-exchange` -- [InvenTree exchange](../design/spec.md#inventree-exchange)
+- Agent status: CLEAR
+- Requires: `compose-database-service`
+- Dependencies: Docker Engine with Compose v2. The newest stable InvenTree release at pin time is
+  the joint target release.
+- User-visible outcome: `make inventree-up` and `make inventree-down` run the target release in
+  the Compose `inventree` profile with its own database. `INVENTREE_RELEASE=<tag>` starts a
+  candidate release beside it for the upgrade check. A seed command loads one synthetic catalogue:
+  companies, manufacturer parts, supplier parts, price breaks, parameter templates, parameters,
+  categories, parts, and attachment links.
+- Scope boundary: Test-only services on an internal network with loopback access for tests, a
+  TLS proxy with a generated test CA so that certificate verification is exercised, generated
+  non-secret credentials, the seed script, and the target tag and digest in
+  `deploy/versions.yaml`. No connection to an owner instance.
+- Data and artifact paths: `deploy/compose.yaml`, `deploy/inventree/`, `deploy/versions.yaml`,
+  `tests/fixtures/inventree/seed/`, `Makefile`.
+- Execution path: Pin the target image by tag and digest, start it from empty volumes, and seed it
+  through the API.
+- Acceptance gates: The target release reaches healthy from empty volumes. The seed loads the
+  catalogue, and the API reports the expected counts. No port is published beyond loopback.
+  `make ci` stays green without Docker.
+- Documentation target: A new `current/inventree-exchange.md` page listed in the
+  [areas index](current.md#areas).
+
+#### inventree-schema-registry
+
+The adapter must know which InvenTree API it is talking to, and must notice when an instance stops
+matching the reviewed target.
+
+- Serves: `inventree-exchange` -- [InvenTree exchange](../design/spec.md#inventree-exchange)
+- Agent status: CLEAR
+- Requires: `inventree-test-service`, `interchange-schema-evolution`, `http-fetch-safety`
+- Dependencies: The pinned test service.
+- User-visible outcome: `kn inventree probe --instance <id>` reports the software version, API
+  version, schema digest, and selected profile. `kn inventree schema capture` archives the API
+  root and the OpenAPI schema to WARC and writes a normalized snapshot with its digest to
+  `interchange/inventree/schemas/<api-version>/`. `kn inventree schema diff` reports the
+  compatibility of two snapshots for the mapped subset.
+- Scope boundary: The probe, capture, normalization into schema facts, and the reviewed snapshot
+  of the target release. Classifier fixtures for the
+  [documented change kinds](../design/integrations/inventree.md#diff-classifier-fixtures). The
+  design page's verification items, checked on the target release. No snapshots of earlier
+  releases.
+- Data and artifact paths: `src/kn/interchange/inventree/`, `interchange/inventree/schemas/`,
+  `tests/interchange/inventree/`, `tests/fixtures/inventree/`.
+- Execution path: Capture the target release twice, compare the digests, and run the classifier
+  over mutated copies of the snapshot.
+- Acceptance gates: Two captures give identical normalized digests. Planted removals, renames,
+  read-only changes, filter renames, and endpoint moves of mapped fields are `breaking`, and an
+  added optional field is `compatible`. An unreachable or non-InvenTree host fails with a declared
+  error code.
+- Documentation target: `current/inventree-exchange.md` listed in the
+  [areas index](current.md#areas).
+
+#### inventree-adapter-profiles
+
+The target release needs one reviewed mapping to the interchange contract, with a safe policy for
+instances that drift from it.
+
+- Serves: `inventree-exchange` -- [InvenTree exchange](../design/spec.md#inventree-exchange)
+- Agent status: CLEAR
+- Requires: `inventree-schema-registry`, `supply-model-contracts`
+- Dependencies: The [resource mapping](../design/integrations/inventree.md#resource-mapping).
+- User-visible outcome: The target profile in `interchange/inventree/profiles/` maps each resource
+  in the design page to interchange field IDs. It records endpoints, filters, cursors, the binding
+  location, capability flags, default field owners, and a loss report. The probed schema digest
+  selects the profile.
+- Scope boundary: The target profile, the drift policy (reads only on a compatible diff, writes
+  refused), and a validator that resolves every mapped field in the target snapshot.
+- Data and artifact paths: `interchange/inventree/profiles/`,
+  `src/kn/interchange/inventree/profiles.py`, `tests/interchange/inventree/`.
+- Execution path: Validate the profile against the target snapshot, and generate the loss report
+  from the supply model.
+- Acceptance gates: Every mapped field resolves in the target snapshot. The loss report classifies
+  every supply field as native, parameter, metadata, or not representable. A drifted schema is
+  refused for writes, and allowed for reads only with a compatible diff.
+- Documentation target: `current/inventree-exchange.md` listed in the
+  [areas index](current.md#areas).
+
+#### inventree-read-import
+
+InvenTree data must enter KN as evidence matched to existing objects, and change them only through
+the update policies.
+
+- Serves: `inventree-exchange` -- [InvenTree exchange](../design/spec.md#inventree-exchange)
+- Agent status: CLEAR
+- Requires: `inventree-adapter-profiles`, `exchange-binding-ledger`, `rebuild-from-raw`
+- Dependencies: The pinned test service. No owner instance is used here.
+- User-visible outcome: An InvenTree instance profile runs as an `adapter_api` source through
+  `kn source run` and `kn source replay`. Allowlisted resources are archived, mapped through the
+  profile, change-tracked per record, and resolved to KN IDs. Identity resolves by binding, then
+  source-qualified ID, then MPN and manufacturer or supplier and SKU, then scored match.
+  Owner-entered values carry the `owner_entered` rank, and values KN wrote come back as echoes.
+- Scope boundary: The instance profile schema (crawler blocks plus `exchange`), `owner_private`
+  rights, the resource allowlist, `limit` pagination, `updated` cursors where declared and
+  otherwise full listings compared by record hash, metadata binding reads, the
+  `counterpart_missing` binding state, HTTPS with certificate verification and an optional CA
+  file for non-loopback instances, and the instance template. No writes.
+- Data and artifact paths: `interchange/inventree/instances/`, `src/kn/interchange/inventree/`,
+  `tests/interchange/inventree/`, `tests/fixtures/inventree/`.
+- Execution path: Work fixture-first against recorded WARC from the target release, then run live
+  against the test service.
+- Acceptance gates: The synthetic catalogue yields the same KN objects, IDs, and claims on every
+  run, and a second run is idempotent. A part deleted in InvenTree marks its binding
+  `counterpart_missing` and deletes nothing in KN. An owner-entered InvenTree value wins over a
+  manufacturer value and is flagged `owner_override`. A value KN wrote earlier creates no
+  claim. A non-loopback connection over plain HTTP, or with a failing certificate, is refused.
+  Contacts, users, orders, and notes are never requested.
+  Replay without network reproduces the import, and a rebuild keeps every KN ID.
+- Documentation target: `current/inventree-exchange.md` listed in the
+  [areas index](current.md#areas).
+
+#### inventree-write-export
+
+KN knowledge must reach InvenTree only through deterministic, approved, verifiable plans.
+
+- Serves: `inventree-exchange` -- [InvenTree exchange](../design/spec.md#inventree-exchange)
+- Agent status: CLEAR
+- Requires: `inventree-read-import`
+- Dependencies: none.
+- User-visible outcome: `kn inventree plan` writes a dry-run plan with per-field changes, owners,
+  conflicts, a loss report, and a request estimate. `kn inventree apply --plan <id>` applies an
+  approved plan in dependency order, with idempotent writes, metadata bindings, read-back checks,
+  and receipts. Exchange conflicts reach the review queue.
+- Scope boundary: Writes for companies, parameter templates, manufacturer parts, supplier parts,
+  price breaks, parameters, and attachment links. Part and category creation sits behind an
+  export-profile flag. No deletion. Only licence-filtered values. Throttling and request budgets
+  apply. Apply refuses an instance profile without a write approval reference, and an instance
+  whose schema digest differs from the profile.
+- Data and artifact paths: `src/kn/interchange/inventree/export/`, `$DATA_DIR/exchange/inventree/`,
+  `tests/interchange/inventree/`.
+- Execution path: Work fixture-first with recorded responses, then run live on the test service.
+- Acceptance gates: A plan is deterministic. A second apply is a no-op. Every written value reads
+  back equal. A manual InvenTree edit to a KN-owned field is imported as an owner claim and never
+  overwritten. A no-redistribution value never appears in a plan. An unapproved or drifted instance
+  refuses to apply.
+- Documentation target: `current/inventree-exchange.md` listed in the
+  [areas index](current.md#areas).
+
+#### inventree-upgrade-check
+
+InvenTree releases arrive on their own schedule. Each candidate must be checked before `vl-itree`
+or the joint target moves to it.
+
+- Serves: `inventree-exchange` -- [InvenTree exchange](../design/spec.md#inventree-exchange)
+- Agent status: CLEAR
+- Requires: `inventree-write-export`
+- Dependencies: The candidate release image, pulled by tag and digest.
+- User-visible outcome: `kn inventree upgrade-check --release <tag>` starts the candidate beside
+  the target, seeds it, captures and diffs its schema, runs the import and export suite against
+  it, and writes a compatibility report. The report lists the profile changes needed before
+  `vl-itree` may move.
+- Scope boundary: The command, the report, and the procedure for promoting a candidate to the joint
+  target (new snapshot, new or extended profile, version manifest, and the matching `vl-itree`
+  tag). No change to a live instance.
+- Data and artifact paths: `src/kn/interchange/inventree/upgrade.py`,
+  `$DATA_DIR/exchange/upgrade-check/<run-id>/`, `docs/guide/inventree-upgrade.md`,
+  `tests/interchange/inventree/`.
+- Execution path: Run the check with the target as its own candidate, then with a fixture
+  candidate whose schema carries planted changes.
+- Acceptance gates: The target checked against itself reports `compatible` and a passing suite.
+  The fixture candidate reports each planted change with its class and the affected profile
+  fields. A failing suite blocks promotion.
+- Documentation target: `current/inventree-exchange.md` listed in the
+  [areas index](current.md#areas).
+
+#### vl-itree-read-acceptance
+
+The owner's instance must import correctly on the target release before any write is proposed.
+
+- Serves: `inventree-exchange` -- [InvenTree exchange](../design/spec.md#inventree-exchange)
+- Agent status: RUN NEEDED
+- Requires: `inventree-read-import`, `provide-inventree-instance-access`, `align-vl-itree-release`
+- Dependencies: Read access to `vl-itree` on the target release over HTTPS, its CA certificate if
+  it uses the proxy's internal CA, and network access to it from the run host.
+- User-visible outcome: An archived schema capture and a read-only import of `vl-itree`, with the
+  reviewed instance profile, and a report of losses, unmapped resources, identity matches, and
+  update-policy outcomes.
+- Scope boundary: Read-only capture and import within a request budget. No writes.
+- Data and artifact paths: `interchange/inventree/instances/vl-itree.yaml`, `$DATA_DIR/raw/`,
+  `$DATA_DIR/exchange/vl-itree/<run-id>/`, and the task record.
+- Execution path: Probe, confirm the target digest, capture, and import. Then replay the import
+  without network.
+- Acceptance gates: The probe matches the target snapshot digest over verified TLS. The replay gives
+  identical KN objects. Every unmapped native field is listed with a reason. The request count stays
+  within the budget.
+- Documentation target: `current/inventree-exchange.md` listed in the
+  [areas index](current.md#areas).
+
+#### vl-itree-write-acceptance
+
+The first write into the owner's inventory must apply exactly as approved and verify itself.
+
+- Serves: `inventree-exchange` -- [InvenTree exchange](../design/spec.md#inventree-exchange)
+- Agent status: RUN NEEDED
+- Requires: `approve-inventree-write-exchange`, `inventree-write-export`
+- Dependencies: The write approval, and a write-capable token for the `kn-exchange` user in the
+  environment.
+- User-visible outcome: The approved first plan is applied to `vl-itree` with receipts and
+  read-back. A re-import shows the written values bound to unchanged KN IDs.
+- Scope boundary: The approved plan only. Later exchanges use the same commands.
+- Data and artifact paths: `$DATA_DIR/exchange/vl-itree/`, and the task record.
+- Execution path: Re-plan, confirm the plan equals the approved one, apply, re-import, and compare.
+- Acceptance gates: Every read-back is equal. A second apply is a no-op. KN IDs and bindings are
+  unchanged after the re-import. Any read-only or lost field is in the report.
+- Documentation target: `current/inventree-exchange.md` listed in the
+  [areas index](current.md#areas).
+
+#### inventree-change-feed (optional)
+
+Listing every resource is wasteful once the instance can report its own changes.
+
+- Serves: `inventree-exchange` -- [InvenTree exchange](../design/spec.md#inventree-exchange)
+- Agent status: CLEAR
+- Requires: `vl-itree-read-acceptance`
+- Dependencies: Access to `/api/audit/` for the exchange user on the target release.
+- User-visible outcome: Incremental imports read the InvenTree audit log as a change feed and fetch
+  only the changed objects. A periodic full listing catches missed events.
+- Scope boundary: A cursor over audit events per resource and a profile capability flag. No
+  webhooks or plugins.
+- Data and artifact paths: `src/kn/interchange/inventree/`, `tests/interchange/inventree/`.
+- Execution path: Use fixture audit pages from the target release, then compare live with a full
+  listing.
+- Acceptance gates: On the test service, a change-feed import followed by a full listing finds no
+  difference. An audit gap triggers a full listing.
+- Documentation target: `current/inventree-exchange.md` listed in the
+  [areas index](current.md#areas).
+
 ### Obsidian export -- `obsidian-export`
 
 #### obsidian-export-core
@@ -570,7 +1158,7 @@ Users need a safe, read-only Obsidian subset of the knowledge base.
 
 - Serves: `obsidian-export` -- [Obsidian export](../design/spec.md#obsidian-export)
 - Agent status: CLEAR
-- Requires: `identity-and-fact-selection`, `message-catalog-core`
+- Requires: `canonical-fact-selection`, `message-catalog-core`
 - Dependencies: none.
 - User-visible outcome: `kn export obsidian --profile <id> --locale en|uk` writes a verified vault
   ZIP and manifest from one snapshot.
@@ -916,7 +1504,8 @@ Dashboards must deploy reproducibly from one definition in both locales.
 
 - Serves: `space-dashboards` -- [Space dashboards](../design/spec.md#space-dashboards)
 - Agent status: CLEAR
-- Requires: `space-analytics-marts`, `dashboards-as-code`, `review-queue-cli`
+- Requires: `space-analytics-marts`, `dashboards-as-code`, `review-queue-cli`,
+  `object-lineage-lookup`
 - Dependencies: none.
 - User-visible outcome: An analyst can open "Why this fact?" on a selected value and see why
   it won, the evidence, permitted alternatives, and any applicable review decision.
@@ -1115,21 +1704,21 @@ Product identity and condition-bound observations need typed contracts.
 
 - Serves: `microelectronics-elt` -- [Microelectronics ELT](../design/spec.md#microelectronics-elt)
 - Agent status: CLEAR
-- Requires: `rebuild-from-raw`
+- Requires: `rebuild-from-raw`, `supply-model-contracts`
 - Dependencies: [Microelectronics design](../design/domains/microelectronics.md).
 - User-visible outcome: The `microelectronics` schema holds families, models, MPNs, dies, IP
   blocks, kits, facilities, projects, benchmark runs, and observations with condition sets and
   comparison groups.
-- Scope boundary: Contracts and policies. Origin facts are stored but never gate anything until
-  the owner policy exists.
+- Scope boundary: Contracts and policies that extend the shared part and supply classes rather
+  than redefining them. Origin facts are stored but never gate anything until the owner policy
+  exists.
 - Data and artifact paths: `domains/microelectronics/contracts/`, `src/kn/domains/microelectronics/`,
   `tests/domains/microelectronics/`.
 - Execution path: Write the contracts from the design page and the reviewed attribute dictionary,
   then compile and rebuild.
 - Acceptance gates: MPN identity requires the legal manufacturer and the exact MPN. Typical and
   guaranteed values cannot share a field. Unit conversions are logged.
-- Documentation target: `current/microelectronics-domain.md` listed in the
-  [areas index](current.md#areas).
+- Documentation target: `current/microelectronics-domain.md` listed in the [areas index](current.md#areas).
 
 #### microelectronics-source-mlperf-tiny
 
@@ -1204,7 +1793,8 @@ Product baselines need exact datasheet observations for the watchlist families.
   map revisions and stated conditions, and link evidence to the applicable market scope.
 - Acceptance gates: Offline fixtures cover a cross-border rule, a bloc rule, a superseded
   measure, and missing coverage. Replay reproduces the as-of results and source locators.
-- Documentation target: `current/microelectronics-domain.md` listed in the [areas index](current.md#areas).
+- Documentation target: `current/microelectronics-domain.md` listed in the [areas
+  index](current.md#areas).
 
 ### Microelectronics dashboards -- `microelectronics-dashboards`
 
@@ -1279,11 +1869,13 @@ Security properties need one consolidated, repeatable proof.
 
 - Serves: `operations-hardening` -- [Operations hardening](../design/spec.md#operations-hardening)
 - Agent status: CLEAR
-- Requires: `reverse-proxy-auth`, `obsidian-export-core`, `http-fetch-safety`
+- Requires: `reverse-proxy-auth`, `obsidian-export-core`, `http-fetch-safety`,
+  `inventree-write-export`
 - Dependencies: none.
 - User-visible outcome: `make security` runs the checks for schema isolation, loader DDL denial,
   restricted-fact denial, unauthorized users, secrets in logs and ZIPs, SSRF, archive traversal,
-  and decompression bombs.
+  decompression bombs, counterpart writes without approval, and personal data in counterpart
+  reads.
 - Scope boundary: Consolidation and gap filling across existing tests.
 - Data and artifact paths: `tests/security/`, `Makefile`.
 - Execution path: Map each property in the specification to a test. Withdraw permission for one
@@ -1301,7 +1893,8 @@ Recovery objectives must be measured, not assumed.
 - Requires: `provide-target-server-and-backup`, `security-test-suite`
 - Dependencies: The target server and the off-host backup destination.
 - User-visible outcome: Nightly backups (databases, globals, raw ledger and changed WARC files,
-  decision logs) and a written recovery runbook.
+  decision logs, the identity event log, and the exchange ledger) and a written recovery
+  runbook.
 - Scope boundary: Backup jobs, retention, the restore drill into an isolated instance, and
   achieved RPO and RTO.
 - Data and artifact paths: `deploy/backup/`, `docs/guide/operations-runbook.md`,
@@ -1344,7 +1937,7 @@ After release approval, schema change must preserve data instead of rebuilding.
 - Dependencies: The release approval and its scope.
 - User-visible outcome: Contracts at `1.0.0` and versioned migrations generated from contract
   diffs. Destructive-change refusal, dataset versions, and the released-environment guard on
-  rebuild are active.
+  rebuild are active. The interchange contract is frozen at `1.0.0` with its upgrade chain.
 - Scope boundary: A bounded comparison of migration tools (Atlas Community Edition first) against
   the generated DDL, then baseline and guard. No feature work.
 - Data and artifact paths: `contracts/`, `migrations/`, `src/kn/db/`, `tests/integration/`.
@@ -1401,6 +1994,82 @@ Core Ukrainian terminology needs review by a Ukrainian technical speaker.
 - Acceptance gates: The reviewer signs off in the task record, and the bilingual checks pass after
   the corrections.
 - Documentation target: `current/localization.md` listed in the [areas index](current.md#areas).
+
+### InvenTree exchange -- `inventree-exchange`
+
+#### provide-inventree-instance-access
+
+Reading the owner's InvenTree instance needs access the owner grants and data boundaries the owner
+sets.
+
+- Serves: `inventree-exchange` -- [InvenTree exchange](../design/spec.md#inventree-exchange)
+- Agent status: BLOCKED BY HUMAN
+- Dependencies: The owner provides the instance's HTTPS base URL and, when the proxy uses its
+  internal CA, the exported root certificate for the instance profile. The owner also provides a
+  dedicated `kn-exchange` InvenTree user with read-only roles, its token in the local environment,
+  and the list of allowed resources. An agent prepares the access checklist and the instance profile
+  template from the [vl-itree deployment
+  facts](../design/integrations/inventree.md#the-vl-itree-deployment).
+- User-visible outcome: A non-secret instance profile draft and a recorded access decision.
+- Scope boundary: Access and facts only. Credentials stay out of Git. Write access is a separate
+  decision in `approve-inventree-write-exchange`.
+- Data and artifact paths: `interchange/inventree/instances/vl-itree.yaml`, and the task record.
+- Execution path: The owner supplies access. The agent records the non-secret profile and checks
+  the token with a read-only `GET /api/`.
+- Acceptance gates: The instance answers with its software and API versions using the provided
+  token, and the profile records the allowed resources.
+- Documentation target: `current/inventree-exchange.md` listed in the
+  [areas index](current.md#areas).
+
+#### align-vl-itree-release
+
+`vl-itree` must run exactly the target InvenTree release that KN is tested against, over TLS, and
+with changed passwords, because it can run on another machine.
+
+- Serves: `inventree-exchange` -- [InvenTree exchange](../design/spec.md#inventree-exchange)
+- Agent status: HUMAN-GATED
+- Requires: `inventree-test-service`
+- Dependencies: The owner runs the
+  [vl-itree upgrade prompt](../design/integrations/vl-itree-upgrade-prompt.md) in the `vl-itree`
+  repository, reviews the change, takes an offline backup, and deploys. The owner then creates the
+  `vl-itree` release tag that pins the InvenTree release, and reports the InvenTree tag, image
+  digest, and release tag. If the prompt finds a newer stable release than the test service pins,
+  the test service is re-pinned through `inventree-upgrade-check` first.
+- User-visible outcome: `vl-itree` runs the target release from pinned images, serves HTTPS to
+  other machines, and refuses to start with unchanged passwords. `deploy/versions.yaml` records the
+  InvenTree tag, image digest, and `vl-itree` release tag.
+- Scope boundary: The
+  [vl-itree requirements](../design/integrations/inventree.md#vl-itree-requirements) and their
+  deployment, in the `vl-itree` repository. KN never deploys `vl-itree`.
+- Data and artifact paths: The `vl-itree` repository change and release tag,
+  `deploy/versions.yaml`, and the task record.
+- Execution path: The owner runs the prompt, reviews, deploys, and tags. The agent records the
+  versions that the instance reports over HTTPS.
+- Acceptance gates: The instance reports the target release and API version over verified TLS
+  from another machine. Its image reference matches `deploy/versions.yaml`. The launcher's refusal
+  of a default password is shown in the prompt's verification output.
+- Documentation target: `current/inventree-exchange.md` listed in the
+  [areas index](current.md#areas).
+
+#### approve-inventree-write-exchange
+
+Writing KN knowledge into the owner's inventory is the owner's authorization.
+
+- Serves: `inventree-exchange` -- [InvenTree exchange](../design/spec.md#inventree-exchange)
+- Agent status: HUMAN-GATED
+- Requires: `inventree-write-export`, `vl-itree-read-acceptance`
+- Dependencies: An agent prepares a dry-run plan against `vl-itree` with its loss report and
+  conflicts, and proposes the export profile and field ownership.
+- User-visible outcome: An approval reference in the instance profile, a write-capable token for
+  `kn-exchange` with the fewest roles the export profile needs, and the approved first plan ID.
+- Scope boundary: Write authorization, the export profile, field ownership, and whether part and
+  category creation is enabled.
+- Data and artifact paths: `interchange/inventree/instances/vl-itree.yaml`, and the task record.
+- Execution path: The owner reviews the dry run, then approves, narrows, or rejects it.
+- Acceptance gates: The decision is recorded, and `kn source validate` accepts the instance profile
+  with its write approval.
+- Documentation target: `current/inventree-exchange.md` listed in the
+  [areas index](current.md#areas).
 
 ### Space ELT -- `space-elt`
 
@@ -1524,10 +2193,13 @@ Leaving the development phase is the owner's decision.
 - Serves: `release-readiness` -- [Release readiness](../design/spec.md#release-readiness)
 - Agent status: HUMAN-GATED
 - Requires: `review-ukrainian-terminology`, `review-space-dashboards`, `performance-gate`,
-  `verify-official-taxonomies`, `skos-export`
+  `verify-official-taxonomies`, `skos-export`, `vl-itree-write-acceptance`,
+  `inventree-upgrade-check`, `identity-match-calibration`
 - Dependencies: The evidence of every capability evaluation, compiled by an agent into a release
   checklist. Through their own prerequisites, these gates cover the bilingual suite, all three
-  domains' dashboards, scheduled ingestion, security, and the restore drill.
+  domains' dashboards, scheduled ingestion, security, the restore drill, InvenTree exchange with
+  `vl-itree`, and identity calibration. If a newer stable InvenTree release exists at approval,
+  the upgrade check runs on it first, so the joint release ships on the newest stable release.
 - User-visible outcome: Approval of the release scope, or a narrowed scope with deferred
   capabilities named.
 - Scope boundary: Release decision only.
