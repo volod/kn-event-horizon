@@ -34,39 +34,15 @@ recorded decision before later groups build on the group.
 
 ### Runtime platform -- `runtime-platform`
 
-#### compose-database-service
-
-The core engine needs a pinned, local PostgreSQL with PostGIS before any contract can be compiled
-or loaded.
-
-- Serves: `runtime-platform` -- [Runtime platform](../design/spec.md#runtime-platform)
-- Agent status: CLEAR
-- Dependencies: Docker Engine with Compose v2 on the development host. Choose the newest PostgreSQL
-  major that has an official PostGIS image at pin time.
-- User-visible outcome: `make db-up`, `make db-down`, and `make db-reset` manage a healthy local
-  database `kn` with its schemas and roles. The data survives restarts.
-- Scope boundary: The PostgreSQL and PostGIS service, role bootstrap (owner, loader, and reader per
-  schema), `.env.example` entries without secrets, and the version manifest. Kestra, Superset, the
-  proxy, and inference come in their own tasks.
-- Data and artifact paths: `deploy/compose.yaml`, `deploy/postgres/`, `deploy/versions.yaml`,
-  `.env.example`, `Makefile`, the `$DATA_DIR/postgres/` volume, and a numbered task record.
-- Execution path: Pin the image by tag and digest. Add a healthcheck, an internal network, a
-  non-root runtime where the image allows it, and an initialization script for schemas and roles.
-  Add Make targets that source `scripts/shared/common.sh`.
-- Acceptance gates: Starting from empty volumes reaches healthy. A restart preserves a probe row. No
-  port is published to the host network. The roles exist with the declared privileges. `make ci`
-  passes.
-- Documentation target: A new `current/runtime-platform.md` page listed in the
-  [areas index](current.md#areas).
-
 #### database-integration-harness
 
 Tests that touch SQL need one repeatable database fixture locally and in CI.
 
 - Serves: `runtime-platform` -- [Runtime platform](../design/spec.md#runtime-platform)
 - Agent status: CLEAR
-- Requires: `compose-database-service`
-- Dependencies: The pinned PostGIS image from the version manifest.
+- Dependencies: The pinned PostGIS image from the version manifest and the local service in
+  [runtime platform](current/runtime-platform.md). The service publishes no port, so tests reach
+  it from a container on its network or through a mounted socket.
 - User-visible outcome: `make test-integration` runs database tests against the Compose service,
   and GitHub Actions runs them against a PostGIS service container.
 - Scope boundary: A pytest marker, a fixture that creates and drops a scratch schema set per
@@ -87,7 +63,7 @@ isolation are cheapest to fix before contracts compile against them.
 
 - Serves: `runtime-platform` -- [Runtime platform](../design/spec.md#runtime-platform)
 - Agent status: CLEAR
-- Requires: `compose-database-service`, `database-integration-harness`
+- Requires: `database-integration-harness`
 - Dependencies: The accepted task records of the group and the [implementation
   audit](../guide/planning-workflow.md#implementation-audits) checks. Docker Engine with Compose v2.
 - User-visible outcome: Later groups build on a verified database service and test harness. The
@@ -1266,7 +1242,6 @@ instance.
 
 - Serves: `inventree-exchange` -- [InvenTree exchange](../design/spec.md#inventree-exchange)
 - Agent status: CLEAR
-- Requires: `compose-database-service`
 - Dependencies: Docker Engine with Compose v2. The joint target release is InvenTree `1.7.3` (API
   version 570), pinned by the `vl-itree` release `v0.1.0`. Its
   [target release](../design/integrations/inventree.md#target-release) table gives the InvenTree,
@@ -1827,7 +1802,6 @@ Scheduled ingestion needs a pinned orchestrator without host-level privileges.
 
 - Serves: `orchestration` -- [Orchestration](../design/spec.md#orchestration)
 - Agent status: CLEAR
-- Requires: `compose-database-service`
 - Dependencies: A pinned Kestra OSS release whose Process task runner is confirmed.
 - User-visible outcome: Kestra runs with its own `kestra` database. A dedicated non-root image
   holds the pinned `kn` package and runs `kn source run`.
@@ -1918,7 +1892,7 @@ Dashboards need a pinned, bilingual, read-only BI service.
 
 - Serves: `space-dashboards` -- [Space dashboards](../design/spec.md#space-dashboards)
 - Agent status: CLEAR
-- Requires: `compose-database-service`, `message-catalog-core`
+- Requires: `message-catalog-core`
 - Dependencies: A pinned Superset release that bundles a `uk` catalog.
 - User-visible outcome: Superset runs with `en` and `uk` enabled, its own `superset` metadata
   database, a read-only `analytics` connection, and SQL Lab restrictions.

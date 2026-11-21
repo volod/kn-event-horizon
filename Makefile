@@ -15,7 +15,8 @@ export MYPY_CACHE_DIR := $(DATA_ROOT)/cache/mypy
 
 .PHONY: help bootstrap venv lock run doctor format format-check lint typecheck test coverage \
 	complexity-gate shell-lint-gate lint-md lint-doc-links lint-spec-plan plan-status \
-	ci-checks ci ci-github build quality code-quality quality-report
+	ci-checks ci ci-github build quality code-quality quality-report \
+	db-up db-down db-reset db-verify
 
 help: ## List available targets
 	@awk 'BEGIN {FS = ":.*## "; print "Usage: make <target>\n"} /^[a-zA-Z0-9_.-]+:.*## / {printf "  %-20s %s\n", $$1, $$2}' $(MAKEFILE_LIST)
@@ -101,6 +102,18 @@ build: ## Build source and wheel distributions
 quality: ci-checks coverage lint-md build ## Run the full local quality suite
 
 code-quality: quality ## Alias for the full local quality suite
+
+db-up: ## Start the local PostGIS database, wait for healthy, and apply the role bootstrap
+	@source "$(PROJECT_ROOT)/scripts/shared/common.sh"; kn_load_env; kn_db_up
+
+db-down: ## Stop the local database service and keep its data volume
+	@source "$(PROJECT_ROOT)/scripts/shared/common.sh"; kn_load_env; kn_db_down
+
+db-reset: ## Delete the local database volume and start the database from empty
+	@source "$(PROJECT_ROOT)/scripts/shared/common.sh"; kn_load_env; kn_db_reset
+
+db-verify: ## Probe schemas, roles, and privileges in the running database (rolled back)
+	@source "$(PROJECT_ROOT)/scripts/shared/common.sh"; kn_load_env; kn_db_verify
 
 quality-report: ## Report Python/shell files over the 250-line soft limit
 	@find src tests scripts -type f \( -name '*.py' -o -name '*.sh' \) -print0 | \

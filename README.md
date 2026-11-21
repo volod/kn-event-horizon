@@ -5,8 +5,9 @@ and technology domains from public or legitimately licensed sources, normalize i
 knowledge models, and keep the provenance and history of each fact. Product capabilities enter
 through the [specification](docs/design/spec.md) before they are planned and built.
 
-The repository currently provides the typed `kn` package and its `kn` command, a locked development
-environment, and shared rules for planning, implementation, and verification.
+The repository currently provides the typed `kn` package and its `kn` command, a local PostgreSQL
+and PostGIS service, a locked development environment, and shared rules for planning,
+implementation, and verification.
 
 ## Setup
 
@@ -36,6 +37,10 @@ make plan-status
 | `make format` | Apply Ruff formatting |
 | `make ci` | Run required local and CI checks |
 | `make quality` | Run CI checks, coverage, Markdown lint, and package build |
+| `make db-up` | Start the local PostgreSQL and PostGIS service and wait until it is healthy |
+| `make db-down` | Stop the database service and keep its data |
+| `make db-reset` | Delete the local database volume and start from empty |
+| `make db-verify` | Probe the database schemas, roles, and privileges |
 | `make plan-status` | Count tasks and show lane priorities after checking open-task prerequisites |
 | `make lint-spec-plan` | Check the capability registry, plan, and closed-research register |
 | `make lint-doc-links` | Check relative Markdown files and anchors |
@@ -75,6 +80,7 @@ Keep these files focused on their integration. [CLAUDE.md](CLAUDE.md), [GEMINI.m
 src/kn/                    production package and kn CLI
 tests/                     unit and governance tests
 domains/                   domain packages; seeds/proposals/ holds the converted workbooks
+deploy/                    Compose stack, service configuration, and the version manifest
 docs/design/               product specification and domain design pages
 docs/impl/plan.md          forward-only work
 docs/impl/current/         delivered behavior
