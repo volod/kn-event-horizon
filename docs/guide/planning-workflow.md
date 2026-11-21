@@ -95,6 +95,59 @@ Capability groups follow the registry. Within a group:
 The summary prefers required work across capabilities, then uses registry and document order.
 If capability priorities change, edit the registry order and move the same groups in both lanes.
 
+## Implementation audits
+
+Each capability group in the agent lane ends with an optional `<group>-implementation-audit` task.
+The audit checks the group's built work against its specification section before later groups
+build on it, so that known issues are fixed or scheduled while they are still cheap to change.
+
+The audit requires the group's required `CLEAR` tasks. The group's open `RUN NEEDED` and human-lane
+tasks are reviewed for the readiness of their inputs, not for results. Required work never depends
+on an audit. A group without required `CLEAR` tasks has an audit that requires its other tasks. A
+clean audit is a valid result when the record shows the evidence for each check. The task names
+the group's focus areas in its scope boundary and its planted cases in its execution path.
+
+The record gives each check a result:
+
+1. **Implementation validation.** Every acceptance gate of the group's accepted tasks reproduces on
+   the current tree from the commands in their records. The current-state page matches the actual
+   commands, interfaces, paths, and error codes.
+2. **Specification conformance.** Each promise, integrity rule, boundary, and evaluation item of
+   the owning specification section maps to code and a test, or is listed as a gap. No behavior
+   exists outside the boundary. Contracts and interfaces that other groups consume match what
+   those groups expect.
+3. **Design scope.** Each decision that would be expensive to change later is listed with its
+   reason: identifiers, contract and file layouts, CLI and error-code surfaces, extension points,
+   and the seams that later groups use. Changes that the specification already names, such as new
+   sources, domains, counterparts, releases, locales, scale targets, and release migration mode,
+   fit by extension without a breaking change.
+4. **Corner cases.** Empty, missing, duplicate, out-of-order, partial, oversized, malformed, and
+   hostile input; time zones and clock skew; Unicode and bilingual text; interruption, retry, and
+   concurrent runs; rerun idempotency; and a rebuild from durable inputs with identical results.
+   Each case has a test or a recorded reason why it cannot occur.
+5. **Best practices.** The [project rules](../../AGENTS.md) and the practices of the group's
+   tools: typing, cohesive modules, named constants, logging, secret handling, ASCII, pinned
+   dependencies, deterministic network-free tests, failure-path coverage, least privilege, input
+   validation, observability, and declared performance budgets.
+6. **Debt.** Parallel implementations of one rule, dead code, skipped or weakened checks, open
+   `TODO` notes, and tests that assert internals instead of behavior.
+
+Each finding gets an ID, a severity (`blocker`, `major`, or `minor`), evidence (a file and line, a
+command and its output, or a failing test), and one disposition:
+
+| Disposition | Rule |
+| --- | --- |
+| Fixed | An in-scope defect is fixed in the audit, starting from a failing regression test. |
+| Scheduled bug | A defect too large for the audit becomes a plan task in the owning group, with observed behavior, impact, and an acceptance check. |
+| Scheduled feature | A missing behavior that the specification already promises becomes a plan task with its operator problem. Tasks that need it gain a `Requires` entry. |
+| Specification change | A change to a product promise follows [Choose the work contract](#choose-the-work-contract) before any task is planned. |
+| Research | An uncertain path becomes a task with `Research: yes`. |
+| Accepted | A risk kept on purpose is listed under known limitations on the current-state page, with its reason and what would reopen it. |
+
+A `blocker` is never accepted. An audit fixes defects and schedules the rest; it does not add
+features or refactor without a finding. A finding owned by another group is scheduled in that
+group. Record the before and after task counts like any other plan change.
+
 ## Record file naming
 
 Name each task record `NNNN-<group>-<task-id>.md`. Use the next unused four-digit sequence
