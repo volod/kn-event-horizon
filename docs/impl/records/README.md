@@ -34,5 +34,6 @@ decision. A record can name a plan task by ID because plan headings disappear on
 | 0017 | `data-contracts-implementation-audit` | [0017-data-contracts-data-contracts-implementation-audit.md](0017-data-contracts-data-contracts-implementation-audit.md) |
 | 0018 | `adhoc` prefetched dataset locations | [0018-adhoc-prefetched-dataset-locations.md](0018-adhoc-prefetched-dataset-locations.md) |
 | 0019 | `storage-contract-registry` | [0019-data-contracts-storage-contract-registry.md](0019-data-contracts-storage-contract-registry.md) |
+| 0020 | `semantic-model-contracts` | [0020-ontology-taxonomy-semantic-model-contracts.md](0020-ontology-taxonomy-semantic-model-contracts.md) |
 
-Next unused sequence is `0020`.
+Next unused sequence is `0021`.

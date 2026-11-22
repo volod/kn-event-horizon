@@ -42,11 +42,12 @@ and the platform policy uses typed SQLAlchemy statements, so no SQL text reaches
 | `jsonschema/<table>.json` | Closed JSON Schema wire validation with KN metadata |
 | `manifest.json` | Contract digest and SHA-256 for every generated artifact |
 
-SATCOM generates 100 artifacts plus the manifest, and the governance contract 10. Files use ASCII
-and LF line endings, and no line ends in a blank, so `git diff --check` stays clean. JSON uses
-sorted object keys and compact separators. YAML source definitions use JSON syntax, which is also
-valid YAML. Source array order remains significant, including column order, composite keys and
-policy priority criteria. Reordering JSON object keys or using equivalent YAML changes no bytes.
+Including manifests, SATCOM generates 101 artifacts, governance 11, and the semantic meta-model 62.
+Files use ASCII and LF line endings, and no line ends in a blank, so `git diff --check` stays clean.
+JSON uses sorted object keys and compact separators. YAML source definitions use JSON syntax,
+which is also valid YAML. Source array order remains significant, including column order,
+composite keys and policy priority criteria. Reordering JSON object keys or using equivalent YAML
+changes no bytes.
 Reordering tables or `customProperties` entries changes only `contract.json` and the digest, which
 every artifact embeds; see [known
 limitations](../data-contracts.md#observed-package-and-limitations). Two processes with different
@@ -163,8 +164,9 @@ Malformed or unsafe previous manifests fail before writes; symlinked destination
 Compilation is not an atomic directory transaction: an interrupted write can leave drift, which
 `--check` detects and a rerun repairs.
 
-The committed `generated/contracts/kn.space.satcom/` is the one drift reference. `make ci` runs
-`make contract-check`, so a contract, mapping or generator change fails until `make contract-compile`
+Each committed `generated/contracts/<contract-id>/` is the drift reference for that registered
+contract. `make ci` runs `make contract-check`, so a contract, mapping or generator change fails
+until `make contract-compile`
 refreshes the directory and the diff is reviewed and committed. Review the generated DDL and models
 in that diff; do not bypass the check.
 

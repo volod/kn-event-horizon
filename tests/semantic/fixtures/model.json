@@ -1,0 +1,415 @@
+{
+  "namespaces": [
+    {
+      "id": "space.demo",
+      "domain": "space",
+      "code": "demo",
+      "definition": "Synthetic test scheme"
+    }
+  ],
+  "namespace_labels": [
+    {
+      "namespace_id": "space.demo",
+      "locale": "en",
+      "label": "Demo"
+    },
+    {
+      "namespace_id": "space.demo",
+      "locale": "uk",
+      "label": "\u041f\u0440\u0438\u043a\u043b\u0430\u0434"
+    }
+  ],
+  "terms": [
+    {
+      "id": "space.demo.Organization",
+      "namespace_id": "space.demo",
+      "code": "Organization",
+      "kind": "entity_class",
+      "status": "active",
+      "definition": "Organization definition"
+    },
+    {
+      "id": "space.demo.Satellite",
+      "namespace_id": "space.demo",
+      "code": "Satellite",
+      "kind": "entity_class",
+      "status": "active",
+      "definition": "Satellite definition"
+    },
+    {
+      "id": "space.demo.operates",
+      "namespace_id": "space.demo",
+      "code": "operates",
+      "kind": "relation_type",
+      "status": "active",
+      "definition": "operates definition"
+    },
+    {
+      "id": "space.demo.scheme",
+      "namespace_id": "space.demo",
+      "code": "scheme",
+      "kind": "concept_scheme",
+      "status": "active",
+      "definition": "scheme definition"
+    },
+    {
+      "id": "space.demo.001",
+      "namespace_id": "space.demo",
+      "code": "001",
+      "kind": "concept",
+      "status": "active",
+      "definition": "001 definition"
+    },
+    {
+      "id": "space.demo.002",
+      "namespace_id": "space.demo",
+      "code": "002",
+      "kind": "concept",
+      "status": "active",
+      "definition": "002 definition"
+    },
+    {
+      "id": "space.demo.003",
+      "namespace_id": "space.demo",
+      "code": "003",
+      "kind": "concept",
+      "status": "active",
+      "definition": "003 definition"
+    },
+    {
+      "id": "space.demo.mapping",
+      "namespace_id": "space.demo",
+      "code": "mapping",
+      "kind": "concept_mapping",
+      "status": "active",
+      "definition": "mapping definition"
+    },
+    {
+      "id": "space.demo.tag",
+      "namespace_id": "space.demo",
+      "code": "tag",
+      "kind": "entity_tag",
+      "status": "active",
+      "definition": "tag definition"
+    },
+    {
+      "id": "space.demo.power",
+      "namespace_id": "space.demo",
+      "code": "power",
+      "kind": "attribute_definition",
+      "status": "active",
+      "definition": "power definition"
+    },
+    {
+      "id": "space.demo.measured",
+      "namespace_id": "space.demo",
+      "code": "measured",
+      "kind": "condition_set",
+      "status": "active",
+      "definition": "measured definition"
+    },
+    {
+      "id": "space.demo.profile",
+      "namespace_id": "space.demo",
+      "code": "profile",
+      "kind": "comparison_profile",
+      "status": "active",
+      "definition": "profile definition"
+    },
+    {
+      "id": "space.demo.rubric",
+      "namespace_id": "space.demo",
+      "code": "rubric",
+      "kind": "rubric",
+      "status": "active",
+      "definition": "rubric definition"
+    }
+  ],
+  "labels": [
+    {
+      "term_id": "space.demo.Organization",
+      "locale": "en",
+      "label": "Organization en",
+      "definition": "Organization definition en",
+      "inverse_label": null
+    },
+    {
+      "term_id": "space.demo.Organization",
+      "locale": "uk",
+      "label": "Organization uk",
+      "definition": "Organization definition uk",
+      "inverse_label": null
+    },
+    {
+      "term_id": "space.demo.Satellite",
+      "locale": "en",
+      "label": "Satellite en",
+      "definition": "Satellite definition en",
+      "inverse_label": null
+    },
+    {
+      "term_id": "space.demo.Satellite",
+      "locale": "uk",
+      "label": "Satellite uk",
+      "definition": "Satellite definition uk",
+      "inverse_label": null
+    },
+    {
+      "term_id": "space.demo.operates",
+      "locale": "en",
+      "label": "operates en",
+      "definition": "operates definition en",
+      "inverse_label": "inverse operates en"
+    },
+    {
+      "term_id": "space.demo.operates",
+      "locale": "uk",
+      "label": "operates uk",
+      "definition": "operates definition uk",
+      "inverse_label": "inverse operates uk"
+    },
+    {
+      "term_id": "space.demo.scheme",
+      "locale": "en",
+      "label": "scheme en",
+      "definition": "scheme definition en",
+      "inverse_label": null
+    },
+    {
+      "term_id": "space.demo.scheme",
+      "locale": "uk",
+      "label": "scheme uk",
+      "definition": "scheme definition uk",
+      "inverse_label": null
+    },
+    {
+      "term_id": "space.demo.001",
+      "locale": "en",
+      "label": "001 en",
+      "definition": "001 definition en",
+      "inverse_label": null
+    },
+    {
+      "term_id": "space.demo.001",
+      "locale": "uk",
+      "label": "001 uk",
+      "definition": "001 definition uk",
+      "inverse_label": null
+    },
+    {
+      "term_id": "space.demo.002",
+      "locale": "en",
+      "label": "002 en",
+      "definition": "002 definition en",
+      "inverse_label": null
+    },
+    {
+      "term_id": "space.demo.002",
+      "locale": "uk",
+      "label": "002 uk",
+      "definition": "002 definition uk",
+      "inverse_label": null
+    },
+    {
+      "term_id": "space.demo.003",
+      "locale": "en",
+      "label": "003 en",
+      "definition": "003 definition en",
+      "inverse_label": null
+    },
+    {
+      "term_id": "space.demo.003",
+      "locale": "uk",
+      "label": "003 uk",
+      "definition": "003 definition uk",
+      "inverse_label": null
+    },
+    {
+      "term_id": "space.demo.power",
+      "locale": "en",
+      "label": "power en",
+      "definition": "power definition en",
+      "inverse_label": null
+    },
+    {
+      "term_id": "space.demo.power",
+      "locale": "uk",
+      "label": "power uk",
+      "definition": "power definition uk",
+      "inverse_label": null
+    },
+    {
+      "term_id": "space.demo.measured",
+      "locale": "en",
+      "label": "measured en",
+      "definition": "measured definition en",
+      "inverse_label": null
+    },
+    {
+      "term_id": "space.demo.measured",
+      "locale": "uk",
+      "label": "measured uk",
+      "definition": "measured definition uk",
+      "inverse_label": null
+    },
+    {
+      "term_id": "space.demo.profile",
+      "locale": "en",
+      "label": "profile en",
+      "definition": "profile definition en",
+      "inverse_label": null
+    },
+    {
+      "term_id": "space.demo.profile",
+      "locale": "uk",
+      "label": "profile uk",
+      "definition": "profile definition uk",
+      "inverse_label": null
+    },
+    {
+      "term_id": "space.demo.rubric",
+      "locale": "en",
+      "label": "rubric en",
+      "definition": "rubric definition en",
+      "inverse_label": null
+    },
+    {
+      "term_id": "space.demo.rubric",
+      "locale": "uk",
+      "label": "rubric uk",
+      "definition": "rubric definition uk",
+      "inverse_label": null
+    }
+  ],
+  "alternative_labels": [
+    {
+      "term_id": "space.demo.001",
+      "locale": "en",
+      "label": "First concept"
+    }
+  ],
+  "entity_classes": [
+    {
+      "id": "space.demo.Organization",
+      "parent_id": null
+    },
+    {
+      "id": "space.demo.Satellite",
+      "parent_id": null
+    }
+  ],
+  "relation_types": [
+    {
+      "id": "space.demo.operates",
+      "source_class_id": "space.demo.Organization",
+      "target_class_id": "space.demo.Satellite",
+      "cardinality": "one_to_many",
+      "minimum_evidence": "primary",
+      "guarded_errors": "Operation is distinct from ownership"
+    }
+  ],
+  "concept_schemes": [
+    {
+      "id": "space.demo.scheme",
+      "origin": "kb_extension",
+      "publisher": null,
+      "edition": null,
+      "source_uri": null,
+      "source_sha256": null,
+      "verification_state": "unverified",
+      "verification_reason": "Synthetic fixture; no official publication"
+    }
+  ],
+  "concepts": [
+    {
+      "id": "space.demo.001",
+      "scheme_id": "space.demo.scheme",
+      "parent_id": null,
+      "replacement_id": null
+    },
+    {
+      "id": "space.demo.002",
+      "scheme_id": "space.demo.scheme",
+      "parent_id": "space.demo.001",
+      "replacement_id": null
+    },
+    {
+      "id": "space.demo.003",
+      "scheme_id": "space.demo.scheme",
+      "parent_id": null,
+      "replacement_id": null
+    }
+  ],
+  "concept_mappings": [
+    {
+      "id": "space.demo.mapping",
+      "source_id": "space.demo.002",
+      "target_id": "space.demo.003",
+      "mapping_type": "closeMatch",
+      "method": "fixture",
+      "evidence_id": "fixture.evidence"
+    }
+  ],
+  "entity_tags": [
+    {
+      "id": "space.demo.tag",
+      "entity_id": "fixture.entity",
+      "concept_id": "space.demo.002",
+      "method": "fixture",
+      "evidence_id": "fixture.evidence",
+      "verification_state": "unreviewed",
+      "valid_from": "2026-01-01T00:00:00Z",
+      "valid_to": "2026-02-01T00:00:00Z"
+    }
+  ],
+  "attribute_definitions": [
+    {
+      "id": "space.demo.power",
+      "entity_class_id": "space.demo.Satellite",
+      "value_type": "number",
+      "unit": "W",
+      "quantity_type": "power"
+    }
+  ],
+  "condition_sets": [
+    {
+      "id": "space.demo.measured"
+    }
+  ],
+  "condition_values": [
+    {
+      "condition_set_id": "space.demo.measured",
+      "attribute_id": "space.demo.power",
+      "value": "1.00",
+      "unit": "W"
+    }
+  ],
+  "comparison_profiles": [
+    {
+      "id": "space.demo.profile",
+      "entity_class_id": "space.demo.Satellite",
+      "condition_set_id": "space.demo.measured"
+    }
+  ],
+  "profile_attributes": [
+    {
+      "profile_id": "space.demo.profile",
+      "attribute_id": "space.demo.power",
+      "required": true
+    }
+  ],
+  "rubrics": [
+    {
+      "id": "space.demo.rubric",
+      "profile_id": "space.demo.profile"
+    }
+  ],
+  "rubric_criteria": [
+    {
+      "rubric_id": "space.demo.rubric",
+      "attribute_id": "space.demo.power",
+      "weight": "1.25",
+      "direction": "minimize"
+    }
+  ]
+}

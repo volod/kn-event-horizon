@@ -34,36 +34,14 @@ recorded decision before later groups build on the group.
 
 ### Ontology and taxonomy -- `ontology-taxonomy`
 
-#### semantic-model-contracts
-
-Ontology and taxonomy content needs its own contracted data model before any import.
-
-- Serves: `ontology-taxonomy` -- [Ontology and taxonomy](../design/spec.md#ontology-and-taxonomy)
-- Agent status: CLEAR
-- Dependencies: The accepted [contract compiler](current/data-contracts/compiler.md) and its local
-  reference catalog interface, and the [deployment set](current/data-contracts.md#deployment-set)
-  that registers its contracts.
-- User-visible outcome: The `semantic` schema holds namespaces, entity classes, relation types,
-  concept schemes, concepts, mappings, entity tags, attribute definitions, condition sets,
-  comparison profiles, and rubrics, with per-locale labels.
-- Scope boundary: The contracts and their validation rules: unique IDs, no cycles, parents exist,
-  endpoints exist, mappings don't conflict, statuses, and verification states. No content import.
-- Data and artifact paths: `contracts/core/semantic/`, `src/kn/semantic/`, `tests/semantic/`.
-- Execution path: Write the contracts, compile, and add validation code with invalid fixtures for
-  every rule.
-- Acceptance gates: Fixtures with a cycle, a missing parent, a duplicate preferred label, an unknown
-  endpoint, and an ID collision are rejected. `make ci` passes.
-- Documentation target: A new `current/ontology-taxonomy.md` page listed in the
-  [areas index](current.md#areas).
-
 #### seed-vocabulary-import
 
 The converted workbook proposals must become reviewed seed data with a row-by-row reconciliation.
 
 - Serves: `ontology-taxonomy` -- [Ontology and taxonomy](../design/spec.md#ontology-and-taxonomy)
 - Agent status: CLEAR
-- Requires: `semantic-model-contracts`
-- Dependencies: The [reviewed seed hook](current/data-contracts/rebuild.md#reviewed-seed-hook) and
+- Dependencies: The [semantic meta-model](current/ontology-taxonomy.md), the
+  [reviewed seed hook](current/data-contracts/rebuild.md#reviewed-seed-hook) and
   the proposal JSON under `domains/<domain>/seeds/proposals/`, documented in
   [domains/README.md](../../domains/README.md).
 - User-visible outcome: Every rebuild loads reviewed space, GDELT, and microelectronics ontology and
@@ -136,7 +114,7 @@ changing them later breaks stored data and links.
 
 - Serves: `ontology-taxonomy` -- [Ontology and taxonomy](../design/spec.md#ontology-and-taxonomy)
 - Agent status: CLEAR
-- Requires: `semantic-model-contracts`, `seed-vocabulary-import`, `verify-official-taxonomies`,
+- Requires: `seed-vocabulary-import`, `verify-official-taxonomies`,
   `skos-export`
 - Dependencies: The accepted task records of the group and the [implementation
   audit](../guide/planning-workflow.md#implementation-audits) checks.
@@ -168,8 +146,7 @@ Every later capability needs one durable KN ID per object before any claim refer
 
 - Serves: `object-identity` -- [Object identity](../design/spec.md#object-identity)
 - Agent status: CLEAR
-- Requires: `semantic-model-contracts`
-- Dependencies: none.
+- Dependencies: The [semantic meta-model](current/ontology-taxonomy.md).
 - User-visible outcome: The `identity` schema holds objects, identifiers with authority levels,
   identity attributes, source records with versions, links, match records, lifecycle events, and
   redirects. `kn db rebuild` replays the append-only identity event log in `$DATA_DIR/identity/`
@@ -414,7 +391,7 @@ Claims, evidence, and canonical facts need contracts that carry every provenance
 
 - Serves: `evidence-model` -- [Evidence model](../design/spec.md#evidence-model)
 - Agent status: CLEAR
-- Requires: `semantic-model-contracts`, `identity-registry-contracts`
+- Requires: `identity-registry-contracts`
 - Dependencies: none.
 - User-visible outcome: The `evidence` schema holds alias, claim, claim confirmation, evidence,
   relation assertion, canonical fact, and review item datasets with value-or-missing-reason

@@ -38,11 +38,12 @@ def registry_copy(tmp_path: Path, entries: list[dict]) -> Path:
     return path
 
 
-def test_the_registry_deploys_governance_first_then_satcom() -> None:
+def test_the_registry_deploys_governance_first_then_domain_contracts() -> None:
     contracts = registered_contracts()
     assert [(item.contract_id, item.schema) for item in contracts] == [
         (MARKER_CONTRACT, "system"),
         ("kn.space.satcom", "space"),
+        ("kn.core.semantic", "semantic"),
     ]
     validate_registry(fixture_contracts())
 
@@ -96,7 +97,7 @@ def _rename_table(contract, name: str):  # type: ignore[no-untyped-def]
 
 @pytest.mark.parametrize("collision", ["contract", "field", "table", "index", "marker"])
 def test_one_deployment_has_unique_contracts_fields_and_names(collision: str) -> None:
-    system, satcom, space, semantic = fixture_contracts()
+    system, satcom, core_semantic, space, semantic = fixture_contracts()
     if collision == "contract":
         space = replace(space, contract_id=satcom.contract_id)
     elif collision == "field":
@@ -108,9 +109,9 @@ def test_one_deployment_has_unique_contracts_fields_and_names(collision: str) ->
     elif collision == "index":
         # The fixture's index name, used as a SATCOM table name in the same schema.
         space = _rename_table(space, "pk_countries")
-    contracts = [system, satcom, space, semantic]
+    contracts = [system, satcom, core_semantic, space, semantic]
     if collision == "marker":
-        contracts = [satcom, system, space, semantic]
+        contracts = [satcom, system, core_semantic, space, semantic]
     with pytest.raises(ContractError, match="registry"):
         validate_registry(contracts)
 

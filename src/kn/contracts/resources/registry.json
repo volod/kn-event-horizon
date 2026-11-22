@@ -5,6 +5,9 @@
     },
     {
       "path": "satcom/1.0.0.json"
+    },
+    {
+      "path": "semantic/1.0.0.json"
     }
   ]
 }

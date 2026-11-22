@@ -5,7 +5,7 @@ space source, kept as the first data integration example. More prefetched datase
 through a shared path (`prefetched-dataset-method` in the [plan](../plan.md)); today the adapter is
 SATCOM-specific. SATCOM is a subset of space, not a domain, service, or PostgreSQL schema of its
 own. This implementation supplies the first bounded profile
-of the [data contracts capability](../../design/spec.md#data-contracts). The remaining ontology,
+of the [data contracts capability](../../design/spec.md#data-contracts). The remaining ontology content,
 identity, interchange and raw replay work stays in the [plan](../plan.md).
 
 ## One definition for each model
@@ -21,9 +21,16 @@ in the wheel, so validation and deployment do not need network access.
 deployment order, with paths relative to the registry and an optional reference catalog per entry:
 
 ```json
-{"contracts": [{"path": "system/1.0.0.json"}, {"path": "satcom/1.0.0.json"}]}
+{
+  "contracts": [
+    {"path": "system/1.0.0.json"},
+    {"path": "satcom/1.0.0.json"},
+    {"path": "semantic/1.0.0.json"}
+  ]
+}
 ```
 
+The semantic entry deploys the [ontology meta-model](ontology-taxonomy.md), with no content import.
 The first entry is the governance contract `kn.system.governance`. Its table
 `system.installed_contracts` is the installed-contract marker: one row per registered contract with
 version, digest, storage schema and table names. `kn.contracts.registry.registered_contracts()`
