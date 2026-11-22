@@ -13,10 +13,12 @@ helper. The targets refuse to run as root and need Docker Engine with the Compos
 
 | Command | Behavior |
 | --- | --- |
-| `make db-up` | Creates the password file and `$DATA_DIR/postgres/` if they are missing, starts the service, waits up to 180 s for healthy, then applies the bootstrap again and prints the host address and the password file path. When the service does not become healthy, it prints the last 30 log lines and a hint about a taken port or a failed first initialization, and exits 1. |
+| `make db-up` | Creates the password file and `$DATA_DIR/postgres/` if they are missing, starts the service, waits up to 180 s for server readiness, then runs Python platform governance, Alembic upgrade, contract and privilege verification, and prints the host address and the password file path. When the service does not become healthy, it prints the last 30 log lines and a hint about a taken port or a failed first initialization, and exits 1. |
 | `make db-down` | Removes the containers and the networks. `$DATA_DIR/postgres/` is kept. |
-| `make db-reset` | Runs `db-down`, deletes `$DATA_DIR/postgres/`, then runs `db-up`. The password file and the rest of `$DATA_DIR` are kept. It refuses a `DATA_DIR` that is empty, relative, or `/`. |
-| `make db-verify` | Runs the role probe against the running database. It prints `kn roles verified: 10 schemas, 30 roles, postgis 3.7.0`, or fails with an error that names the first failed check. |
+| `make db-reset` | Runs `db-down`, deletes `$DATA_DIR/postgres/`, then runs `db-up`. The password file and the rest of `$DATA_DIR` are kept. It refuses a `DATA_DIR` that is empty, relative, or `/`, and refuses `KN_ENVIRONMENT=released`. |
+| `make db-upgrade` | Applies Python platform policy and the Alembic head, then verifies the installed contract. |
+| `make db-rebuild` | Recreates only contract-managed space projections when `KN_ENVIRONMENT=development`; archived packages remain available for backfill. |
+| `make db-verify` | Runs the Python role, contract and structure probes against the running database. It prints `kn roles verified: 10 schemas, 30 roles, postgis 3.7.0`, or fails with an error that names the first failed check. |
 | `make test-integration` | Runs the tests marked `integration` against the running database. It does not start or stop the database. See [Integration tests](#integration-tests). |
 | `make ci-local` | Runs `make ci`, then every local-only test (`integration` or `heavy`) against the running database. See [Where tests run](#where-tests-run). |
 
@@ -58,7 +60,7 @@ and service `postgres`.
 | Host port | `127.0.0.1:15432` (`KN_POSTGRES_HOST_PORT`) to container port 5432; no other host address |
 | Networks | `internal`: internal, no IPv6, `gateway_mode_ipv4: isolated`, for traffic between services. `loopback`: not internal, no IPv6, `host_binding_ipv4: 127.0.0.1`, `enable_ip_masquerade: false`; it carries only the published port |
 | Outbound traffic | None. TCP to outside addresses times out, because `loopback` has no source NAT. `dns: [127.0.0.1]` makes Docker's embedded resolver forward unknown names to the container's own loopback, so external names do not resolve, while service names on the stack networks still do |
-| Health | TCP `pg_isready` to `127.0.0.1` and the role `kn_system_owner` exists |
+| Health | TCP `pg_isready` to `127.0.0.1`; `make db-up` subsequently requires successful governance and verification |
 | Restart | `unless-stopped`, 1 min stop grace period, 256 MB shared memory |
 
 The password file defaults to `$DATA_DIR/secrets/postgres-password`. `make db-up` creates it with
@@ -72,12 +74,18 @@ the container. Unix socket connections inside the container are trusted, and onl
 
 ## Schemas and roles
 
-`deploy/postgres/initdb/10-kn-bootstrap.sql` runs once from the image entrypoint on an empty
-volume, and `make db-up` applies it again every time. It is idempotent and runs in one
-transaction. It replaces the image's own init script, so `kn` has no `topology` schema and the
-cluster has no `template_postgis` database. It first takes the transaction-level advisory lock
-`(0x4B4E4253, 0)`, so concurrent runs, such as two `make db-up` at once, wait for each other
-instead of failing with `tuple concurrently updated`.
+`src/kn/db/platform.py` reads the schema and role policy from
+`src/kn/contracts/resources/platform.json`. `make db-up` starts the server, then invokes
+`kn db upgrade` through the host virtual environment. The mounted init directory contains only
+`.gitkeep`, replacing the image's own init SQL so `kn` has no `topology` schema or
+`template_postgis` database. Deployment has no SQL files.
+
+The Python platform policy, Alembic upgrade and verification run in one transaction. The policy
+first takes transaction-level advisory lock `(0x4B4E4253, 0)`; concurrent deployments serialize.
+Failures return nonzero and roll back governance changes; server readiness alone is not successful
+deployment. Retry `make db-upgrade` after correcting the error. Contract digest drift during
+development needs an explicit guarded rebuild and source backfill, described under
+[data contracts](data-contracts.md#development-baseline-and-release-evolution).
 
 - PostGIS is installed in schema `public`, and every run updates it to the version of the image
   (`ALTER EXTENSION postgis UPDATE`). `PUBLIC` keeps `USAGE` on `public` but not `CREATE`.
@@ -155,10 +163,10 @@ and the reader selects. The loader is refused `CREATE` and `TRUNCATE`, the reade
 of the list. A temporary login in `kn_system_reader` cannot `SET ROLE` to the superuser or to any
 other KN role. The test fails when a probe object outlives its transaction.
 
-`tests/integration/test_bootstrap.py` applies the bootstrap as `make db-up` does: four concurrent
-connections run it three times each, and the installed PostGIS version afterwards equals the
+`tests/integration/test_bootstrap.py` applies the Python platform policy as `make db-up` does: four concurrent
+SQLAlchemy connections run it three times each, and the installed PostGIS version afterwards equals the
 image's default version and the manifest. The tests change nothing on a database that
-`make db-up` started, because the bootstrap converges to its declared state.
+`make db-up` started, because the platform policy converges to its declared state.
 
 ## Where tests run
 
@@ -191,8 +199,8 @@ by `make ci-local` on the development host.
 | Shell helpers | `make test` | `tests/scripts/test_common_db.py` passes against a stubbed `docker`, including the default and configured host port, the refused port values, and the test connection |
 | Harness without a database | `make test` | `tests/test_integration_harness.py` passes: configuration, deselection of `integration` and `heavy` tests, the skip reason, the failure for an unreachable database without the password, and marking by fixture use |
 | GitHub runs unit tests only | `make test` | `tests/deploy/test_ci_workflow.py` passes: no job starts a service or a job container, the workflow runs only `uv sync` and `make ci-github`, and `make -n` shows the unit selection for `ci-github` and the added local-only selection for `ci-local` |
-| Integration tests | `make db-up`, then `make test-integration` | `34 passed`; afterwards no `kn_test_*` schema and no advisory lock remain |
-| Every test | `make db-up`, then `make ci-local` | the `make ci` checks pass, then `34 passed` for the local-only tests |
+| Integration tests | `make db-up`, then `make test-integration` | `36 passed`; afterwards no `kn_test_*` schema and no advisory lock remain |
+| Every test | `make db-up`, then `make ci-local` | the `make ci` checks pass, then `36 passed` for the local-only tests |
 | GitHub gate from a fresh copy | In a copy of the tracked and untracked, not ignored files, for 3.12 and 3.13: `uv sync --locked --extra dev --python <version>`, then `make ci-github PYTHON_VERSION=<version>` | both exit 0 without Docker or a database |
 | Healthy from empty | `make db-reset` | exits 0 with the container `Healthy` |
 | Roles and privileges | `make db-verify` | the `kn roles verified` notice |
@@ -200,12 +208,12 @@ by `make ci-local` on the development host.
 | Password required | `psql -w -h 127.0.0.1 -p 15432 -U postgres -d kn` | `fe_sendauth: no password supplied` |
 | No outbound traffic | In the container: `timeout 5 bash -c 'exec 3<>/dev/tcp/1.1.1.1/53'` and `getent hosts one.one.one.one` | both fail, while a container on the default bridge connects and resolves |
 
-`deploy/postgres/verify-roles.sql` runs every probe as one transaction and rolls it back. For each
-schema the owner creates a table with a PostGIS column. The loader inserts, updates, selects, and
-deletes, and is refused `CREATE`, `ALTER`, `TRUNCATE`, and `DROP`. The reader selects and is refused
-`INSERT` and `CREATE`. For every pair of schemas the owner, loader, and reader of one are refused in
-the other. The probe states its expected schema list itself instead of reading it from the
-bootstrap.
+`src/kn/db/verification.py` checks declared role access to every schema, database CONNECT and
+TEMPORARY privileges, CREATE denial in `public`, and table/sequence default grants. Probe tables
+are created as each schema's owner in a savepoint that is always rolled back. It also compares the
+installed PostgreSQL structure with contract-generated metadata. The integration role tests retain
+actual allowed and refused operations. `governance.py` additionally checks safe role attributes,
+schema ownership, the Alembic head and installed contract digest.
 
 The acceptance run, its planted faults, and its evidence are in
 [record 0006](../records/0006-runtime-platform-compose-database-service.md). The loopback port and
@@ -233,10 +241,9 @@ the image reference in `deploy/compose.yaml` together; `make test` checks that t
 
 ## Durable findings
 
-- After a failed first initialization, the image entrypoint skips init on the next start and the
-  server comes up without KN roles. The role check in the healthcheck keeps such a container
-  unhealthy, and `make db-up` fails after about 100 s with the SQL error in the log tail. Recover
-  with `make db-reset`.
+- Governance now runs after TCP server readiness. A failed policy or migration rolls back and
+  makes `make db-up` fail; the running server can still be healthy. Retry `make db-upgrade` after
+  fixing the cause. Readiness is not permission to load an unverified schema.
 - `pg_isready` reports `no attempt` for a user ID without a passwd entry unless `--username` is
   given. The healthcheck passes it explicitly.
 - On Docker Engine 29.9.3, an `internal: true` network still gives the host a bridge address that
@@ -310,6 +317,11 @@ the image reference in `deploy/compose.yaml` together; `make test` checks that t
   recorded in the manifest as a fallback.
 - The bootstrap converges what it declares: it re-grants privileges and restores role
   attributes, schema owners, and schema grants. It does not revoke extra table grants or role
-  memberships added by hand. `make db-verify` reports those.
+  memberships added by hand. `make db-verify` reports privilege violations visible to its probes;
+  it does not audit the complete role membership graph.
 - Adding a schema to the bootstrap reaches an existing volume on the next `make db-up`. Removing
   one needs `make db-reset`.
+
+The Python governance replacement, development baseline and initial space dataset are documented
+in [data contracts](data-contracts.md) and
+[record 0011](../records/0011-data-contracts-satcom-schema-governance.md).

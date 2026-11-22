@@ -14,11 +14,11 @@ Task fields, statuses, ordering, and the capability-gap lifecycle are defined in
 the highest-priority candidate in each lane after filtering open task prerequisites. Check its
 external and manual dependencies before starting.
 
-The project is in the [development phase](../design/spec.md#development-and-release-phases). No
-task adds versioned storage schemas, migration files, or storage compatibility code before
-`release-migration-mode`. The single exception is the external boundary: the interchange contract,
-its upgrade steps, and counterpart adapter profiles are versioned from their first task, as the
-specification requires. Object identity, partial-update tracking, interchange, and InvenTree
+The project uses ODCS storage contract version `1.0.0` and a single editable Python
+SQLAlchemy/Alembic baseline during development. Rebuild and backfill replace development revision
+chains. First release freezes this baseline and enables subsequent versioned migration history.
+The external interchange contract and counterpart adapters remain
+independently versioned. Object identity, partial-update tracking, interchange, and InvenTree
 compatibility are core work and come before the domain pipelines.
 Source tasks follow the [onboarding workflow](../design/spec.md#source-management) and the
 [TDD growth rule](../design/spec.md#ingestion-engine). Each source adds failing fixtures first, then
@@ -115,9 +115,8 @@ Contracts can only be authoritative once the standard and the exporter are pinne
 
 - Serves: `data-contracts` -- [Data contracts](../design/spec.md#data-contracts)
 - Agent status: CLEAR
-- Dependencies: Network access to the Bitol ODCS releases and the Data Contract CLI package. The
-  official version was v3.1.0 at review, and a later minor was reported. Pin whichever is the
-  current official release.
+- Dependencies: Network access to the Bitol ODCS releases and, if needed, the Data Contract CLI
+  package. The initial profile pins v3.1.0; broader feature coverage remains to be validated.
 - User-visible outcome: `kn contract lint` validates ODCS YAML against the pinned JSON Schema and
   the `kn.*` extension schemas.
 - Scope boundary: The pinned schema with its checksum, the extension JSON Schemas for every family
@@ -138,18 +137,18 @@ Generated DDL and models must come only from contracts, deterministically.
 - Serves: `data-contracts` -- [Data contracts](../design/spec.md#data-contracts)
 - Agent status: CLEAR
 - Requires: `contract-toolchain-pin`
-- Dependencies: The pinned Data Contract CLI export coverage for PostgreSQL. Generated DDL
-  applies to scratch schemas of the
+- Dependencies: The initial [SQLAlchemy profile](current/data-contracts.md) and its remaining
+  ODCS feature gaps. Generated metadata applies to scratch schemas of the
   [integration test harness](current/runtime-platform.md#integration-tests).
 - User-visible outcome: `kn contract compile` writes DDL, Pydantic models, JSON Schema, dbt source
   definitions, and contract docs into `generated/`, and `--check` fails on drift.
 - Scope boundary: Reference checks, canonical serialization, the contract digest, and templates
-  for PostGIS geometry, checks, comments, and indexes. Supplemental SQL needs an approval note. No
-  migrations.
-- Data and artifact paths: `src/kn/contracts/`, `generated/`, `contracts/supplemental/`,
+  for PostGIS geometry, checks, comments, and indexes. Python platform policy covers roles and
+  grants. Keep one editable development baseline and version evolution after first release.
+- Data and artifact paths: `src/kn/contracts/`, `generated/`, `src/kn/db/`,
   `tests/contracts/`.
-- Execution path: Use the exporter where it covers a feature, and use reviewed templates where it
-  does not. Mark generated files and add a CI drift check.
+- Execution path: Extend the shared model and SQLAlchemy compiler where a required ODCS feature
+  is unsupported. Keep engine exports deterministic and update the CI drift manifest.
 - Acceptance gates: Compiling twice is byte-identical. Generated DDL applies to the integration
   database. A broken reference fails. Drift fails CI.
 - Documentation target: `current/data-contracts.md` listed in the
@@ -157,7 +156,7 @@ Generated DDL and models must come only from contracts, deterministically.
 
 #### development-rebuild-mode
 
-Development replaces migrations with a full rebuild from durable inputs.
+Development keeps an explicit disposable rebuild alongside normal in-place migrations.
 
 - Serves: `data-contracts` -- [Data contracts](../design/spec.md#data-contracts)
 - Agent status: CLEAR
@@ -1531,12 +1530,13 @@ once a vault is shared.
 
 #### space-domain-contracts
 
-The SATCOM pilot needs typed domain tables before its first source.
+Canonical space tables must represent the preserved source examples without conflating their meanings.
 
 - Serves: `space-elt` -- [Space ELT](../design/spec.md#space-elt)
 - Agent status: CLEAR
 - Requires: `seed-vocabulary-import`, `evidence-claim-contracts`
-- Dependencies: [Space domain model](../design/domains/space.md#domain-model).
+- Dependencies: [Space domain model](../design/domains/space.md#domain-model) and the initial
+  [space example dataset](current/data-contracts.md#source-preservation-and-import).
 - User-visible outcome: The `space` schema holds every pilot table, with claim links,
   coverage-kind and availability vocabularies, and space selection policies.
 - Scope boundary: Contracts, domain policies, and fixtures. No source parsers.
@@ -1546,7 +1546,8 @@ The SATCOM pilot needs typed domain tables before its first source.
   reviewed seed rows, compile, and rebuild.
 - Acceptance gates: Every table compiles and rebuilds. Fixtures prove that planned and actual
   launches, cataloged and operational status, and recurring and one-time tariff amounts cannot be
-  stored in the same field.
+  stored in the same field. Reuse the real SATCOM mixture to preserve model versus individual
+  spacecraft identity, mass bases, claim qualifiers, financial bases and missing reasons.
 - Documentation target: A new `current/space-domain.md` page listed in the
   [areas index](current.md#areas).
 
@@ -2509,10 +2510,10 @@ After release approval, schema change must preserve data instead of rebuilding.
 - User-visible outcome: Contracts at `1.0.0` and versioned migrations generated from contract
   diffs. Destructive-change refusal, dataset versions, and the released-environment guard on
   rebuild are active. The interchange contract is frozen at `1.0.0` with its upgrade chain.
-- Scope boundary: A bounded comparison of migration tools (Atlas Community Edition first) against
-  the generated DDL, then baseline and guard. No feature work.
+- Scope boundary: Release verification of the SQLAlchemy/Alembic governance against the full
+  generated model, then baseline and guard. No feature work.
 - Data and artifact paths: `contracts/`, `migrations/`, `src/kn/db/`, `tests/integration/`.
-- Execution path: Compare the tools on fixture diffs, adopt one, baseline, and add migration tests.
+- Execution path: Verify Alembic on full-model fixture diffs, baseline, and add release migration tests.
 - Acceptance gates: An empty-database migration and an additive `1.0.0` -> `1.1.0` change preserve
   records, identifiers, and provenance. A breaking change without a plan is refused. Rebuild is
   refused when released.

@@ -10,10 +10,10 @@ from collections.abc import Iterator
 import pytest
 from psycopg import errors, sql
 
-from tests.deploy.bootstrap_sql import bootstrap_schemas
+from kn.db.platform import SCHEMAS as PLATFORM_SCHEMAS
 from tests.integration.harness import Connection
 
-SCHEMAS = bootstrap_schemas()
+SCHEMAS = list(PLATFORM_SCHEMAS)
 
 
 def _role(schema: str, kind: str) -> sql.Identifier:

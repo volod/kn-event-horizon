@@ -16,6 +16,19 @@ The pilot implements only the tables below. The full space dictionaries are stil
 system must work with sparse evidence and clearly labeled unknowns. The map is a market and
 geographic awareness tool, not a tracking system.
 
+## Initial source dataset
+
+The owner-provided `satcom_enriched_package` is a source dataset within space, not a separate
+cosmos or SATCOM domain. Its 28 CSV tables preserve textual source IDs, claims, contextual
+observations, finance and deployment bases, missing reasons and field dictionaries. The initial
+source projection and immutable package archive are described in the
+[current data-contract documentation](../../impl/current/data-contracts.md).
+
+Source rows keep their own identity namespace and snapshot ID. Mapping them into the canonical
+space tables below requires reviewed identity and ontology decisions; importing them does not
+assert that a source spacecraft model is an individual spacecraft, a plan is a deployment, or
+an opportunity is a verified contract. The workbook remains archived with its formulas and charts.
+
 ## Classification axes
 
 The seed proposals in `domains/space/seeds/proposals/` use three independent axes plus the

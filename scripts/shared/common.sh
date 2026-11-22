@@ -68,8 +68,6 @@ KN_COMPOSE_FILE="$PROJECT_ROOT/deploy/compose.yaml"
 KN_DB_SERVICE="postgres"
 KN_DB_NAME="kn"
 KN_DB_SUPERUSER="postgres"
-KN_DB_BOOTSTRAP_SQL="/docker-entrypoint-initdb.d/10-kn-bootstrap.sql"
-KN_DB_VERIFY_SQL="$PROJECT_ROOT/deploy/postgres/verify-roles.sql"
 KN_DB_WAIT_TIMEOUT_SECONDS=180
 KN_DB_LOG_TAIL_LINES=30
 KN_DB_PASSWORD_BYTES=32
@@ -159,7 +157,7 @@ kn_db_up() {
       "A failed first initialization needs make db-reset." >&2
     return 1
   fi
-  kn_db_psql --file="$KN_DB_BOOTSTRAP_SQL" || return 1
+  kn_db_govern upgrade || return 1
   echo "Database $KN_DB_NAME is on $KN_DB_HOST_ADDRESS:$port" \
     "(user $KN_DB_SUPERUSER, password in $(kn_db_password_file))"
 }
@@ -168,8 +166,16 @@ kn_db_down() {
   kn_compose down
 }
 
+kn_db_govern() {
+  local port
+  port="$(kn_db_host_port)" || return 1
+  KN_DATABASE_URL="postgresql://$KN_DB_SUPERUSER@$KN_DB_HOST_ADDRESS:$port/$KN_DB_NAME" \
+    KN_DATABASE_PASSWORD_FILE="$(kn_db_password_file)" \
+    "$PROJECT_ROOT/.venv/bin/kn" db "$1"
+}
+
 kn_db_verify() {
-  kn_db_psql <"$KN_DB_VERIFY_SQL"
+  kn_db_govern verify
 }
 
 # Export the integration test connection (tests/integration/harness.py): the loopback port as a
@@ -184,6 +190,10 @@ kn_db_test_env() {
 
 # Delete the database volume and start from empty. The password file is kept.
 kn_db_reset() {
+  if [ "${KN_ENVIRONMENT:-}" = "released" ]; then
+    echo "ERROR: database reset is refused in a released environment" >&2
+    return 1
+  fi
   local volume
   case "$DATA_DIR" in
     /?*) ;;

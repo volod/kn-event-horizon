@@ -71,8 +71,8 @@ Product principles:
 - **Versioned at the boundary.** The interchange contract and every adapter for an external system
   are versioned and compatibility-tested from their first task. KN does not control the external
   versions. See [Data interchange](#data-interchange).
-- **Simple until release inside the boundary.** KN's own storage schemas use rebuild-from-archive
-  instead of versioned schemas and compatibility code during development. See
+- **Versioned storage with a development baseline.** Internal contracts start at `1.0.0`, edited
+  in place until release. SQLAlchemy and Alembic support later reviewed evolutions. See
   [Development and release phases](#development-and-release-phases).
 
 ## Scope
@@ -94,7 +94,7 @@ initial requirements, not later refinements. After the core come space ELT, orch
 space dashboards; then GDELT and microelectronics ELT and dashboards; then operations hardening and
 release readiness. Optional local AI extraction comes last.
 
-Exclusions: no Kubernetes, Kafka, Elasticsearch, graph server, vector database, distributed agents,
+Exclusions: no Kubernetes, Kafka, Elasticsearch service, graph server, vector database, distributed agents,
 or full GDELT replication. No satellite tasking or operations control. No public-facing custom
 frontend; a minimal bilingual page is justified only where Superset, Kestra, and the CLI cannot meet
 an acceptance test. No runtime dependency on a coding agent. No claims of comprehensive coverage or
@@ -133,7 +133,7 @@ plan for 8-16 logical cores and confirm by measurement.
 
 | Component | Choice | Boundary |
 | --- | --- | --- |
-| Contracts | ODCS v3, exact minor pinned with its JSON Schema checksum; Data Contract CLI as a build-time tool | Validate and export supported artifacts; never silently drop custom extensions |
+| Contracts | ODCS v3, exact minor and JSON Schema checksum pinned; SQLAlchemy and Alembic governance | Validate and export supported artifacts; never silently drop custom extensions |
 | Ontology and taxonomy | Reviewed JSON seed files loaded into the `semantic` schema; SKOS Turtle generated with RDFLib | SKOS is an interchange export; typed relation rules live in the meta-model |
 | Storage | PostgreSQL with PostGIS, newest major that has an official PostGIS image at pin time; one database `kn` with one schema per domain | ACID, constraints, geometry, time series; no cross-database transactions needed |
 | Raw archive | WARC 1.1 (ISO 28500:2017) via `warcio`; Parquet fetch ledger | Original bytes plus origin URI and fetch time; the only fetch output |
@@ -195,7 +195,7 @@ contracts/core/                  core ODCS contracts: system, semantic, identity
                                  interchange ledger, export
 contracts/core/identity/match-profiles/   reviewed match profiles per entity class
 contracts/interchange/<version>/ versioned KN interchange contract and its upgrade steps
-contracts/supplemental/          approved supplemental SQL with its approval note
+src/kn/db/                      Python platform policy and Alembic schema governance
 interchange/inventree/schemas/<api-version>/   normalized InvenTree schema snapshots and digests
 interchange/inventree/profiles/  adapter profiles, one per supported API version range
 interchange/inventree/instances/ instance profiles (non-secret), such as vl-itree.yaml
@@ -233,14 +233,19 @@ The project has two phases. The switch between them is the
 
 **Development phase** (from now until release approval):
 
-- Contracts carry no version numbers. There are no migration files and no backward-compatibility
-  code paths.
-- Instead of a contract version, every loaded row records `contract_digest`, the SHA-256 of the
-  canonical contract set, and `code_digest`, the Git commit of the parser that produced it.
-- A schema change is applied with `kn db rebuild`. It drops and recreates the KN schemas from
-  generated DDL, loads the reviewed seeds, and replays the raw archive, curation files, and
-  decision logs through current code. Rebuild never fetches, and it does not touch the Kestra or
-  Superset metadata databases.
+- Storage contracts declare version `1.0.0` from their first model. During rapid development this
+  version and the single Alembic baseline are updated in place; every edit changes a canonical
+  digest, without adding development revisions or backward-compatibility branches.
+- SQLAlchemy metadata, strict Elasticsearch mappings, Avro schemas, and validation schemas derive
+  from the same ODCS definitions and reviewed `kn.*` metadata. Elasticsearch and Avro outputs are
+  portable artifacts; no additional service is introduced.
+- Normal deployment checks the installed digest. A changed development contract requires an
+  explicit guarded rebuild and backfill from durable inputs. Development test data is disposable.
+- At the first release, freeze contract `1.0.0` and the Alembic baseline. Subsequent schema changes
+  require new semantic versions and reviewed Python Alembic revisions from contract diffs. Refuse
+  destructive or incompatible changes until a reviewed expand/backfill/contract migration exists.
+- There are no handwritten SQL deployment files. Development keeps the same governance mechanism
+  that release migrations use, without accumulating revisions for provisional models.
 - The raw archive, Git-managed seeds and curation files, decision logs, the identity event log, and
   the exchange ledger are the durable inputs. The database is a reproducible projection of them.
 - Review decisions re-attach after rebuild by deterministic claim keys. A decision that no longer
@@ -254,19 +259,19 @@ The project has two phases. The switch between them is the
   classified by a contract diff, and each breaking change ships an upgrade step from the previous
   version. External adapter profiles, such as the [InvenTree profiles](#inventree-exchange), each
   declare the counterpart API versions they support. This code is required because counterpart
-  systems change versions on their own schedule. It does not version internal tables.
+  systems change versions on their own schedule. Storage versions evolve independently.
 - The ontology, taxonomy, and source-catalogue "data migrations" are the idempotent seed loads
   that every rebuild runs, using deterministic identifiers.
 - Rebuild is refused in an environment marked as released.
 
 **Release phase** (after release approval):
 
-- Contracts get semantic versions starting at `1.0.0`, and datasets record their versions. The
+- Storage contracts stabilize at `1.0.0`, and datasets retain their versions and digests. The
   interchange contract is frozen at `1.0.0`, and later breaking changes need a new major version
   with an upgrade step and a deprecation window.
 - Schema changes go through reviewed, versioned migrations generated from the contract diff. The
-  migration tool is selected by [release readiness](#release-readiness); Atlas Community Edition
-  is the leading candidate. Destructive changes and incompatible releases are refused by default.
+  migration tool is Alembic over contract-generated SQLAlchemy metadata. Release readiness verifies
+  its safety on the full model. Destructive changes and incompatible releases are refused by default.
   Renames require stable field IDs and an alias plan, and changes follow
   expand -> backfill -> switch consumers -> contract.
 - Seed changes become versioned data migrations.
@@ -521,22 +526,30 @@ KN extension JSON Schemas. No top-level keys are added to ODCS. The extension fa
 | `kn.i18nKey` | Stable display key resolved through the message catalogs |
 | `kn.lineageRefs` | Declared datasets and mappings, not observed runtime lineage |
 
-The compiler (`kn contract lint|compile`) validates contracts against the pinned schema and the
-extension schemas. It checks references to ontology classes, vocabulary schemes, and field IDs, and
-produces a canonical serialization and a digest. It generates PostgreSQL DDL, Pydantic models and
-JSON Schema for load validation, dbt source definitions, and contract documentation into
-`generated/`. Data Contract CLI exports are used where they cover a feature; reviewed templates fill
-PostGIS geometry, check constraints, comments, and indexes. Supplemental SQL (extensions, roles,
-grants, functions) lives in `contracts/supplemental/` and needs an approval note. No handwritten DDL
-may redefine a contract, and nothing alters schemas at runtime.
+The compiler (`kn contract lint|compile`) validates against a checksum-pinned ODCS schema and
+closed KN extensions. It produces canonical digests, SQLAlchemy metadata, strict Elasticsearch
+mappings, Avro schemas, and JSON Schema validation. Decimal values remain exact; partial dates stay
+strings with declared precision rather than invented days. Unsupported types or metadata fail.
+PostgreSQL deployment uses Python Alembic revisions and a shared Python role/extension policy;
+there are no handwritten SQL deployment scripts. Generated artifacts cannot redefine contracts.
+
+The initial SATCOM import contract preserves all 28 reference tables, native textual IDs,
+composite keys, deferrable references, enums, decimal values, partial dates, claims, source
+verification states, formulas and input claim references, aliases, and missing reasons. Source IDs
+are scoped to this import and are not canonical KN UUIDs. Package bytes and raw CSV cells remain
+immutable evidence; a typed projection does not promote assertions into verified facts. Workbook
+formulas and charts remain in the archived workbook and are never silently flattened into facts.
+The importer validates the complete package before one transactional load, is idempotent for
+identical bytes, rejects conflicting records, and retains multiple source snapshots.
 
 The KN interchange contract in `contracts/interchange/<version>/` is also ODCS. It compiles to
 JSON Schema for packages and adapters, and to no DDL. Each interchange field references a storage
 field ID. A storage field can change through rebuild without changing the interchange contract,
 as long as its mapping is kept.
 
-Boundary: not a general schema registry; no schema editing through a UI or a crawler. Data Contract
-CLI is a pinned build-time tool, not a runtime dependency.
+Boundary: not a general schema registry; no schema editing through a UI or a crawler.
+Only the implemented ODCS profile is
+accepted; broader ontology and interchange compilation remain separately planned.
 
 Evaluation:
 
@@ -1613,9 +1626,10 @@ The owner approves a release scope, which by default covers the core engine (inc
 identity, data interchange, and InvenTree exchange), all three domains' ELT and dashboards,
 Obsidian export, localization, and operations hardening.
 
-- **Migration tool.** Selected by a bounded comparison against the contract diff. Atlas Community
-  Edition is the leading candidate; supplemental SQL stays versioned.
-- **Baseline.** Contracts are baselined at `1.0.0`, and dataset version recording begins.
+- **Migration tool.** SQLAlchemy metadata and Python Alembic revisions generated from reviewed
+  contract diffs; no handwritten SQL deployment scripts.
+- **Baseline.** Freeze the existing editable development contracts and baseline at `1.0.0`.
+  Dataset version and digest recording already exists; later versions get separate revisions.
 - **Interchange freeze.** The interchange contract is frozen at `1.0.0` with an upgrade chain from
   every development version that has been exchanged. The joint release names its target InvenTree
   release, and `vl-itree` pins the same image tag.
@@ -1628,8 +1642,8 @@ Evaluation: migrating an empty database and a `1.0.0` -> `1.1.0` additive change
 identifiers, and provenance. A breaking change without a migration plan is refused. Drift is
 detected. Rebuild is refused in the released environment.
 
-Negative result: if no candidate tool handles the generated DDL safely, migrations are written from
-reviewed templates and the gap is recorded.
+Negative result: if an evolution cannot be generated safely, refuse it until a reviewed Python
+expand/backfill/contract migration and preservation tests cover the gap.
 
 ### AI extraction
 
@@ -1670,7 +1684,7 @@ upstream before downstream.
 | 3 | `documentation-integrity` | shipped | Link, registry-plan, task-lane, metadata, ordering, prerequisites, forward-language, and closed-research register checks pass over fixtures and the repository tree | [Documentation checks](../guide/development.md#documentation-checks) |
 | 4 | `runtime-platform` | shipped | Pinned Compose database reaches healthy from empty volumes, keeps data across restart, publishes its port on loopback only, and serves integration tests on the development host | [Runtime platform](../impl/current/runtime-platform.md) |
 | 5 | `localization` | planned | Key coverage, plural, golden-output, and screenshot checks pass in `en` and `uk`; the Kestra waiver is the only English-only path | - |
-| 6 | `data-contracts` | planned | Contracts compile deterministically, invalid contracts fail, drift fails CI, rebuild creates every schema, loaders cannot run DDL | - |
+| 6 | `data-contracts` | planned | Contracts compile deterministically, invalid contracts fail, drift fails CI, rebuild creates every schema, loaders cannot run DDL | [Initial space profile](../impl/current/data-contracts.md) |
 | 7 | `ontology-taxonomy` | planned | Every proposal row is classified, identifiers are stable, invalid hierarchies are rejected, SKOS round-trips | - |
 | 8 | `object-identity` | planned | KN IDs survive rebuilds; lifecycle, matching, partial-update, and lineage fixtures pass; calibrated classes meet the precision gate | - |
 | 9 | `raw-archive` | planned | WARC round trip, atomic write, ledger reindex, redaction, revisit, and corruption checks pass | - |

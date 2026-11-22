@@ -1,0 +1,19 @@
+{
+  "schemas": [
+    "system",
+    "semantic",
+    "identity",
+    "evidence",
+    "supply",
+    "interchange",
+    "space",
+    "gdelt",
+    "microelectronics",
+    "analytics"
+  ],
+  "roleKinds": [
+    "owner",
+    "loader",
+    "reader"
+  ]
+}
