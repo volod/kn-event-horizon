@@ -83,11 +83,24 @@ Timestamps are checked for real calendar dates and explicit offsets without opti
 checker dependencies. Comparison attributes and conditions must belong to the profile's entity
 class; rubric criteria must name a profile attribute and use a positive exact decimal weight.
 
-Failures raise the existing `ContractError` with a JSON Pointer, a rule such as
-`semantic.cycle` or `semantic.endpoint`, and a value-free hint. Row-shape failures use the existing
-JSON Schema rule names. The [seed reconciliation command](ontology-taxonomy/seeds.md) is separate
-from model validation;
-rebuilds load only explicitly reviewed packaged files.
+Failures raise the existing `ContractError` with a JSON Pointer, a rule such as `semantic.cycle` or
+`semantic.endpoint`, and a value-free hint. A cycle names the parent or replacement link of a row on
+the cycle, for example `$/concepts/12/parent_id`. A publication URI must also be a valid IRI:
+whitespace, control characters, the backtick and `<>"{}|\^` are refused, because RDF serializations
+cannot write them; percent-encoding and non-ASCII characters are allowed. Row-shape failures use the
+existing JSON Schema rule names. The [seed reconciliation command](ontology-taxonomy/seeds.md) is
+separate from model validation; rebuilds load only explicitly reviewed packaged files.
+
+## Lifecycle report
+
+Deprecated and replaced concepts stay valid endpoints, so validation accepts them. Review needs the
+opposite view, which `kn.semantic.lifecycle.lifecycle_report(snapshot, external_uses=None)` gives:
+one finding per retired concept that is still in use, with its status, the end of its replacement
+chain and that successor's status, and every use. A use is a child concept, a mapping endpoint, an
+entity tag, a replacement link, or a record of another engine. `external_uses` maps concept IDs to
+such records, for example the claims that cite them; the owning engines supply it. Every seed
+reconciliation writes the report for the combined reviewed content under `lifecycle`. The reviewed
+seeds hold only `draft` concepts, so the report is empty today.
 
 ## Enforcement boundary and verification
 
@@ -102,6 +115,8 @@ execute conversions, ranking or evidence selection.
 - `make ci`: compilation drift, type/lint/complexity checks and network-free fixture validation.
 - `tests/semantic/`: all 11 meta-model kinds, hierarchy cycles, missing parents, duplicate labels,
   unknown endpoints, ID collisions, lifecycle, schemes, mappings, policies and malformed input.
+  `test_lifecycle.py` reports deprecated parents, mapping endpoints, tags, replacement chains and
+  external uses; `test_integrity.py` covers cycle locations and publication IRIs.
 - `tests/integration/test_semantic.py`: exact PostgreSQL round trip, deferred references, leading
   zeroes, Unicode, decimals, duplicate IDs, invalid status and missing parents.
 - `make test-integration`: the new round trip and existing registry deployment/rebuild verification.
@@ -112,5 +127,23 @@ are available alongside the original mixed product vocabulary.
 [Seed import and proposal reconciliation](ontology-taxonomy/seeds.md) and
 [official publication comparison](ontology-taxonomy/verification.md) are available.
 [SKOS Turtle export](ontology-taxonomy/skos.md) preserves labels, hierarchy, mappings, scheme
-origins, verification states and publication boundaries. The ontology-taxonomy capability is shipped;
-its optional implementation audit remains in the [plan](../plan.md).
+origins, verification states and publication boundaries. The
+[implementation audit](../records/0025-ontology-taxonomy-ontology-taxonomy-implementation-audit.md)
+of the group records its findings and their dispositions.
+
+## Known limitations
+
+- Every `uk` label is a copy of the English proposal text, and every concept definition is a JSON
+  dump of the proposal columns. Both are stored and exported as if they were Ukrainian labels and
+  definitions. `vocabulary-text-integrity` in the [plan](../plan.md) corrects them; translations
+  come from `review-ukrainian-terminology`.
+- Exported term URIs use `urn:kn:term:<id>`, and `kn` is not a registered URN namespace.
+  `decide-vocabulary-uri-namespace` lets the owner choose a base before any consumer stores the
+  URIs.
+- Each concept has one primary parent. A scheme with several broader concepts per concept needs a
+  secondary hierarchy table, which is additive; reopen when a reviewed scheme needs one.
+- Mappings are not restricted to concepts of different schemes. SKOS links schemes with mapping
+  properties by convention, not by an integrity condition, and no reviewed mapping joins one
+  scheme. Reopen when reviewed content does.
+- Nothing re-checks the pinned publications for changed bytes; `official-publication-drift-check`
+  in the plan adds that.

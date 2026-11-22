@@ -35,6 +35,16 @@ model before writing any artifact. Unrecognized sheets remain `needs_mapping`; m
 codes fail rather than being fabricated. Codes derived from uncoded labels are stable textual
 codes, never row numbers.
 
+Each reconciliation also lists, per domain under `changes`, the term IDs that were `added`,
+`changed`, or `removed` relative to the packaged reviewed seeds that rebuilds load, and the CLI's
+JSON result repeats them. A removed proposal row therefore never drops a term ID unnoticed;
+retire a concept in use as `deprecated` or `replaced` instead of deleting it. `stale_reviews` names
+each scheme whose content changed after its publication review, with the reviewed and the new
+content digest. Staging continues with that scheme `unverified` and a reason that asks for a new
+comparison; it never keeps the old verification. The packaged loader and `make seed-check` still
+refuse the change until the review records the new comparison and digest. `lifecycle` holds the
+[lifecycle report](../ontology-taxonomy.md#lifecycle-report) of the combined content.
+
 Review staged files against `domains/<domain>/seeds/semantic.json` before promoting a change to
 `src/kn/semantic/resources/`. Promote the staged `fixtures.json` to
 `tests/semantic/fixtures/proposal_examples.json` at the same time. Reconciliation lists every input
@@ -104,12 +114,12 @@ The 477 pending rows remain available in the reconciliation and the original pro
 
 ## Rebuild and verification
 
-The explicit registry in `kn.db.seeds` calls the packaged loader as `kn_semantic_loader`, within the
-rebuild transaction. It validates the envelopes, term provenance and full snapshot before DML.
-Bulk inserts are idempotent; conflicting stored content refuses and rolls back the seed savepoint
-rather than being overwritten. Semantic foreign-key checks are completed and returned to deferred
-mode before returning, so a second rebuild in the same transaction can drop the seeded tables.
-The loader does not read proposals, instantiate fixtures, fetch publications, or commit.
+The explicit registry in `kn.db.seeds` calls `kn.semantic.seed_loader` as `kn_semantic_loader`,
+within the rebuild transaction. It validates the envelopes, term provenance and full snapshot before
+DML. Bulk inserts are idempotent; conflicting stored content refuses and rolls back the seed
+savepoint rather than being overwritten. Semantic foreign-key checks are completed and returned to
+deferred mode before returning, so a second rebuild in the same transaction can drop the seeded
+tables. The loader does not read proposals, instantiate fixtures, fetch publications, or commit.
 
 - `make seed-check`: deterministic conversion, checked-in seed/fixture comparison, row reconciliation.
 - `make ci`: semantic integrity and conversion failures, all-row accounting, identifier stability

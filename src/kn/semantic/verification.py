@@ -91,38 +91,72 @@ def content_digest(snapshot: Snapshot, scheme_id: str) -> str:
     return hashlib.sha256(encoded(content)).hexdigest()
 
 
-def review_schemes(snapshot: Snapshot, path: Path, domain: str, *, check: bool = False) -> None:
-    """Project reviewed metadata during staging; require identical metadata when loading seeds."""
+def review_schemes(
+    snapshot: Snapshot, path: Path, domain: str, *, check: bool = False
+) -> list[dict[str, str]]:
+    """Project reviewed metadata during staging; require identical metadata when loading seeds.
+
+    Loading (`check`) refuses a review whose content digest no longer matches. Staging keeps
+    going so the change can be reviewed: a stale scheme is staged `unverified`, never with its
+    old verification, and is returned with its new digest for the next comparison.
+    """
     report = VerificationReport.model_validate_json(path.read_bytes())
     schemes = {row["id"]: row for row in snapshot.get("concept_schemes", [])}
     ids = [review.scheme_id for review in report.schemes]
     if report.domain != domain or len(ids) != len(set(ids)) or set(ids) != schemes.keys():
         raise ValueError("verification review must cover each scheme exactly once")
+    stale: list[dict[str, str]] = []
     for review in report.schemes:
-        _check_review(snapshot, schemes[review.scheme_id], review)
+        _check_review(schemes[review.scheme_id], review)
+        digest = content_digest(snapshot, review.scheme_id)
+        if digest != review.content_sha256:
+            if check:
+                raise ValueError(
+                    f"verification review of {review.scheme_id} is stale; "
+                    "compare the changed content again"
+                )
+            stale.append(
+                {
+                    "scheme_id": review.scheme_id,
+                    "reviewed_sha256": review.content_sha256,
+                    "content_sha256": digest,
+                }
+            )
+    changed = {item["scheme_id"] for item in stale}
     for review in report.schemes:
-        _metadata(schemes[review.scheme_id], review, check=check)
+        _metadata(
+            schemes[review.scheme_id],
+            review,
+            check=check,
+            stale_since=report.reviewed_on if review.scheme_id in changed else None,
+        )
+    return stale
 
 
-def _metadata(row: dict[str, Any], review: SchemeReview, *, check: bool) -> None:
+def _metadata(
+    row: dict[str, Any], review: SchemeReview, *, check: bool, stale_since: str | None = None
+) -> None:
     metadata = {
         key: getattr(review, key) for key in SCHEME_FIELDS if getattr(review, key) is not None
     }
     if check:
         if {key: row[key] for key in SCHEME_FIELDS if key in row} != metadata:
             raise ValueError("reviewed scheme metadata differs from verification review")
-    else:
-        for key in SCHEME_FIELDS:
-            row.pop(key, None)
-        row.update(metadata)
+        return
+    for key in SCHEME_FIELDS:
+        row.pop(key, None)
+    row.update(metadata)
+    if stale_since is not None:
+        row["verification_state"] = "unverified"
+        row["verification_reason"] = (
+            f"Content changed after the {stale_since} review; a new comparison is required. "
+            f"Previous review: {review.verification_reason}"
+        )
 
 
-def _check_review(snapshot: Snapshot, row: dict[str, Any], review: SchemeReview) -> None:
-    if (
-        row["origin"] != review.origin
-        or content_digest(snapshot, review.scheme_id) != review.content_sha256
-    ):
-        raise ValueError("verification review is stale; compare changed content with publication")
+def _check_review(row: dict[str, Any], review: SchemeReview) -> None:
+    if row["origin"] != review.origin:
+        raise ValueError(f"reviewed origin of {review.scheme_id} differs from the seed")
     if review.verification_state == "verified" and (
         review.origin != "official"
         or any(

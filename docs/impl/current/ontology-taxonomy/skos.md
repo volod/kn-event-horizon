@@ -87,6 +87,13 @@ this export.
   Unicode escapes, both locales, JSON errors, output failures, and repeated exports.
 - `tests/e2e/test_skos.py`: real subprocesses in both locales produce identical Turtle and retain
   the verified OECD scheme's boundary. `make test-bilingual` includes this path.
+- `tests/semantic/test_skos_independent.py`: Oxigraph (`pyoxigraph`, pinned in the development
+  extra) parses every exported scheme in strict mode, and its triples equal RDFLib's. It runs in
+  `make ci` and on GitHub without network access.
+- `make skos-reference-check`: Apache Jena RIOT 6.3.0, installed by `make bootstrap`, validates a
+  fresh export of every scheme with `riot --validate`; an error or a warning fails the check. The
+  exports and `summary.json` are kept under `$DATA_DIR/skos-reference/<run-id>/`. `make ci-local`
+  runs it.
 - `make ci`: formatting, lint, typing, complexity, contracts, documentation, catalogs, and unit tests.
 
 [Task record 0024](../../records/0024-ontology-taxonomy-skos-export.md) records the retained command

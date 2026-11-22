@@ -39,5 +39,7 @@ decision. A record can name a plan task by ID because plan headings disappear on
 | 0022 | `verify-official-taxonomies` | [0022-ontology-taxonomy-verify-official-taxonomies.md](0022-ontology-taxonomy-verify-official-taxonomies.md) |
 | 0023 | `oecd-official-product-scheme` | [0023-ontology-taxonomy-oecd-official-product-scheme.md](0023-ontology-taxonomy-oecd-official-product-scheme.md) |
 | 0024 | `skos-export` | [0024-ontology-taxonomy-skos-export.md](0024-ontology-taxonomy-skos-export.md) |
+| 0025 | `ontology-taxonomy-implementation-audit` | [0025-ontology-taxonomy-ontology-taxonomy-implementation-audit.md](0025-ontology-taxonomy-ontology-taxonomy-implementation-audit.md) |
+| 0026 | `adhoc` independent RDF parsers and host prerequisites | [0026-adhoc-independent-rdf-parsers-and-host-prerequisites.md](0026-adhoc-independent-rdf-parsers-and-host-prerequisites.md) |
 
-Next unused sequence is `0025`.
+Next unused sequence is `0027`.

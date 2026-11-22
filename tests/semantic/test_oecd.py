@@ -101,7 +101,7 @@ def test_all_crosswalk_decisions_and_original_row_provenance_are_preserved() -> 
         "X.MAT",
     }
     assert all(row.reason for row in review.crosswalks)
-    documents, report, _ = reconcile(Path(__file__).resolve().parents[2])
+    documents, report, *_ = reconcile(Path(__file__).resolve().parents[2])
     doc = documents["microelectronics"]
     mentioned = {identifier for row in report for identifier in row["term_ids"]}
     generated = [

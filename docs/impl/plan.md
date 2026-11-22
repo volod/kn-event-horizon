@@ -34,34 +34,63 @@ recorded decision before later groups build on the group.
 
 ### Ontology and taxonomy -- `ontology-taxonomy`
 
-#### ontology-taxonomy-implementation-audit (optional)
+#### vocabulary-text-integrity
 
-Concept IDs, schemes, and crosswalks become references in claims, exports, and dashboards, so
-changing them later breaks stored data and links.
+Every Ukrainian label of the reviewed seeds is a copy of the English proposal text, and every
+concept definition is a JSON dump of proposal columns. The database and SKOS therefore present
+untranslated text as Ukrainian and spreadsheet metadata as definitions.
 
 - Serves: `ontology-taxonomy` -- [Ontology and taxonomy](../design/spec.md#ontology-and-taxonomy)
 - Agent status: CLEAR
-- Dependencies: The accepted task records of the group and the [implementation
-  audit](../guide/planning-workflow.md#implementation-audits) checks.
-- User-visible outcome: Claims and exports reference stable, verified concepts. The audit record
-  gives every check a result and every finding a disposition. The current-state page lists known
-  limitations, and each scheduled finding is a plan task.
-- Scope boundary: Focus: stability of concept IDs and URIs across rebuilds; deprecation and
-  replacement of concepts in use; hierarchy cycles and multiple parents; label parity in `en` and
-  `uk`; seed reconciliation of added, changed, and removed rows; official editions and checksum
-  drift; the SKOS round trip; a new domain scheme or edition without renumbering. Fixes only; new
-  behavior becomes plan tasks.
-- Data and artifact paths: `contracts/core/semantic/`, `src/kn/semantic/`,
-  `domains/<domain>/seeds/`, `tests/semantic/`, `docs/impl/plan.md`, and the task record.
-- Execution path: Rerun the group's acceptance commands, then work through the audit checks. Rebuild
-  twice and compare concept IDs, plant a cycle and a duplicate label, deprecate a concept that a
-  claim uses, and parse the SKOS export with an independent parser.
-- Acceptance gates: Concept IDs are identical across rebuilds. A cycle, a duplicate label, and a
-  deprecated concept in use are reported. The SKOS export parses with an independent tool. Every
-  finding has a severity, evidence, and a disposition, no `blocker` is accepted, and every fix
-  starts from a failing regression test. `make ci` passes with the scheduled tasks in the plan.
-- Documentation target: `current/ontology-taxonomy.md` listed in the [areas
-  index](current.md#areas).
+- Dependencies: Findings ON-04 and ON-05 of the
+  [ontology audit](records/0025-ontology-taxonomy-ontology-taxonomy-implementation-audit.md#findings),
+  the [localization data rules](../design/spec.md#localization), and the shared
+  [text selector](current/localization.md#source-data-and-translations).
+- User-visible outcome: Seed labels carry the language of their text: proposal labels are `en`,
+  and a `uk` label exists only as a reviewed translation. Interfaces and the SKOS export fall back
+  from `uk` to `en` and report the fallback. A concept definition is a definition or absent; the
+  proposal columns stay in provenance and the reconciliation.
+- Scope boundary: The label rule of the semantic validator (a named term needs one preferred label,
+  English for proposal content), the seed import, nullable definitions if the contract needs them,
+  the SKOS mapping, and new content digests for the publication reviews with a recorded statement
+  that the comparisons are unchanged. Writing translations is `review-ukrainian-terminology`.
+- Data and artifact paths: `src/kn/semantic/`, `src/kn/contracts/resources/semantic/`,
+  `src/kn/semantic/resources/`, `domains/<domain>/seeds/`, `generated/contracts/`,
+  `tests/semantic/`.
+- Execution path: Write failing tests first: no `uk` label equals its `en` label unless a review
+  marks the text as identical in both languages, no definition parses as JSON, and the SKOS export
+  of every scheme has no `@uk` copy. Then change the import, the validator and the export, and
+  rerun `make seed-check`.
+- Acceptance gates: The tests pass for all 16 schemes. The reviewed seeds and SKOS output contain
+  only real `uk` labels. Every publication review keeps its comparison result under its new
+  digest. `make ci` passes.
+- Documentation target: `current/ontology-taxonomy.md` listed in the
+  [areas index](current.md#areas).
+
+#### official-publication-drift-check (optional)
+
+The publication reviews pin checksums of mutable URLs, but nothing notices when a publisher
+replaces the bytes behind a reviewed edition.
+
+- Serves: `ontology-taxonomy` -- [Ontology and taxonomy](../design/spec.md#ontology-and-taxonomy)
+- Agent status: RUN NEEDED
+- Dependencies: Network access to the publishers listed in the
+  [publication reviews](current/ontology-taxonomy/verification.md#primary-publications). The ESA
+  GPT and OECD downloads may need the owner's browser, as in record 0022 and record 0023.
+- User-visible outcome: `kn vocabulary drift-check` re-fetches each pinned publication within a
+  request budget and reports `unchanged`, `drifted`, or `unreachable` per scheme, with the new
+  checksum. A drifted publication keeps its reviewed state, marked as drifted, until a new
+  comparison.
+- Scope boundary: Fetch, checksum, and report only, through the source-safety rules: allowlisted
+  hosts, size limits, no credentials. No automatic re-verification and no seed change.
+- Data and artifact paths: `src/kn/semantic/`, `$DATA_DIR/taxonomy-verification/drift-<run-id>/`,
+  `tests/semantic/`.
+- Execution path: Unit tests use a local stub server for unchanged, drifted, redirected, oversized
+  and unreachable publications; the declared run checks the real publishers once.
+- Acceptance gates: Every stub case gives its status without network access. The declared run
+  reports a status for every pinned publication and is retained under `DATA_DIR`. `make ci` passes.
+- Documentation target: `current/ontology-taxonomy.md` listed in the
+  [areas index](current.md#areas).
 
 ### Object identity -- `object-identity`
 
@@ -329,6 +358,9 @@ Claims, evidence, and canonical facts need contracts that carry every provenance
   compile and test the constraints against the integration database.
 - Acceptance gates: A claim without an origin URI, a fetch time, or a value-or-missing-reason is
   rejected. Re-inserting the same claim key is a no-op. As-of views are deterministic on fixtures.
+  A claim that cites a deprecated or replaced concept appears in the
+  [lifecycle report](current/ontology-taxonomy.md#lifecycle-report) as an external use, with the
+  concept's successor.
   Multilingual text projections preserve originals, language tags, and translation provenance under
   the [localization policy](../design/spec.md#localization), without duplicating facts per locale.
 - Documentation target: A new `current/evidence-model.md` page listed in the
@@ -2478,6 +2510,31 @@ prompts would be costly to unwind.
 
 ## Human-Assisted Tasks
 
+### Ontology and taxonomy -- `ontology-taxonomy`
+
+#### decide-vocabulary-uri-namespace
+
+Exported vocabulary terms use `urn:kn:term:<id>`, but `kn` is not a registered URN namespace, and
+the URIs become references in other systems once an export is shared.
+
+- Serves: `ontology-taxonomy` -- [Ontology and taxonomy](../design/spec.md#ontology-and-taxonomy)
+- Agent status: HUMAN-GATED
+- Dependencies: The owner chooses a base that the owner controls: an HTTPS path on a domain the
+  owner holds, or a `tag:` URI (RFC 4151) with an authority the owner holds. An agent prepares the
+  options with their consequences, as described in finding ON-09 of the
+  [ontology audit](records/0025-ontology-taxonomy-ontology-taxonomy-implementation-audit.md#findings).
+- User-visible outcome: A recorded URI base, applied by the agent to the SKOS export while no
+  consumer stores the old URIs.
+- Scope boundary: The decision and the export change only. Qualified term IDs stay unchanged; no
+  web service is published.
+- Data and artifact paths: `src/kn/semantic/skos.py`, `tests/semantic/`, and the task record.
+- Execution path: The owner picks the base. The agent changes the URI function and its tests and
+  re-exports every scheme.
+- Acceptance gates: Every exported term URI uses the recorded base, the IDs inside them are
+  unchanged, and the export still parses and round-trips its labels.
+- Documentation target: `current/ontology-taxonomy.md` listed in the
+  [areas index](current.md#areas).
+
 ### Ingestion engine -- `ingestion-engine`
 
 #### publish-satcom-drive-package
@@ -2688,9 +2745,10 @@ Core Ukrainian terminology needs review by a Ukrainian technical speaker.
 
 - Serves: `localization` -- [Localization](../design/spec.md#localization)
 - Agent status: HUMAN-GATED
-- Requires: `bilingual-acceptance-suite`
+- Requires: `bilingual-acceptance-suite`, `vocabulary-text-integrity`
 - Dependencies: A Ukrainian technical speaker named by the owner. An agent prepares a glossary
-  export of every `uk` UI string and vocabulary label with context.
+  export of every `uk` UI string and every vocabulary label that still falls back to English, with
+  context.
 - User-visible outcome: Reviewed Ukrainian terminology for the UI, the vocabularies, and the
   operator quickstart.
 - Scope boundary: Review and corrections of catalogs and labels.

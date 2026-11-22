@@ -80,10 +80,10 @@ def test_reviewed_seed_integrity(tmp_path: Path, damage: str) -> None:
 
 
 def test_identifier_stability_when_proposals_are_reordered(monkeypatch: pytest.MonkeyPatch) -> None:
-    before, _, _ = reconcile(ROOT)
+    before, *_ = reconcile(ROOT)
     proposals = read_proposals(ROOT)
     monkeypatch.setattr(seeds, "read_proposals", lambda _: list(reversed(proposals)))
-    after, _, _ = reconcile(ROOT)
+    after, *_ = reconcile(ROOT)
     for domain in before:
         assert {r["id"] for r in before[domain]["snapshot"]["terms"]} == {
             r["id"] for r in after[domain]["snapshot"]["terms"]
@@ -103,7 +103,7 @@ def test_unknown_sheet_stays_pending(monkeypatch: pytest.MonkeyPatch) -> None:
     proposals = read_proposals(ROOT)
     extra = replace(proposals[0], sheet="01_unknown", workbook="new_workbook")
     monkeypatch.setattr(seeds, "read_proposals", lambda _: [*proposals, extra])
-    _, report, _ = reconcile(ROOT)
+    _, report, *_ = reconcile(ROOT)
     assert report[-1]["status"] == "needs_mapping"
     assert report[-1]["term_ids"] == []
 

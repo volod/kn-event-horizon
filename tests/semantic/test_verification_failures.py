@@ -11,33 +11,49 @@ from kn.semantic.seed_model import encoded
 from kn.semantic.seeds import RESOURCES, reviewed_snapshot
 from kn.semantic.verification import content_digest, review_schemes
 
+SCHEME = "space.esa_tt_4_1.scheme"
+TERM = "space.esa_tt_4_1.TD01.A"
+CHANGES = ["label", "uk_label", "code", "parent", "status", "removed", "added"]
 
-@pytest.mark.parametrize(
-    "change", ["label", "uk_label", "code", "parent", "status", "removed", "added"]
-)
-def test_content_edits_require_review(tmp_path: Path, change: str) -> None:
+
+def changed_space(change: str) -> dict:
+    """The reviewed space snapshot with one edit inside the verified ESA technology scheme."""
     data = json.loads((RESOURCES / "space.json").read_bytes())["snapshot"]
-    sid = "space.esa_tt_4_1.scheme"
-    term_id = "space.esa_tt_4_1.TD01.A"
     if change in {"label", "uk_label"}:
         locale = "uk" if change == "uk_label" else "en"
-        next(
-            row for row in data["labels"] if row["term_id"] == term_id and row["locale"] == locale
-        )["label"] += " changed"
+        next(row for row in data["labels"] if row["term_id"] == TERM and row["locale"] == locale)[
+            "label"
+        ] += " changed"
     elif change in {"code", "status"}:
-        next(row for row in data["terms"] if row["id"] == term_id)[change] = "changed"
+        next(row for row in data["terms"] if row["id"] == TERM)[change] = "changed"
     elif change == "parent":
-        next(row for row in data["concepts"] if row["id"] == term_id)["parent_id"] = (
+        next(row for row in data["concepts"] if row["id"] == TERM)["parent_id"] = (
             "space.esa_tt_4_1.TD02"
         )
     elif change == "removed":
-        data["concepts"] = [row for row in data["concepts"] if row["id"] != term_id]
+        data["concepts"] = [row for row in data["concepts"] if row["id"] != TERM]
     else:
-        data["concepts"].append({"id": "space.esa_tt_4_1.NEW", "scheme_id": sid})
+        data["concepts"].append({"id": "space.esa_tt_4_1.NEW", "scheme_id": SCHEME})
+    return data
+
+
+@pytest.mark.parametrize("change", CHANGES)
+def test_content_edits_require_review_before_loading(change: str) -> None:
+    data = changed_space(change)
     before = copy.deepcopy(data)
     with pytest.raises(ValueError, match="stale"):
-        review_schemes(data, RESOURCES / "space-verification.json", "space")
-    assert data == before  # Even a later failed scheme must not partially apply metadata.
+        review_schemes(data, RESOURCES / "space-verification.json", "space", check=True)
+    assert data == before  # Loading never applies metadata.
+
+
+@pytest.mark.parametrize("change", CHANGES)
+def test_content_edits_stage_unverified_until_a_new_comparison(change: str) -> None:
+    data = changed_space(change)
+    stale = review_schemes(data, RESOURCES / "space-verification.json", "space")
+    assert [item["scheme_id"] for item in stale] == [SCHEME]
+    scheme = next(row for row in data["concept_schemes"] if row["id"] == SCHEME)
+    assert scheme["verification_state"] == "unverified"
+    assert "new comparison" in scheme["verification_reason"]
 
 
 @pytest.mark.parametrize("damage", ["missing", "duplicate", "extra", "domain", "format", "digest"])

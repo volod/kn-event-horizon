@@ -29,7 +29,7 @@ export MYPY_CACHE_DIR := $(DATA_ROOT)/cache/mypy
 .DEFAULT_GOAL := help
 
 .PHONY: help bootstrap venv lock run doctor format format-check lint typecheck test coverage \
-	test-integration ci-local \
+	test-integration ci-local skos-reference-check \
 	complexity-gate shell-lint-gate lint-md lint-doc-links lint-spec-plan plan-status \
 	ci-checks ci ci-github build quality code-quality quality-report \
 	db-up db-down db-reset db-verify
@@ -37,10 +37,11 @@ export MYPY_CACHE_DIR := $(DATA_ROOT)/cache/mypy
 help: ## List available targets
 	@awk 'BEGIN {FS = ":.*## "; print "Usage: make <target>\n"} /^[a-zA-Z0-9_.-]+:.*## / {printf "  %-20s %s\n", $$1, $$2}' $(MAKEFILE_LIST)
 
-bootstrap: ## Create/update .venv from uv.lock with development tools
+bootstrap: ## Create/update .venv from uv.lock, check host prerequisites, install pinned tools
 	@command -v uv >/dev/null 2>&1 || { echo "ERROR: uv is required"; exit 1; }
 	@source "$(PROJECT_ROOT)/scripts/shared/common.sh"; kn_load_env; \
 		uv sync --locked --extra dev --python "$(PYTHON_VERSION)"
+	@"$(PY)" -m kn.quality.prerequisites --root "$(PROJECT_ROOT)" --data-dir "$(DATA_ROOT)" --install
 
 venv: bootstrap ## Alias for bootstrap
 
@@ -58,6 +59,7 @@ doctor: ## Verify required tools, files, and the installed package
 	@test -f pyproject.toml -a -f uv.lock -a -f AGENTS.md
 	@test -x "$(PY)" || { echo "ERROR: run 'make bootstrap' first"; exit 1; }
 	@"$(PY)" -c 'import kn; print(kn.project_info().distribution)'
+	@"$(PY)" -m kn.quality.prerequisites --root "$(PROJECT_ROOT)" --data-dir "$(DATA_ROOT)"
 
 format: ## Format production code and tests with Ruff
 	@"$(VENV)/bin/ruff" format src tests
@@ -115,8 +117,13 @@ ci: ci-checks test ## Run the required gate: checks and lightweight unit tests
 
 ci-github: ci ## GitHub Actions entrypoint, the same gate as make ci
 
-ci-local: ci ## Run make ci, then every local-only test: database and heavy (make db-up first)
+ci-local: ci ## Run make ci, every local-only test (make db-up first) and the Jena SKOS check
 	@$(LOCAL_PYTEST) -m "$(LOCAL_TESTS)"
+	@$(MAKE) --no-print-directory skos-reference-check
+
+skos-reference-check: ## Validate every SKOS export with the pinned Apache Jena RIOT (local only)
+	@test -x "$(PY)" || { echo "ERROR: run 'make bootstrap' first"; exit 1; }
+	@"$(PY)" -m kn.quality.skos_reference --root "$(PROJECT_ROOT)" --data-dir "$(DATA_ROOT)"
 
 build: ## Build source and wheel distributions
 	@source "$(PROJECT_ROOT)/scripts/shared/common.sh"; kn_load_env; uv build

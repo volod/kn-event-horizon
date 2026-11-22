@@ -6,7 +6,7 @@ from sqlalchemy.engine import Connection
 
 from kn.db.platform import SCHEMAS, role_name
 from kn.db.statements import ResetRole, SetRole
-from kn.semantic.seeds import load_reviewed_seeds as load_semantic_seeds
+from kn.semantic.seed_loader import load_reviewed_seeds as load_semantic_seeds
 
 # Explicit registry: no proposal discovery at rebuild time.
 REVIEWED_SEED_LOADERS: tuple[tuple[str, Callable[[Connection], None]], ...] = (

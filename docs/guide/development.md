@@ -6,13 +6,27 @@ under [current implementation](../impl/current.md).
 
 ## Setup
 
-Install Git, Make, and uv, then run:
+The development host needs the commands that `deploy/versions.yaml` lists under
+`host_prerequisites`: Git, Make, uv, Docker Engine with the Compose v2 plugin, and a Java 21 or
+newer runtime. On Ubuntu, Java is `openjdk-21-jre-headless`. Then run:
 
 ```bash
 make bootstrap
 make doctor
 make run
 ```
+
+`make bootstrap` (alias `make venv`) syncs `.venv` from `uv.lock` with the development extra,
+then checks every prerequisite and fails with one message per missing command or too-old version
+and its install hint; it never installs system packages. It also installs each archive listed under
+`downloaded_tools`, today Apache Jena 6.3.0, into `DATA_DIR/tools/`, only when the download matches
+the pinned SHA-512. A marker file records that checksum, and a directory without it is never
+reused. `make doctor` repeats the checks without installing anything. GitHub Actions installs with
+`uv sync` and runs only the unit gate, so it needs neither Docker nor Java.
+
+To move Jena to a new release, verify the new archive against the release manager's key in
+`https://downloads.apache.org/jena/KEYS` and its `.sha512` file, then change `version`, `archive`,
+`sha512`, `install_dir` and `pinned` together and run `make bootstrap`.
 
 The lockfile is committed. After changing dependencies in `pyproject.toml`, run `make lock` and
 include the resulting `uv.lock` change.

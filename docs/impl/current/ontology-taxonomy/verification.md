@@ -90,13 +90,15 @@ an explicitly recorded subset boundary. The existing semantic validator checks t
 URI and checksum shape. These offline checks preserve a human-readable review; they do not fetch
 or automatically certify an official publication.
 
-`reconcile()` applies reviewed scheme metadata before validation and staging. The packaged loader
-requires stored scheme metadata to equal that review and refuses stale content before database
-writes. It never overwrites labels, codes or origins. A changed projection requires a new comparison
-and digest; updating only the seed cannot retain an old verification. Reviewed states and reasons
-are available in both locale runs' staged snapshots and in rebuilt `concept_schemes` rows. Future
-interfaces must carry these states and subset boundaries. [SKOS export](skos.md) carries them for
-every included scheme, including crosswalk counterparts.
+`reconcile()` applies reviewed scheme metadata before validation and staging. A scheme whose content
+digest no longer matches its review is staged `unverified` with a request for a new comparison and
+reported under `stale_reviews`, so a proposal change can be reviewed without ever keeping an old
+verification. The packaged loader requires stored scheme metadata to equal that review and refuses
+stale content before database writes. It never overwrites labels, codes or origins. A changed
+projection requires a new comparison and digest; updating only the seed cannot retain an old
+verification. Reviewed states and reasons are available in both locale runs' staged snapshots and in
+rebuilt `concept_schemes` rows. Future interfaces must carry these states and subset boundaries.
+[SKOS export](skos.md) carries them for every included scheme, including crosswalk counterparts.
 
 - `make seed-check` repeats the normal CLI path and checks reviewed snapshots and proposal fixtures.
 - `make ci` compares 268 selected publication rows offline, pins the three label mismatches, checks

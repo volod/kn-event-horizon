@@ -377,12 +377,20 @@ time run on the development host through `make ci-local`. Tool caches follow `DA
 environment helper chooses `UV_LINK_MODE=copy` only when uv's cache and the checkout live on
 different filesystems.
 
-Boundary: the skeleton controls Python dependencies and checks. It does not install system packages,
-provision external services, or guarantee reproducibility for undeclared tools.
+The version manifest `deploy/versions.yaml` declares the host prerequisites, with minimum versions
+where they matter, and the tool archives the project downloads. `make bootstrap` (and its alias
+`make venv`) syncs the locked environment, checks every prerequisite, and installs each declared
+archive under `DATA_DIR/tools/` only when it matches its pinned SHA-512; `make doctor` repeats the
+checks without installing.
 
-Evaluation: a fresh copy reaches `make bootstrap` and `make ci` without manual repair. A negative
-result names the missing command, stale lock, unsupported interpreter, or failing gate rather than
-silently changing the environment contract.
+Boundary: the skeleton controls Python dependencies, declared tool archives, and checks. It does not
+install system packages, provision external services, or guarantee reproducibility for undeclared
+tools.
+
+Evaluation: a fresh copy reaches `make bootstrap` and `make ci` without manual repair once the
+declared host prerequisites exist. A negative result names the missing command, too-old version,
+unverified archive, stale lock, unsupported interpreter, or failing gate rather than silently
+changing the environment contract.
 
 ## Project identity
 
@@ -615,7 +623,10 @@ How seed content moves:
 - The converted workbooks in `domains/<domain>/seeds/proposals/` are inputs to a reviewed import.
   The import writes reviewed seed files in `domains/<domain>/seeds/` and a reconciliation report
   that classifies every proposal row as `accepted`, `duplicate`, `needs_mapping`, or `rejected`,
-  with a reason.
+  with a reason. The report also lists the term IDs added, changed, and removed relative to the
+  reviewed seeds, so a removed row never drops an ID unnoticed. A changed proposal always stages
+  for review; a scheme whose content changed after its publication review stages `unverified`,
+  with its new content digest, until a new comparison.
 - Every rebuild loads the reviewed seed files with deterministic identifiers.
 - Tagging examples and templates become fixtures. Unknown tags proposed by sources become pending
   suggestions, never automatic additions.
@@ -635,23 +646,34 @@ How seed content moves:
   artifacts; unsupported equivalence and non-chip matches are never inferred.
 - Analyst extensions are never presented as official. The GDELT and some space schemes in the
   proposals are explicit subsets, never complete dictionaries.
+- Labels follow the [localization](#localization) data rules: each label carries the language of
+  its text. Proposal labels are English; a `uk` label exists only as a reviewed translation, and
+  display and exports fall back from `uk` to `en` and report the fallback. A definition is a
+  definition or absent; proposal columns stay in provenance and the reconciliation.
+- A drift check re-fetches the pinned publications on request and reports any whose bytes no
+  longer match their recorded checksum. A drifted publication keeps its reviewed state, marked
+  as drifted, until a new comparison; nothing is re-verified automatically.
 
 SKOS Turtle export per scheme (`ConceptScheme`, `Concept`, `prefLabel` with language tags,
 `altLabel`, `broader`/`narrower`, `notation`, `definition`, and mappings) is generated for
 interchange. SKOS cannot enforce typed relations, so the meta-model enforces them.
 
-Validation: unique identifiers; one preferred label per language per scheme; no cycles in a
-primary hierarchy; parents exist; mappings don't conflict; relation endpoints exist; deprecated
-concepts stay resolvable. A content change is a reviewed edit to a seed file followed by a rebuild
-(development) or a data migration (release).
+Validation: unique identifiers; one preferred label per language per scheme; no cycles in a primary
+hierarchy; parents exist; mappings don't conflict; relation endpoints exist; deprecated concepts
+stay resolvable. A lifecycle report lists every deprecated or replaced concept that is still in use
+(child concepts, mappings, entity tags, replacement links, and records of other engines such as
+claims) with the end of its replacement chain. A content change is a reviewed edit to a seed file
+followed by a rebuild (development) or a data migration (release).
 
 Boundary: no OWL reasoning, and no taxonomy editing in a UI. The structural rules (see
 Validation) are enforced in code, not by SKOS.
 
 Evaluation:
 
-- Importing all five proposal sets classifies every row.
+- Importing all five proposal sets classifies every row, and a changed proposal reports its added,
+  changed, and removed term IDs.
 - Identifiers are identical across runs.
+- A deprecated or replaced concept in use is reported with each use and its successor.
 - Fixtures with a cycle, a missing parent, a duplicate label, an identifier collision, or an
   unknown relation endpoint are rejected.
 - The SKOS export parses with RDFLib and round-trips its labels.
@@ -1751,7 +1773,7 @@ upstream before downstream.
 | 3 | `documentation-integrity` | shipped | Link, registry-plan, task-lane, metadata, ordering, prerequisites, forward-language, and closed-research register checks pass over fixtures and the repository tree | [Documentation checks](../guide/development.md#documentation-checks) |
 | 4 | `runtime-platform` | shipped | Pinned Compose database reaches healthy from empty volumes, keeps data across restart, publishes its port on loopback only, and serves integration tests on the development host | [Runtime platform](../impl/current/runtime-platform.md) |
 | 5 | `data-contracts` | shipped | Contracts compile deterministically, invalid contracts fail, drift fails CI, rebuild creates every schema, loaders cannot run DDL | [Compiler and development rebuild](../impl/current/data-contracts.md) |
-| 6 | `ontology-taxonomy` | shipped | Every proposal row is classified, identifiers are stable, invalid hierarchies are rejected, SKOS round-trips | [Semantic model, reviewed seeds and SKOS export](../impl/current/ontology-taxonomy.md) |
+| 6 | `ontology-taxonomy` | planned | Every proposal row is classified, identifiers are stable, invalid hierarchies are rejected, SKOS round-trips | [Semantic model, reviewed seeds and SKOS export](../impl/current/ontology-taxonomy.md) |
 | 7 | `object-identity` | planned | KN IDs survive rebuilds; lifecycle, matching, partial-update, and lineage fixtures pass; calibrated classes meet the precision gate | - |
 | 8 | `raw-archive` | planned | WARC round trip, atomic write, ledger reindex, redaction, revisit, and corruption checks pass | - |
 | 9 | `evidence-model` | planned | Conflict, time, provenance-lookup, idempotence, confirmation, update-policy, and decision-replay fixtures pass | - |

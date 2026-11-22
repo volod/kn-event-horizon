@@ -3,18 +3,14 @@
 import json
 from collections import Counter
 from pathlib import Path
-from typing import Any
+from typing import Any, NamedTuple
 from uuid import uuid4
 
-from sqlalchemy import MetaData, Table, select
-from sqlalchemy.dialects.postgresql import insert
-from sqlalchemy.engine import Connection
-
-from kn.contracts.sqlalchemy import metadata
-from kn.db.statements import SetConstraints
 from kn.semantic import validate_model
+from kn.semantic.lifecycle import lifecycle_report
 from kn.semantic.oecd_reference import publication_references
 from kn.semantic.proposals import DOMAINS, Proposal, read_proposals
+from kn.semantic.seed_changes import term_changes
 from kn.semantic.seed_model import SeedBuilder, encoded
 from kn.semantic.seed_oecd import (
     enrich_report,
@@ -25,7 +21,7 @@ from kn.semantic.seed_oecd import (
 from kn.semantic.seed_ontology import CLASS_SHEETS, import_classes, import_relation
 from kn.semantic.seed_provenance import validate_provenance
 from kn.semantic.seed_vocabulary import import_concepts
-from kn.semantic.structure import Snapshot, semantic_contract
+from kn.semantic.structure import Snapshot
 from kn.semantic.verification import review_schemes
 
 RESOURCES = Path(__file__).with_name("resources")
@@ -39,9 +35,17 @@ EXAMPLE_SHEETS = {
 POLICY_REASON = "Policy or schema proposal needs typed attribute, condition, evidence, or profile mapping; no executable policy inferred."
 
 
-def reconcile(
-    root: Path,
-) -> tuple[dict[str, dict[str, Any]], list[dict[str, Any]], list[dict[str, Any]]]:
+class Reconciliation(NamedTuple):
+    documents: dict[str, dict[str, Any]]
+    report: list[dict[str, Any]]
+    fixtures: list[dict[str, Any]]
+    # Schemes whose content changed after their publication review, staged as unverified.
+    stale_reviews: list[dict[str, str]]
+    # Deprecated or replaced concepts that children, mappings or tags still use.
+    lifecycle: list[dict[str, Any]]
+
+
+def reconcile(root: Path) -> Reconciliation:
     """Build in memory and validate the complete result before emitting any artifact."""
     proposals = read_proposals(root)
     builders = {domain: SeedBuilder(domain) for domain in DOMAINS}
@@ -72,12 +76,17 @@ def reconcile(
         )
     enrich_report(report, import_oecd(builders["microelectronics"], proposals, RESOURCES))
     documents = {domain: builder.document() for domain, builder in builders.items()}
-    for domain, document in documents.items():
-        review_schemes(document["snapshot"], RESOURCES / f"{domain}-verification.json", domain)
+    stale = [
+        item
+        for domain, document in documents.items()
+        for item in review_schemes(
+            document["snapshot"], RESOURCES / f"{domain}-verification.json", domain
+        )
+    ]
     snapshot = merge_snapshots([document["snapshot"] for document in documents.values()])
     validate_model(snapshot, publication_references(RESOURCES))
     validate_oecd(snapshot, RESOURCES)
-    return documents, report, fixtures
+    return Reconciliation(documents, report, fixtures, stale, lifecycle_report(snapshot))
 
 
 def _class_identifiers(builder: SeedBuilder, row: Proposal) -> list[str]:
@@ -134,14 +143,31 @@ def merge_snapshots(snapshots: list[Snapshot]) -> Snapshot:
 
 def import_proposals(root: Path, data_dir: Path, *, check: bool = False) -> dict[str, object]:
     """Stage a review diff under DATA_DIR; never overwrite reviewed repository files."""
-    documents, report, fixtures = reconcile(root)
+    documents, report, fixtures, stale, lifecycle = reconcile(root)
+    changes = {
+        domain: term_changes(
+            document["snapshot"],
+            json.loads((RESOURCES / f"{domain}.json").read_bytes())["snapshot"],
+        )
+        for domain, document in documents.items()
+    }
     destination = data_dir / "seed-import" / uuid4().hex
     destination.mkdir(parents=True)
     for domain, document in documents.items():
         (destination / f"{domain}.json").write_bytes(encoded(document))
     (destination / "fixtures.json").write_bytes(encoded(fixtures))
     counts = dict(sorted(Counter(row["status"] for row in report).items()))
-    (destination / "reconciliation.json").write_bytes(encoded({"counts": counts, "rows": report}))
+    (destination / "reconciliation.json").write_bytes(
+        encoded(
+            {
+                "counts": counts,
+                "changes": changes,
+                "stale_reviews": stale,
+                "lifecycle": lifecycle,
+                "rows": report,
+            }
+        )
+    )
     if check:
         for domain, document in documents.items():
             reviewed = root / "domains" / domain / "seeds/semantic.json"
@@ -154,6 +180,9 @@ def import_proposals(root: Path, data_dir: Path, *, check: bool = False) -> dict
         "report": str(destination / "reconciliation.json"),
         "rows": len(report),
         "counts": counts,
+        "changes": changes,
+        "stale_reviews": [item["scheme_id"] for item in stale],
+        "lifecycle": len(lifecycle),
     }
 
 
@@ -182,44 +211,3 @@ def reviewed_snapshot(resources: Path = RESOURCES) -> Snapshot:
     validate_model(snapshot, references)
     validate_oecd(snapshot, resources)
     return snapshot
-
-
-def load_reviewed_seeds(connection: Connection) -> None:
-    """Idempotent inserts; a changed row requires a rebuild, never a silent overwrite."""
-    if not connection.in_transaction():
-        raise ValueError("reviewed seed loading requires a caller-owned transaction")
-    snapshot = reviewed_snapshot()
-    model = metadata(semantic_contract())
-    with connection.begin_nested():
-        for name, rows in snapshot.items():
-            _load_table(connection, model.tables["semantic." + name], rows)
-        _check_references(connection, model)
-
-
-def _load_table(connection: Connection, table: Table, rows: list[dict[str, Any]]) -> None:
-    # Explicit nulls give all parameter sets one shape; the semantic contract has no SQL defaults.
-    native = [{column.name: row.get(column.name) for column in table.columns} for row in rows]
-    if not native:
-        return
-    connection.execute(insert(table).on_conflict_do_nothing(), native)
-    keys = [column.name for column in table.primary_key.columns]
-    stored = {
-        tuple(row[key] for key in keys): dict(row)
-        for row in connection.execute(select(table)).mappings()
-    }
-    for row in native:
-        if stored.get(tuple(row[key] for key in keys)) != row:
-            raise ValueError("reviewed seed conflicts with stored content; rebuild required")
-
-
-def _check_references(connection: Connection, model: MetaData) -> None:
-    """Drain deferred seed triggers so another rebuild can drop these tables in this transaction."""
-    names = tuple(
-        sorted(
-            str(reference.name)
-            for table in model.tables.values()
-            for reference in table.foreign_key_constraints
-        )
-    )
-    connection.execute(SetConstraints("semantic", names, deferred=False))
-    connection.execute(SetConstraints("semantic", names, deferred=True))

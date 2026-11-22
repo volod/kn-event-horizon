@@ -20,7 +20,7 @@ ROOT = Path(__file__).resolve().parents[2]
 
 
 def test_every_proposal_row_is_reconciled_and_provenance_is_durable() -> None:
-    documents, report, fixtures = reconcile(ROOT)
+    documents, report, fixtures, *_ = reconcile(ROOT)
     proposals = read_proposals(ROOT)
 
     def locators(rows: list[dict]) -> set[tuple[str, int]]:

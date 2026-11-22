@@ -42,6 +42,7 @@ dev = [
   "shellcheck-py==0.11.0.1",
   "types-jsonschema>=4.25,<5",
   "fastavro>=1.12,<2",
+  "pyoxigraph>=0.5.13,<0.6",
 ]
 
 [dependency-groups]
