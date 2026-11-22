@@ -34,33 +34,6 @@ recorded decision before later groups build on the group.
 
 ### Ontology and taxonomy -- `ontology-taxonomy`
 
-#### seed-vocabulary-import
-
-The converted workbook proposals must become reviewed seed data with a row-by-row reconciliation.
-
-- Serves: `ontology-taxonomy` -- [Ontology and taxonomy](../design/spec.md#ontology-and-taxonomy)
-- Agent status: CLEAR
-- Dependencies: The [semantic meta-model](current/ontology-taxonomy.md), the
-  [reviewed seed hook](current/data-contracts/rebuild.md#reviewed-seed-hook) and
-  the proposal JSON under `domains/<domain>/seeds/proposals/`, documented in
-  [domains/README.md](../../domains/README.md).
-- User-visible outcome: Every rebuild loads reviewed space, GDELT, and microelectronics ontology and
-  taxonomy seeds with deterministic identifiers. A reconciliation report classifies every proposal
-  row.
-- Scope boundary: Namespacing (including the `S*` and `APP.*` collisions), relation-direction
-  normalization with inverse labels, and structural parents for the ESA GPT nodes. The pilot's
-  missing space classes are added as `kb_extension`. Examples and templates become fixtures. All
-  schemes stay unverified. The source catalogue comes in `source-catalogue-import`.
-- Data and artifact paths: `domains/<domain>/seeds/`, `src/kn/semantic/seeds.py`,
-  `$DATA_DIR/seed-import/<run-id>/` for the reconciliation report, `tests/semantic/`.
-- Execution path: Write a deterministic import from the proposals into reviewed seed files, and
-  have a maintainer review the diff of those files. The rebuild hook then loads the reviewed files.
-- Acceptance gates: Every proposal row is `accepted`, `duplicate`, `needs_mapping`, or `rejected`
-  with a reason. Identifiers are identical across two runs. No example row becomes an entity. Every
-  file records its provenance (file, SHA-256, sheet, row).
-- Documentation target: `current/ontology-taxonomy.md` listed in the
-  [areas index](current.md#areas).
-
 #### verify-official-taxonomies
 
 Concepts that name an official standard cannot be shown as official until checked against the
@@ -69,7 +42,6 @@ publication.
 - Serves: `ontology-taxonomy` -- [Ontology and taxonomy](../design/spec.md#ontology-and-taxonomy)
 - Agent status: CLEAR
 - Research: yes
-- Requires: `seed-vocabulary-import`
 - Dependencies: Public access to the ESA GPT, ESA Technology Tree v4.1 (STM-277), NASA 2024
   Technology Taxonomy, EUSPA EU Space Market Report 2026, ECS SRIA 2026, OECD "Chips, nodes and
   wafers", and GDELT lookup publications.
@@ -93,7 +65,6 @@ Vocabularies need a standard interchange format.
 
 - Serves: `ontology-taxonomy` -- [Ontology and taxonomy](../design/spec.md#ontology-and-taxonomy)
 - Agent status: CLEAR
-- Requires: `seed-vocabulary-import`
 - Dependencies: RDFLib as the justified dependency.
 - User-visible outcome: `kn vocabulary export --format skos --scheme <id>` writes Turtle with `en`
   and `uk` labels, hierarchy, notations, definitions, and mappings.
@@ -114,8 +85,7 @@ changing them later breaks stored data and links.
 
 - Serves: `ontology-taxonomy` -- [Ontology and taxonomy](../design/spec.md#ontology-and-taxonomy)
 - Agent status: CLEAR
-- Requires: `seed-vocabulary-import`, `verify-official-taxonomies`,
-  `skos-export`
+- Requires: `verify-official-taxonomies`, `skos-export`
 - Dependencies: The accepted task records of the group and the [implementation
   audit](../guide/planning-workflow.md#implementation-audits) checks.
 - User-visible outcome: Claims and exports reference stable, verified concepts. The audit record
@@ -511,7 +481,9 @@ to be known before the contracts are fixed.
 - Research: yes
 - Dependencies: Public documentation of representative vendor channels: manufacturer product pages
   and datasheets for the watchlist families, distributor API documentation for the catalogue rows
-  C01-C03, and the InvenTree API schema. The microelectronics attribute dictionary proposal.
+  C01-C03, and the InvenTree API schema. The 195 pending microelectronics attribute dictionary rows
+  in the
+  [seed reconciliation](current/ontology-taxonomy/seeds.md#unmapped-rows-and-ownership).
 - User-visible outcome: The coverage matrix `contracts/core/supply/coverage.yaml` maps every
   information group in the specification to field IDs or an exclusion. It lists each studied
   channel's documented fields with a classification and licence notes on caching and
@@ -535,8 +507,7 @@ domain and counterpart shares.
 
 - Serves: `part-supply-model` -- [Part and supply model](../design/spec.md#part-and-supply-model)
 - Agent status: CLEAR
-- Requires: `vendor-information-coverage`, `evidence-claim-contracts`, `identity-match-engine`,
-  `seed-vocabulary-import`
+- Requires: `vendor-information-coverage`, `evidence-claim-contracts`, `identity-match-engine`
 - Dependencies: none.
 - User-visible outcome: The `supply` schema holds organization roles, product families and models,
   manufacturer parts, orderable variants, and supplier offers. It also holds price, stock, and
@@ -766,7 +737,7 @@ Most source-specific behavior must live in configuration, not code.
 
 - Serves: `ingestion-engine` -- [Ingestion engine](../design/spec.md#ingestion-engine)
 - Agent status: CLEAR
-- Requires: `http-fetch-safety`, `seed-vocabulary-import`, `partial-update-tracking`
+- Requires: `http-fetch-safety`, `partial-update-tracking`
 - Dependencies: none.
 - User-visible outcome: Crawler configurations map native fields to contract field IDs. They also
   map units with logged conversions, native codes to concepts with mapping types, classes and
@@ -1415,7 +1386,7 @@ Canonical space tables must represent the preserved source examples without conf
 
 - Serves: `space-elt` -- [Space ELT](../design/spec.md#space-elt)
 - Agent status: CLEAR
-- Requires: `seed-vocabulary-import`, `evidence-claim-contracts`
+- Requires: `evidence-claim-contracts`
 - Dependencies: [Space domain model](../design/domains/space.md#domain-model) and the initial
   [space example dataset](current/data-contracts.md#source-preservation-and-import).
 - User-visible outcome: The `space` schema holds every pilot table, with claim links,
@@ -1424,7 +1395,8 @@ Canonical space tables must represent the preserved source examples without conf
 - Data and artifact paths: `domains/space/contracts/`, `src/kn/domains/space/`,
   `tests/domains/space/`.
 - Execution path: Write the contracts from the design page, add the missing ontology classes as
-  reviewed seed rows, compile, and rebuild.
+  reviewed seed rows as needed, compile, and rebuild. Resolve the two pending seed relations
+  (regulatory Activity and EUSPA concept endpoints) without conflating classes and concepts.
 - Acceptance gates: Every table compiles and rebuilds. Fixtures prove that planned and actual
   launches, cataloged and operational status, and recurring and one-time tariff amounts cannot be
   stored in the same field. Reuse the real SATCOM mixture to preserve model versus individual
@@ -1881,7 +1853,8 @@ GDELT signals need their own schema that never writes canonical domain facts.
   the optional stream import. No loader writes to space or microelectronics tables.
 - Data and artifact paths: `domains/gdelt/contracts/`, `src/kn/domains/gdelt/`,
   `tests/domains/gdelt/`.
-- Execution path: Write the contracts from the design page, then compile and rebuild.
+- Execution path: Write the contracts from the design page, then compile and rebuild. Reconcile
+  the pending field-mapping and ingestion-order proposals; defer native-only rows with reasons.
 - Acceptance gates: The contracts compile. A role test proves the GDELT loader cannot write other
   domain schemas.
 - Documentation target: `current/gdelt-domain.md` listed in the [areas index](current.md#areas).
@@ -1893,7 +1866,8 @@ Native codes must resolve against full official dictionaries, not workbook subse
 - Serves: `gdelt-elt` -- [GDELT ELT](../design/spec.md#gdelt-elt)
 - Agent status: CLEAR
 - Requires: `gdelt-domain-contracts`, `authorize-gdelt-collection`
-- Dependencies: Collection authorization covering the lookup files.
+- Dependencies: Collection authorization covering the lookup files and the
+  [pending actor/geography and GCAM rows](current/ontology-taxonomy/seeds.md#unmapped-rows-and-ownership).
 - User-visible outcome: CAMEO event codes, actor types, countries, known groups, GKG themes, and
   the GCAM codebook load as native schemes with edition and checksum.
 - Scope boundary: Dictionary files only. Leading zeros are preserved. Sensitive actor attributes
@@ -2066,7 +2040,8 @@ Product identity and condition-bound observations need typed contracts.
 - Serves: `microelectronics-elt` -- [Microelectronics ELT](../design/spec.md#microelectronics-elt)
 - Agent status: CLEAR
 - Requires: `rebuild-from-raw`, `supply-model-contracts`
-- Dependencies: [Microelectronics design](../design/domains/microelectronics.md).
+- Dependencies: [Microelectronics design](../design/domains/microelectronics.md) and the
+  [pending seed policies](current/ontology-taxonomy/seeds.md#unmapped-rows-and-ownership).
 - User-visible outcome: The `microelectronics` schema holds families, models, MPNs, dies, IP
   blocks, kits, facilities, projects, benchmark runs, and observations with condition sets and
   comparison groups.
@@ -2076,7 +2051,8 @@ Product identity and condition-bound observations need typed contracts.
 - Data and artifact paths: `domains/microelectronics/contracts/`, `src/kn/domains/microelectronics/`,
   `tests/domains/microelectronics/`.
 - Execution path: Write the contracts from the design page and the reviewed attribute dictionary,
-  then compile and rebuild.
+  then compile and rebuild. Resolve all 31 pending observation-schema, comparison-profile and
+  rubric proposal rows to typed policies or explicit exclusions.
 - Acceptance gates: MPN identity requires the legal manufacturer and the exact MPN. Typical and
   guaranteed values cannot share a field. Unit conversions are logged.
 - Documentation target: `current/microelectronics-domain.md` listed in the [areas index](current.md#areas).

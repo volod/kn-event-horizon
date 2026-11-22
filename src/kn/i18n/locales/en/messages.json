@@ -33,5 +33,8 @@
   },
   "cli.usage": "usage: ",
   "cli.validated": "SATCOM {import_id}: validated; {tables}",
-  "cli.validation_error": "E_CONTRACT: contract validation failed at {path}."
+  "cli.validation_error": "E_CONTRACT: contract validation failed at {path}.",
+  "cli.vocabulary_help": "reconcile vocabulary proposals for review",
+  "cli.seed_check_help": "compare staged seeds and fixtures with reviewed files",
+  "cli.seed_ok": "Reconciled {rows} proposal rows. Report: {report}"
 }

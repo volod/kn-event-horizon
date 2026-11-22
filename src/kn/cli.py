@@ -22,6 +22,8 @@ from kn.i18n.output import render_result
 from kn.i18n.parser import OperatorParser, parse_interface_options
 from kn.metadata import project_info
 from kn.operations import contract_operation, database_operation, satcom_operation
+from kn.quality.project_root import discover_project_root
+from kn.semantic.seeds import import_proposals
 
 _LOG = logging.getLogger("kn.operator")
 
@@ -58,6 +60,15 @@ def build_parser(
     satcom.add_argument("action", choices=("validate", "import"))
     satcom.add_argument("source", type=Path, help=tr.text("cli.source_help"))
     satcom.add_argument(
+        "--data-dir",
+        type=Path,
+        default=Path(os.environ.get("DATA_DIR", ".data")),
+        help=tr.text("cli.data_dir_help"),
+    )
+    vocabulary = subcommands.add_parser("vocabulary", help=tr.text("cli.vocabulary_help"))
+    vocabulary.add_argument("action", choices=("import-proposals",))
+    vocabulary.add_argument("--check", action="store_true", help=tr.text("cli.seed_check_help"))
+    vocabulary.add_argument(
         "--data-dir",
         type=Path,
         default=Path(os.environ.get("DATA_DIR", ".data")),
@@ -126,6 +137,8 @@ def _run(args: argparse.Namespace) -> dict[str, object]:
         )
     if args.command == "db":
         return database_operation(args.action)
+    if args.command == "vocabulary":
+        return import_proposals(discover_project_root(), args.data_dir, check=args.check)
     return satcom_operation(args.action, args.source, args.data_dir)
 
 

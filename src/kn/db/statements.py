@@ -1,6 +1,7 @@
 """Typed PostgreSQL statements that SQLAlchemy and Alembic have no construct for.
 
-Roles, grants, default privileges, extensions, schema owners, and role switches are DDL elements.
+Roles, grants, default privileges, extensions, schema owners, role switches, and constraint timing
+are DDL elements.
 Each renders through the dialect's identifier preparer, so names are quoted when needed and no
 statement is assembled from free text. Keywords come from fixed sets and are checked on creation.
 """
@@ -88,6 +89,15 @@ class ResetRole(_Statement):
     pass
 
 
+class SetConstraints(_Statement):
+    """Change only explicitly named, schema-qualified constraints; never affect unrelated callers."""
+
+    def __init__(self, schema: str, names: tuple[str, ...], *, deferred: bool) -> None:
+        if not schema or not names or any(not name for name in names):
+            raise ValueError("name at least one constraint in a schema")
+        self.schema, self.names, self.deferred = schema, names, deferred
+
+
 @compiles(CreateExtension)
 def _create_extension(element: CreateExtension, compiler: DDLCompiler, **kw: Any) -> str:
     quote = compiler.preparer.quote
@@ -143,3 +153,11 @@ def _set_role(element: SetRole, compiler: DDLCompiler, **kw: Any) -> str:
 @compiles(ResetRole)
 def _reset_role(element: ResetRole, compiler: DDLCompiler, **kw: Any) -> str:
     return "RESET ROLE"
+
+
+@compiles(SetConstraints)
+def _set_constraints(element: SetConstraints, compiler: DDLCompiler, **kw: Any) -> str:
+    quote = compiler.preparer.quote
+    names = ", ".join(quote(element.schema) + "." + quote(name) for name in element.names)
+    timing = "DEFERRED" if element.deferred else "IMMEDIATE"
+    return f"SET CONSTRAINTS {names} {timing}"

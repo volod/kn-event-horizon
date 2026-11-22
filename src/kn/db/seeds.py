@@ -6,9 +6,12 @@ from sqlalchemy.engine import Connection
 
 from kn.db.platform import SCHEMAS, role_name
 from kn.db.statements import ResetRole, SetRole
+from kn.semantic.seeds import load_reviewed_seeds as load_semantic_seeds
 
-# Append a schema and deterministic loader only after its reviewed seed task is accepted.
-REVIEWED_SEED_LOADERS: tuple[tuple[str, Callable[[Connection], None]], ...] = ()
+# Explicit registry: no proposal discovery at rebuild time.
+REVIEWED_SEED_LOADERS: tuple[tuple[str, Callable[[Connection], None]], ...] = (
+    ("semantic", load_semantic_seeds),
+)
 
 
 def load_reviewed_seeds(connection: Connection) -> None:

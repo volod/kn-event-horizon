@@ -29,7 +29,8 @@ owner, in registry order, and records one row per contract in `system.installed_
 rebuild and an upgrade of an empty database therefore use one mechanism. No SQL text is executed;
 the generated `postgresql/schema.sql` is a review artifact only, and an archived source
 `schema.sql` is evidence that nothing reads. The current set holds the governance table in
-`system` and 31 SATCOM tables in `space`; the other eight schemas have no contracted datasets yet.
+`system`, 31 SATCOM tables in `space`, and 18 semantic tables in `semantic`; the other seven
+schemas have no contracted datasets.
 `rebuild()` and `upgrade()` accept another validated set, which the integration tests use for
 fixture contracts in `space` and `semantic`.
 
@@ -59,9 +60,9 @@ that schema's loader role (`SET LOCAL ROLE`), with DML privileges only, and then
 Loaders must use the supplied transaction and must not commit independently. An exception aborts the
 rebuild.
 
-The registry is currently empty: ontology vocabulary and source catalogue review are separate plan
-tasks. Proposals are never loaded automatically, and SATCOM source imports are not seed data. Those
-tasks will register loaders for their reviewed files; this task supplies and tests the hook.
+The registry explicitly loads the [reviewed semantic vocabulary](../ontology-taxonomy/seeds.md)
+from packaged files as the semantic loader role. Proposals are never loaded automatically, and
+SATCOM source imports are not seed data. Source catalogue loading remains a separate plan task.
 
 ## Verification
 

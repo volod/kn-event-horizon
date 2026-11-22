@@ -5,7 +5,7 @@ from pathlib import Path
 import pytest
 from sqlalchemy.dialects import postgresql
 
-from kn.db.statements import PUBLIC, AlterRole, CreateRole, Privileges, SetRole
+from kn.db.statements import PUBLIC, AlterRole, CreateRole, Privileges, SetConstraints, SetRole
 
 
 def sql(statement: object) -> str:
@@ -56,3 +56,14 @@ def test_production_code_sends_no_sql_strings_to_the_database() -> None:
         if marker in path.read_text(encoding="utf-8")
     ]
     assert offenders == []
+
+
+def test_constraint_timing_is_qualified_and_quotes_identifiers() -> None:
+    assert sql(SetConstraints("semantic", ("fk_parent",), deferred=False)) == (
+        "SET CONSTRAINTS semantic.fk_parent IMMEDIATE"
+    )
+    assert sql(SetConstraints('odd"schema', ('odd"constraint', "Other"), deferred=True)) == (
+        'SET CONSTRAINTS "odd""schema"."odd""constraint", "odd""schema"."Other" DEFERRED'
+    )
+    with pytest.raises(ValueError):
+        SetConstraints("semantic", (), deferred=False)

@@ -65,6 +65,7 @@ where = ["src"]
 [tool.setuptools.package-data]
 "kn.contracts" = ["resources/**/*.json"]
 "kn.i18n.locales" = ["*/*.json"]
+"kn.semantic" = ["resources/*.json"]
 "kn.db" = ["migrations/*.py", "migrations/versions/*.py"]
 
 [tool.ruff]

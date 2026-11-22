@@ -124,7 +124,10 @@ Development edits contract version `1.0.0` and one Alembic baseline in place. If
 changes, explicitly set `KN_ENVIRONMENT=development`, run `make db-rebuild`, and backfill with
 `make satcom-import`. Rebuild recreates all KN schemas and removes obsolete KN tables; external
 dependencies refuse atomically. See the [rebuild reference](../impl/current/data-contracts/rebuild.md)
-for the reviewed seed hook and boundaries. Released environments refuse rebuild. First release
+for the reviewed seed hook and boundaries. `make seed-import` stages vocabulary changes for review;
+`make seed-check` checks them against the packaged files and fixtures. See the
+[seed reference](../impl/current/ontology-taxonomy/seeds.md). Released environments refuse rebuild.
+First release
 freezes the baseline;
 later schema changes use reviewed Python Alembic revisions and separate contract versions.
 See [data contracts](../impl/current/data-contracts.md) for preservation rules and current limits.

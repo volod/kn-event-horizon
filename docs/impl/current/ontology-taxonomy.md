@@ -1,6 +1,7 @@
 # Ontology and Taxonomy
 
-The semantic meta-model is available; vocabulary content is still planned. The packaged ODCS
+The semantic meta-model and [reviewed vocabulary seeds](ontology-taxonomy/seeds.md) are available.
+The packaged ODCS
 contract `src/kn/contracts/resources/semantic/1.0.0.json` defines `kn.core.semantic` in the `semantic`
 schema and is registered after governance and SATCOM in the [deployment
 set](data-contracts.md#deployment-set). Source installations and wheels use the same contract.
@@ -83,7 +84,9 @@ class; rubric criteria must name a profile attribute and use a positive exact de
 
 Failures raise the existing `ContractError` with a JSON Pointer, a rule such as
 `semantic.cycle` or `semantic.endpoint`, and a value-free hint. Row-shape failures use the existing
-JSON Schema rule names. No semantic CLI or automatic discovery of proposal files is provided.
+JSON Schema rule names. The [seed reconciliation command](ontology-taxonomy/seeds.md) is separate
+from model validation;
+rebuilds load only explicitly reviewed packaged files.
 
 ## Enforcement boundary and verification
 
@@ -103,6 +106,6 @@ execute conversions, ranking or evidence selection.
 - `make test-integration`: the new round trip and existing registry deployment/rebuild verification.
 
 The [task record](../records/0020-ontology-taxonomy-semantic-model-contracts.md) contains acceptance
-evidence. Reviewed content import, proposal reconciliation, publication comparison and SKOS export
-remain in the [plan](../plan.md). The ontology-taxonomy capability remains planned until those
-outcomes are available.
+evidence. [Seed import and proposal reconciliation](ontology-taxonomy/seeds.md) are available. Publication
+comparison and SKOS export remain in the [plan](../plan.md), so the ontology-taxonomy capability
+remains planned.

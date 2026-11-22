@@ -188,3 +188,12 @@ test-bilingual: ## Check available bilingual paths and save evidence under DATA_
 
 bilingual-acceptance: ## Require full bilingual release acceptance; fail on open paths
 	@$(BILINGUAL_PYTEST) --require-bilingual-release
+
+.PHONY: seed-import seed-check
+seed-import: ## Stage deterministic vocabulary seeds, fixtures, and row reconciliation for review
+	@source "$(PROJECT_ROOT)/scripts/shared/common.sh"; kn_load_env; \
+		"$(VENV)/bin/kn" vocabulary import-proposals --data-dir "$(DATA_ROOT)"
+
+seed-check: ## Reconcile proposals and compare staged outputs with checked-in reviewed content
+	@source "$(PROJECT_ROOT)/scripts/shared/common.sh"; kn_load_env; \
+		"$(VENV)/bin/kn" vocabulary import-proposals --check --data-dir "$(DATA_ROOT)"
