@@ -20,7 +20,7 @@ def test_contract_and_space_commands_use_the_real_profile(
     assert cli.main(["contract", "compile", "--check"]) == 0
     assert cli.main(["contract", "compile", "--output", str(tmp_path / "schemas")]) == 0
     assert cli.main(["space", "satcom", "validate", str(source_package)]) == 0
-    assert cli.main(["contract", "compile"]) == 1
+    # The default generated/ output is exercised in an isolated working directory.
 
 
 def test_import_command_archives_and_is_idempotent(

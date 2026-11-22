@@ -746,6 +746,7 @@ dependencies = [
     { name = "babel" },
     { name = "jsonschema" },
     { name = "psycopg", extra = ["binary"] },
+    { name = "pydantic" },
     { name = "pyyaml" },
     { name = "sqlalchemy" },
 ]
@@ -781,6 +782,7 @@ requires-dist = [
     { name = "mypy", marker = "extra == 'dev'", specifier = ">=1.15,<2" },
     { name = "psycopg", extras = ["binary"], specifier = ">=3.3,<4" },
     { name = "psycopg", extras = ["binary"], marker = "extra == 'dev'", specifier = ">=3.3,<4" },
+    { name = "pydantic", specifier = ">=2.12,<3" },
     { name = "pymarkdownlnt", marker = "extra == 'dev'", specifier = ">=0.9.32,<1" },
     { name = "pytest", marker = "extra == 'dev'", specifier = ">=8,<10" },
     { name = "pytest-cov", marker = "extra == 'dev'", specifier = ">=6,<8" },
@@ -1243,10 +1245,10 @@ name = "pydantic"
 version = "2.14.4"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
-    { name = "annotated-types", marker = "python_full_version < '3.15'" },
-    { name = "pydantic-core", marker = "python_full_version < '3.15'" },
-    { name = "typing-extensions", marker = "python_full_version < '3.15'" },
-    { name = "typing-inspection", marker = "python_full_version < '3.15'" },
+    { name = "annotated-types" },
+    { name = "pydantic-core" },
+    { name = "typing-extensions" },
+    { name = "typing-inspection" },
 ]
 sdist = { url = "https://files.pythonhosted.org/packages/8e/25/3ec212432a6031b65f043eaca9c820ddf87c0d0aa330023e64f79fcb5db6/pydantic-2.14.4.tar.gz", hash = "sha256:7c19f1d46f8accf55a4617a6116e1ade64840870f397b846a2c53fb9019414ba", size = 927354, upload-time = "2026-11-19T12:57:39.767Z" }
 wheels = [
@@ -1258,7 +1260,7 @@ name = "pydantic-core"
 version = "2.50.5"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
-    { name = "typing-extensions", marker = "python_full_version < '3.15'" },
+    { name = "typing-extensions" },
 ]
 sdist = { url = "https://files.pythonhosted.org/packages/fb/63/0ceb815a7762576027ce388544c573d440574f95afb1302a2496b96db548/pydantic_core-2.50.5.tar.gz", hash = "sha256:1e740886083ff95530d694e6a3f09ed914bcf92a496d16acd307c6c3484fc36d", size = 523285, upload-time = "2026-11-19T12:56:38.067Z" }
 wheels = [
@@ -2067,7 +2069,7 @@ name = "typing-inspection"
 version = "0.4.5"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
-    { name = "typing-extensions", marker = "python_full_version < '3.15'" },
+    { name = "typing-extensions" },
 ]
 sdist = { url = "https://files.pythonhosted.org/packages/ff/50/0195198eb1d75bab716bb0a813abea4cc394bfa17a92a189f021a34859af/typing_inspection-0.4.5.tar.gz", hash = "sha256:7f16c411e7930dc79596d42ab44672a3fe5f60eb34b781a1647e7872363120c7", size = 81194, upload-time = "2026-11-04T14:13:23.774Z" }
 wheels = [

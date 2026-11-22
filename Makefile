@@ -146,7 +146,7 @@ contract-check: ## Validate open contracts and check generated artifact digests
 	@"$(VENV)/bin/kn" contract lint
 	@"$(VENV)/bin/kn" contract compile --check
 
-contract-compile: ## Compile portable schemas under DATA_DIR
+contract-compile: ## Compile contract artifacts under DATA_DIR
 	@"$(VENV)/bin/kn" contract compile --output "$(DATA_ROOT)/contract/current"
 
 .PHONY: contract-toolchain-check

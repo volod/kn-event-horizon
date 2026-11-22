@@ -17,7 +17,11 @@ from kn.domains.space.satcom.package import read_package
 
 
 def contract_operation(
-    action: str, output: Path | None, check: bool, source: Path | None = None
+    action: str,
+    output: Path | None,
+    check: bool,
+    source: Path | None = None,
+    references: Path | None = None,
 ) -> dict[str, object]:
     if action == "lint":
         data = lint_contract(source or SATCOM)
@@ -26,9 +30,7 @@ def contract_operation(
             "version": data["version"],
             "digest": hashlib.sha256(canonical(data).encode()).hexdigest(),
         }
-    if source is not None:
-        raise ValueError("custom contract compilation remains planned")
-    contract = load_contract()
+    contract = load_contract(source or SATCOM, references=references)
     if action == "compile":
         compile_contract(contract, output, check)
     return {

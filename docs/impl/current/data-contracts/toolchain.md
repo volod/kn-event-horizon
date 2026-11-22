@@ -10,8 +10,9 @@ make contract-check
 make contract-toolchain-check
 ```
 
-Lint without a path checks the bundled SATCOM contract. A supplied path is for lint only;
-compilation of arbitrary input contracts remains planned. Success keeps the existing `contract_id`,
+Lint without a path checks the bundled SATCOM contract. Supplied paths also work with
+`kn contract compile`; see the [compiler reference](compiler.md) for its stricter supported profile
+and local reference catalogs. Success keeps the existing `contract_id`,
 `version`, and canonical `digest` result. Equivalent YAML and JSON produce the same digest. Contract
 versions use `major.minor.patch`; `apiVersion` must be exactly `v3.1.0` even though the upstream
 schema accepts some older versions.
@@ -91,9 +92,10 @@ contract scope; `kn.csv` at table scope; and `kn.foreignKey`, `kn.enum`, `kn.par
 `kn.precision`, and `kn.scale` at field scope. Compilation continues to enforce decimal consistency,
 scalar logical types, required stable IDs, and resolvable composite foreign keys.
 
-## Remaining gates
+## Compilation boundary
 
-`contract-compiler` owns semantic reference resolution, broader ODCS and KN extension exports,
-PostGIS templates, Pydantic, dbt, and full deterministic compilation. New lint schemas do not
-enable those exports. The `data-contracts` capability remains planned until its compiler and
-full-platform rebuild gates pass.
+Lint validates structure without resolving external definitions. Compilation additionally resolves
+reference catalogs and emits the [supported artifacts](compiler.md#entry-points-and-artifacts),
+including PostGIS templates, Pydantic and dbt. Runtime ontology and policy behavior remains owned by
+its capability tasks. The `data-contracts` capability remains planned until the full-platform
+rebuild gate passes.

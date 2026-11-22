@@ -3,7 +3,7 @@
 The space domain has an initial SATCOM source dataset. SATCOM is a subset of space, not a domain,
 service, or PostgreSQL schema of its own. This implementation supplies the first bounded profile
 of the [data contracts capability](../../design/spec.md#data-contracts). The remaining ontology,
-identity, interchange, PostGIS and broader compiler work stays in the [plan](../plan.md).
+identity, interchange and full-platform rebuild work stays in the [plan](../plan.md).
 
 ## One definition for each model
 
@@ -25,35 +25,17 @@ It does not resolve ontology, policy, vocabulary, mapping or dataset references.
 [toolchain reference](data-contracts/toolchain.md) lists extension shapes, diagnostics, parser
 limits, and the pinned external tool's verification command.
 
-The SATCOM compiler additionally checks its supported profile, names, stable field IDs, and
-references. Its supported extensions remain `storageSchema`, `sourceProfile`, `csv`, `fieldId`,
-`foreignKey` (ordered source and target columns), `enum`, `partialDate`, `precision`, and `scale`.
-The shared closed value schemas live in `resources/kn-extensions.json`; compiler-supported ODCS
-keys live in `profile.py`. Unsupported ODCS features and extensions still fail compilation.
-A successful structural lint does not imply compiler support or resolved semantic references.
+The compiler accepts supplied JSON or YAML contracts and resolves local reference catalogs before
+producing SQLAlchemy metadata, generated PostgreSQL DDL, strict Pydantic models, JSON Schema, Avro,
+Elasticsearch mappings, dbt sources and contract documentation. The
+[compiler reference](data-contracts/compiler.md) describes the supported profile, reference catalog,
+PostGIS and partition templates, output paths, and exact-byte drift checks.
 
-## Engine exports
-
-`model.py` supplies immutable typed models. The same fields compile into:
-
-| Consumer | Representation |
-| --- | --- |
-| PostgreSQL | SQLAlchemy metadata; exact `NUMERIC(38,18)`, big integers, dates, text, booleans, required fields, composite keys, enum checks, and initially deferred composite foreign keys |
-| Elasticsearch | Strict mappings with date and numeric inference disabled; exact decimals are keyword strings, partial dates are keyword strings, full dates use `strict_date` |
-| Avro | Records, nullable unions with null defaults, `long`, dates, and standard decimal logical types with precision 38 and scale 18 |
-| JSON Schema | Closed objects, required fields, enums, dates, partial-date syntax and decimal strings for portable JSON |
-
-Elasticsearch mappings describe fields; JSON Schema and the importer enforce required values and
-allowed enums before indexing. Decimal keyword fields preserve precision but do not support numeric
-range aggregation. No Elasticsearch service or Avro transport is deployed.
-
-`make contract-check` validates and compares artifact digests with the reviewed manifest.
-`make ci` includes this gate. The PostgreSQL descriptor is generated from SQLAlchemy metadata,
-including column types, nullability, keys and checks, so physical mapping drift also fails CI.
-`make contract-compile` writes 96 portable artifacts, a PostgreSQL metadata descriptor and a digest
-manifest under `$DATA_DIR/contract/current/`. `kn contract compile --output <directory>` supports a selected
-runtime directory. SQLAlchemy metadata is consumed directly by Alembic; no SQL script is authored
-or executed by deployment.
+`make contract-check` validates the bundled contract and checks the reviewed artifact digest
+manifest, including physical mappings and generated DDL. `make contract-compile` writes 103 artifacts
+plus a manifest under `$DATA_DIR/contract/current/`. `kn contract compile` defaults to `generated/`;
+`--output <directory>` selects another destination. Generated SQL is reviewable output; Alembic
+continues to consume SQLAlchemy metadata directly for deployment.
 
 ## Development baseline and release evolution
 
@@ -80,7 +62,9 @@ At first release, freeze the baseline and contract `1.0.0`. Subsequent releases 
 snapshots and Python Alembic revisions. `evolution.py` supplies conservative diff validation and
 additive operations for new tables and nullable fields. It refuses removals, renames, type,
 identity, nullability, enum, reference and precision changes, and new constrained fields that need
-backfill. Additive evolution updates the installed contract marker. A revision calls this helper
+backfill. Changes to table metadata or reference definitions and new fields with semantic
+extensions require reviewed migrations instead of silently losing new compiler behavior.
+Additive evolution updates the installed contract marker. A revision calls this helper
 with reviewed old and new contracts; deployment never autogenerates or applies arbitrary drift.
 Destructive downgrades are refused. The full-model release gate remains `release-migration-mode`.
 
@@ -138,11 +122,13 @@ scenario conditions, finance bases, and terminal mass boundaries remain explicit
 Canonical identity matching, rights review and source onboarding remain required before publication
 or exchange. The importer does not fetch URLs or treat a local file as permission to crawl them.
 
-The compiler currently supports flat scalar models. PostgreSQL numeric bounds are chosen to hold
-this dataset exactly; oversized new values fail and keep their original input file available.
+The compiler supports flat scalar models and bounded WKT/PostGIS geometry templates. PostgreSQL
+numeric bounds hold this dataset exactly; oversized new values fail and keep their original input
+file available.
 Structural drift checking covers tables, columns, types, nullability and references through
 Alembic; it does not prove equivalence of arbitrary manually altered check expressions. The pinned
-standard and compiler extension subset are deliberately narrower than the future full compiler.
+standard and implemented ODCS profile remain bounded; ontology content, cross-contract SQL
+references, runtime semantic policies and interchange compilation remain separately planned.
 
 ## Verification
 
@@ -165,3 +151,6 @@ The analysis, real import evidence and remaining scope are in
 [record 0011](../records/0011-data-contracts-satcom-schema-governance.md).
 The pinned lint toolchain and external export boundary are recorded in
 [record 0014](../records/0014-data-contracts-contract-toolchain-pin.md).
+
+The full compiler templates, offline reference resolution and drift acceptance are in
+[record 0015](../records/0015-data-contracts-contract-compiler.md).

@@ -12,8 +12,16 @@ CONTRACT_KEYS = {
     "domain",
     "customProperties",
     "schema",
+    "description",
 }
-TABLE_KEYS = {"name", "logicalType", "physicalType", "customProperties", "properties"}
+TABLE_KEYS = {
+    "name",
+    "logicalType",
+    "physicalType",
+    "customProperties",
+    "properties",
+    "description",
+}
 FIELD_KEYS = {"name", "logicalType", "required", "primaryKey", "customProperties", "description"}
 
 
@@ -32,8 +40,8 @@ def validate_profile(data: dict[str, Any]) -> None:
     if not data["schema"]:
         raise ValueError("empty contract schema")
     for table in data["schema"]:
-        _keys(table, TABLE_KEYS, {"properties", "customProperties", "logicalType", "physicalType"})
+        _keys(table, TABLE_KEYS, {"properties", "logicalType", "physicalType"})
         if table["logicalType"] != "object" or table["physicalType"] != "table":
             raise ValueError("only object/table models are supported")
         for field in table["properties"]:
-            _keys(field, FIELD_KEYS, {"logicalType", "customProperties", "required", "primaryKey"})
+            _keys(field, FIELD_KEYS, {"logicalType", "customProperties"})

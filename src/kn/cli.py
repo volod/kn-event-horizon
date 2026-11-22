@@ -45,6 +45,7 @@ def build_parser(
     contracts.add_argument("action", choices=("lint", "compile"))
     contracts.add_argument("source", nargs="?", type=Path, help=tr.text("cli.contract_source_help"))
     contracts.add_argument("--output", type=Path, help=tr.text("cli.output_help"))
+    contracts.add_argument("--references", type=Path, help=tr.text("cli.references_help"))
     contracts.add_argument("--check", action="store_true", help=tr.text("cli.check_help"))
     database = subcommands.add_parser("db", help=tr.text("cli.db_help"))
     database.add_argument("action", choices=("upgrade", "verify", "rebuild"))
@@ -116,7 +117,9 @@ def _run(args: argparse.Namespace) -> dict[str, object]:
     if args.command == "info":
         return asdict(project_info())
     if args.command == "contract":
-        return contract_operation(args.action, args.output, args.check, args.source)
+        return contract_operation(
+            args.action, args.output, args.check, args.source, args.references
+        )
     if args.command == "db":
         return database_operation(args.action)
     return satcom_operation(args.action, args.source, args.data_dir)

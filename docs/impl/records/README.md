@@ -29,5 +29,6 @@ decision. A record can name a plan task by ID because plan headings disappear on
 | 0012 | `message-catalog-core` | [0012-localization-message-catalog-core.md](0012-localization-message-catalog-core.md) |
 | 0013 | `bilingual-acceptance-suite` (open) | [0013-localization-bilingual-acceptance-suite.md](0013-localization-bilingual-acceptance-suite.md) |
 | 0014 | `contract-toolchain-pin` | [0014-data-contracts-contract-toolchain-pin.md](0014-data-contracts-contract-toolchain-pin.md) |
+| 0015 | `contract-compiler` | [0015-data-contracts-contract-compiler.md](0015-data-contracts-contract-compiler.md) |
 
-Next unused sequence is `0015`.
+Next unused sequence is `0016`.

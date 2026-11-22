@@ -29,8 +29,8 @@
       ],
       "expected": {
         "exit_code": 0,
-        "stdout": "usage: kn contract [-h] [--output OUTPUT] [--check] {lint,compile} [source]\n\narguments:\n  {lint,compile}\n  source           ODCS YAML or JSON file to lint (default: bundled SATCOM)\n\noptions:\n  -h, --help       show this help message and exit\n  --output OUTPUT  compiled artifact directory\n  --check          check artifacts against the contract\n",
-        "stderr": ""
+        "stderr": "",
+        "stdout": "usage: kn contract [-h] [--output OUTPUT] [--references REFERENCES] [--check]\n                   {lint,compile} [source]\n\narguments:\n  {lint,compile}\n  source                ODCS YAML or JSON file (default: bundled SATCOM)\n\noptions:\n  -h, --help            show this help message and exit\n  --output OUTPUT       compiled artifact directory\n  --references REFERENCES\n                        local compiler reference catalog (JSON or YAML)\n  --check               check artifacts against the contract\n"
       },
       "id": "contract-help"
     },
@@ -99,14 +99,15 @@
     {
       "arguments": [
         "contract",
-        "compile"
+        "compile",
+        "missing-contract.json"
       ],
       "expected": {
         "exit_code": 1,
         "stderr": "E_INPUT: operation failed; check input files, options, and configuration.\n",
         "stdout": ""
       },
-      "id": "compile-missing-output"
+      "id": "compile-missing-source"
     },
     {
       "arguments": [
@@ -135,8 +136,8 @@
       ],
       "expected": {
         "exit_code": 2,
-        "stdout": "usage: kn contract [-h] [--output OUTPUT] [--check] {lint,compile} [source]\n",
-        "stderr": "E_ARGUMENTS: invalid arguments for kn contract; use --help.\n"
+        "stderr": "E_ARGUMENTS: invalid arguments for kn contract; use --help.\n",
+        "stdout": "usage: kn contract [-h] [--output OUTPUT] [--references REFERENCES] [--check]\n                   {lint,compile} [source]\n"
       },
       "id": "invalid-action"
     },
@@ -208,6 +209,7 @@
       "arguments": [
         "contract",
         "compile",
+        "missing-contract.json",
         "--json"
       ],
       "expected": {
@@ -285,8 +287,8 @@
       ],
       "expected": {
         "exit_code": 0,
-        "stdout": "\u0432\u0438\u043a\u043e\u0440\u0438\u0441\u0442\u0430\u043d\u043d\u044f: kn contract [-h] [--output OUTPUT] [--check]\n                          {lint,compile} [source]\n\n\u0430\u0440\u0433\u0443\u043c\u0435\u043d\u0442\u0438:\n  {lint,compile}\n  source           \u0424\u0430\u0439\u043b ODCS YAML \u0430\u0431\u043e JSON \u0434\u043b\u044f \u043f\u0435\u0440\u0435\u0432\u0456\u0440\u043a\u0438 (\u0442\u0438\u043f\u043e\u0432\u043e: \u0432\u0431\u0443\u0434\u043e\u0432\u0430\u043d\u0438\u0439\n                   SATCOM)\n\n\u043f\u0430\u0440\u0430\u043c\u0435\u0442\u0440\u0438:\n  -h, --help       \u043f\u043e\u043a\u0430\u0437\u0430\u0442\u0438 \u0446\u044e \u0434\u043e\u0432\u0456\u0434\u043a\u0443 \u0439 \u0432\u0438\u0439\u0442\u0438\n  --output OUTPUT  \u043a\u0430\u0442\u0430\u043b\u043e\u0433 \u0441\u043a\u043e\u043c\u043f\u0456\u043b\u044c\u043e\u0432\u0430\u043d\u0438\u0445 \u0430\u0440\u0442\u0435\u0444\u0430\u043a\u0442\u0456\u0432\n  --check          \u0437\u0456\u0441\u0442\u0430\u0432\u0438\u0442\u0438 \u0430\u0440\u0442\u0435\u0444\u0430\u043a\u0442\u0438 \u0437 \u043a\u043e\u043d\u0442\u0440\u0430\u043a\u0442\u043e\u043c\n",
-        "stderr": ""
+        "stderr": "",
+        "stdout": "\u0432\u0438\u043a\u043e\u0440\u0438\u0441\u0442\u0430\u043d\u043d\u044f: kn contract [-h] [--output OUTPUT] [--references REFERENCES]\n                          [--check]\n                          {lint,compile} [source]\n\n\u0430\u0440\u0433\u0443\u043c\u0435\u043d\u0442\u0438:\n  {lint,compile}\n  source                \u0424\u0430\u0439\u043b ODCS YAML \u0430\u0431\u043e JSON (\u0442\u0438\u043f\u043e\u0432\u043e: \u0432\u0431\u0443\u0434\u043e\u0432\u0430\u043d\u0438\u0439 SATCOM)\n\n\u043f\u0430\u0440\u0430\u043c\u0435\u0442\u0440\u0438:\n  -h, --help            \u043f\u043e\u043a\u0430\u0437\u0430\u0442\u0438 \u0446\u044e \u0434\u043e\u0432\u0456\u0434\u043a\u0443 \u0439 \u0432\u0438\u0439\u0442\u0438\n  --output OUTPUT       \u043a\u0430\u0442\u0430\u043b\u043e\u0433 \u0441\u043a\u043e\u043c\u043f\u0456\u043b\u044c\u043e\u0432\u0430\u043d\u0438\u0445 \u0430\u0440\u0442\u0435\u0444\u0430\u043a\u0442\u0456\u0432\n  --references REFERENCES\n                        \u043b\u043e\u043a\u0430\u043b\u044c\u043d\u0438\u0439 \u043a\u0430\u0442\u0430\u043b\u043e\u0433 \u043f\u043e\u0441\u0438\u043b\u0430\u043d\u044c \u043a\u043e\u043c\u043f\u0456\u043b\u044f\u0442\u043e\u0440\u0430 (JSON \u0430\u0431\u043e YAML)\n  --check               \u0437\u0456\u0441\u0442\u0430\u0432\u0438\u0442\u0438 \u0430\u0440\u0442\u0435\u0444\u0430\u043a\u0442\u0438 \u0437 \u043a\u043e\u043d\u0442\u0440\u0430\u043a\u0442\u043e\u043c\n"
       },
       "id": "contract-help"
     },
@@ -355,14 +357,15 @@
     {
       "arguments": [
         "contract",
-        "compile"
+        "compile",
+        "missing-contract.json"
       ],
       "expected": {
         "exit_code": 1,
         "stderr": "E_INPUT: \u043e\u043f\u0435\u0440\u0430\u0446\u0456\u044f \u043d\u0435 \u0432\u0434\u0430\u043b\u0430\u0441\u044f; \u043f\u0435\u0440\u0435\u0432\u0456\u0440\u0442\u0435 \u0432\u0445\u0456\u0434\u043d\u0456 \u0444\u0430\u0439\u043b\u0438, \u043f\u0430\u0440\u0430\u043c\u0435\u0442\u0440\u0438 \u0442\u0430 \u043a\u043e\u043d\u0444\u0456\u0433\u0443\u0440\u0430\u0446\u0456\u044e.\n",
         "stdout": ""
       },
-      "id": "compile-missing-output"
+      "id": "compile-missing-source"
     },
     {
       "arguments": [
@@ -391,8 +394,8 @@
       ],
       "expected": {
         "exit_code": 2,
-        "stdout": "\u0432\u0438\u043a\u043e\u0440\u0438\u0441\u0442\u0430\u043d\u043d\u044f: kn contract [-h] [--output OUTPUT] [--check]\n                          {lint,compile} [source]\n",
-        "stderr": "E_ARGUMENTS: \u043d\u0435\u043a\u043e\u0440\u0435\u043a\u0442\u043d\u0456 \u0430\u0440\u0433\u0443\u043c\u0435\u043d\u0442\u0438 kn contract; \u0441\u043a\u043e\u0440\u0438\u0441\u0442\u0430\u0439\u0442\u0435\u0441\u044f --help.\n"
+        "stderr": "E_ARGUMENTS: \u043d\u0435\u043a\u043e\u0440\u0435\u043a\u0442\u043d\u0456 \u0430\u0440\u0433\u0443\u043c\u0435\u043d\u0442\u0438 kn contract; \u0441\u043a\u043e\u0440\u0438\u0441\u0442\u0430\u0439\u0442\u0435\u0441\u044f --help.\n",
+        "stdout": "\u0432\u0438\u043a\u043e\u0440\u0438\u0441\u0442\u0430\u043d\u043d\u044f: kn contract [-h] [--output OUTPUT] [--references REFERENCES]\n                          [--check]\n                          {lint,compile} [source]\n"
       },
       "id": "invalid-action"
     },
@@ -464,6 +467,7 @@
       "arguments": [
         "contract",
         "compile",
+        "missing-contract.json",
         "--json"
       ],
       "expected": {

@@ -3,10 +3,13 @@
 import hashlib
 from typing import Any
 
+from kn.contracts.ddl import postgresql_ddl
+from kn.contracts.field_exports import json_field
 from kn.contracts.loader import canonical
 from kn.contracts.model import Contract, Field, Table
+from kn.contracts.physical import extensions
 from kn.contracts.postgresql import manifest as postgresql_manifest
-from kn.contracts.sqlalchemy import PARTIAL_DATE
+from kn.contracts.templates import contract_docs, dbt_sources, pydantic_models
 
 
 def _avro_type(field: Field) -> object:
@@ -15,6 +18,7 @@ def _avro_type(field: Field) -> object:
         "integer": "long",
         "boolean": "boolean",
         "date": {"type": "int", "logicalType": "date"},
+        "timestamp": {"type": "long", "logicalType": "timestamp-micros"},
         "number": {
             "type": "bytes",
             "logicalType": "decimal",
@@ -32,6 +36,7 @@ def avro(contract: Contract, table: Table) -> dict[str, Any]:
             "name": field.name,
             "type": _avro_type(field),
             "kn.fieldId": field.field_id,
+            "kn.extensions": extensions(field),
         }
         if not field.required:
             item.update(type=["null", item["type"]], default=None)
@@ -42,6 +47,7 @@ def avro(contract: Contract, table: Table) -> dict[str, Any]:
         "namespace": f"kn.{contract.schema}",
         "kn.contractVersion": contract.version,
         "kn.contractDigest": contract.digest,
+        "kn.extensions": extensions(table),
         "fields": fields,
     }
 
@@ -52,13 +58,14 @@ def elasticsearch(contract: Contract, table: Table) -> dict[str, Any]:
         "integer": "long",
         "boolean": "boolean",
         "date": "date",
+        "timestamp": "date",
         "number": "keyword",
     }
     properties = {}
     for field in table.fields:
         item = {"type": types[field.logical_type]}
-        if field.logical_type == "date":
-            item["format"] = "strict_date"
+        if field.logical_type in {"date", "timestamp"}:
+            item["format"] = "strict_date" if field.logical_type == "date" else "strict_date_time"
         properties[field.name] = item
     return {
         "dynamic": "strict",
@@ -75,37 +82,28 @@ def elasticsearch(contract: Contract, table: Table) -> dict[str, Any]:
 
 def json_schema(table: Table) -> dict[str, Any]:
     """Portable wire validation uses exact decimal strings, never JSON floating point."""
-    types = {
-        "string": "string",
-        "integer": "integer",
-        "boolean": "boolean",
-        "date": "string",
-        "number": "string",
-    }
-    properties: dict[str, Any] = {}
-    for field in table.fields:
-        item: dict[str, Any] = {"type": types[field.logical_type]}
-        if field.partial_date:
-            item["pattern"] = PARTIAL_DATE
-        if field.logical_type == "date":
-            item["format"] = "date"
-        if field.logical_type == "number":
-            item["pattern"] = r"^-?[0-9]+(?:\.[0-9]+)?$"
-        if field.enum:
-            item["enum"] = list(field.enum)
-        properties[field.name] = item if field.required else {"anyOf": [item, {"type": "null"}]}
     return {
         "$schema": "https://json-schema.org/draft/2020-12/schema",
         "type": "object",
         "additionalProperties": False,
         "required": [field.name for field in table.fields if field.required],
-        "properties": properties,
+        "properties": {field.name: json_field(field) for field in table.fields},
+        "x-kn": extensions(table),
     }
 
 
 def artifacts(contract: Contract) -> dict[str, str]:
     """Canonical content is independent of input object order and machine paths."""
-    result = {"postgresql/metadata.json": canonical(postgresql_manifest(contract)) + "\n"}
+    result = {
+        "postgresql/metadata.json": canonical(postgresql_manifest(contract)) + "\n",
+        "postgresql/schema.sql": postgresql_ddl(contract),
+        "pydantic/models.py": pydantic_models(contract),
+        # JSON is a YAML 1.2 subset, giving dbt a deterministic, escaped YAML document.
+        "dbt/sources.yaml": canonical(dbt_sources(contract)) + "\n",
+        "docs/contract.md": contract_docs(contract),
+        "contract.json": contract.document_json + "\n",
+        "references.json": contract.references_json + "\n",
+    }
     for table in sorted(contract.tables, key=lambda table: table.name):
         for engine, content in [
             ("avro", avro(contract, table)),

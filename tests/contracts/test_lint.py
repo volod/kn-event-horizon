@@ -106,7 +106,7 @@ def test_lint_acceptance_does_not_silently_expand_compiler_support(tmp_path: Pat
     )
     path = write_contract(tmp_path, data)
     lint_contract(path)
-    with pytest.raises(ValueError, match="extension"):
+    with pytest.raises(ValueError, match="reference"):
         load_contract(path)
 
 

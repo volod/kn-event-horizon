@@ -7,6 +7,7 @@ from alembic.operations import Operations
 
 from kn.contracts.loader import canonical
 from kn.contracts.model import Contract, Field, Table
+from kn.contracts.physical import extensions
 from kn.contracts.sqlalchemy import column_type, metadata
 
 
@@ -18,6 +19,11 @@ def additions(previous: Contract, current: Contract) -> dict[str, tuple[str, ...
         raise ValueError("contract identity or storage schema changed")
     if new_version <= old_version:
         raise ValueError("evolution requires a newer contract version")
+    if (
+        previous.references_json != current.references_json
+        or previous.source_profile != current.source_profile
+    ):
+        raise ValueError("reference or source profile changes require a reviewed migration")
     changes: dict[str, tuple[str, ...]] = {}
     new_tables = {table.name: table for table in current.tables}
     for old in previous.tables:
@@ -32,6 +38,8 @@ def additions(previous: Contract, current: Contract) -> dict[str, tuple[str, ...
 
 
 def _table_additions(old: Table, new: Table) -> tuple[str, ...]:
+    if old.extensions_json != new.extensions_json:
+        raise ValueError("table metadata changes require a reviewed migration")
     fields = {field.name: field for field in new.fields}
     for field in old.fields:
         candidate = fields.get(field.name)
@@ -46,7 +54,12 @@ def _table_additions(old: Table, new: Table) -> tuple[str, ...]:
 
 def _needs_review(field: Field) -> bool:
     return bool(
-        field.required or field.primary_key or field.reference or field.enum or field.partial_date
+        field.required
+        or field.primary_key
+        or field.reference
+        or field.enum
+        or field.partial_date
+        or (extensions(field).keys() - {"fieldId"})
     )
 
 

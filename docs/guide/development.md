@@ -114,7 +114,8 @@ Use repository checks to enforce testable rules and keep detailed procedures in 
 ## Contract and space example workflow
 
 Run `make contract-check` to validate the bundled open contracts and artifact digests, and
-`make contract-compile` to inspect generated schemas under `$DATA_DIR/contract/current/`.
+`make contract-compile` to inspect generated schemas, DDL, Pydantic models and dbt sources under
+`$DATA_DIR/contract/current/`.
 The SATCOM example belongs to the existing space domain: `make satcom-validate` checks the
 owner-provided package and `make satcom-import` archives and imports it into the governed database.
 

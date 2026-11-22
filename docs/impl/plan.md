@@ -34,38 +34,13 @@ recorded decision before later groups build on the group.
 
 ### Data contracts -- `data-contracts`
 
-#### contract-compiler
-
-Generated DDL and models must come only from contracts, deterministically.
-
-- Serves: `data-contracts` -- [Data contracts](../design/spec.md#data-contracts)
-- Agent status: CLEAR
-- Dependencies: The [pinned lint schemas and initial SQLAlchemy profile](current/data-contracts.md)
-  and their remaining semantic reference and ODCS export gaps. Generated metadata applies to scratch
-  schemas of the
-  [integration test harness](current/runtime-platform.md#integration-tests).
-- User-visible outcome: `kn contract compile` writes DDL, Pydantic models, JSON Schema, dbt source
-  definitions, and contract docs into `generated/`, and `--check` fails on drift.
-- Scope boundary: Reference checks, canonical serialization, the contract digest, and templates
-  for PostGIS geometry, checks, comments, and indexes. Python platform policy covers roles and
-  grants. Keep one editable development baseline and version evolution after first release.
-- Data and artifact paths: `src/kn/contracts/`, `generated/`, `src/kn/db/`,
-  `tests/contracts/`.
-- Execution path: Extend the shared model and SQLAlchemy compiler where a required ODCS feature
-  is unsupported. Keep engine exports deterministic and update the CI drift manifest.
-- Acceptance gates: Compiling twice is byte-identical. Generated DDL applies to the integration
-  database. A broken reference fails. Drift fails CI.
-- Documentation target: `current/data-contracts.md` listed in the
-  [areas index](current.md#areas).
-
 #### development-rebuild-mode
 
 Development keeps an explicit disposable rebuild alongside normal in-place migrations.
 
 - Serves: `data-contracts` -- [Data contracts](../design/spec.md#data-contracts)
 - Agent status: CLEAR
-- Requires: `contract-compiler`
-- Dependencies: none.
+- Dependencies: The accepted [contract compiler](current/data-contracts/compiler.md).
 - User-visible outcome: `kn db rebuild` drops and recreates the KN schemas from generated DDL and
   loads the reviewed seeds. It refuses to run in an environment marked as released.
 - Scope boundary: Schema drop and recreate, the seed-load hook, grants, and the released-environment
@@ -86,7 +61,7 @@ toolchain or the rebuild multiplies across every later contract.
 
 - Serves: `data-contracts` -- [Data contracts](../design/spec.md#data-contracts)
 - Agent status: CLEAR
-- Requires: `contract-compiler`, `development-rebuild-mode`
+- Requires: `development-rebuild-mode`
 - Dependencies: The accepted task records of the group and the [implementation
   audit](../guide/planning-workflow.md#implementation-audits) checks.
 - User-visible outcome: Later groups compile their contracts with a verified, deterministic
@@ -116,8 +91,8 @@ Ontology and taxonomy content needs its own contracted data model before any imp
 
 - Serves: `ontology-taxonomy` -- [Ontology and taxonomy](../design/spec.md#ontology-and-taxonomy)
 - Agent status: CLEAR
-- Requires: `contract-compiler`
-- Dependencies: none.
+- Dependencies: The accepted [contract compiler](current/data-contracts/compiler.md) and its local
+  reference catalog interface.
 - User-visible outcome: The `semantic` schema holds namespaces, entity classes, relation types,
   concept schemes, concepts, mappings, entity tags, attribute definitions, condition sets,
   comparison profiles, and rubrics, with per-locale labels.

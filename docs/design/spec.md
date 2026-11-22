@@ -536,9 +536,12 @@ KN extension JSON Schemas. No top-level keys are added to ODCS. The extension fa
 | `kn.lineageRefs` | Declared datasets and mappings, not observed runtime lineage |
 
 The compiler (`kn contract lint|compile`) validates against a checksum-pinned ODCS schema and
-closed KN extensions. It produces canonical digests, SQLAlchemy metadata, strict Elasticsearch
-mappings, Avro schemas, and JSON Schema validation. Decimal values remain exact; partial dates stay
-strings with declared precision rather than invented days. Unsupported types or metadata fail.
+closed KN extensions. It produces canonical digests, SQLAlchemy metadata and generated DDL,
+strict Elasticsearch mappings, Avro schemas, JSON Schema validation, Pydantic models, dbt source
+definitions, and contract documentation. Compile-time semantic references resolve against a local
+reviewed catalog; no network lookup or runtime policy execution occurs during compilation. Decimal
+values remain exact; partial dates stay strings with declared precision rather than invented days.
+Unsupported types or metadata fail.
 PostgreSQL deployment uses Python Alembic revisions and a shared Python role/extension policy;
 there are no handwritten SQL deployment scripts. Generated artifacts cannot redefine contracts.
 
@@ -1692,7 +1695,7 @@ upstream before downstream.
 | 2 | `project-identity` | shipped | Import, CLI, and distribution-build tests agree on the `kn-event-horizon` identity | [Product core](../impl/current/product-core.md) |
 | 3 | `documentation-integrity` | shipped | Link, registry-plan, task-lane, metadata, ordering, prerequisites, forward-language, and closed-research register checks pass over fixtures and the repository tree | [Documentation checks](../guide/development.md#documentation-checks) |
 | 4 | `runtime-platform` | shipped | Pinned Compose database reaches healthy from empty volumes, keeps data across restart, publishes its port on loopback only, and serves integration tests on the development host | [Runtime platform](../impl/current/runtime-platform.md) |
-| 5 | `data-contracts` | planned | Contracts compile deterministically, invalid contracts fail, drift fails CI, rebuild creates every schema, loaders cannot run DDL | [Lint and initial space profile](../impl/current/data-contracts.md) |
+| 5 | `data-contracts` | planned | Contracts compile deterministically, invalid contracts fail, drift fails CI, rebuild creates every schema, loaders cannot run DDL | [Compiler and initial space profile](../impl/current/data-contracts.md) |
 | 6 | `ontology-taxonomy` | planned | Every proposal row is classified, identifiers are stable, invalid hierarchies are rejected, SKOS round-trips | - |
 | 7 | `object-identity` | planned | KN IDs survive rebuilds; lifecycle, matching, partial-update, and lineage fixtures pass; calibrated classes meet the precision gate | - |
 | 8 | `raw-archive` | planned | WARC round trip, atomic write, ledger reindex, redaction, revisit, and corruption checks pass | - |
