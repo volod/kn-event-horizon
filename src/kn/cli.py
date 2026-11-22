@@ -17,7 +17,7 @@ from sqlalchemy.exc import SQLAlchemyError
 
 from kn.i18n import DEFAULT_LOCALE, Translator
 from kn.i18n.output import render_result
-from kn.i18n.parser import OperatorParser
+from kn.i18n.parser import OperatorParser, parse_interface_options
 from kn.metadata import project_info
 from kn.operations import contract_operation, database_operation, satcom_operation
 
@@ -66,10 +66,9 @@ def main(argv: Sequence[str] | None = None) -> int:
     """Run the selected command, keeping JSON keys and error codes independent of locale."""
     logging.basicConfig(level=logging.INFO, format="%(message)s")
     arguments = list(sys.argv[1:] if argv is None else argv)
-    bootstrap = OperatorParser(prog="kn", include_help=False, json_output="--json" in arguments)
-    bootstrap.add_argument("--locale", default=os.environ.get("KN_LOCALE", DEFAULT_LOCALE))
-    bootstrap.add_argument("--json", action="store_true")
-    selected, remaining = bootstrap.parse_known_args(arguments)
+    selected, remaining = parse_interface_options(
+        arguments, os.environ.get("KN_LOCALE", DEFAULT_LOCALE)
+    )
     try:
         translator = Translator(selected.locale)
     except ValueError:

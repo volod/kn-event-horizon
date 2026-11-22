@@ -27,5 +27,6 @@ decision. A record can name a plan task by ID because plan headings disappear on
 | 0010 | `runtime-platform-implementation-audit` | [0010-runtime-platform-runtime-platform-implementation-audit.md](0010-runtime-platform-runtime-platform-implementation-audit.md) |
 | 0011 | `satcom-schema-governance` | [0011-data-contracts-satcom-schema-governance.md](0011-data-contracts-satcom-schema-governance.md) |
 | 0012 | `message-catalog-core` | [0012-localization-message-catalog-core.md](0012-localization-message-catalog-core.md) |
+| 0013 | `bilingual-acceptance-suite` (open) | [0013-localization-bilingual-acceptance-suite.md](0013-localization-bilingual-acceptance-suite.md) |
 
-Next unused sequence is `0013`.
+Next unused sequence is `0014`.

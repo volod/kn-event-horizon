@@ -123,3 +123,17 @@ changes, explicitly set `KN_ENVIRONMENT=development`, run `make db-rebuild`, and
 `make satcom-import`. Released environments refuse rebuild. First release freezes the baseline;
 later schema changes use reviewed Python Alembic revisions and separate contract versions.
 See [data contracts](../impl/current/data-contracts.md) for preservation rules and current limits.
+
+## Bilingual acceptance workflow
+
+Run `make test-bilingual` for the delivered CLI, catalogs, multilingual selection, and lossless
+source archive/import checks. Each run writes evidence under `$DATA_DIR/e2e/bilingual-<run-id>/`.
+Run `make bilingual-acceptance` for the full release gate; it fails while any operator surface lacks
+acceptance evidence, even if the available checks pass. See
+[localization coverage](../impl/current/localization.md#bilingual-acceptance) for artifacts and
+remaining paths. Both targets honor `.env` and `DATA_DIR` using the normal Make resolution.
+
+Review expected output changes in `tests/e2e/fixtures/cli.json`; do not automatically regenerate
+goldens to hide a regression. Keep fixture files and reports ASCII with escaped Unicode. Source
+text decodes to Unicode and its original bytes must remain intact in archives. Missing data
+translations exercise fallback; missing interface keys must still fail the catalog gate.

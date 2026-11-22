@@ -33,7 +33,9 @@ def _pytest_caches(target: str, project: Path, **env: str) -> list[str]:
     ]
 
 
-@pytest.mark.parametrize("target", ["test", "test-integration"])
+@pytest.mark.parametrize(
+    "target", ["test", "test-integration", "test-bilingual", "bilingual-acceptance"]
+)
 def test_a_data_dir_with_a_space_is_one_pytest_cache_path(tmp_path: Path, target: str) -> None:
     data_dir = tmp_path / "audit data"
 
@@ -53,3 +55,10 @@ def test_make_reads_data_dir_from_dot_env_like_the_shell_helpers(
     project = _project(tmp_path, dot_env)
 
     assert _pytest_caches("test", project) == [f"{project}/{expected}/cache/pytest"]
+
+
+def test_running_subset_and_release_targets_together_keeps_the_release_gate(tmp_path: Path) -> None:
+    commands = pytest_commands(("test-bilingual", "bilingual-acceptance"), _project(tmp_path))
+    assert len(commands) == 2
+    assert "--require-bilingual-release" not in commands[0]
+    assert "--require-bilingual-release" in commands[1]

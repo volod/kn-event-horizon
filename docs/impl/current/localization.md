@@ -18,6 +18,9 @@ The explicit `--locale` overrides `KN_LOCALE`; the default is `en`. `main()` acc
 `--locale` and `--json` options before or after a subcommand. Locale selection happens before help
 rendering. Each invocation uses its own `Translator`, without changing process-global gettext
 state. Unsupported interface locales fail with `E_LOCALE` and exit status 2.
+Malformed global options use the last parsed locale, or `KN_LOCALE` before any explicit selection,
+for both usage and error text. If that locale is invalid, the diagnostic uses English. JSON argument
+errors keep the same keys and codes even when the locale option itself is malformed.
 
 CLI help, success messages, and error summaries use the catalog. Command names, flags, IDs,
 versions, hashes, paths, and JSON keys remain stable. Operator output uses the `kn.operator` logger
@@ -110,5 +113,54 @@ boundaries; this AST check is not a general Python data-flow analyzer.
 `tests/i18n/` contains bilingual CLI goldens, plural and number cases, locale precedence, nested
 help and failure paths, planted catalog/literal failures, and multilingual source-text preservation
 and fallback cases. See [record 0012](../records/0012-localization-message-catalog-core.md) for run
-commands, packaging evidence, and the accepted task contract. Dashboard screenshots, Ukrainian
-terminology review, and full release acceptance remain open.
+commands, packaging evidence, and the accepted core task contract.
+
+## Bilingual acceptance
+
+```bash
+make test-bilingual
+make bilingual-acceptance
+```
+
+`make test-bilingual` runs `tests/e2e/` and `tests/i18n/`, without a service or network, and writes
+ASCII JSON evidence under a unique `$DATA_DIR/e2e/bilingual-<run-id>/` directory. `.env`, relative
+paths, and paths containing spaces use the shared Make environment rules. The same tests also run
+in `make ci`; ordinary CI runs keep their artifacts in pytest's temporary directory.
+
+- `en/cli/` and `uk/cli/` contain actual subprocess exit codes, stdout, and stderr. The committed
+  [CLI goldens](../../../tests/e2e/fixtures/cli.json) cover identity, every delivered help surface,
+  contract checks, argument/input/configuration failures, and stable JSON diagnostics. Only the
+  installed project version is normalized for golden comparison. Package validation and contract
+  compilation also run against real fixture inputs; compiled artifact hashes are checked.
+- `en/data-selection.json` and `uk/data-selection.json` contain original variants, all translations,
+  and selected text with language, provenance, originality, and fallback metadata. The
+  [source-text fixtures](../../../tests/e2e/fixtures/source-text.json) cover English, Ukrainian,
+  Russian, Chinese, Arabic, unknown language, case-insensitive tags, and regional tags. Translation
+  subsets and ordering, exact whitespace and combining characters, unrelated translations, and
+  later translation without replacing the original have independent checks.
+- `source-preservation.json` records a source-only multilingual archive/import/replay check.
+  Real SATCOM source rows and attached messages retain their original text, language, and provenance.
+  Archive bytes and raw CSV cells round-trip exactly; typed missing values retain the existing
+  contract's null semantics. This check uses SQLite for the portable projection, not PostgreSQL
+  service acceptance or a live crawler.
+- `machine-parity.json` confirms identical machine output across interface locales.
+  `manifest.json` records test exit status, selected and passing tests, available scope, untested
+  paths, the Kestra waiver, and explicit release blockers with their owning plan tasks.
+
+`make bilingual-acceptance` runs those checks and additionally fails if release blockers remain,
+even when every available test passes. A planted passing-subset test verifies this behavior with
+and without persistent artifacts. A passing `make test-bilingual` or `make ci` is therefore only
+evidence for available paths. The acceptance command currently exits nonzero because dashboards,
+filters, maps, review queue, source status, lineage, InvenTree plans/reports, export README,
+date/unit/missing-value presentation, and browser screenshots still need their implementations.
+No screenshot or Cyrillic font-rendering acceptance is claimed. There is no browser dependency
+until a real browser surface can be tested; no other delivered English-only operator screen was
+found. Ukrainian terminology review also remains open.
+
+Interface key coverage stays strict in both locales. A Chinese or Russian source message displayed
+through the data fallback policy is valid content, not an untranslated interface label. The
+dashboard language must change controls and formatting independently of whether any data
+translation exists. Future dashboard and export acceptance must exercise the same source fixtures
+through their real projections and the shared selector, preserving the original for later
+translation. See the open [acceptance record](../records/0013-localization-bilingual-acceptance-suite.md)
+for evidence and remaining prerequisites.
