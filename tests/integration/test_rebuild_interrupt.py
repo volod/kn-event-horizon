@@ -88,9 +88,10 @@ def test_a_killed_rebuild_leaves_the_previous_schemas_in_use(
             monkeypatch.setenv("KN_ENVIRONMENT", "development")
             assert cli.main(["--json", "db", "rebuild"]) == 0
             with engine.begin() as connection:
-                # A table that the next rebuild drops as obsolete.
-                connection.exec_driver_sql("CREATE TABLE semantic.kept (id integer)")
-                connection.exec_driver_sql("INSERT INTO semantic.kept VALUES (7)")
+                # A row that the next rebuild would drop with its table.
+                connection.exec_driver_sql(
+                    "INSERT INTO space.satcom_imports VALUES ('kept', '1.0.0', 'kept', 'kept')"
+                )
                 before = catalog(connection)
             child = subprocess.Popen([sys.executable, "-c", CHILD, name], cwd=ROOT)
             try:
@@ -100,7 +101,7 @@ def test_a_killed_rebuild_leaves_the_previous_schemas_in_use(
                     observer.exec_driver_sql("SET lock_timeout = '200ms'")
                     # Readers wait for the rebuild instead of seeing a partial schema.
                     with pytest.raises(OperationalError, match="lock timeout"):
-                        observer.exec_driver_sql("SELECT id FROM semantic.kept")
+                        observer.exec_driver_sql("SELECT * FROM space.satcom_imports")
                 os.kill(child.pid, signal.SIGKILL)
                 child.wait(timeout=WAIT_SECONDS)
                 _wait_for_exit(engine, pid)
@@ -110,11 +111,12 @@ def test_a_killed_rebuild_leaves_the_previous_schemas_in_use(
                     child.wait()
             with engine.connect() as connection:
                 assert catalog(connection) == before
-                assert connection.scalar(sa.text("SELECT id FROM semantic.kept")) == 7
+                kept = "SELECT count(*) FROM space.satcom_imports WHERE import_id = 'kept'"
+                assert connection.scalar(sa.text(kept)) == 1
                 verify(connection)
             assert cli.main(["--json", "db", "rebuild"]) == 0
             with engine.connect() as connection:
-                assert not sa.inspect(connection).has_table("kept", schema="semantic")
+                assert connection.scalar(sa.text(kept)) == 0
         finally:
             engine.dispose()
             admin.execute(sql.SQL("DROP DATABASE {} WITH (FORCE)").format(sql.Identifier(name)))

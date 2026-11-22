@@ -32,43 +32,6 @@ recorded decision before later groups build on the group.
 
 ## Agent Implementation Tasks
 
-### Data contracts -- `data-contracts`
-
-#### storage-contract-registry
-
-Every later storage contract must deploy, rebuild, and verify through the same governance as the
-SATCOM contract, the first prefetched source dataset. Upgrade, rebuild, verification, and the
-installed-contract marker know only that one bundled contract, while more prefetched datasets and
-the core models will each bring their own.
-
-- Serves: `data-contracts` -- [Data contracts](../design/spec.md#data-contracts)
-- Agent status: CLEAR
-- Dependencies: Finding DC-11 of the [data contracts audit](records/0017-data-contracts-data-contracts-implementation-audit.md#findings),
-  the [compiler](current/data-contracts/compiler.md), and the
-  [development rebuild](current/data-contracts/rebuild.md).
-- User-visible outcome: A reviewed registry lists every deployed storage contract and its schema.
-  `kn db upgrade`, `kn db rebuild`, `kn db verify`, `make contract-check`, and
-  `make contract-compile` cover every registered contract, and one installed-contract marker in
-  `system` records the version and digest of each.
-- Scope boundary: The registry; a contract-neutral marker that replaces `space.satcom_contract`;
-  Alembic baseline creation of each contract as its schema owner; structural and compiled-catalog
-  verification per contract, including two contracts in one schema; the evolution helper on the
-  shared marker; refusal of a `kn.storageSchema` outside the platform schemas; and a recorded
-  decision for references between registered contracts, either field-ID references checked at
-  compile time or cross-schema foreign keys with the grants they need. Contract content stays with
-  its owning tasks. No SQL text, as in the rest of deployment.
-- Data and artifact paths: `src/kn/contracts/`, `src/kn/db/`, `generated/contracts/`,
-  `tests/contracts/`, `tests/integration/`.
-- Execution path: Add fixture contracts in another schema and a second dataset contract in `space`
-  beside SATCOM, then make upgrade,
-  rebuild, verification, and compilation pass for all of them while the SATCOM import and its tests
-  keep passing.
-- Acceptance gates: A rebuild from empty creates every registered contract and records each in the
-  marker. Verification refuses a missing table, digest drift, or an unregistered table in any
-  registered contract. A contract outside the platform schemas is refused before database access.
-  Each contract compiles into its own `generated/contracts/<id>/`. `make ci` passes.
-- Documentation target: `current/data-contracts.md` listed in the [areas index](current.md#areas).
-
 ### Ontology and taxonomy -- `ontology-taxonomy`
 
 #### semantic-model-contracts
@@ -77,9 +40,9 @@ Ontology and taxonomy content needs its own contracted data model before any imp
 
 - Serves: `ontology-taxonomy` -- [Ontology and taxonomy](../design/spec.md#ontology-and-taxonomy)
 - Agent status: CLEAR
-- Requires: `storage-contract-registry`
 - Dependencies: The accepted [contract compiler](current/data-contracts/compiler.md) and its local
-  reference catalog interface.
+  reference catalog interface, and the [deployment set](current/data-contracts.md#deployment-set)
+  that registers its contracts.
 - User-visible outcome: The `semantic` schema holds namespaces, entity classes, relation types,
   concept schemes, concepts, mappings, entity tags, attribute definitions, condition sets,
   comparison profiles, and rubrics, with per-locale labels.
@@ -653,9 +616,10 @@ Every candidate source must be visible and disabled before any crawler exists.
 
 - Serves: `source-management` -- [Source management](../design/spec.md#source-management)
 - Agent status: CLEAR
-- Requires: `storage-contract-registry`
-- Dependencies: The [reviewed seed hook](current/data-contracts/rebuild.md#reviewed-seed-hook) and
-  the data-source proposal JSON for space, microelectronics, and GDELT.
+- Dependencies: The [reviewed seed hook](current/data-contracts/rebuild.md#reviewed-seed-hook), the
+  [deployment set](current/data-contracts.md#deployment-set) that registers the catalogue contract
+  beside the governance contract in `system`, and the data-source proposal JSON for space,
+  microelectronics, and GDELT.
 - User-visible outcome: Every rebuild loads `system.source_catalogue` with 37 space, 65
   microelectronics, and 17 GDELT candidates. `kn source list` shows them in both locales.
 - Scope boundary: The catalogue contract, original IDs, lifecycle states, and access notes marked
@@ -900,8 +864,7 @@ its integration is dataset-specific code beside the engine.
 
 - Serves: `ingestion-engine` -- [Ingestion engine](../design/spec.md#ingestion-engine)
 - Agent status: CLEAR
-- Requires: `storage-contract-registry`, `warc-raw-store`, `mapping-and-quality-rules`,
-  `dataset-package-locations`
+- Requires: `warc-raw-store`, `mapping-and-quality-rules`, `dataset-package-locations`
 - Dependencies: Finding DC-16 of the [data contracts audit](records/0017-data-contracts-data-contracts-implementation-audit.md#findings),
   the current [SATCOM import](current/data-contracts.md#source-preservation-and-import) as the first
   dataset, and the `bulk_file` access method of the

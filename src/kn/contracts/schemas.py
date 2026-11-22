@@ -11,7 +11,13 @@ from kn.contracts.diagnostics import ContractError
 
 RESOURCES = Path(__file__).parent / "resources"
 SATCOM = RESOURCES / "satcom" / "1.0.0.json"
+PLATFORM = RESOURCES / "platform.json"
 SCHEMA_FILES = ("odcs-3.1.0.json", "kn-extensions.json")
+
+
+def platform_policy() -> dict[str, Any]:
+    """The KN schemas and role kinds: the only places a storage contract can deploy to."""
+    return dict(json.loads(PLATFORM.read_text(encoding="ascii")))
 
 
 def pinned_schemas() -> tuple[dict[str, Any], dict[str, Any]]:

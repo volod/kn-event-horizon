@@ -15,8 +15,22 @@ PG_ROLES = sa.table(
     schema=CATALOG_SCHEMA,
 )
 PG_NAMESPACE = sa.table(
-    "pg_namespace", sa.column("nspname"), sa.column("nspowner"), schema=CATALOG_SCHEMA
+    "pg_namespace",
+    sa.column("oid"),
+    sa.column("nspname"),
+    sa.column("nspowner"),
+    schema=CATALOG_SCHEMA,
 )
+PG_CLASS = sa.table(
+    "pg_class",
+    sa.column("relname"),
+    sa.column("relnamespace"),
+    sa.column("relkind"),
+    sa.column("relispartition"),
+    schema=CATALOG_SCHEMA,
+)
+# Ordinary and partitioned tables; views, sequences and indexes are other relation kinds.
+TABLE_KINDS = ("r", "p")
 PG_EXTENSION = sa.table(
     "pg_extension", sa.column("extname"), sa.column("extversion"), schema=CATALOG_SCHEMA
 )

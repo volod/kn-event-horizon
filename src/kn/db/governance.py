@@ -1,6 +1,6 @@
 """Transactional Alembic entrypoint, also used by deployment and tests."""
 
-from collections.abc import Callable
+from collections.abc import Callable, Sequence
 from pathlib import Path
 
 import sqlalchemy as sa
@@ -8,29 +8,55 @@ from alembic import command
 from alembic.config import Config
 from sqlalchemy.engine import Connection
 
-from kn.contracts import Contract, load_contract
+from kn.contracts import Contract
 from kn.contracts.model import canonical
-from kn.contracts.sqlalchemy import metadata
+from kn.contracts.registry import marker_table, registered_contracts, validate_registry
 from kn.db.catalog import PG_EXTENSION, PG_NAMESPACE, PG_ROLES, UNSAFE_ROLE_ATTRIBUTES
-from kn.db.platform import EXTENSION, apply_platform, role_name
+from kn.db.platform import (
+    EXTENSION,
+    MIGRATION_SCHEMA,
+    ROLE_KINDS,
+    SCHEMAS,
+    apply_platform,
+    role_name,
+)
 from kn.db.statements import ResetRole, SetRole
-from kn.db.verification import verify_privileges, verify_structure
+from kn.db.verification import verify_privileges, verify_registered_tables, verify_structure
 
 MIGRATIONS = Path(__file__).parent / "migrations"
-# The Alembic version table lives here and is owned by this schema's owner role.
-MIGRATION_SCHEMA = "system"
+# The baseline reads the deployment set from here; tests supply a fixture registry.
+CONTRACTS_ATTRIBUTE = "contracts"
+__all__ = [
+    "CONTRACTS_ATTRIBUTE",
+    "MIGRATION_SCHEMA",
+    "deployment",
+    "governed_migrations",
+    "record_installed",
+    "upgrade",
+    "verify",
+    "verify_contracts",
+]
 
 
-def migration_config(connection: Connection) -> Config:
+def deployment(contracts: Sequence[Contract] | None = None) -> tuple[Contract, ...]:
+    """The registered contracts, or a supplied set that passes the same validation."""
+    if contracts is None:
+        return registered_contracts()
+    validate_registry(contracts)
+    return tuple(contracts)
+
+
+def migration_config(connection: Connection, contracts: Sequence[Contract] | None = None) -> Config:
     config = Config()
     config.set_main_option("script_location", str(MIGRATIONS))
     config.attributes["connection"] = connection
+    config.attributes[CONTRACTS_ATTRIBUTE] = deployment(contracts)
     return config
 
 
-def upgrade(connection: Connection) -> None:
+def upgrade(connection: Connection, contracts: Sequence[Contract] | None = None) -> None:
     """`alembic upgrade head` in the caller's transaction; no migration commits independently."""
-    command.upgrade(migration_config(connection), "head")
+    command.upgrade(migration_config(connection, contracts), "head")
 
 
 def governed_migrations(connection: Connection, migrate: Callable[[], None]) -> None:
@@ -42,14 +68,13 @@ def governed_migrations(connection: Connection, migrate: Callable[[], None]) -> 
     apply_platform(connection)
 
 
-def verify(connection: Connection) -> str:
+def verify(connection: Connection, contracts: Sequence[Contract] | None = None) -> str:
     """Verify catalog policy and the migration revision without persistent probe objects."""
     from alembic.migration import MigrationContext
     from alembic.script import ScriptDirectory
 
-    from kn.db.platform import ROLE_KINDS, SCHEMAS
-
-    head = ScriptDirectory.from_config(migration_config(connection)).get_current_head()
+    config = migration_config(connection, contracts)
+    head = ScriptDirectory.from_config(config).get_current_head()
     current = MigrationContext.configure(
         connection, opts={"version_table_schema": MIGRATION_SCHEMA}
     )
@@ -70,7 +95,7 @@ def verify(connection: Connection) -> str:
             ).one_or_none()
             if attributes != (False,) * len(UNSAFE_ROLE_ATTRIBUTES):
                 raise ValueError(f"unsafe or missing role: {role}")
-    verify_contract(connection)
+    verify_contracts(connection, config.attributes[CONTRACTS_ATTRIBUTE])
     verify_privileges(connection)
     postgis = connection.scalar(
         sa.select(PG_EXTENSION.c.extversion).where(PG_EXTENSION.c.extname == EXTENSION)
@@ -78,36 +103,48 @@ def verify(connection: Connection) -> str:
     return f"kn roles verified: {len(SCHEMAS)} schemas, {len(SCHEMAS) * len(ROLE_KINDS)} roles, postgis {postgis}"
 
 
-def verify_contract(connection: Connection) -> None:
-    """Read-only checks also run before a loader imports a package."""
-    contract = load_contract()
-    model = metadata(contract)
-    if not sa.inspect(connection).has_table("satcom_contract", schema=contract.schema):
+def verify_contracts(connection: Connection, contracts: Sequence[Contract] | None = None) -> None:
+    """Every registered contract is installed at its digest, with its tables and no others.
+
+    These read-only checks also run before a loader imports a package.
+    """
+    deployed = deployment(contracts)
+    marker = marker_table()
+    if not sa.inspect(connection).has_table(marker.name, schema=marker.schema):
         raise ValueError(
             "contract baseline changed; use an explicit development rebuild and backfill"
         )
-    marker = model.tables[f"{contract.schema}.satcom_contract"]
-    installed = connection.execute(
-        sa.select(marker.c.version, marker.c.digest).where(
-            marker.c.contract_id == contract.contract_id
+    installed = {
+        row.contract_id: (row.version, row.digest)
+        for row in connection.execute(
+            sa.select(marker.c.contract_id, marker.c.version, marker.c.digest)
         )
-    ).one_or_none()
-    if installed != (contract.version, contract.digest):
+    }
+    if installed != {
+        contract.contract_id: (contract.version, contract.digest) for contract in deployed
+    }:
         raise ValueError(
             "contract digest drift; rebuild development data or apply a release migration"
         )
-    verify_structure(connection)
+    verify_structure(connection, deployed)
+    verify_registered_tables(connection, deployed)
 
 
-def install_contract(connection: Connection, contract: Contract) -> None:
-    """Initialize the shared installed-contract marker after baseline or generated DDL."""
-    marker = metadata(contract).tables[f"{contract.schema}.satcom_contract"]
+def record_installed(
+    connection: Connection, contracts: Sequence[Contract], *, marker_schema: str | None = None
+) -> None:
+    """Write one marker row per contract after the baseline creates its tables."""
+    marker = marker_table(marker_schema)
     connection.execute(
         marker.insert(),
-        {
-            "contract_id": contract.contract_id,
-            "version": contract.version,
-            "digest": contract.digest,
-            "managed_tables_json": canonical([table.name for table in contract.tables]),
-        },
+        [
+            {
+                "contract_id": contract.contract_id,
+                "version": contract.version,
+                "digest": contract.digest,
+                "storage_schema": contract.schema,
+                "managed_tables_json": canonical([table.name for table in contract.tables]),
+            }
+            for contract in contracts
+        ],
     )

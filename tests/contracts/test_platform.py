@@ -6,7 +6,6 @@ import pytest
 import sqlalchemy as sa
 from sqlalchemy.dialects import postgresql
 
-from kn.contracts import load_contract
 from kn.db import governance, platform, verification
 
 
@@ -77,7 +76,7 @@ def test_verification_refuses_wrong_revision_unsafe_roles_and_owners(
     context.get_current_revision.return_value = "old"
     with pytest.raises(ValueError, match="revision"):
         governance.verify(conn)
-    context.get_current_revision.return_value = "0001_satcom"
+    context.get_current_revision.return_value = "0001_baseline"
     conn.scalar.return_value = "intruder"
     with pytest.raises(ValueError, match="owner"):
         governance.verify(conn)
@@ -90,22 +89,37 @@ def test_verification_refuses_wrong_revision_unsafe_roles_and_owners(
 def test_contract_verification_refuses_missing_marker_and_digest_drift(
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
+    from types import SimpleNamespace
+
+    from kn.contracts.registry import registered_contracts
+
     conn = connection()
     inspector = MagicMock()
     monkeypatch.setattr(sa, "inspect", lambda _: inspector)
     inspector.has_table.return_value = False
     with pytest.raises(ValueError, match="baseline"):
-        governance.verify_contract(conn)
+        governance.verify_contracts(conn)
     inspector.has_table.return_value = True
-    conn.execute.return_value.one_or_none.return_value = ("1.0.0", "old")
-    with pytest.raises(ValueError, match="digest drift"):
-        governance.verify_contract(conn)
-    contract = load_contract()
-    conn.execute.return_value.one_or_none.return_value = (contract.version, contract.digest)
-    check = MagicMock()
-    monkeypatch.setattr(governance, "verify_structure", check)
-    governance.verify_contract(conn)
-    check.assert_called_once_with(conn)
+    contracts = registered_contracts()
+    rows = [
+        SimpleNamespace(contract_id=item.contract_id, version=item.version, digest=item.digest)
+        for item in contracts
+    ]
+    for installed in (
+        [],
+        rows[:1],
+        [*rows[:1], SimpleNamespace(**{**vars(rows[1]), "digest": "old"})],
+    ):
+        conn.execute.return_value = installed
+        with pytest.raises(ValueError, match="digest drift"):
+            governance.verify_contracts(conn)
+    conn.execute.return_value = rows
+    structure, tables = MagicMock(), MagicMock()
+    monkeypatch.setattr(governance, "verify_structure", structure)
+    monkeypatch.setattr(governance, "verify_registered_tables", tables)
+    governance.verify_contracts(conn)
+    structure.assert_called_once_with(conn, contracts)
+    tables.assert_called_once_with(conn, contracts)
 
 
 def test_structural_drift_is_refused(monkeypatch: pytest.MonkeyPatch) -> None:

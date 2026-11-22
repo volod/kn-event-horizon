@@ -6,14 +6,14 @@ revisions, so `alembic upgrade head` is the complete deployment step.
 
 from alembic import context
 
-from kn.contracts import load_contract
 from kn.contracts.sqlalchemy import metadata
-from kn.db.governance import MIGRATION_SCHEMA, governed_migrations
+from kn.db.governance import CONTRACTS_ATTRIBUTE, MIGRATION_SCHEMA, deployment, governed_migrations
 
 connection = context.config.attributes["connection"]
+contracts = context.config.attributes.get(CONTRACTS_ATTRIBUTE) or deployment()
 context.configure(
     connection=connection,
-    target_metadata=metadata(load_contract()),
+    target_metadata=[metadata(contract) for contract in contracts],
     include_schemas=True,
     version_table_schema=MIGRATION_SCHEMA,
     transactional_ddl=True,

@@ -1,11 +1,9 @@
 """One Python policy for PostGIS, schema roles, and default privileges, as SQLAlchemy constructs."""
 
-import json
-
 import sqlalchemy as sa
 from sqlalchemy.engine import Connection
 
-from kn.contracts.schemas import RESOURCES
+from kn.contracts.schemas import platform_policy
 from kn.db.catalog import PG_ROLES
 from kn.db.statements import (
     PUBLIC,
@@ -18,10 +16,13 @@ from kn.db.statements import (
     UpdateExtension,
 )
 
-POLICY = json.loads((RESOURCES / "platform.json").read_text())
+POLICY = platform_policy()
 SCHEMAS: tuple[str, ...] = tuple(POLICY["schemas"])
 ROLE_KINDS: tuple[str, ...] = tuple(POLICY["roleKinds"])
 LOCK_NAMESPACE = 0x4B4E4253
+# The Alembic version table lives here; it is the one KN table that no contract defines.
+MIGRATION_SCHEMA = "system"
+VERSION_TABLE = "alembic_version"
 EXTENSION = "postgis"
 EXTENSION_SCHEMA = "public"
 ROLE_ATTRIBUTES = (

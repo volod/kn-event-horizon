@@ -7,6 +7,7 @@ from alembic.operations import Operations
 
 from kn.contracts.model import Contract, Field, Table, canonical
 from kn.contracts.physical import extensions
+from kn.contracts.registry import marker_table
 from kn.contracts.sqlalchemy import column_type, metadata
 
 
@@ -62,11 +63,17 @@ def _needs_review(field: Field) -> bool:
     )
 
 
-def evolve(operations: Operations, previous: Contract, current: Contract) -> None:
+def evolve(
+    operations: Operations,
+    previous: Contract,
+    current: Contract,
+    *,
+    marker_schema: str | None = None,
+) -> None:
     """Called only by reviewed revisions referencing immutable old and new snapshots."""
     changes = additions(previous, current)
     model = metadata(current)
-    marker = model.tables[f"{current.schema + '.' if current.schema else ''}satcom_contract"]
+    marker = marker_table(marker_schema)
     installed = (
         operations.get_bind()
         .execute(
@@ -96,7 +103,6 @@ def evolve(operations: Operations, previous: Contract, current: Contract) -> Non
                     schema=current.schema,
                 )
     _apply_comments(operations, previous, current)
-
     operations.get_bind().execute(
         marker.update()
         .where(marker.c.contract_id == current.contract_id)

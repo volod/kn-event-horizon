@@ -23,13 +23,15 @@ command. Raw archive replay, identity event replay and decision replay remain pl
 
 `src/kn/db/rebuild.py` drops the KN schemas and then runs the normal `kn db upgrade` path:
 `alembic upgrade head`, whose environment converges the platform policy, and the editable baseline
-`0001_satcom`, which creates the bundled contract from its SQLAlchemy metadata as the schema owner
-and records the installed-contract marker. A rebuild and an upgrade of an empty database therefore
-use one mechanism. No SQL text is executed; the generated `postgresql/schema.sql` is a review
-artifact only, and an archived source `schema.sql` is evidence that nothing reads. The current
-bundle contains 32 SATCOM tables in `space`; the other nine schemas have no contracted datasets
-yet. A second storage contract needs the registry of `storage-contract-registry` in the
-[plan](../../plan.md).
+`0001_baseline`. The baseline creates every contract of the
+[deployment set](../data-contracts.md#deployment-set) from its SQLAlchemy metadata as its schema
+owner, in registry order, and records one row per contract in `system.installed_contracts`. A
+rebuild and an upgrade of an empty database therefore use one mechanism. No SQL text is executed;
+the generated `postgresql/schema.sql` is a review artifact only, and an archived source
+`schema.sql` is evidence that nothing reads. The current set holds the governance table in
+`system` and 31 SATCOM tables in `space`; the other eight schemas have no contracted datasets yet.
+`rebuild()` and `upgrade()` accept another validated set, which the integration tests use for
+fixture contracts in `space` and `semantic`.
 
 The caller owns the transaction. A nested transaction groups all KN schemas, because cross-schema
 references and the migration marker must stay consistent. The shared platform advisory lock
@@ -71,11 +73,14 @@ comments. Structural verification also compares PostGIS geometry types and SRIDs
 reflects as an unknown type. It does not
 prove equivalence of arbitrary manually edited check expressions.
 
-`tests/integration/test_rebuild.py` starts from empty KN schemas, rebuilds twice, compares catalog
-structure and deterministic seed rows, and exercises real loader DDL refusals. After the baseline it
-plants a dropped check, a renamed primary key or foreign key, and a missing comment, and it plants
-seed exceptions and SQL errors, obsolete tables, external dependencies and unsupported views. It
-also records every SQL string the rebuild sends and finds no `CREATE TABLE`.
+`tests/integration/test_registry.py` rebuilds twice with fixture contracts beside SATCOM, checks the
+marker rows and tables of every contract, and plants a missing table, a drifted or missing marker
+row, and unregistered tables in `space` and in a schema without contracts; verification refuses
+each. `tests/integration/test_rebuild.py` starts from empty KN schemas, rebuilds twice, compares
+catalog structure and deterministic seed rows, and exercises real loader DDL refusals. After the
+baseline it plants a dropped check, a renamed primary key or foreign key, and a missing comment, and
+it plants seed exceptions and SQL errors, obsolete tables, external dependencies and unsupported
+views. It also records every SQL string the rebuild sends and finds no `CREATE TABLE`.
 `tests/integration/test_rebuild_interrupt.py` kills a rebuild process while it holds the dropped
 schemas and checks that the catalog, a sentinel row and verification are unchanged. Destructive
 probes roll back and leave the original database in place. Run `make test-integration` against local

@@ -2,7 +2,7 @@
 
 Version: 1.0.0
 
-Digest: `9b5aeb084e5202a5951f6182e493d88e0410943ea0db37d6033e6930e3ada2a4`
+Digest: `498e717814a2eb29e44756f256fd3dab4277b069812f4b54e2bb42a496d2ec10`
 
 Storage schema: `space`
 
@@ -426,17 +426,6 @@ Storage schema: `space`
 | org_id | space.satcom.program_organizations.org_id | string | True | True |  |
 | role | space.satcom.program_organizations.role | string | True | True | \u0420\u043e\u043b\u044c |
 | claim_id | space.satcom.program_organizations.claim_id | string | False | False | \u0414\u043e\u043a\u0430\u0437 |
-
-## satcom_contract
-
-
-
-| Field | Stable ID | Type | Required | Primary key | Description |
-| --- | --- | --- | --- | --- | --- |
-| contract_id | space.satcom.satcom_contract.contract_id | string | True | True |  |
-| version | space.satcom.satcom_contract.version | string | True | False |  |
-| digest | space.satcom.satcom_contract.digest | string | True | False |  |
-| managed_tables_json | space.satcom.satcom_contract.managed_tables_json | string | True | False |  |
 
 ## satcom_files
 

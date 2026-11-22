@@ -7,7 +7,7 @@
   "cli.contract_diagnostic": "E_CONTRACT: {path}: {rule}: {hint}.",
   "cli.contract_help": "validate or compile open data contracts",
   "cli.contract_ok": "Contract {contract_id} {version} {digest}",
-  "cli.contract_source_help": "ODCS YAML or JSON file (default: bundled SATCOM)",
+  "cli.contract_source_help": "ODCS YAML or JSON file (default: every registered contract)",
   "cli.data_dir_help": "runtime data directory",
   "cli.database_error": "E_DATABASE: database operation failed; check connectivity, permissions, and schema revision.",
   "cli.db_help": "apply or verify governed schema revisions",

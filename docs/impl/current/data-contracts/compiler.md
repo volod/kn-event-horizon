@@ -12,12 +12,17 @@ make contract-check
 make contract-compile
 ```
 
-Without a source, compilation uses the bundled SATCOM contract. Without an output directory, it
-writes `generated/contracts/<contract-id>/` relative to the working directory, and `--check`
-compares the same directory. A contract ID that is not a plain file name (letters, digits, `.`,
-`_`, `-`, not starting with `.`) needs `--output`. `make contract-compile` refreshes the committed
-`generated/contracts/kn.space.satcom/` from the project root, and `make contract-check` compares it
-byte for byte. Other generators keep their own directories under `generated/`.
+Without a source, compilation covers every contract in the
+[deployment set](../data-contracts.md#deployment-set): each goes to `<root>/<contract-id>/`, where
+the root is `--output` or `generated/contracts/`, and the result lists every contract under
+`contracts`. A check without a source also refuses a directory under the root that belongs to no
+registered contract. `--references` needs a source, because registered contracts name their own
+catalogs. With a source and no output directory, compilation writes
+`generated/contracts/<contract-id>/` relative to the working directory, and `--check` compares the
+same directory. A contract ID that is not a plain file name (letters, digits, `.`, `_`, `-`, not
+starting with `.`) needs `--output`. `make contract-compile` refreshes the committed
+`generated/contracts/` from the project root, and `make contract-check` compares it byte for byte.
+Other generators keep their own directories under `generated/`.
 
 These are review artifacts; nothing executes them. Normal upgrades and the
 [development rebuild](rebuild.md) both run the Alembic baseline over the same SQLAlchemy metadata,
@@ -37,14 +42,15 @@ and the platform policy uses typed SQLAlchemy statements, so no SQL text reaches
 | `jsonschema/<table>.json` | Closed JSON Schema wire validation with KN metadata |
 | `manifest.json` | Contract digest and SHA-256 for every generated artifact |
 
-SATCOM generates 103 artifacts plus the manifest. Files use ASCII and LF line endings, and no line
-ends in a blank, so `git diff --check` stays clean. JSON uses sorted object keys and compact
-separators. YAML source definitions use JSON syntax, which is also
+SATCOM generates 100 artifacts plus the manifest, and the governance contract 10. Files use ASCII
+and LF line endings, and no line ends in a blank, so `git diff --check` stays clean. JSON uses
+sorted object keys and compact separators. YAML source definitions use JSON syntax, which is also
 valid YAML. Source array order remains significant, including column order, composite keys and
 policy priority criteria. Reordering JSON object keys or using equivalent YAML changes no bytes.
 Reordering tables or `customProperties` entries changes only `contract.json` and the digest, which
-every artifact embeds; see [known limitations](../data-contracts.md#observed-package-and-limitations).
-Two processes with different hash seeds, and Python 3.12 and 3.13, give byte-identical output.
+every artifact embeds; see [known
+limitations](../data-contracts.md#observed-package-and-limitations). Two processes with different
+hash seeds, and Python 3.12 and 3.13, give byte-identical output.
 
 The contract digest covers canonical input. With a reference catalog, it covers the canonical
 `{"contract": ..., "references": ...}` object instead. Changing a referenced definition therefore

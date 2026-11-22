@@ -1,0 +1,10 @@
+{
+  "contracts": [
+    {
+      "path": "system/1.0.0.json"
+    },
+    {
+      "path": "satcom/1.0.0.json"
+    }
+  ]
+}

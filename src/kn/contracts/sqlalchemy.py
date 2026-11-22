@@ -1,5 +1,6 @@
 """Compile PostgreSQL metadata from the engine-neutral contract."""
 
+from collections.abc import Sequence
 from typing import Any
 
 import sqlalchemy as sa
@@ -53,6 +54,19 @@ def metadata(contract: Contract, schema: str | None = None) -> sa.MetaData:
     """Create fresh metadata; snapshot references remain deferrable across cyclic tables."""
     target = schema if schema is not None else contract.schema
     result = sa.MetaData(schema=target or None)
+    _add_tables(result, contract, target)
+    return result
+
+
+def deployment_metadata(contracts: Sequence[Contract]) -> sa.MetaData:
+    """Every deployed contract in one metadata, as Alembic and verification compare it."""
+    result = sa.MetaData()
+    for contract in contracts:
+        _add_tables(result, contract, contract.schema)
+    return result
+
+
+def _add_tables(result: sa.MetaData, contract: Contract, target: str) -> None:
     for model in sorted(contract.tables, key=lambda item: item.name):
         table = sa.Table(
             model.name,
@@ -70,8 +84,13 @@ def metadata(contract: Contract, schema: str | None = None) -> sa.MetaData:
                 )
                 for field in model.fields
             ],
-            info={"contract_version": contract.version, "contract_digest": contract.digest},
+            info={
+                "contract_id": contract.contract_id,
+                "contract_version": contract.version,
+                "contract_digest": contract.digest,
+            },
             comment=model.description or None,
+            schema=target or None,
             **_table_options(model),
         )
         table.primary_key.name = primary_key_name(model)
@@ -98,7 +117,6 @@ def metadata(contract: Contract, schema: str | None = None) -> sa.MetaData:
                     initially="DEFERRED",
                 )
             )
-    return result
 
 
 def _table_options(model: Table) -> dict[str, Any]:

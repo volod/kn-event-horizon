@@ -46,6 +46,13 @@ def column_names(table: Table, refs: list[str], path: Location = ()) -> list[str
     return result
 
 
+def relation_names(tables: tuple[Table, ...]) -> list[str]:
+    """Tables and indexes, including primary key indexes, which share one namespace per schema."""
+    names = [name for table in tables for name in (table.name, primary_key_name(table))]
+    names.extend(index["name"] for table in tables for index in extensions(table).get("index", []))
+    return names
+
+
 def validate_physical(tables: tuple[Table, ...]) -> None:
     """Fail closed for combinations PostgreSQL cannot implement without more intent."""
     # Tables and indexes, including primary key indexes, share one namespace per schema.

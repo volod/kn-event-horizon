@@ -1,0 +1,49 @@
+{
+  "apiVersion": "v3.1.0",
+  "kind": "DataContract",
+  "id": "kn.semantic.fixture_terms",
+  "name": "A contract in another schema, for registry tests",
+  "version": "1.0.0",
+  "status": "draft",
+  "customProperties": [
+    {
+      "property": "kn.storageSchema",
+      "value": "semantic"
+    }
+  ],
+  "schema": [
+    {
+      "name": "fixture_terms",
+      "logicalType": "object",
+      "physicalType": "table",
+      "description": "A contract in another schema, for registry tests",
+      "customProperties": [],
+      "properties": [
+        {
+          "name": "term_id",
+          "logicalType": "string",
+          "required": true,
+          "primaryKey": true,
+          "customProperties": [
+            {
+              "property": "kn.fieldId",
+              "value": "fixture.terms.fixture_terms.term_id"
+            }
+          ]
+        },
+        {
+          "name": "label",
+          "logicalType": "string",
+          "required": true,
+          "primaryKey": false,
+          "customProperties": [
+            {
+              "property": "kn.fieldId",
+              "value": "fixture.terms.fixture_terms.label"
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

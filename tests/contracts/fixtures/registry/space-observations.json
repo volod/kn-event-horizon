@@ -1,0 +1,83 @@
+{
+  "apiVersion": "v3.1.0",
+  "kind": "DataContract",
+  "id": "kn.space.fixture_observations",
+  "name": "A second prefetched dataset beside SATCOM, for registry tests",
+  "version": "1.0.0",
+  "status": "draft",
+  "customProperties": [
+    {
+      "property": "kn.storageSchema",
+      "value": "space"
+    }
+  ],
+  "schema": [
+    {
+      "name": "fixture_observations",
+      "logicalType": "object",
+      "physicalType": "table",
+      "description": "A second prefetched dataset beside SATCOM, for registry tests",
+      "customProperties": [
+        {
+          "property": "kn.index",
+          "value": [
+            {
+              "name": "fixture_observations_time_idx",
+              "fields": [
+                "observed_at"
+              ],
+              "method": "btree",
+              "unique": false
+            }
+          ]
+        }
+      ],
+      "properties": [
+        {
+          "name": "observation_id",
+          "logicalType": "string",
+          "required": true,
+          "primaryKey": true,
+          "customProperties": [
+            {
+              "property": "kn.fieldId",
+              "value": "fixture.observations.fixture_observations.observation_id"
+            }
+          ]
+        },
+        {
+          "name": "observed_at",
+          "logicalType": "timestamp",
+          "required": true,
+          "primaryKey": false,
+          "customProperties": [
+            {
+              "property": "kn.fieldId",
+              "value": "fixture.observations.fixture_observations.observed_at"
+            }
+          ]
+        },
+        {
+          "name": "altitude_km",
+          "logicalType": "number",
+          "required": false,
+          "primaryKey": false,
+          "customProperties": [
+            {
+              "property": "kn.fieldId",
+              "value": "fixture.observations.fixture_observations.altitude_km"
+            },
+            {
+              "property": "kn.precision",
+              "value": 12
+            },
+            {
+              "property": "kn.scale",
+              "value": 3
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

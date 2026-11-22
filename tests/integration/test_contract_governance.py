@@ -13,8 +13,9 @@ from sqlalchemy.engine import Connection
 from kn.contracts import Contract, Field, load_contract
 from kn.contracts.ddl import postgresql_ddl
 from kn.contracts.evolution import evolve
+from kn.contracts.registry import marker_table
 from kn.contracts.sqlalchemy import metadata
-from kn.db.governance import install_contract
+from kn.db.governance import record_installed
 from kn.db.verification import verify_compiled_catalog, verify_structure
 from tests.contracts.test_compiler import compiler_document, reference_catalog, write_document
 from tests.contracts.test_physical import LONG_FIELD, LONG_TABLE, contract_with, field, reference
@@ -58,8 +59,8 @@ def test_long_and_composite_generated_names_apply_and_verify(
     contract = load_contract(write_document(tmp_path, data))
     contract = in_schema(contract, "names")
     scratch_connection.exec_driver_sql(postgresql_ddl(contract))
-    verify_compiled_catalog(scratch_connection, contract)
-    verify_structure(scratch_connection, contract)
+    verify_compiled_catalog(scratch_connection, (contract,))
+    verify_structure(scratch_connection, (contract,))
 
 
 def test_additive_evolution_applies_the_comments_that_verification_compares(
@@ -77,9 +78,11 @@ def test_additive_evolution_applies_the_comments_that_verification_compares(
         tables=tuple(table if item.name == table.name else item for item in old.tables),
     )
     metadata(old).create_all(scratch_connection)
-    install_contract(scratch_connection, old)
-    evolve(Operations(MigrationContext.configure(scratch_connection)), old, new)
-    verify_structure(scratch_connection, new)
+    marker_table(old.schema).create(scratch_connection)
+    record_installed(scratch_connection, [old], marker_schema=old.schema)
+    operations = Operations(MigrationContext.configure(scratch_connection))
+    evolve(operations, old, new, marker_schema=old.schema)
+    verify_structure(scratch_connection, (new,))
 
 
 @pytest.mark.filterwarnings("ignore:Did not recognize type 'geometry'")
@@ -90,10 +93,10 @@ def test_structural_verification_compares_geometry_types(
     contract = load_contract(document, references=reference_catalog(tmp_path))
     contract = in_schema(contract, "geometry")
     scratch_connection.exec_driver_sql(postgresql_ddl(contract))
-    verify_structure(scratch_connection, contract)
+    verify_structure(scratch_connection, (contract,))
     scratch_connection.exec_driver_sql(
         f'ALTER TABLE {contract.schema}."select" ALTER COLUMN coverage '
         "TYPE geometry(MultiPolygon,4326) USING ST_Multi(coverage)"
     )
     with pytest.raises(ValueError, match="structure"):
-        verify_structure(scratch_connection, contract)
+        verify_structure(scratch_connection, (contract,))

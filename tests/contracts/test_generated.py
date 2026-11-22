@@ -6,9 +6,10 @@ import pytest
 
 from kn import cli
 from kn.contracts import load_contract
-from kn.contracts.compiler import compile_contract
+from kn.contracts.compiler import compile_contract, compile_registry
 from kn.contracts.diagnostics import ContractError
 from kn.contracts.exports import artifacts
+from kn.contracts.registry import registered_contracts
 from tests.contracts.test_compiler import compiler_document, write_document
 
 ROOT = Path(__file__).resolve().parents[2]
@@ -16,7 +17,7 @@ SATCOM_OUTPUT = Path("generated") / "contracts" / "kn.space.satcom"
 
 
 def test_committed_generated_output_matches_a_fresh_compile() -> None:
-    compile_contract(load_contract(), ROOT / SATCOM_OUTPUT, check=True)
+    compile_registry(registered_contracts(), ROOT / "generated" / "contracts", check=True)
 
 
 def test_check_without_output_checks_the_default_compile_directory(

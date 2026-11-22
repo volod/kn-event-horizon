@@ -1,7 +1,5 @@
 """All-schema rebuild acceptance, with every destructive probe rolled back."""
 
-from collections.abc import Iterator
-
 import pytest
 import sqlalchemy as sa
 from sqlalchemy.engine import Connection
@@ -13,21 +11,7 @@ from kn.db.governance import verify
 from kn.db.platform import SCHEMAS
 from kn.db.rebuild import rebuild
 from kn.db.statements import SetRole
-from tests.integration.harness import IntegrationDatabase, ScratchSchemas
-
-
-@pytest.fixture
-def rebuild_connection(
-    integration_database: IntegrationDatabase, monkeypatch: pytest.MonkeyPatch
-) -> Iterator[Connection]:
-    monkeypatch.setenv("KN_ENVIRONMENT", "development")
-    engine = sa.create_engine("postgresql+psycopg://", creator=integration_database.connect)
-    try:
-        with engine.connect() as connection, connection.begin() as transaction:
-            yield connection
-            transaction.rollback()
-    finally:
-        engine.dispose()
+from tests.integration.harness import ScratchSchemas
 
 
 def catalog(connection: Connection) -> list[tuple[object, ...]]:
@@ -57,9 +41,7 @@ def test_rebuild_from_empty_is_identical_and_loads_seeds_as_loader(
     def seed(conn: Connection) -> None:
         seen.append(str(conn.scalar(sa.text("SELECT current_user"))))
         conn.exec_driver_sql(
-            "INSERT INTO space.satcom_contract "
-            "SELECT 'reviewed-seed', version, digest, managed_tables_json "
-            "FROM space.satcom_contract LIMIT 1"
+            "INSERT INTO space.satcom_imports VALUES ('reviewed-seed', '1.0.0', 'seed', 'seed')"
         )
 
     monkeypatch.setattr(seeds, "REVIEWED_SEED_LOADERS", (("space", seed),))
@@ -73,7 +55,7 @@ def test_rebuild_from_empty_is_identical_and_loads_seeds_as_loader(
     rebuild(connection)
     assert catalog(connection) == first
     assert seen == ["kn_space_loader", "kn_space_loader"]
-    assert connection.scalar(sa.text("SELECT count(*) FROM space.satcom_contract")) == 2
+    assert connection.scalar(sa.text("SELECT count(*) FROM space.satcom_imports")) == 1
     for statement in (
         "CREATE TABLE space.forbidden (id integer)",
         "ALTER TABLE space.countries ADD COLUMN forbidden integer",
@@ -94,7 +76,7 @@ def test_seed_failure_restores_all_schemas_even_if_caller_catches_it(
     before = catalog(connection)
 
     def fail(conn: Connection) -> None:
-        conn.exec_driver_sql("UPDATE space.satcom_contract SET version = 'bad'")
+        conn.exec_driver_sql("UPDATE space.satcom_imports SET adapter_version = 'bad'")
         raise ValueError("seed failed")
 
     monkeypatch.setattr(seeds, "REVIEWED_SEED_LOADERS", (("space", fail),))
@@ -162,9 +144,9 @@ def test_damaged_baseline_object_rolls_back_before_returning(
     )
     real_upgrade = module.upgrade
 
-    def damaged(connection: Connection) -> None:
+    def damaged(connection: Connection, contracts: object = None) -> None:
         # Simulate an object that differs from the compiled contract after the baseline.
-        real_upgrade(connection)
+        real_upgrade(connection, contracts)  # type: ignore[arg-type]
         connection.exec_driver_sql(damage.format(check=check, reference=reference))
 
     monkeypatch.setattr(module, "upgrade", damaged)
@@ -213,4 +195,4 @@ def test_rebuild_creates_schemas_through_alembic_without_sql_text(
     monkeypatch.setattr(Connection, "exec_driver_sql", record)
     rebuild(rebuild_connection)
     assert not [statement for statement in statements if "CREATE TABLE" in statement.upper()]
-    assert sa.inspect(rebuild_connection).has_table("satcom_contract", schema="space")
+    assert sa.inspect(rebuild_connection).has_table("installed_contracts", schema="system")

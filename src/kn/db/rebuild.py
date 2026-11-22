@@ -1,11 +1,13 @@
 """Atomic, explicitly disposable rebuild of all KN schemas through the Alembic baseline."""
 
 import os
+from collections.abc import Sequence
 
 import sqlalchemy as sa
 from sqlalchemy.engine import Connection
 
-from kn.db.governance import upgrade, verify
+from kn.contracts import Contract
+from kn.db.governance import deployment, upgrade, verify
 from kn.db.platform import SCHEMAS, apply_platform
 from kn.db.seeds import load_reviewed_seeds
 from kn.db.verification import verify_compiled_catalog
@@ -23,23 +25,25 @@ def require_development() -> None:
         )
 
 
-def rebuild(connection: Connection) -> None:
+def rebuild(connection: Connection, contracts: Sequence[Contract] | None = None) -> None:
     """The caller commits; a failure restores the previous schemas even when caught.
 
-    After the drop, the database is empty, and the normal upgrade recreates it: the same
-    SQLAlchemy metadata and Alembic revisions as every deployment, never SQL text.
+    After the drop, the database is empty, and the normal upgrade recreates every registered
+    contract: the same SQLAlchemy metadata and Alembic revisions as every deployment, never SQL
+    text. Tests supply a fixture deployment set.
     """
     require_development()
     if not connection.in_transaction():
         raise ValueError("rebuild requires a caller-owned transaction")
+    deployed = deployment(contracts)
     # All schemas form one group: references and the Alembic marker cannot become partial.
     with connection.begin_nested():
         apply_platform(connection)
         _drop_schemas(connection)
-        upgrade(connection)
+        upgrade(connection, deployed)
         load_reviewed_seeds(connection)
-        verify(connection)
-        verify_compiled_catalog(connection)
+        verify(connection, deployed)
+        verify_compiled_catalog(connection, deployed)
 
 
 def _drop_schemas(connection: Connection) -> None:

@@ -11,9 +11,43 @@ identity, interchange and raw replay work stays in the [plan](../plan.md).
 ## One definition for each model
 
 `src/kn/contracts/resources/satcom/1.0.0.json` is the ODCS source of truth for the example dataset.
-It declares `domain: space` and storage schema `space`. It contains all 28 CSV tables and four
-bookkeeping tables: `satcom_contract`, `satcom_imports`, `satcom_files`, and `satcom_rows`.
-The bundled resources ship in the wheel, so validation and deployment do not need network access.
+It declares `domain: space` and storage schema `space`. It contains all 28 CSV tables and three
+bookkeeping tables: `satcom_imports`, `satcom_files`, and `satcom_rows`. The bundled resources ship
+in the wheel, so validation and deployment do not need network access.
+
+## Deployment set
+
+`src/kn/contracts/resources/registry.json` is the reviewed list of deployed storage contracts, in
+deployment order, with paths relative to the registry and an optional reference catalog per entry:
+
+```json
+{"contracts": [{"path": "system/1.0.0.json"}, {"path": "satcom/1.0.0.json"}]}
+```
+
+The first entry is the governance contract `kn.system.governance`. Its table
+`system.installed_contracts` is the installed-contract marker: one row per registered contract with
+version, digest, storage schema and table names. `kn.contracts.registry.registered_contracts()`
+loads and validates every entry without touching a database. It refuses a file outside the registry
+directory, a registry that does not start with the governance contract, a repeated contract ID, a
+field ID used by two contracts, and a table, primary key or index name used twice in one schema.
+Several contracts can share a schema; the SATCOM dataset and later prefetched datasets share
+`space`. The loader refuses a `kn.storageSchema` outside the ten platform schemas before it resolves
+any reference, and `kn db upgrade|verify|rebuild` load the registry before opening a connection.
+
+`kn db upgrade` and `kn db rebuild` create every registered contract as its schema owner through the
+Alembic baseline and record each marker row. `kn db verify`, every upgrade and rebuild, and every
+import check that the marker rows equal the registry (no missing, extra or drifted contract), that
+the structure of every registered table matches its contract, and that every table in a KN schema
+belongs to a registered contract. The Alembic version table `system.alembic_version` is the one
+exception, and partitions count with their parent. To register a contract, add its file and its
+entry, run `make contract-compile`, and rebuild the development database.
+
+Contracts refer to each other only by stable field IDs, which the registry keeps unique, and by KN
+IDs that the owning engines check. SQL foreign keys stay within one contract. A cross-schema
+foreign key would need `REFERENCES` grants and `USAGE` on another schema for its owner role, which
+the least-privilege policy refuses and verifies, and it would couple the drop and migration order of
+contracts. A capability whose integrity rule needs database-enforced references across schemas
+amends this decision together with the grants it needs.
 
 The official ODCS 3.1.0 JSON Schema is vendored with upstream and local checksums in `pins.json`.
 The local copy only escapes non-ASCII characters as JSON escapes. Both standard and extension
@@ -22,7 +56,7 @@ schema checksums are mandatory and verified offline on every lint and compile.
 ## Contract lint and toolchain
 
 `kn contract lint <file.yaml>` validates YAML or JSON against ODCS 3.1.0 and the closed schemas for
-every `kn.*` family in the specification. Omitting the file validates the bundled SATCOM contract.
+every `kn.*` family in the specification. Omitting the file validates every registered contract.
 Lint checks types, required members, allowed locations, duplicate extensions and unknown names.
 It does not resolve ontology, policy, vocabulary, mapping or dataset references. The
 [toolchain reference](data-contracts/toolchain.md) lists extension shapes, diagnostics, parser
@@ -34,20 +68,23 @@ Elasticsearch mappings, dbt sources and contract documentation. The
 [compiler reference](data-contracts/compiler.md) describes the supported profile, reference catalog,
 PostGIS and partition templates, output paths, and exact-byte drift checks.
 
-`make contract-check` validates the bundled contract and compares the committed
-`generated/contracts/kn.space.satcom/` (103 artifacts plus a manifest, including physical mappings
-and generated DDL) byte for byte with a fresh compile. `make contract-compile` refreshes that
-directory. `kn contract compile` defaults to `generated/contracts/<contract-id>/`; `--output
-<directory>` selects another destination. Normal upgrades and the explicit development rebuild both
-run the Alembic baseline over the contract's SQLAlchemy metadata. No SQL text reaches the database:
+`make contract-check` validates every registered contract and compares the committed
+`generated/contracts/<contract-id>/` of each (SATCOM: 100 artifacts plus a manifest, including
+physical mappings and generated DDL) byte for byte with a fresh compile; a directory of an
+unregistered contract is drift. `make contract-compile` refreshes them. `kn contract compile` with a
+source defaults to `generated/contracts/<contract-id>/`, and `--output <directory>` selects another
+destination. Without a source, `--output <root>` receives one directory per registered contract.
+Normal upgrades and the explicit development rebuild both run the Alembic baseline over the
+contracts' SQLAlchemy metadata. No SQL text reaches the database:
 schema objects come from SQLAlchemy metadata, and the platform policy from typed statements.
 
 ## Development baseline and release evolution
 
-Development keeps contract version `1.0.0` and one Python Alembic baseline, `0001_satcom`, editable
-in place. A contract edit changes its digest. Refresh the artifact digest manifest after reviewing
-exports. Normal `make db-upgrade` verifies the installed digest and structure; it does not silently
-alter an existing projection to match edited development definitions.
+Development keeps contract version `1.0.0` and one Python Alembic baseline, `0001_baseline`,
+editable in place; it creates every registered contract. A contract edit changes its digest. Refresh
+the committed `generated/` output after reviewing it. Normal `make db-upgrade` verifies the
+installed digest and structure; it does not silently alter an existing projection to match edited
+development definitions.
 
 For a development model edit:
 
@@ -70,7 +107,8 @@ identity, nullability, enum, reference and precision changes, and new constraine
 backfill. Changes to table metadata or reference definitions and new fields with semantic
 extensions require reviewed migrations instead of silently losing new compiler behavior.
 Additive evolution adds new fields with their comments, applies changed table and field
-descriptions, and updates the installed contract marker. A revision calls this helper
+descriptions, and updates the contract's row in `system.installed_contracts`. A revision calls this
+helper
 with reviewed old and new contracts; deployment never autogenerates or applies arbitrary drift.
 Destructive downgrades are refused. The full-model release gate remains `release-migration-mode`.
 
@@ -142,20 +180,20 @@ Known limitations, with what would reopen them:
   tables, archive directory (`$DATA_DIR/satcom-import/`), and a `kn.sourceProfile` fixed to
   `satcom-csv/1`, and rebuild does not restore it. `prefetched-dataset-method` in the
   [plan](../plan.md) generalizes it before the next dataset.
-- One storage contract is deployed. Upgrade, rebuild, verification and the installed-contract
-  marker (`space.satcom_contract`) know only the bundled SATCOM contract, `kn.storageSchema` is not
-  checked against the platform schemas at compile time, and cross-contract SQL references are
-  refused. `storage-contract-registry` in the [plan](../plan.md) owns this before the first second
-  contract.
+- Registered contracts are package resources under `src/kn/contracts/resources/`, so source
+  installations and wheels deploy the same bytes. The specification's `contracts/core/` and
+  `domains/<domain>/contracts/` layout applies once contracts outside the package are deployed;
+  the registry then needs a reviewed path rule for them.
+- `load_contract()` without a path still loads the SATCOM contract for the SATCOM adapter and its
+  tests. Deployment code no longer relies on it; `prefetched-dataset-method` removes the default.
 - The digest covers the source document as written. Reordering tables or `customProperties`
   entries changes the digest and `contract.json`, though every other artifact is byte-identical
   after masking the digest, so a reorder costs a development rebuild or a release version bump.
   This is kept so that the digest names exactly the reviewed text. Reopen it if reorders cause
   review churn or when contracts are assembled from several files.
-- A development database created before the audit keeps its old single-column foreign key names
-  (`fk_<table>_import_id_`) until the next `make db-rebuild`. Structural verification compares
-  references by columns, so `make db-verify` passes; the compiled-catalog check of a rebuild
-  compares names.
+- A development database created before the registry has revision `0001_satcom` and no
+  `system.installed_contracts`, so `make db-up` and `make db-verify` fail until
+  `KN_ENVIRONMENT=development make db-rebuild` and `make satcom-import` restore it.
 
 ## Verification
 

@@ -3,6 +3,7 @@
 import hashlib
 import json
 import re
+from collections.abc import Sequence
 from pathlib import Path
 
 from kn.contracts.diagnostics import ContractError
@@ -23,6 +24,22 @@ def default_output(contract: Contract) -> Path:
             ("id",), "output", "supply --output for a contract ID that is not a plain file name"
         )
     return GENERATED_CONTRACTS / contract.contract_id
+
+
+def compile_registry(
+    contracts: Sequence[Contract], root: Path | None = None, check: bool = False
+) -> None:
+    """Each contract in `<root>/<contract-id>/`; a check also refuses directories of others."""
+    base = root if root is not None else GENERATED_CONTRACTS
+    destinations = [base / default_output(contract).name for contract in contracts]
+    if check:
+        actual = {path.name for path in base.iterdir()} if base.is_dir() else set()
+        if actual != {path.name for path in destinations}:
+            raise ContractError(
+                (), "drift", "regenerate output for exactly the registered contracts"
+            )
+    for contract, destination in zip(contracts, destinations, strict=True):
+        compile_contract(contract, destination, check)
 
 
 def compile_contract(contract: Contract, output: Path | None = None, check: bool = False) -> None:

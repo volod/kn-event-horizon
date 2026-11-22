@@ -13,7 +13,7 @@ from kn.contracts.names import IDENTIFIER, MAX_IDENTIFIER
 from kn.contracts.physical import validate_physical
 from kn.contracts.profile import validate_profile
 from kn.contracts.references import resolve_extensions
-from kn.contracts.schemas import SATCOM
+from kn.contracts.schemas import SATCOM, platform_policy
 
 __all__ = ["IDENTIFIER", "SATCOM", "canonical", "load_contract"]
 NAME_HINT = f"use a unique lowercase SQL identifier of at most {MAX_IDENTIFIER} characters"
@@ -55,11 +55,23 @@ def load_contract(path: Path = SATCOM, *, references: Path | None = None) -> Con
     """Validate the pinned standard and supported profile before interpreting any model."""
     data = lint_contract(path)
     validate_profile(data)
-    catalog = _catalog(references)
-    resolve_extensions(data, catalog)
+    # The deployment target comes first: no reference is resolved for a foreign schema.
     meta = extensions_of(data, {"storageSchema", "sourceProfile"}, ())
     if "storageSchema" not in meta:
         raise ContractError((), "profile", "include kn.storageSchema")
+    if meta["storageSchema"] not in platform_policy()["schemas"]:
+        position = next(
+            index
+            for index, item in enumerate(data["customProperties"])
+            if item["property"] == "kn.storageSchema"
+        )
+        raise ContractError(
+            ("customProperties", position, "value"),
+            "storageSchema",
+            "use a KN schema from the platform policy",
+        )
+    catalog = _catalog(references)
+    resolve_extensions(data, catalog)
     tables = tuple(
         Table(
             node["name"],

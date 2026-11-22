@@ -336,13 +336,6 @@ class ProgramOrganizations(_kn_pydantic.BaseModel):
     role: _kn_typing.Literal['operator', 'owner', 'prime_manufacturer', 'payload_supplier', 'bus_supplier', 'launch_provider', 'service_distributor', 'ground_segment', 'funding_agency', 'consortium_member', 'customer', 'terminal_supplier', 'investor'] = _kn_pydantic.Field(alias='role', description='\u0420\u043e\u043b\u044c', json_schema_extra={'x-kn': {'enum': ['operator', 'owner', 'prime_manufacturer', 'payload_supplier', 'bus_supplier', 'launch_provider', 'service_distributor', 'ground_segment', 'funding_agency', 'consortium_member', 'customer', 'terminal_supplier', 'investor'], 'fieldId': 'space.satcom.program_organizations.role'}})
     claim_id: _kn_builtins.str | None = _kn_pydantic.Field(default=None, alias='claim_id', description='\u0414\u043e\u043a\u0430\u0437', json_schema_extra={'x-kn': {'fieldId': 'space.satcom.program_organizations.claim_id', 'foreignKey': {'fields': ['import_id', 'claim_id'], 'table': 'evidence_claims', 'targetFields': ['import_id', 'claim_id']}}})
 
-class SatcomContract(_kn_pydantic.BaseModel):
-    model_config = _kn_pydantic.ConfigDict(extra='forbid', strict=True)
-    contract_id: _kn_builtins.str = _kn_pydantic.Field(alias='contract_id', description='', json_schema_extra={'x-kn': {'fieldId': 'space.satcom.satcom_contract.contract_id'}})
-    version: _kn_builtins.str = _kn_pydantic.Field(alias='version', description='', json_schema_extra={'x-kn': {'fieldId': 'space.satcom.satcom_contract.version'}})
-    digest: _kn_builtins.str = _kn_pydantic.Field(alias='digest', description='', json_schema_extra={'x-kn': {'fieldId': 'space.satcom.satcom_contract.digest'}})
-    managed_tables_json: _kn_builtins.str = _kn_pydantic.Field(alias='managed_tables_json', description='', json_schema_extra={'x-kn': {'fieldId': 'space.satcom.satcom_contract.managed_tables_json'}})
-
 class SatcomFiles(_kn_pydantic.BaseModel):
     model_config = _kn_pydantic.ConfigDict(extra='forbid', strict=True)
     import_id: _kn_builtins.str = _kn_pydantic.Field(alias='import_id', description='', json_schema_extra={'x-kn': {'fieldId': 'space.satcom.satcom_files.import_id', 'foreignKey': {'fields': ['import_id'], 'table': 'satcom_imports', 'targetFields': ['import_id']}}})

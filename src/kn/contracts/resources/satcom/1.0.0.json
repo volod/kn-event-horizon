@@ -18,67 +18,6 @@
   ],
   "schema": [
     {
-      "name": "satcom_contract",
-      "logicalType": "object",
-      "physicalType": "table",
-      "customProperties": [
-        {
-          "property": "kn.csv",
-          "value": false
-        }
-      ],
-      "properties": [
-        {
-          "name": "contract_id",
-          "logicalType": "string",
-          "required": true,
-          "primaryKey": true,
-          "customProperties": [
-            {
-              "property": "kn.fieldId",
-              "value": "space.satcom.satcom_contract.contract_id"
-            }
-          ]
-        },
-        {
-          "name": "version",
-          "logicalType": "string",
-          "required": true,
-          "primaryKey": false,
-          "customProperties": [
-            {
-              "property": "kn.fieldId",
-              "value": "space.satcom.satcom_contract.version"
-            }
-          ]
-        },
-        {
-          "name": "digest",
-          "logicalType": "string",
-          "required": true,
-          "primaryKey": false,
-          "customProperties": [
-            {
-              "property": "kn.fieldId",
-              "value": "space.satcom.satcom_contract.digest"
-            }
-          ]
-        },
-        {
-          "name": "managed_tables_json",
-          "logicalType": "string",
-          "required": true,
-          "primaryKey": false,
-          "customProperties": [
-            {
-              "property": "kn.fieldId",
-              "value": "space.satcom.satcom_contract.managed_tables_json"
-            }
-          ]
-        }
-      ]
-    },
-    {
       "name": "satcom_imports",
       "logicalType": "object",
       "physicalType": "table",

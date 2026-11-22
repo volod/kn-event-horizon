@@ -1,6 +1,7 @@
 """Runtime privilege and structural checks generated from policy and contract models."""
 
 import secrets
+from collections.abc import Sequence
 
 import sqlalchemy as sa
 from alembic.autogenerate import compare_metadata
@@ -8,37 +9,37 @@ from alembic.migration import MigrationContext
 from sqlalchemy.engine import Connection
 from sqlalchemy.engine.reflection import Inspector
 
-from kn.contracts import Contract, load_contract
-from kn.contracts.sqlalchemy import Geometry, metadata
-from kn.db.catalog import PG_ATTRIBUTE
-from kn.db.platform import ROLE_KINDS, SCHEMAS, role_name
+from kn.contracts import Contract
+from kn.contracts.registry import registered_contracts
+from kn.contracts.sqlalchemy import Geometry, deployment_metadata
+from kn.db.catalog import PG_ATTRIBUTE, PG_CLASS, PG_NAMESPACE, TABLE_KINDS
+from kn.db.platform import MIGRATION_SCHEMA, ROLE_KINDS, SCHEMAS, VERSION_TABLE, role_name
 from kn.db.statements import ResetRole, SetRole
 
 
-def verify_structure(connection: Connection, contract: Contract | None = None) -> None:
-    """Compare the deployed contract, or a supplied one, with the database through Alembic."""
-    contract = contract or load_contract()
-    managed = {table.name for table in contract.tables}
+def verify_structure(connection: Connection, contracts: Sequence[Contract] | None = None) -> None:
+    """Compare the registered contracts, or supplied ones, with the database through Alembic."""
+    contracts = contracts or registered_contracts()
+    managed = {(contract.schema, table.name) for contract in contracts for table in contract.tables}
+    schemas = {schema for schema, _ in managed}
 
     def include_name(name: str | None, kind: str, parents: dict[str, str | None]) -> bool:
         if kind == "schema":
-            return name == contract.schema
+            return name in schemas
         if kind == "table":
-            return name in managed and parents.get("schema_name") == contract.schema
-        return (
-            parents.get("schema_name") == contract.schema and parents.get("table_name") in managed
-        )
+            return (parents.get("schema_name"), name) in managed
+        return (parents.get("schema_name"), parents.get("table_name")) in managed
 
     context = MigrationContext.configure(
         connection,
         opts={
             "include_schemas": True,
             "include_name": include_name,
-            "version_table_schema": "system",
+            "version_table_schema": MIGRATION_SCHEMA,
             "compare_type": True,
         },
     )
-    model = metadata(contract)
+    model = deployment_metadata(contracts)
     if compare_metadata(context, model) or _geometry_drift(connection, model):
         raise ValueError("database structure differs from the contract; rebuild or migrate")
 
@@ -60,6 +61,33 @@ def _geometry_drift(connection: Connection, model: sa.MetaData) -> bool:
                 if actual != column.type.get_col_spec():
                     return True
     return False
+
+
+def verify_registered_tables(connection: Connection, contracts: Sequence[Contract]) -> None:
+    """Every table in a KN schema belongs to a registered contract; partitions count with their
+    parent, and the Alembic version table is the one exception."""
+    for schema in SCHEMAS:
+        actual: set[str] = set(
+            connection.scalars(
+                sa.select(PG_CLASS.c.relname)
+                .join(PG_NAMESPACE, PG_NAMESPACE.c.oid == PG_CLASS.c.relnamespace)
+                .where(
+                    PG_NAMESPACE.c.nspname == schema,
+                    PG_CLASS.c.relkind.in_(TABLE_KINDS),
+                    sa.not_(PG_CLASS.c.relispartition),
+                )
+            )
+        )
+        expected = {
+            table.name
+            for contract in contracts
+            if contract.schema == schema
+            for table in contract.tables
+        }
+        if schema == MIGRATION_SCHEMA:
+            expected.add(VERSION_TABLE)
+        if actual != expected:
+            raise ValueError(f"tables in schema {schema} differ from the registered contracts")
 
 
 def verify_privileges(connection: Connection) -> None:
@@ -130,15 +158,15 @@ def _table_privileges(connection: Connection, schema: str) -> None:
             _expect(value, kind != "reader", f"{role} {privilege} sequence")
 
 
-def verify_compiled_catalog(connection: Connection, contract: Contract | None = None) -> None:
+def verify_compiled_catalog(
+    connection: Connection, contracts: Sequence[Contract] | None = None
+) -> None:
     """Check compiled keys, checks and comments that Alembic does not fully compare."""
-    contract = contract or load_contract()
-    model = metadata(contract)
+    contracts = contracts or registered_contracts()
     inspector = sa.inspect(connection)
-    expected_tables = {table.name for table in contract.tables}
-    if set(inspector.get_table_names(schema=contract.schema)) != expected_tables:
-        raise ValueError("rebuilt tables differ from the compiled contract")
-    for table in model.tables.values():
+    for table in deployment_metadata(contracts).tables.values():
+        if not inspector.has_table(table.name, schema=table.schema):
+            raise ValueError(f"compiled table missing: {table.fullname}")
         _verify_compiled_table(inspector, table)
 
 

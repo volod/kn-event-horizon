@@ -7,7 +7,9 @@ def render_result(translator: Translator, command: str, result: dict[str, object
     if command == "info":
         return translator.text("cli.info", **result)
     if command == "contract":
-        return translator.text("cli.contract_ok", **result)
+        contracts = result.get("contracts", [result])
+        assert isinstance(contracts, list)
+        return "\n".join(translator.text("cli.contract_ok", **item) for item in contracts)
     if command == "db":
         return translator.text("cli.db_ok")
     if "tables" in result:

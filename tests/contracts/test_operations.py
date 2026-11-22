@@ -30,7 +30,7 @@ def test_import_command_archives_and_is_idempotent(
     contract = load_contract()
     metadata(contract, "").create_all(engine)
     monkeypatch.setattr(operations, "engine_from_env", lambda: engine)
-    monkeypatch.setattr(operations, "verify_contract", lambda *a: None)
+    monkeypatch.setattr(operations, "verify_contracts", lambda *a: None)
     real_import = operations.import_package
     monkeypatch.setattr(operations, "import_package", lambda c, p, m: real_import(c, p, m, ""))
     # Keep the in-memory database alive across command invocations.

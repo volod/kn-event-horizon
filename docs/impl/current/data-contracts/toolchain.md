@@ -10,7 +10,8 @@ make contract-check
 make contract-toolchain-check
 ```
 
-Lint without a path checks the bundled SATCOM contract. Supplied paths also work with
+Lint without a path checks every registered contract and reports one result per contract under
+`contracts`. Supplied paths also work with
 `kn contract compile`; see the [compiler reference](compiler.md) for its stricter supported profile
 and local reference catalogs. Success keeps the existing `contract_id`,
 `version`, and canonical `digest` result. Equivalent YAML and JSON produce the same digest. Contract

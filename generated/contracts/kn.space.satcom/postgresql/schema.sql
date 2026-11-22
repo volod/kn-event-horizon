@@ -392,14 +392,6 @@ CREATE TABLE space.program_organizations (
 	CONSTRAINT ck_program_organizations_role_enum CHECK (role IN ('operator', 'owner', 'prime_manufacturer', 'payload_supplier', 'bus_supplier', 'launch_provider', 'service_distributor', 'ground_segment', 'funding_agency', 'consortium_member', 'customer', 'terminal_supplier', 'investor'))
 );
 
-CREATE TABLE space.satcom_contract (
-	contract_id TEXT NOT NULL,
-	version TEXT NOT NULL,
-	digest TEXT NOT NULL,
-	managed_tables_json TEXT NOT NULL,
-	CONSTRAINT pk_satcom_contract PRIMARY KEY (contract_id)
-);
-
 CREATE TABLE space.satcom_files (
 	import_id TEXT NOT NULL,
 	path TEXT NOT NULL,

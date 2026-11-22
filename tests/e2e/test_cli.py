@@ -54,11 +54,12 @@ def test_real_package_validation_and_compilation(
     compiled = run_cli(["contract", "compile", "--output", str(destination)], KN_LOCALE=locale)
     write_json(e2e_artifacts / locale / "cli" / "contract-compile.json", compiled)
     assert compiled["exit_code"] == 0
-    manifest = json.loads((destination / "manifest.json").read_text("ascii"))
+    satcom = destination / load_contract().contract_id
+    manifest = json.loads((satcom / "manifest.json").read_text("ascii"))
     assert manifest["contract_digest"] == load_contract().digest
     assert manifest["artifacts"]
     for name, digest in manifest["artifacts"].items():
-        assert hashlib.sha256((destination / name).read_bytes()).hexdigest() == digest
+        assert hashlib.sha256((satcom / name).read_bytes()).hexdigest() == digest
     write_json(e2e_artifacts / locale / "compiled-manifest.json", manifest)
 
 
