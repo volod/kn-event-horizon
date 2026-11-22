@@ -1,0 +1,20 @@
+apiVersion: v3.1.0
+kind: DataContract
+version: 1.0.0
+status: draft
+name: Satellite fixture
+schema:
+  - name: satellites
+    logicalType: object
+    physicalType: table
+    customProperties:
+      - property: kn.entityClass
+        value: space.satellite
+    properties:
+      - name: id
+        logicalType: string
+        required: true
+        primaryKey: true
+        customProperties:
+          - property: kn.fieldId
+            value: space.satellite.id

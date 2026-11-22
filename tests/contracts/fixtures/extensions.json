@@ -1,0 +1,146 @@
+{
+  "kn.entityClass": "space.satellite",
+  "kn.relation": {
+    "type": "space.operates",
+    "sourceClass": "core.organization",
+    "targetClass": "space.satellite"
+  },
+  "kn.fieldId": "space.satellite.id",
+  "kn.identity": {
+    "strategy": "uuidv7",
+    "externalKeys": [
+      {
+        "namespace": "cospar",
+        "fields": [
+          "id"
+        ],
+        "authority": "authoritative"
+      }
+    ],
+    "sourceRecordKey": [
+      "id"
+    ],
+    "sourceVersionField": "revision",
+    "attributes": [
+      {
+        "fieldId": "space.satellite.name",
+        "normalizer": "casefold",
+        "comparator": "exact",
+        "authority": "source_qualified"
+      }
+    ],
+    "matchProfile": "space.satellite-match"
+  },
+  "kn.updatePolicy": {
+    "mode": "priority",
+    "priorityCriteria": [
+      "source_rank",
+      "evidence_class",
+      "data_time"
+    ],
+    "minimumSourceRank": "first_party",
+    "minimumEvidenceClass": "primary",
+    "timeBasis": "published",
+    "valueTolerance": 0,
+    "freshnessSeconds": 86400,
+    "emptyValueHandling": "review"
+  },
+  "kn.interchange": {
+    "exposed": true,
+    "compatibility": "stable",
+    "aliases": [
+      "legacy_id"
+    ],
+    "counterpartMappingRefs": [
+      "inventree.part"
+    ]
+  },
+  "kn.units": {
+    "originalUnit": "g",
+    "normalizedUnit": "kg",
+    "quantityType": "mass",
+    "conversionRule": "gram-to-kilogram"
+  },
+  "kn.comparisonProfile": "space.mass-comparison",
+  "kn.temporalProfile": {
+    "eventTime": "launch_time",
+    "publishedTime": "published_at",
+    "observedTime": "observed_at",
+    "validFrom": "valid_from",
+    "validTo": "valid_to",
+    "recordedTime": "recorded_at",
+    "asOf": "bitemporal",
+    "nullSemantics": "unknown"
+  },
+  "kn.spatialProfile": {
+    "geometryType": "Point",
+    "srid": 4326,
+    "precision": 6,
+    "coverageSemantics": "observed-location",
+    "validity": "required"
+  },
+  "kn.evidence": {
+    "required": true,
+    "assertionType": "declared",
+    "minimumClass": "primary",
+    "referenceFields": [
+      "evidence_id"
+    ]
+  },
+  "kn.licensePolicy": {
+    "policyRef": "owner-reviewed",
+    "rights": [
+      "internal_use"
+    ],
+    "exportAllowed": false,
+    "restrictions": [
+      "no_redistribution"
+    ]
+  },
+  "kn.enumRef": "space.orbit-regime",
+  "kn.vocabularyRefs": [
+    "space.orbit-regime"
+  ],
+  "kn.index": [
+    {
+      "name": "satellite_id_idx",
+      "fields": [
+        "id"
+      ],
+      "method": "btree",
+      "unique": true
+    }
+  ],
+  "kn.partition": {
+    "strategy": "range",
+    "fields": [
+      "recorded_at"
+    ]
+  },
+  "kn.i18nKey": "space.satellite.id",
+  "kn.lineageRefs": [
+    {
+      "dataset": "space.source-satellites",
+      "mapping": "satellite-projection"
+    }
+  ],
+  "kn.storageSchema": "space",
+  "kn.sourceProfile": "satcom-csv/1",
+  "kn.csv": true,
+  "kn.foreignKey": {
+    "table": "satellites",
+    "fields": [
+      "id"
+    ],
+    "targetFields": [
+      "id"
+    ]
+  },
+  "kn.enum": [
+    "active",
+    "retired"
+  ],
+  "kn.partialDate": true,
+  "kn.precision": 38,
+  "kn.scale": 18
+}

@@ -13,15 +13,26 @@ bookkeeping tables: `satcom_contract`, `satcom_imports`, `satcom_files`, and `sa
 The bundled resources ship in the wheel, so validation and deployment do not need network access.
 
 The official ODCS 3.1.0 JSON Schema is vendored with upstream and local checksums in `pins.json`.
-The local copy only escapes non-ASCII characters as JSON escapes. Validation checks this checksum,
-the official standard, the supported profile, names, stable field IDs, and references. Unsupported
-ODCS features, unknown or misplaced extensions, repeated extensions, missing metadata, and
-incompatible reference types fail instead of disappearing from an export.
+The local copy only escapes non-ASCII characters as JSON escapes. Both standard and extension
+schema checksums are mandatory and verified offline on every lint and compile.
 
-The implemented `kn.*` extensions are `storageSchema`, `sourceProfile`, `csv`, `fieldId`,
+## Contract lint and toolchain
+
+`kn contract lint <file.yaml>` validates YAML or JSON against ODCS 3.1.0 and the closed schemas for
+every `kn.*` family in the specification. Omitting the file validates the bundled SATCOM contract.
+Lint checks types, required members, allowed locations, duplicate extensions and unknown names.
+It does not resolve ontology, policy, vocabulary, mapping or dataset references. The
+[toolchain reference](data-contracts/toolchain.md) lists extension shapes, diagnostics, parser
+limits, and the pinned external tool's verification command.
+
+The SATCOM compiler additionally checks its supported profile, names, stable field IDs, and
+references. Its supported extensions remain `storageSchema`, `sourceProfile`, `csv`, `fieldId`,
 `foreignKey` (ordered source and target columns), `enum`, `partialDate`, `precision`, and `scale`.
-Their closed schemas live in `loader.py`; supported ODCS keys live in `profile.py`. The wider
-extension families in the specification remain planned and are refused by this bounded profile.
+The shared closed value schemas live in `resources/kn-extensions.json`; compiler-supported ODCS
+keys live in `profile.py`. Unsupported ODCS features and extensions still fail compilation.
+A successful structural lint does not imply compiler support or resolved semantic references.
+
+## Engine exports
 
 `model.py` supplies immutable typed models. The same fields compile into:
 
@@ -131,7 +142,7 @@ The compiler currently supports flat scalar models. PostgreSQL numeric bounds ar
 this dataset exactly; oversized new values fail and keep their original input file available.
 Structural drift checking covers tables, columns, types, nullability and references through
 Alembic; it does not prove equivalence of arbitrary manually altered check expressions. The pinned
-standard and implemented extension subset are deliberately narrower than the future full compiler.
+standard and compiler extension subset are deliberately narrower than the future full compiler.
 
 ## Verification
 
@@ -145,6 +156,12 @@ standard and implemented extension subset are deliberately narrower than the fut
   numeric values.
 - `tests/contracts/test_contracts.py`: deterministic exports, invalid contracts, PostgreSQL DDL
   compilation, independent fastavro schema parsing and exact decimal/date/null round trips.
+- `tests/contracts/test_lint.py` and `test_document.py`: every extension family, invalid fixtures,
+  schema tampering, compiler refusal of lint-only metadata, and safe YAML/JSON failure paths.
+- `make contract-toolchain-check`: isolated pinned external linter and export probe, separate from
+  runtime dependencies and the deterministic network-free CI suite.
 
 The analysis, real import evidence and remaining scope are in
 [record 0011](../records/0011-data-contracts-satcom-schema-governance.md).
+The pinned lint toolchain and external export boundary are recorded in
+[record 0014](../records/0014-data-contracts-contract-toolchain-pin.md).

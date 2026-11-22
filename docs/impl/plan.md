@@ -34,36 +34,15 @@ recorded decision before later groups build on the group.
 
 ### Data contracts -- `data-contracts`
 
-#### contract-toolchain-pin
-
-Contracts can only be authoritative once the standard and the exporter are pinned and checked.
-
-- Serves: `data-contracts` -- [Data contracts](../design/spec.md#data-contracts)
-- Agent status: CLEAR
-- Dependencies: Network access to the Bitol ODCS releases and, if needed, the Data Contract CLI
-  package. The initial profile pins v3.1.0; broader feature coverage remains to be validated.
-- User-visible outcome: `kn contract lint` validates ODCS YAML against the pinned JSON Schema and
-  the `kn.*` extension schemas.
-- Scope boundary: The pinned schema with its checksum, the extension JSON Schemas for every family
-  in the specification, and lint diagnostics. Compilation comes later.
-- Data and artifact paths: `contracts/schemas/`, `src/kn/contracts/`, `tests/contracts/`,
-  `deploy/versions.yaml`, `pyproject.toml`, `uv.lock`.
-- Execution path: Vendor the schema file with its checksum. Run Data Contract CLI as a pinned
-  development tool outside the runtime dependencies. Add valid and invalid fixture contracts.
-- Acceptance gates: Valid fixtures pass. An unknown extension, a missing required field, and a bad
-  type fail with actionable diagnostics. The checksum is verified in CI.
-- Documentation target: A new `current/data-contracts.md` page listed in the
-  [areas index](current.md#areas).
-
 #### contract-compiler
 
 Generated DDL and models must come only from contracts, deterministically.
 
 - Serves: `data-contracts` -- [Data contracts](../design/spec.md#data-contracts)
 - Agent status: CLEAR
-- Requires: `contract-toolchain-pin`
-- Dependencies: The initial [SQLAlchemy profile](current/data-contracts.md) and its remaining
-  ODCS feature gaps. Generated metadata applies to scratch schemas of the
+- Dependencies: The [pinned lint schemas and initial SQLAlchemy profile](current/data-contracts.md)
+  and their remaining semantic reference and ODCS export gaps. Generated metadata applies to scratch
+  schemas of the
   [integration test harness](current/runtime-platform.md#integration-tests).
 - User-visible outcome: `kn contract compile` writes DDL, Pydantic models, JSON Schema, dbt source
   definitions, and contract docs into `generated/`, and `--check` fails on drift.
@@ -107,7 +86,7 @@ toolchain or the rebuild multiplies across every later contract.
 
 - Serves: `data-contracts` -- [Data contracts](../design/spec.md#data-contracts)
 - Agent status: CLEAR
-- Requires: `contract-toolchain-pin`, `contract-compiler`, `development-rebuild-mode`
+- Requires: `contract-compiler`, `development-rebuild-mode`
 - Dependencies: The accepted task records of the group and the [implementation
   audit](../guide/planning-workflow.md#implementation-audits) checks.
 - User-visible outcome: Later groups compile their contracts with a verified, deterministic
@@ -627,7 +606,6 @@ to be known before the contracts are fixed.
 - Serves: `part-supply-model` -- [Part and supply model](../design/spec.md#part-and-supply-model)
 - Agent status: CLEAR
 - Research: yes
-- Requires: `contract-toolchain-pin`
 - Dependencies: Public documentation of representative vendor channels: manufacturer product pages
   and datasheets for the watchlist families, distributor API documentation for the catalogue rows
   C01-C03, and the InvenTree API schema. The microelectronics attribute dictionary proposal.

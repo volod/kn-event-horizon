@@ -149,6 +149,20 @@ contract-check: ## Validate open contracts and check generated artifact digests
 contract-compile: ## Compile portable schemas under DATA_DIR
 	@"$(VENV)/bin/kn" contract compile --output "$(DATA_ROOT)/contract/current"
 
+.PHONY: contract-toolchain-check
+contract-toolchain-check: ## Run the locked external linter/exporter in an isolated tool environment
+	@source "$(PROJECT_ROOT)/scripts/shared/common.sh"; kn_load_env; \
+		mkdir -p "$$DATA_DIR/contract-toolchain"; \
+		artifact_dir=$$(mktemp -d "$$DATA_DIR/contract-toolchain/check-XXXXXXXX") || exit 1; \
+		tool=(uv run --locked --isolated --only-group contract-tools \
+		--python "$(PYTHON_VERSION)" datacontract); \
+		"$${tool[@]}" --version >"$$artifact_dir/version.txt" && \
+		"$${tool[@]}" lint tests/contracts/fixtures/valid.yaml \
+		--json-schema src/kn/contracts/resources/odcs-3.1.0.json --no-inline-references \
+		--output-format json --output "$$artifact_dir/lint.json" && \
+		"$${tool[@]}" export jsonschema tests/contracts/fixtures/valid.yaml \
+		--output "$$artifact_dir/export.json"
+
 satcom-validate: ## Validate the supplied SATCOM package without writing
 	@"$(VENV)/bin/kn" space satcom validate "$(DATA_ROOT)/satcom_enriched_package"
 

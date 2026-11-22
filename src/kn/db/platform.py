@@ -5,7 +5,7 @@ import json
 import sqlalchemy as sa
 from sqlalchemy.engine import Connection
 
-from kn.contracts.loader import RESOURCES
+from kn.contracts.schemas import RESOURCES
 
 POLICY = json.loads((RESOURCES / "platform.json").read_text())
 SCHEMAS: tuple[str, ...] = tuple(POLICY["schemas"])

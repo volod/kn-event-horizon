@@ -25,14 +25,15 @@ def test_bad_connection_configuration_never_contains_password(
 def test_schema_checksum_tampering_is_refused(tmp_path, monkeypatch: pytest.MonkeyPatch) -> None:
     import shutil
 
-    from kn.contracts import loader
+    from kn.contracts import schemas
+    from kn.contracts.loader import load_contract
 
     resource = tmp_path / "resources"
-    shutil.copytree(loader.RESOURCES, resource)
+    shutil.copytree(schemas.RESOURCES, resource)
     (resource / "odcs-3.1.0.json").write_text("{}")
-    monkeypatch.setattr(loader, "RESOURCES", resource)
+    monkeypatch.setattr(schemas, "RESOURCES", resource)
     with pytest.raises(ValueError, match="checksum"):
-        loader.load_contract()
+        load_contract()
 
 
 def test_password_file_connection_hides_credentials(

@@ -25,6 +25,13 @@ images:
 schema_governance:
   standard: ODCS-3.1.0
   schema_checksums: src/kn/contracts/resources/pins.json
+  extension_schema: src/kn/contracts/resources/kn-extensions.json
+  external_tool:
+    package: datacontract-cli
+    version: "1.2.11"
+    dependency_group: contract-tools
+    python: ">=3.12,<3.15"
+    purpose: isolated-development-lint-and-export-probe
   platform_policy: src/kn/contracts/resources/platform.json
   space_example_contract: src/kn/contracts/resources/satcom/1.0.0.json
   development_baseline: "0001_satcom"

@@ -1692,7 +1692,7 @@ upstream before downstream.
 | 2 | `project-identity` | shipped | Import, CLI, and distribution-build tests agree on the `kn-event-horizon` identity | [Product core](../impl/current/product-core.md) |
 | 3 | `documentation-integrity` | shipped | Link, registry-plan, task-lane, metadata, ordering, prerequisites, forward-language, and closed-research register checks pass over fixtures and the repository tree | [Documentation checks](../guide/development.md#documentation-checks) |
 | 4 | `runtime-platform` | shipped | Pinned Compose database reaches healthy from empty volumes, keeps data across restart, publishes its port on loopback only, and serves integration tests on the development host | [Runtime platform](../impl/current/runtime-platform.md) |
-| 5 | `data-contracts` | planned | Contracts compile deterministically, invalid contracts fail, drift fails CI, rebuild creates every schema, loaders cannot run DDL | [Initial space profile](../impl/current/data-contracts.md) |
+| 5 | `data-contracts` | planned | Contracts compile deterministically, invalid contracts fail, drift fails CI, rebuild creates every schema, loaders cannot run DDL | [Lint and initial space profile](../impl/current/data-contracts.md) |
 | 6 | `ontology-taxonomy` | planned | Every proposal row is classified, identifiers are stable, invalid hierarchies are rejected, SKOS round-trips | - |
 | 7 | `object-identity` | planned | KN IDs survive rebuilds; lifecycle, matching, partial-update, and lineage fixtures pass; calibrated classes meet the precision gate | - |
 | 8 | `raw-archive` | planned | WARC round trip, atomic write, ledger reindex, redaction, revisit, and corruption checks pass | - |

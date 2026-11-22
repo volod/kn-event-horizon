@@ -4,8 +4,9 @@ import json
 from pathlib import Path
 
 from kn.contracts.exports import artifact_digests, artifacts
-from kn.contracts.loader import RESOURCES, canonical
+from kn.contracts.loader import canonical
 from kn.contracts.model import Contract
+from kn.contracts.schemas import RESOURCES
 
 
 def compile_contract(contract: Contract, output: Path | None = None, check: bool = False) -> None:

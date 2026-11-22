@@ -6,45 +6,13 @@ import re
 from pathlib import Path
 from typing import Any, cast
 
-from jsonschema import Draft201909Validator
-
+from kn.contracts.lint import lint_contract
 from kn.contracts.model import Contract, Field, LogicalType, Reference, Table
 from kn.contracts.profile import validate_profile
+from kn.contracts.schemas import SATCOM
 
-RESOURCES = Path(__file__).parent / "resources"
-SATCOM = RESOURCES / "satcom" / "1.0.0.json"
 IDENTIFIER = re.compile(r"^[a-z][a-z0-9_]{0,47}$")
-SEMVER = re.compile(r"^(0|[1-9][0-9]*)\.(0|[1-9][0-9]*)\.(0|[1-9][0-9]*)$")
-EXTENSIONS: dict[str, dict[str, Any]] = {
-    "storageSchema": {"type": "string", "pattern": IDENTIFIER.pattern},
-    "sourceProfile": {"const": "satcom-csv/1"},
-    "csv": {"type": "boolean"},
-    "fieldId": {"type": "string", "minLength": 1},
-    "foreignKey": {
-        "type": "object",
-        "properties": {
-            "table": {"type": "string"},
-            "fields": {
-                "type": "array",
-                "items": {"type": "string"},
-                "minItems": 1,
-                "uniqueItems": True,
-            },
-            "targetFields": {
-                "type": "array",
-                "items": {"type": "string"},
-                "minItems": 1,
-                "uniqueItems": True,
-            },
-        },
-        "required": ["table", "fields", "targetFields"],
-        "additionalProperties": False,
-    },
-    "enum": {"type": "array", "items": {"type": "string"}, "minItems": 1, "uniqueItems": True},
-    "partialDate": {"type": "boolean"},
-    "precision": {"type": "integer", "minimum": 1, "maximum": 38},
-    "scale": {"type": "integer", "minimum": 0, "maximum": 38},
-}
+FIELD_EXTENSIONS = {"fieldId", "foreignKey", "enum", "partialDate", "precision", "scale"}
 
 
 def canonical(value: object) -> str:
@@ -58,13 +26,12 @@ def _extensions(node: dict[str, Any], allowed: set[str]) -> dict[str, Any]:
         short = name.removeprefix("kn.")
         if name != f"kn.{short}" or short not in allowed or short in result:
             raise ValueError(f"unknown, misplaced, or repeated extension: {name}")
-        Draft201909Validator(EXTENSIONS[short]).validate(item["value"])
         result[short] = item["value"]
     return result
 
 
 def _field(node: dict[str, Any]) -> Field:
-    meta = _extensions(node, set(EXTENSIONS) - {"storageSchema", "sourceProfile", "csv"})
+    meta = _extensions(node, FIELD_EXTENSIONS)
     if "fieldId" not in meta:
         raise ValueError("kn.fieldId extension is required")
     logical = node["logicalType"]
@@ -117,14 +84,7 @@ def _reference(table: Table, field: Field, targets: dict[str, Table]) -> None:
 
 def load_contract(path: Path = SATCOM) -> Contract:
     """Validate the pinned standard and supported profile before interpreting any model."""
-    pins = json.loads((RESOURCES / "pins.json").read_text())
-    schema = (RESOURCES / "odcs-3.1.0.json").read_bytes()
-    if hashlib.sha256(schema).hexdigest() != pins["odcs-3.1.0.json"]:
-        raise ValueError("ODCS schema checksum mismatch")
-    data = json.loads(path.read_text(encoding="utf-8"))
-    Draft201909Validator(json.loads(schema)).validate(data)
-    if data["apiVersion"] != "v3.1.0" or not SEMVER.fullmatch(data["version"]):
-        raise ValueError("unsupported ODCS version or invalid contract semantic version")
+    data = lint_contract(path)
     validate_profile(data)
     meta = _extensions(data, {"storageSchema", "sourceProfile"})
     if set(meta) != {"storageSchema", "sourceProfile"}:
