@@ -19,6 +19,7 @@ classifiers = [
 ]
 dependencies = [
   "alembic>=1.17,<2",
+  "babel>=2.17,<3",
   "jsonschema>=4.25,<5",
   "psycopg[binary]>=3.3,<4",
   "sqlalchemy>=2.0.44,<3",
@@ -55,6 +56,7 @@ where = ["src"]
 
 [tool.setuptools.package-data]
 "kn.contracts" = ["resources/**/*.json"]
+"kn.i18n.locales" = ["*/*.json"]
 "kn.db" = ["migrations/*.py", "migrations/versions/*.py"]
 
 [tool.ruff]

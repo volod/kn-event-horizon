@@ -19,6 +19,9 @@ LOCAL_TESTS := integration or heavy
 LOCAL_PYTEST = test -x "$(PY)" || { echo "ERROR: run 'make bootstrap' first"; exit 1; }; \
 	source "$(PROJECT_ROOT)/scripts/shared/common.sh"; kn_load_env; kn_db_test_env || exit 1; \
 	"$(PY)" -m pytest $(PYTEST_CACHE)
+BILINGUAL_PYTEST = mkdir -p "$(DATA_ROOT)/e2e"; \
+	artifact_dir=$$(mktemp -d "$(DATA_ROOT)/e2e/bilingual-XXXXXXXX") || exit 1; \
+	"$(PY)" -m pytest $(PYTEST_CACHE) tests/e2e tests/i18n --e2e-artifacts "$$artifact_dir"
 
 export RUFF_CACHE_DIR := $(DATA_ROOT)/cache/ruff
 export MYPY_CACHE_DIR := $(DATA_ROOT)/cache/mypy
@@ -106,7 +109,7 @@ lint-spec-plan: ## Check capability registry, plan tasks, and the closed-researc
 plan-status: ## Count tasks by lane/status and show declared priority
 	@"$(PY)" -m kn.quality.plan_summary --root "$(PROJECT_ROOT)"
 
-ci-checks: contract-check format-check lint typecheck complexity-gate shell-lint-gate lint-doc-links lint-spec-plan
+ci-checks: catalog-check contract-check format-check lint typecheck complexity-gate shell-lint-gate lint-doc-links lint-spec-plan
 
 ci: ci-checks test ## Run the required gate: checks and lightweight unit tests
 
@@ -161,3 +164,13 @@ db-upgrade: ## Apply Python platform policy and versioned Alembic migrations
 .PHONY: db-rebuild
 db-rebuild: ## Rebuild disposable SATCOM projections (requires KN_ENVIRONMENT=development)
 	@source "$(PROJECT_ROOT)/scripts/shared/common.sh"; kn_load_env; kn_db_govern rebuild
+
+.PHONY: catalog-check test-bilingual bilingual-acceptance
+catalog-check: ## Check interface catalog parity, placeholders, key usage, and CLI literals
+	@"$(PY)" -m kn.quality.catalogs --root "$(PROJECT_ROOT)"
+
+test-bilingual: ## Check available bilingual paths and save evidence under DATA_DIR/e2e
+	@$(BILINGUAL_PYTEST)
+
+bilingual-acceptance: ## Require full bilingual release acceptance; fail on open paths
+	@$(BILINGUAL_PYTEST) --require-bilingual-release

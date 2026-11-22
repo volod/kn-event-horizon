@@ -12,21 +12,22 @@ INHERITED_VARIABLES = ("MAKEFLAGS", "MFLAGS", "MAKELEVEL", "MAKEOVERRIDES", "PRO
 
 
 def pytest_commands(
-    target: str, directory: Path = ROOT, unset: Iterable[str] = (), **env: str
+    target: str | tuple[str, ...], directory: Path = ROOT, unset: Iterable[str] = (), **env: str
 ) -> list[list[str]]:
     """The arguments after `pytest` of every pytest command that make would run for the target."""
     dropped = {*INHERITED_VARIABLES, *unset}
     environment = {key: value for key, value in os.environ.items() if key not in dropped}
     environment.update(env)
+    targets = (target,) if isinstance(target, str) else target
     result = subprocess.run(
-        ["make", "--no-print-directory", "-n", "-C", str(directory), target],
+        ["make", "--no-print-directory", "-n", "-C", str(directory), *targets],
         env=environment,
         capture_output=True,
         text=True,
         check=True,
     )
     commands = []
-    for line in result.stdout.splitlines():
+    for line in result.stdout.replace("\\\n", "").splitlines():
         if " pytest " not in line:
             continue
         words = shlex.split(line.rsplit(";", 1)[-1])

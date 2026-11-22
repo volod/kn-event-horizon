@@ -1,0 +1,216 @@
+[
+  {
+    "expected": {
+      "en": "en",
+      "uk": "uk"
+    },
+    "id": "chinese-both",
+    "original": {
+      "language": "zh",
+      "provenance": "raw:zh/revision:1",
+      "text": " \u539f\u6587\r\n\u6d88\u606f e\u0301 "
+    },
+    "translations": [
+      {
+        "language": "en",
+        "provenance": "review:english/5",
+        "text": "Translated message"
+      },
+      {
+        "language": "uk",
+        "provenance": "model:fixture/prompt:6/review:7",
+        "text": "\u041f\u0435\u0440\u0435\u043a\u043b\u0430\u0434\u0435\u043d\u0435 \u043f\u043e\u0432\u0456\u0434\u043e\u043c\u043b\u0435\u043d\u043d\u044f"
+      }
+    ]
+  },
+  {
+    "expected": {
+      "en": "en",
+      "uk": "en"
+    },
+    "id": "russian-english",
+    "original": {
+      "language": "ru",
+      "provenance": "raw:ru/revision:2",
+      "text": "\u0418\u0441\u0445\u043e\u0434\u043d\u043e\u0435 \u0441\u043e\u043e\u0431\u0449\u0435\u043d\u0438\u0435"
+    },
+    "translations": [
+      {
+        "language": "en",
+        "provenance": "review:english/5",
+        "text": "Translated message"
+      }
+    ]
+  },
+  {
+    "expected": {
+      "en": "original",
+      "uk": "original"
+    },
+    "id": "chinese-original-only",
+    "original": {
+      "language": "zh",
+      "provenance": "raw:zh/revision:1",
+      "text": " \u539f\u6587\r\n\u6d88\u606f e\u0301 "
+    },
+    "translations": []
+  },
+  {
+    "expected": {
+      "en": "original",
+      "uk": "uk"
+    },
+    "id": "russian-ukrainian-only",
+    "original": {
+      "language": "ru",
+      "provenance": "raw:ru/revision:2",
+      "text": "\u0418\u0441\u0445\u043e\u0434\u043d\u043e\u0435 \u0441\u043e\u043e\u0431\u0449\u0435\u043d\u0438\u0435"
+    },
+    "translations": [
+      {
+        "language": "uk",
+        "provenance": "model:fixture/prompt:6/review:7",
+        "text": "\u041f\u0435\u0440\u0435\u043a\u043b\u0430\u0434\u0435\u043d\u0435 \u043f\u043e\u0432\u0456\u0434\u043e\u043c\u043b\u0435\u043d\u043d\u044f"
+      }
+    ]
+  },
+  {
+    "expected": {
+      "en": "en",
+      "uk": "original"
+    },
+    "id": "ukrainian-original",
+    "original": {
+      "language": "uk",
+      "provenance": "raw:uk/revision:3",
+      "text": "\u041f\u043e\u0447\u0430\u0442\u043a\u043e\u0432\u0435 \u043f\u043e\u0432\u0456\u0434\u043e\u043c\u043b\u0435\u043d\u043d\u044f"
+    },
+    "translations": [
+      {
+        "language": "en",
+        "provenance": "review:english/5",
+        "text": "Translated message"
+      }
+    ]
+  },
+  {
+    "expected": {
+      "en": "original",
+      "uk": "uk"
+    },
+    "id": "english-original",
+    "original": {
+      "language": "en",
+      "provenance": "raw:en/revision:4",
+      "text": "Original source message"
+    },
+    "translations": [
+      {
+        "language": "uk",
+        "provenance": "model:fixture/prompt:6/review:7",
+        "text": "\u041f\u0435\u0440\u0435\u043a\u043b\u0430\u0434\u0435\u043d\u0435 \u043f\u043e\u0432\u0456\u0434\u043e\u043c\u043b\u0435\u043d\u043d\u044f"
+      }
+    ]
+  },
+  {
+    "expected": {
+      "en": "original",
+      "uk": "original"
+    },
+    "id": "russian-original-only",
+    "original": {
+      "language": "ru",
+      "provenance": "raw:ru/revision:2",
+      "text": "\u0418\u0441\u0445\u043e\u0434\u043d\u043e\u0435 \u0441\u043e\u043e\u0431\u0449\u0435\u043d\u0438\u0435"
+    },
+    "translations": []
+  },
+  {
+    "expected": {
+      "en": "original",
+      "uk": "original"
+    },
+    "id": "unknown-original",
+    "original": {
+      "language": "und",
+      "provenance": "raw:unknown/8",
+      "text": "\u539f\u6587 / \u0442\u0435\u043a\u0441\u0442"
+    },
+    "translations": []
+  },
+  {
+    "expected": {
+      "en": "original",
+      "uk": "original"
+    },
+    "id": "arabic-original",
+    "original": {
+      "language": "ar",
+      "provenance": "raw:arabic/9",
+      "text": "\u0631\u0633\u0627\u0644\u0629"
+    },
+    "translations": []
+  },
+  {
+    "expected": {
+      "en": "original",
+      "uk": "original"
+    },
+    "id": "unrelated-translation",
+    "original": {
+      "language": "zh",
+      "provenance": "raw:zh/revision:1",
+      "text": " \u539f\u6587\r\n\u6d88\u606f e\u0301 "
+    },
+    "translations": [
+      {
+        "language": "ru",
+        "provenance": "raw:ru/revision:2",
+        "text": "\u0418\u0441\u0445\u043e\u0434\u043d\u043e\u0435 \u0441\u043e\u043e\u0431\u0449\u0435\u043d\u0438\u0435"
+      }
+    ]
+  },
+  {
+    "expected": {
+      "en": "EN",
+      "uk": "UK"
+    },
+    "id": "case-insensitive-tags",
+    "original": {
+      "language": "zh",
+      "provenance": "raw:zh/revision:1",
+      "text": " \u539f\u6587\r\n\u6d88\u606f e\u0301 "
+    },
+    "translations": [
+      {
+        "language": "EN",
+        "provenance": "review:en/10",
+        "text": "English"
+      },
+      {
+        "language": "UK",
+        "provenance": "review:uk/11",
+        "text": "\u0422\u0435\u043a\u0441\u0442"
+      }
+    ]
+  },
+  {
+    "expected": {
+      "en": "original",
+      "uk": "original"
+    },
+    "id": "no-regional-inference",
+    "original": {
+      "language": "zh-Hans",
+      "provenance": "raw:regional/12",
+      "text": "\u539f\u6587"
+    },
+    "translations": [
+      {
+        "language": "en-US",
+        "provenance": "review:en-US/13",
+        "text": "Regional English"
+      }
+    ]
+  }
+]

@@ -32,81 +32,6 @@ recorded decision before later groups build on the group.
 
 ## Agent Implementation Tasks
 
-### Localization -- `localization`
-
-#### message-catalog-core
-
-Every operator message must exist in `en` and `uk` from the first CLI command onward.
-
-- Serves: `localization` -- [Localization](../design/spec.md#localization)
-- Agent status: CLEAR
-- Dependencies: none.
-- User-visible outcome: `kn --locale uk info` and `KN_LOCALE=uk` print Ukrainian messages, and
-  machine-readable JSON output keeps stable keys.
-- Scope boundary: Catalog format and loader, the locale option, CLDR plural and number formatting,
-  and the CI key-coverage check. Superset and export localization come in their own tasks.
-- Data and artifact paths: `src/kn/i18n/`, `locales/en/`, `locales/uk/`, `src/kn/cli.py`,
-  `tests/i18n/`, `pyproject.toml`, `uv.lock`.
-- Execution path: Use gettext catalogs through Babel, with keys rather than English source strings
-  as identifiers. Add a check that fails on a missing or unused key and on a user-facing literal in
-  CLI handlers.
-- Acceptance gates: Golden outputs exist in both locales. Plural tests cover the Ukrainian
-  categories. The coverage check fails on fixtures with a missing key. `make ci` passes.
-- Documentation target: A new `current/localization.md` page listed in the
-  [areas index](current.md#areas).
-
-#### bilingual-acceptance-suite
-
-Release needs one end-to-end proof that every operator path works in both locales.
-
-- Serves: `localization` -- [Localization](../design/spec.md#localization)
-- Agent status: CLEAR
-- Requires: `obsidian-space-profile`, `microelectronics-comparison-dashboards`,
-  `inventree-write-export`
-- Dependencies: A browser automation tool justified as a development dependency.
-- User-visible outcome: One command produces screenshots and golden outputs for the CLI, the review
-  queue, source status, lineage, InvenTree plans and reports, the dashboards with filters and the
-  map, and the export README, in both locales.
-- Scope boundary: Verification and fixing of missing translations. The Kestra UI is excluded under
-  the approved waiver.
-- Data and artifact paths: `tests/e2e/`, `$DATA_DIR/e2e/<run-id>/` for screenshots, and
-  `locales/`.
-- Execution path: Script the browser paths against fixture data, and compare key coverage and
-  rendered Cyrillic, dates, numbers, and missing-value labels.
-- Acceptance gates: Both locales pass with no untranslated critical string. Any remaining
-  English-only operator screen is listed as a release blocker.
-- Documentation target: `current/localization.md` listed in the [areas index](current.md#areas).
-
-#### localization-implementation-audit (optional)
-
-Message keys, plural rules, and locale fallback serve every operator surface, so a gap found late
-would touch every group.
-
-- Serves: `localization` -- [Localization](../design/spec.md#localization)
-- Agent status: CLEAR
-- Requires: `message-catalog-core`, `bilingual-acceptance-suite`
-- Dependencies: The accepted task records of the group and the [implementation
-  audit](../guide/planning-workflow.md#implementation-audits) checks.
-- User-visible outcome: Every operator surface is shown to work in `en` and `uk` from one catalog.
-  The audit record gives every check a result and every finding a disposition. The current-state
-  page lists known limitations, and each scheduled finding is a plan task.
-- Scope boundary: Focus: key parity between `en` and `uk`; Ukrainian plural forms and number, date,
-  and unit formatting; missing-key fallback; precedence among `--locale`, `KN_LOCALE`, and the
-  default; operator text kept out of logs and log text kept out of catalogs; one source for
-  vocabulary labels in the CLI, exports, and dashboards; text expansion and Cyrillic rendering;
-  adding a third locale without code changes. Fixes only; new behavior becomes plan tasks.
-- Data and artifact paths: `src/kn/i18n/`, `locales/`, `tests/e2e/`, `docs/impl/plan.md`, and the
-  task record.
-- Execution path: Rerun the group's acceptance commands, then work through the audit checks. Remove
-  one `uk` key, add a pseudo-locale with long strings, and render the plural cases 0, 1, 2, 5, 11,
-  12, 21, and 22.
-- Acceptance gates: A missing key fails the catalog check in either direction. The pseudo-locale
-  shows no truncated or hard-coded string on the tested surfaces. Plural forms follow the CLDR rules
-  for `uk`. Every finding has a severity, evidence, and a disposition, no `blocker` is accepted, and
-  every fix starts from a failing regression test. `make ci` passes with the scheduled tasks in the
-  plan.
-- Documentation target: `current/localization.md` listed in the [areas index](current.md#areas).
-
 ### Data contracts -- `data-contracts`
 
 #### contract-toolchain-pin
@@ -365,7 +290,7 @@ Merges, splits, and retirements must be explicit, reviewed, and kept as reversib
 
 - Serves: `object-identity` -- [Object identity](../design/spec.md#object-identity)
 - Agent status: CLEAR
-- Requires: `identity-registry-contracts`, `message-catalog-core`
+- Requires: `identity-registry-contracts`
 - Dependencies: none.
 - User-visible outcome: `kn identity show|resolve|history|merge|split|retire|restore` work in `en`
   and `uk`. Each state change writes a review decision and the identity event that cites it. It
@@ -597,6 +522,8 @@ Claims, evidence, and canonical facts need contracts that carry every provenance
   compile and test the constraints against the integration database.
 - Acceptance gates: A claim without an origin URI, a fetch time, or a value-or-missing-reason is
   rejected. Re-inserting the same claim key is a no-op. As-of views are deterministic on fixtures.
+  Multilingual text projections preserve originals, language tags, and translation provenance under
+  the [localization policy](../design/spec.md#localization), without duplicating facts per locale.
 - Documentation target: A new `current/evidence-model.md` page listed in the
   [areas index](current.md#areas).
 
@@ -644,7 +571,7 @@ Human decisions on conflicts and candidates need a bilingual workflow that survi
 
 - Serves: `evidence-model` -- [Evidence model](../design/spec.md#evidence-model)
 - Agent status: CLEAR
-- Requires: `canonical-fact-selection`, `object-lifecycle-operations`, `message-catalog-core`
+- Requires: `canonical-fact-selection`, `object-lifecycle-operations`
 - Dependencies: none.
 - User-visible outcome: `kn review list` and `kn review decide` work in `en` and `uk` for fact
   conflicts, identity match candidates, and identity drift. Decisions are appended to
@@ -785,7 +712,7 @@ Every candidate source must be visible and disabled before any crawler exists.
 
 - Serves: `source-management` -- [Source management](../design/spec.md#source-management)
 - Agent status: CLEAR
-- Requires: `development-rebuild-mode`, `message-catalog-core`
+- Requires: `development-rebuild-mode`
 - Dependencies: The data-source proposal JSON for space, microelectronics, and GDELT.
 - User-visible outcome: Every rebuild loads `system.source_catalogue` with 37 space, 65
   microelectronics, and 17 GDELT candidates. `kn source list` shows them in both locales.
@@ -922,7 +849,10 @@ The core engine must run end to end on a synthetic source before any real source
   interface returns records and claims, and the loader is the only writer.
 - Acceptance gates: A second run is idempotent. An interrupted run resumes from the committed
   checkpoint. A crash after archive finalization and before SQL commit reuses the archived batch.
-  Replay without network yields the same claims. `make ci` passes.
+  Replay without network yields the same claims. Russian, Chinese, and unknown-language source
+  fixtures ingest without English or Ukrainian translations, retain originals and provenance, and
+  use the [shared text selector](current/localization.md#source-data-and-translations) for display.
+  `make ci` passes.
 - Documentation target: A new `current/ingestion-engine.md` page listed in the
   [areas index](current.md#areas).
 
@@ -1462,7 +1392,7 @@ Users need a safe, read-only Obsidian subset of the knowledge base.
 
 - Serves: `obsidian-export` -- [Obsidian export](../design/spec.md#obsidian-export)
 - Agent status: CLEAR
-- Requires: `canonical-fact-selection`, `message-catalog-core`
+- Requires: `canonical-fact-selection`
 - Dependencies: none.
 - User-visible outcome: `kn export obsidian --profile <id> --locale en|uk` writes a verified vault
   ZIP and manifest from one snapshot.
@@ -1842,7 +1772,6 @@ Dashboards need a pinned, bilingual, read-only BI service.
 
 - Serves: `space-dashboards` -- [Space dashboards](../design/spec.md#space-dashboards)
 - Agent status: CLEAR
-- Requires: `message-catalog-core`
 - Dependencies: A pinned Superset release that bundles a `uk` catalog.
 - User-visible outcome: Superset runs with `en` and `uk` enabled, its own `superset` metadata
   database, a read-only `analytics` connection, and SQL Lab restrictions.
@@ -1892,7 +1821,8 @@ Dashboards must deploy reproducibly from one definition in both locales.
 - Data and artifact paths: `src/kn/dashboards/`, `analytics/dashboards/`, `tests/dashboards/`.
 - Execution path: Golden bundle tests, and a deploy test against the local service.
 - Acceptance gates: Bundles are identical twice. The twins share datasets and filters. Drift is
-  reported.
+  reported. Interface catalogs stay separate from data text; fixtures cover requested-language,
+  English, and original fallback with the selected language and provenance visible.
 - Documentation target: `current/space-dashboards.md` listed in the
   [areas index](current.md#areas).
 
@@ -2383,6 +2313,69 @@ plausible but wrong rankings.
 - Documentation target: `current/microelectronics-dashboards.md` listed in the [areas
   index](current.md#areas).
 
+### Localization -- `localization`
+
+#### bilingual-acceptance-suite
+
+Release needs one end-to-end proof that every operator path works in both locales.
+
+- Serves: `localization` -- [Localization](../design/spec.md#localization)
+- Agent status: CLEAR
+- Requires: `obsidian-space-profile`, `microelectronics-comparison-dashboards`,
+  `inventree-write-export`
+- Dependencies: A browser automation tool justified as a development dependency when product browser
+  surfaces exist. The available CLI and multilingual data checks are documented in
+  [current acceptance coverage](current/localization.md#bilingual-acceptance); the open
+  [task record](records/0013-localization-bilingual-acceptance-suite.md) preserves partial evidence.
+- User-visible outcome: One command produces screenshots and golden outputs for the CLI, the review
+  queue, source status, lineage, InvenTree plans and reports, the dashboards with filters and the
+  map, and the export README, in both locales.
+- Scope boundary: Verification and fixing of missing translations. The Kestra UI is excluded under
+  the approved waiver. Strict bilingual interface keys are independent of optional data
+  translations: requested language, English, then the preserved original with language/provenance.
+  Source-only Russian, Chinese, and other-language messages must survive ingestion and later
+  translation without being counted as untranslated interface strings.
+- Data and artifact paths: `tests/e2e/`, `$DATA_DIR/e2e/<run-id>/` for screenshots, and
+  `locales/`.
+- Execution path: Extend `make test-bilingual` with the real browser paths against multilingual
+  fixture data; compare key coverage and rendered Cyrillic, dates, numbers, and missing-value
+  labels. Run `make bilingual-acceptance` to require all release paths rather than the available
+  subset. Retain screenshots and fallback metadata for both locales.
+- Acceptance gates: Both locales pass with no untranslated critical string. Any remaining
+  English-only operator screen is listed as a release blocker.
+- Documentation target: `current/localization.md` listed in the [areas index](current.md#areas).
+
+#### localization-implementation-audit (optional)
+
+Message keys, plural rules, and locale fallback serve every operator surface, so a gap found late
+would touch every group.
+
+- Serves: `localization` -- [Localization](../design/spec.md#localization)
+- Agent status: CLEAR
+- Requires: `bilingual-acceptance-suite`
+- Dependencies: The accepted task records of the group and the [implementation
+  audit](../guide/planning-workflow.md#implementation-audits) checks.
+- User-visible outcome: Every operator surface is shown to work in `en` and `uk` from one catalog.
+  The audit record gives every check a result and every finding a disposition. The current-state
+  page lists known limitations, and each scheduled finding is a plan task.
+- Scope boundary: Focus: key parity between `en` and `uk`; Ukrainian plural forms and number, date,
+  and unit formatting; missing-interface-key rejection and source-text fallback; precedence among
+  `--locale`, `KN_LOCALE`, and the default; operator text kept out of logs and log text kept out of
+  catalogs; one source for vocabulary labels in the CLI, exports, and dashboards; text expansion
+  and Cyrillic rendering;
+  adding a third locale without code changes. Fixes only; new behavior becomes plan tasks.
+- Data and artifact paths: `src/kn/i18n/`, `locales/`, `tests/e2e/`, `docs/impl/plan.md`, and the
+  task record.
+- Execution path: Rerun the group's acceptance commands, then work through the audit checks. Remove
+  one `uk` key, add a pseudo-locale with long strings, and render the plural cases 0, 1, 2, 5, 11,
+  12, 21, and 22.
+- Acceptance gates: A missing key fails the catalog check in either direction. The pseudo-locale
+  shows no truncated or hard-coded string on the tested surfaces. Plural forms follow the CLDR rules
+  for `uk`. Every finding has a severity, evidence, and a disposition, no `blocker` is accepted, and
+  every fix starts from a failing regression test. `make ci` passes with the scheduled tasks in the
+  plan.
+- Documentation target: `current/localization.md` listed in the [areas index](current.md#areas).
+
 ### Operations hardening -- `operations-hardening`
 
 #### reverse-proxy-auth
@@ -2603,27 +2596,6 @@ prompts would be costly to unwind.
 
 ## Human-Assisted Tasks
 
-### Localization -- `localization`
-
-#### review-ukrainian-terminology
-
-Core Ukrainian terminology needs review by a Ukrainian technical speaker.
-
-- Serves: `localization` -- [Localization](../design/spec.md#localization)
-- Agent status: HUMAN-GATED
-- Requires: `bilingual-acceptance-suite`
-- Dependencies: A Ukrainian technical speaker named by the owner. An agent prepares a glossary
-  export of every `uk` UI string and vocabulary label with context.
-- User-visible outcome: Reviewed Ukrainian terminology for the UI, the vocabularies, and the
-  operator quickstart.
-- Scope boundary: Review and corrections of catalogs and labels.
-- Data and artifact paths: `locales/uk/`, `domains/<domain>/seeds/`, and the task record.
-- Execution path: The agent exports the glossary. The reviewer annotates it. The agent applies the
-  corrections and reruns the bilingual checks.
-- Acceptance gates: The reviewer signs off in the task record, and the bilingual checks pass after
-  the corrections.
-- Documentation target: `current/localization.md` listed in the [areas index](current.md#areas).
-
 ### InvenTree exchange -- `inventree-exchange`
 
 #### provide-inventree-instance-access
@@ -2795,6 +2767,27 @@ Microelectronics sampling needs the owner's authorization.
 - Acceptance gates: Each first-wave source has a decision.
 - Documentation target: `current/microelectronics-domain.md` listed in the
   [areas index](current.md#areas).
+
+### Localization -- `localization`
+
+#### review-ukrainian-terminology
+
+Core Ukrainian terminology needs review by a Ukrainian technical speaker.
+
+- Serves: `localization` -- [Localization](../design/spec.md#localization)
+- Agent status: HUMAN-GATED
+- Requires: `bilingual-acceptance-suite`
+- Dependencies: A Ukrainian technical speaker named by the owner. An agent prepares a glossary
+  export of every `uk` UI string and vocabulary label with context.
+- User-visible outcome: Reviewed Ukrainian terminology for the UI, the vocabularies, and the
+  operator quickstart.
+- Scope boundary: Review and corrections of catalogs and labels.
+- Data and artifact paths: `locales/uk/`, `domains/<domain>/seeds/`, and the task record.
+- Execution path: The agent exports the glossary. The reviewer annotates it. The agent applies the
+  corrections and reruns the bilingual checks.
+- Acceptance gates: The reviewer signs off in the task record, and the bilingual checks pass after
+  the corrections.
+- Documentation target: `current/localization.md` listed in the [areas index](current.md#areas).
 
 ### Operations hardening -- `operations-hardening`
 
