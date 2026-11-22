@@ -6,6 +6,7 @@ import sqlalchemy as sa
 from alembic.autogenerate import compare_metadata
 from alembic.migration import MigrationContext
 from sqlalchemy.engine import Connection
+from sqlalchemy.engine.reflection import Inspector
 
 from kn.contracts import load_contract
 from kn.contracts.sqlalchemy import metadata
@@ -104,3 +105,36 @@ def _table_privileges(connection: Connection, schema: str) -> None:
                 )
             )
             _expect(value, kind != "reader", f"{role} {privilege} sequence")
+
+
+def verify_compiled_catalog(connection: Connection) -> None:
+    """Check compiled keys, checks and comments that Alembic does not fully compare."""
+    contract = load_contract()
+    model = metadata(contract)
+    inspector = sa.inspect(connection)
+    expected_tables = {table.name for table in contract.tables}
+    if set(inspector.get_table_names(schema=contract.schema)) != expected_tables:
+        raise ValueError("rebuilt tables differ from the compiled contract")
+    for table in model.tables.values():
+        _verify_compiled_table(inspector, table)
+
+
+def _verify_compiled_table(inspector: Inspector, table: sa.Table) -> None:
+    primary = inspector.get_pk_constraint(table.name, schema=table.schema)
+    if (primary["name"], primary["constrained_columns"]) != (
+        table.primary_key.name,
+        [column.name for column in table.primary_key.columns],
+    ):
+        raise ValueError(f"compiled primary key mismatch: {table.fullname}")
+    checks = inspector.get_check_constraints(table.name, schema=table.schema)
+    expected = {
+        str(item.name) for item in table.constraints if isinstance(item, sa.CheckConstraint)
+    }
+    if {item["name"] for item in checks} != expected:
+        raise ValueError(f"compiled check constraint mismatch: {table.fullname}")
+    comment = inspector.get_table_comment(table.name, schema=table.schema)["text"]
+    columns = inspector.get_columns(table.name, schema=table.schema)
+    if comment != table.comment or any(
+        column.get("comment") != table.c[column["name"]].comment for column in columns
+    ):
+        raise ValueError(f"compiled comment mismatch: {table.fullname}")

@@ -97,5 +97,5 @@ scalar logical types, required stable IDs, and resolvable composite foreign keys
 Lint validates structure without resolving external definitions. Compilation additionally resolves
 reference catalogs and emits the [supported artifacts](compiler.md#entry-points-and-artifacts),
 including PostGIS templates, Pydantic and dbt. Runtime ontology and policy behavior remains owned by
-its capability tasks. The `data-contracts` capability remains planned until the full-platform
-rebuild gate passes.
+its capability tasks. The shipped [development rebuild](rebuild.md) supplies the all-schema
+reset and transactional reviewed-seed hook for the current compiled bundle.

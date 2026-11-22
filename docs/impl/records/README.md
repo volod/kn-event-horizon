@@ -30,5 +30,6 @@ decision. A record can name a plan task by ID because plan headings disappear on
 | 0013 | `bilingual-acceptance-suite` (open) | [0013-localization-bilingual-acceptance-suite.md](0013-localization-bilingual-acceptance-suite.md) |
 | 0014 | `contract-toolchain-pin` | [0014-data-contracts-contract-toolchain-pin.md](0014-data-contracts-contract-toolchain-pin.md) |
 | 0015 | `contract-compiler` | [0015-data-contracts-contract-compiler.md](0015-data-contracts-contract-compiler.md) |
+| 0016 | `development-rebuild-mode` | [0016-data-contracts-development-rebuild-mode.md](0016-data-contracts-development-rebuild-mode.md) |
 
-Next unused sequence is `0016`.
+Next unused sequence is `0017`.

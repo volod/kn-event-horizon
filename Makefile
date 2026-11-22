@@ -176,7 +176,7 @@ db-upgrade: ## Apply Python platform policy and versioned Alembic migrations
 	@source "$(PROJECT_ROOT)/scripts/shared/common.sh"; kn_load_env; kn_db_govern upgrade
 
 .PHONY: db-rebuild
-db-rebuild: ## Rebuild disposable SATCOM projections (requires KN_ENVIRONMENT=development)
+db-rebuild: ## Rebuild all disposable KN schemas (requires KN_ENVIRONMENT=development)
 	@source "$(PROJECT_ROOT)/scripts/shared/common.sh"; kn_load_env; kn_db_govern rebuild
 
 .PHONY: catalog-check test-bilingual bilingual-acceptance

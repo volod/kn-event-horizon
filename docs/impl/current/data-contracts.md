@@ -3,7 +3,7 @@
 The space domain has an initial SATCOM source dataset. SATCOM is a subset of space, not a domain,
 service, or PostgreSQL schema of its own. This implementation supplies the first bounded profile
 of the [data contracts capability](../../design/spec.md#data-contracts). The remaining ontology,
-identity, interchange and full-platform rebuild work stays in the [plan](../plan.md).
+identity, interchange and raw replay work stays in the [plan](../plan.md).
 
 ## One definition for each model
 
@@ -34,8 +34,8 @@ PostGIS and partition templates, output paths, and exact-byte drift checks.
 `make contract-check` validates the bundled contract and checks the reviewed artifact digest
 manifest, including physical mappings and generated DDL. `make contract-compile` writes 103 artifacts
 plus a manifest under `$DATA_DIR/contract/current/`. `kn contract compile` defaults to `generated/`;
-`--output <directory>` selects another destination. Generated SQL is reviewable output; Alembic
-continues to consume SQLAlchemy metadata directly for deployment.
+`--output <directory>` selects another destination. Normal Alembic upgrades consume SQLAlchemy
+metadata; the explicit development rebuild executes DDL freshly generated from the same contract.
 
 ## Development baseline and release evolution
 
@@ -51,11 +51,11 @@ For a development model edit:
 3. Set `KN_ENVIRONMENT=development` and run `make db-rebuild`.
 4. Run `make satcom-import` to restore the example dataset from the source package.
 
-Rebuild drops only tables listed in the current or previously installed contract manifest. It
-keeps other space tables, the other domain schemas, and package archives. Reflection does not
-follow foreign keys into unmanaged tables. A dependency from an unmanaged table can refuse the
-rebuild rather than being cascaded away. The rebuild and baseline application share one
-transaction and advisory lock. Without explicit development mode, including when
+Rebuild now recreates all ten KN schemas, removes obsolete KN tables, loads registered reviewed
+seeds and verifies the compiled catalog. It preserves external schemas and durable files. External
+dependencies and unsupported non-table objects refuse without cascade. The
+[development rebuild reference](data-contracts/rebuild.md) describes its transaction boundary,
+seed hook, safeguards and tests. Without explicit development mode, including when
 `KN_ENVIRONMENT=released`, rebuild fails before database access.
 
 At first release, freeze the baseline and contract `1.0.0`. Subsequent releases add contract
@@ -154,3 +154,6 @@ The pinned lint toolchain and external export boundary are recorded in
 
 The full compiler templates, offline reference resolution and drift acceptance are in
 [record 0015](../records/0015-data-contracts-contract-compiler.md).
+
+The all-schema rebuild and reviewed-seed hook are in
+[record 0016](../records/0016-data-contracts-development-rebuild-mode.md).

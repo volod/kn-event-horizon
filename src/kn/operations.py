@@ -10,7 +10,7 @@ from kn.contracts.loader import canonical
 from kn.contracts.schemas import SATCOM
 from kn.db.connection import engine_from_env
 from kn.db.governance import upgrade, verify, verify_contract
-from kn.db.rebuild import rebuild
+from kn.db.rebuild import rebuild, require_development
 from kn.domains.space.satcom.archive import archive
 from kn.domains.space.satcom.importer import import_package
 from kn.domains.space.satcom.package import read_package
@@ -41,6 +41,8 @@ def contract_operation(
 
 
 def database_operation(action: str) -> dict[str, object]:
+    if action == "rebuild":
+        require_development()
     engine = engine_from_env()
     try:
         with engine.begin() as connection:

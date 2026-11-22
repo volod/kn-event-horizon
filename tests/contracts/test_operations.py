@@ -57,6 +57,7 @@ def test_database_commands_dispatch_and_dispose_even_on_failure(
     monkeypatch.setattr(operations, "upgrade", upgrade)
     monkeypatch.setattr(operations, "rebuild", rebuild)
     monkeypatch.setattr(operations, "verify", verify)
+    monkeypatch.setenv("KN_ENVIRONMENT", "development")
     for action in ("upgrade", "rebuild", "verify"):
         assert cli.main(["db", action]) == 0
     assert upgrade.call_count == rebuild.call_count == 1

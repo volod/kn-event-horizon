@@ -14,9 +14,10 @@ make contract-compile
 
 Without a source, compilation uses the bundled SATCOM contract. Without an output directory, it
 writes `generated/` relative to the working directory. `make contract-compile` keeps the existing
-runtime destination `$DATA_DIR/contract/current/`. These are generated review artifacts; deployment
-continues to consume SQLAlchemy metadata through Python Alembic revisions. The generated SQL is
-never substituted for role policy or executed automatically by the CLI.
+runtime destination `$DATA_DIR/contract/current/`. These are generated review artifacts. Normal upgrades
+consume SQLAlchemy metadata through Python Alembic revisions. The explicit
+[development rebuild](rebuild.md) executes DDL freshly compiled from the bundled contract, with
+role policy supplied separately by shared Python governance.
 
 | Path inside the output | Content |
 | --- | --- |

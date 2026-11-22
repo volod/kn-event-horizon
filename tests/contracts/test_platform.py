@@ -7,8 +7,7 @@ import sqlalchemy as sa
 from sqlalchemy.dialects import postgresql
 
 from kn.contracts import load_contract
-from kn.contracts.loader import canonical
-from kn.db import governance, platform, rebuild, verification
+from kn.db import governance, platform, verification
 
 
 def connection() -> MagicMock:
@@ -117,44 +116,3 @@ def test_privilege_refusal_always_rolls_back_probe_tables(monkeypatch: pytest.Mo
     with pytest.raises(ValueError, match="privilege mismatch"):
         verification.verify_privileges(conn)
     conn.begin_nested.return_value.rollback.assert_called_once()
-
-
-def test_explicit_rebuild_filters_unmanaged_tables(monkeypatch: pytest.MonkeyPatch) -> None:
-    conn = connection()
-    monkeypatch.setenv("KN_ENVIRONMENT", "development")
-    monkeypatch.setattr(rebuild, "apply_platform", lambda *a: None)
-    inspector = MagicMock()
-    inspector.get_table_names.return_value = [
-        "satcom_contract",
-        "countries",
-        "removed_old",
-        "unmanaged",
-    ]
-    monkeypatch.setattr(sa, "inspect", lambda _: inspector)
-    marker = sa.Table(
-        "satcom_contract",
-        sa.MetaData(),
-        sa.Column("managed_tables_json", sa.Text()),
-        sa.Column("contract_id", sa.Text()),
-    )
-    original_table = sa.Table
-    monkeypatch.setattr(
-        rebuild.sa,
-        "Table",
-        lambda *a, **k: marker if a[0] == "satcom_contract" else original_table(*a, **k),
-    )
-    conn.scalar.return_value = canonical(["satcom_contract", "removed_old"])
-    reflect = MagicMock()
-    monkeypatch.setattr(sa.MetaData, "reflect", reflect)
-    monkeypatch.setattr(sa.MetaData, "drop_all", lambda *a: None)
-    stamp = MagicMock()
-    monkeypatch.setattr(rebuild.command, "stamp", stamp)
-    upgrade = MagicMock()
-    monkeypatch.setattr(rebuild, "upgrade", upgrade)
-    rebuild.rebuild(conn)
-    assert reflect.call_args.kwargs == {
-        "only": ["countries", "removed_old", "satcom_contract"],
-        "resolve_fks": False,
-    }
-    assert stamp.call_args.args[1] == "base"
-    upgrade.assert_called_once_with(conn)

@@ -98,7 +98,7 @@ def test_real_mixture_round_trips_and_additive_evolution_preserves_data(
         engine.dispose()
 
 
-def test_development_rebuild_is_transactional_and_keeps_unmanaged_tables(
+def test_development_rebuild_is_transactional_and_drops_kn_tables(
     integration_database: IntegrationDatabase, monkeypatch: pytest.MonkeyPatch
 ) -> None:
     from kn.db.governance import verify_contract
@@ -122,7 +122,7 @@ def test_development_rebuild_is_transactional_and_keeps_unmanaged_tables(
                 unrelated.create(connection)
                 connection.execute(unrelated.insert(), {"id": 7})
                 rebuild(connection)
-                assert connection.scalar(sa.select(unrelated.c.id)) == 7
+                assert not sa.inspect(connection).has_table(unrelated.name, schema="space")
                 assert connection.scalar(sa.select(sa.func.count()).select_from(imports)) == 0
                 verify_contract(connection)
             finally:

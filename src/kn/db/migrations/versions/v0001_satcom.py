@@ -3,8 +3,8 @@
 from alembic import op
 
 from kn.contracts import load_contract
-from kn.contracts.loader import canonical
 from kn.contracts.sqlalchemy import metadata
+from kn.db.governance import install_contract
 from kn.db.platform import ddl
 
 revision = "0001_satcom"
@@ -19,15 +19,7 @@ def upgrade() -> None:
     ddl(connection, "SET LOCAL ROLE kn_space_owner")
     model = metadata(contract)
     model.create_all(connection, checkfirst=False)
-    connection.execute(
-        model.tables[f"{contract.schema}.satcom_contract"].insert(),
-        {
-            "contract_id": contract.contract_id,
-            "version": contract.version,
-            "digest": contract.digest,
-            "managed_tables_json": canonical([table.name for table in contract.tables]),
-        },
-    )
+    install_contract(connection, contract)
     ddl(connection, "SET LOCAL ROLE kn_system_owner")
 
 

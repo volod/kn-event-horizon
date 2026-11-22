@@ -34,26 +34,6 @@ recorded decision before later groups build on the group.
 
 ### Data contracts -- `data-contracts`
 
-#### development-rebuild-mode
-
-Development keeps an explicit disposable rebuild alongside normal in-place migrations.
-
-- Serves: `data-contracts` -- [Data contracts](../design/spec.md#data-contracts)
-- Agent status: CLEAR
-- Dependencies: The accepted [contract compiler](current/data-contracts/compiler.md).
-- User-visible outcome: `kn db rebuild` drops and recreates the KN schemas from generated DDL and
-  loads the reviewed seeds. It refuses to run in an environment marked as released.
-- Scope boundary: Schema drop and recreate, the seed-load hook, grants, and the released-environment
-  guard. Raw replay and decision replay come in `rebuild-from-raw`. Vendor databases are never
-  touched.
-- Data and artifact paths: `src/kn/db/`, `src/kn/cli.py`, `tests/integration/`.
-- Execution path: Rebuild in one transaction per schema group, then verify catalog objects against
-  the compiled contracts.
-- Acceptance gates: A rebuild from empty creates every compiled object. A second rebuild is
-  identical. The loader role cannot run DDL. The released guard refuses.
-- Documentation target: `current/data-contracts.md` listed in the
-  [areas index](current.md#areas).
-
 #### data-contracts-implementation-audit (optional)
 
 Every schema, model, and generated artifact comes from the contract compiler, so a flaw in the
@@ -61,8 +41,8 @@ toolchain or the rebuild multiplies across every later contract.
 
 - Serves: `data-contracts` -- [Data contracts](../design/spec.md#data-contracts)
 - Agent status: CLEAR
-- Requires: `development-rebuild-mode`
-- Dependencies: The accepted task records of the group and the [implementation
+- Dependencies: The accepted task records of the group, including the
+  [development rebuild](current/data-contracts/rebuild.md), and the [implementation
   audit](../guide/planning-workflow.md#implementation-audits) checks.
 - User-visible outcome: Later groups compile their contracts with a verified, deterministic
   toolchain. The audit record gives every check a result and every finding a disposition. The
@@ -112,8 +92,9 @@ The converted workbook proposals must become reviewed seed data with a row-by-ro
 
 - Serves: `ontology-taxonomy` -- [Ontology and taxonomy](../design/spec.md#ontology-and-taxonomy)
 - Agent status: CLEAR
-- Requires: `semantic-model-contracts`, `development-rebuild-mode`
-- Dependencies: The proposal JSON under `domains/<domain>/seeds/proposals/`, documented in
+- Requires: `semantic-model-contracts`
+- Dependencies: The [reviewed seed hook](current/data-contracts/rebuild.md#reviewed-seed-hook) and
+  the proposal JSON under `domains/<domain>/seeds/proposals/`, documented in
   [domains/README.md](../../domains/README.md).
 - User-visible outcome: Every rebuild loads reviewed space, GDELT, and microelectronics ontology and
   taxonomy seeds with deterministic identifiers. A reconciliation report classifies every proposal
@@ -217,7 +198,7 @@ Every later capability needs one durable KN ID per object before any claim refer
 
 - Serves: `object-identity` -- [Object identity](../design/spec.md#object-identity)
 - Agent status: CLEAR
-- Requires: `semantic-model-contracts`, `development-rebuild-mode`
+- Requires: `semantic-model-contracts`
 - Dependencies: none.
 - User-visible outcome: The `identity` schema holds objects, identifiers with authority levels,
   identity attributes, source records with versions, links, match records, lifecycle events, and
@@ -665,8 +646,8 @@ Every candidate source must be visible and disabled before any crawler exists.
 
 - Serves: `source-management` -- [Source management](../design/spec.md#source-management)
 - Agent status: CLEAR
-- Requires: `development-rebuild-mode`
-- Dependencies: The data-source proposal JSON for space, microelectronics, and GDELT.
+- Dependencies: The [reviewed seed hook](current/data-contracts/rebuild.md#reviewed-seed-hook) and
+  the data-source proposal JSON for space, microelectronics, and GDELT.
 - User-visible outcome: Every rebuild loads `system.source_catalogue` with 37 space, 65
   microelectronics, and 17 GDELT candidates. `kn source list` shows them in both locales.
 - Scope boundary: The catalogue contract, original IDs, lifecycle states, and access notes marked
@@ -878,7 +859,7 @@ Schema changes during development must cost a rebuild, never a re-fetch or a los
 
 - Serves: `ingestion-engine` -- [Ingestion engine](../design/spec.md#ingestion-engine)
 - Agent status: CLEAR
-- Requires: `curated-source-method`, `development-rebuild-mode`, `review-queue-cli`
+- Requires: `curated-source-method`, `review-queue-cli`
 - Dependencies: none.
 - User-visible outcome: `kn db rebuild` replays the raw ledger, curated files, and decision logs
   through current code, and reports orphaned decisions.

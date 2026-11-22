@@ -121,7 +121,10 @@ owner-provided package and `make satcom-import` archives and imports it into the
 
 Development edits contract version `1.0.0` and one Alembic baseline in place. If a definition
 changes, explicitly set `KN_ENVIRONMENT=development`, run `make db-rebuild`, and backfill with
-`make satcom-import`. Released environments refuse rebuild. First release freezes the baseline;
+`make satcom-import`. Rebuild recreates all KN schemas and removes obsolete KN tables; external
+dependencies refuse atomically. See the [rebuild reference](../impl/current/data-contracts/rebuild.md)
+for the reviewed seed hook and boundaries. Released environments refuse rebuild. First release
+freezes the baseline;
 later schema changes use reviewed Python Alembic revisions and separate contract versions.
 See [data contracts](../impl/current/data-contracts.md) for preservation rules and current limits.
 

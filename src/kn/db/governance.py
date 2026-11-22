@@ -7,7 +7,8 @@ from alembic import command
 from alembic.config import Config
 from sqlalchemy.engine import Connection
 
-from kn.contracts import load_contract
+from kn.contracts import Contract, load_contract
+from kn.contracts.loader import canonical
 from kn.contracts.sqlalchemy import metadata
 from kn.db.platform import apply_platform, ddl
 from kn.db.verification import verify_privileges, verify_structure
@@ -85,3 +86,17 @@ def verify_contract(connection: Connection) -> None:
             "contract digest drift; rebuild development data or apply a release migration"
         )
     verify_structure(connection)
+
+
+def install_contract(connection: Connection, contract: Contract) -> None:
+    """Initialize the shared installed-contract marker after baseline or generated DDL."""
+    marker = metadata(contract).tables[f"{contract.schema}.satcom_contract"]
+    connection.execute(
+        marker.insert(),
+        {
+            "contract_id": contract.contract_id,
+            "version": contract.version,
+            "digest": contract.digest,
+            "managed_tables_json": canonical([table.name for table in contract.tables]),
+        },
+    )
