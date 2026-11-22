@@ -142,12 +142,26 @@ quality-report: ## Report Python/shell files over the 250-line soft limit
 		xargs -0 -r wc -l | awk '$$2 != "total" && $$1 > 250 {print}' | sort -nr
 
 .PHONY: contract-check contract-compile satcom-validate satcom-import db-upgrade
-contract-check: ## Validate open contracts and check generated artifact digests
-	@"$(VENV)/bin/kn" contract lint
-	@"$(VENV)/bin/kn" contract compile --check
+contract-check: ## Validate open contracts and check committed generated/ output byte for byte
+	@cd "$(PROJECT_ROOT)" && "$(VENV)/bin/kn" contract lint
+	@cd "$(PROJECT_ROOT)" && "$(VENV)/bin/kn" contract compile --check
 
-contract-compile: ## Compile portable schemas under DATA_DIR
-	@"$(VENV)/bin/kn" contract compile --output "$(DATA_ROOT)/contract/current"
+contract-compile: ## Refresh the committed generated/contracts/ output for review
+	@cd "$(PROJECT_ROOT)" && "$(VENV)/bin/kn" contract compile
+
+.PHONY: contract-toolchain-check
+contract-toolchain-check: ## Run the locked external linter/exporter in an isolated tool environment
+	@source "$(PROJECT_ROOT)/scripts/shared/common.sh"; kn_load_env; \
+		mkdir -p "$$DATA_DIR/contract-toolchain"; \
+		artifact_dir=$$(mktemp -d "$$DATA_DIR/contract-toolchain/check-XXXXXXXX") || exit 1; \
+		tool=(uv run --locked --isolated --only-group contract-tools \
+		--python "$(PYTHON_VERSION)" datacontract); \
+		"$${tool[@]}" --version >"$$artifact_dir/version.txt" && \
+		"$${tool[@]}" lint tests/contracts/fixtures/valid.yaml \
+		--json-schema src/kn/contracts/resources/odcs-3.1.0.json --no-inline-references \
+		--output-format json --output "$$artifact_dir/lint.json" && \
+		"$${tool[@]}" export jsonschema tests/contracts/fixtures/valid.yaml \
+		--output "$$artifact_dir/export.json"
 
 satcom-validate: ## Validate the supplied SATCOM package without writing
 	@"$(VENV)/bin/kn" space satcom validate "$(DATA_ROOT)/satcom_enriched_package"
@@ -162,7 +176,7 @@ db-upgrade: ## Apply Python platform policy and versioned Alembic migrations
 	@source "$(PROJECT_ROOT)/scripts/shared/common.sh"; kn_load_env; kn_db_govern upgrade
 
 .PHONY: db-rebuild
-db-rebuild: ## Rebuild disposable SATCOM projections (requires KN_ENVIRONMENT=development)
+db-rebuild: ## Rebuild all disposable KN schemas (requires KN_ENVIRONMENT=development)
 	@source "$(PROJECT_ROOT)/scripts/shared/common.sh"; kn_load_env; kn_db_govern rebuild
 
 .PHONY: catalog-check test-bilingual bilingual-acceptance

@@ -12,7 +12,9 @@ from sqlalchemy.exc import IntegrityError
 
 from kn.contracts import Field, load_contract
 from kn.contracts.evolution import evolve
+from kn.contracts.registry import marker_table
 from kn.contracts.sqlalchemy import metadata
+from kn.db.governance import record_installed
 from kn.domains.space.satcom.importer import import_package
 from kn.domains.space.satcom.package import read_package
 from tests.integration.harness import IntegrationDatabase, ScratchSchemas
@@ -29,15 +31,8 @@ def test_real_mixture_round_trips_and_additive_evolution_preserves_data(
     try:
         with engine.begin() as connection:
             model.create_all(connection)
-            connection.execute(
-                model.tables[f"{schema}.satcom_contract"].insert(),
-                {
-                    "contract_id": contract.contract_id,
-                    "version": contract.version,
-                    "digest": contract.digest,
-                    "managed_tables_json": "[]",
-                },
-            )
+            marker_table(schema).create(connection)
+            record_installed(connection, [contract], marker_schema=schema)
             assert import_package(connection, package, contract)
         with engine.begin() as connection:
             assert not import_package(connection, package, contract)
@@ -63,7 +58,8 @@ def test_real_mixture_round_trips_and_additive_evolution_preserves_data(
                     updated if table.name == "countries" else table for table in contract.tables
                 ),
             )
-            evolve(Operations(MigrationContext.configure(connection)), contract, next_contract)
+            operations = Operations(MigrationContext.configure(connection))
+            evolve(operations, contract, next_contract, marker_schema=schema)
             assert connection.scalar(
                 sa.select(sa.func.count()).select_from(
                     metadata(next_contract).tables[f"{schema}.countries"]
@@ -98,10 +94,10 @@ def test_real_mixture_round_trips_and_additive_evolution_preserves_data(
         engine.dispose()
 
 
-def test_development_rebuild_is_transactional_and_keeps_unmanaged_tables(
+def test_development_rebuild_is_transactional_and_drops_kn_tables(
     integration_database: IntegrationDatabase, monkeypatch: pytest.MonkeyPatch
 ) -> None:
-    from kn.db.governance import verify_contract
+    from kn.db.governance import verify_contracts
     from kn.db.rebuild import rebuild
 
     engine = sa.create_engine("postgresql+psycopg://", creator=integration_database.connect)
@@ -122,9 +118,9 @@ def test_development_rebuild_is_transactional_and_keeps_unmanaged_tables(
                 unrelated.create(connection)
                 connection.execute(unrelated.insert(), {"id": 7})
                 rebuild(connection)
-                assert connection.scalar(sa.select(unrelated.c.id)) == 7
+                assert not sa.inspect(connection).has_table(unrelated.name, schema="space")
                 assert connection.scalar(sa.select(sa.func.count()).select_from(imports)) == 0
-                verify_contract(connection)
+                verify_contracts(connection)
             finally:
                 transaction.rollback()
             assert connection.scalar(sa.select(sa.func.count()).select_from(imports)) == original

@@ -20,13 +20,15 @@ from kn.contracts.compiler import compile_contract
 from kn.contracts.evolution import additions, evolve
 from kn.contracts.exports import artifacts, avro, elasticsearch, json_schema
 from kn.contracts.loader import SATCOM
+from kn.contracts.registry import marker_table
 from kn.contracts.sqlalchemy import metadata
+from kn.db.governance import record_installed
 
 
 def test_contract_compilation_is_deterministic_and_matches_reviewed_digests(tmp_path: Path) -> None:
     contract = load_contract()
     assert contract.version == "1.0.0"
-    assert len(contract.tables) == 32
+    assert len(contract.tables) == 31
     assert artifacts(contract) == artifacts(load_contract())
     compile_contract(contract, check=True)
     compile_contract(contract, tmp_path)
@@ -138,15 +140,8 @@ def test_additive_release_evolution_preserves_records() -> None:
     model = metadata(old)
     model.create_all(engine)
     with engine.begin() as connection:
-        connection.execute(
-            model.tables["satcom_contract"].insert(),
-            {
-                "contract_id": old.contract_id,
-                "version": old.version,
-                "digest": old.digest,
-                "managed_tables_json": "[]",
-            },
-        )
+        marker_table("").create(connection)
+        record_installed(connection, [old], marker_schema="")
         connection.execute(
             model.tables["countries"].insert(),
             {
@@ -157,7 +152,7 @@ def test_additive_release_evolution_preserves_records() -> None:
                 "region": "\u0404\u0432\u0440\u043e\u043f\u0430",
             },
         )
-        evolve(Operations(MigrationContext.configure(connection)), old, new)
+        evolve(Operations(MigrationContext.configure(connection)), old, new, marker_schema="")
         table = metadata(new).tables["countries"]
         row = connection.execute(sa.select(table)).mappings().one()
         assert row["country_iso2"] == "UA" and row["new_note"] is None

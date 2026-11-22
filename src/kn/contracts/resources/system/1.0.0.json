@@ -1,0 +1,89 @@
+{
+  "apiVersion": "v3.1.0",
+  "kind": "DataContract",
+  "id": "kn.system.governance",
+  "name": "KN deployment governance",
+  "version": "1.0.0",
+  "status": "draft",
+  "customProperties": [
+    {
+      "property": "kn.storageSchema",
+      "value": "system"
+    }
+  ],
+  "schema": [
+    {
+      "name": "installed_contracts",
+      "logicalType": "object",
+      "physicalType": "table",
+      "description": "One row per deployed storage contract: the installed-contract marker.",
+      "properties": [
+        {
+          "name": "contract_id",
+          "logicalType": "string",
+          "required": true,
+          "primaryKey": true,
+          "description": "ODCS id of the deployed storage contract",
+          "customProperties": [
+            {
+              "property": "kn.fieldId",
+              "value": "system.governance.installed_contracts.contract_id"
+            }
+          ]
+        },
+        {
+          "name": "version",
+          "logicalType": "string",
+          "required": true,
+          "primaryKey": false,
+          "description": "Semantic version of the deployed contract",
+          "customProperties": [
+            {
+              "property": "kn.fieldId",
+              "value": "system.governance.installed_contracts.version"
+            }
+          ]
+        },
+        {
+          "name": "digest",
+          "logicalType": "string",
+          "required": true,
+          "primaryKey": false,
+          "description": "Canonical SHA-256 digest of the contract and its reference catalog",
+          "customProperties": [
+            {
+              "property": "kn.fieldId",
+              "value": "system.governance.installed_contracts.digest"
+            }
+          ]
+        },
+        {
+          "name": "storage_schema",
+          "logicalType": "string",
+          "required": true,
+          "primaryKey": false,
+          "description": "KN schema that holds the contract's tables",
+          "customProperties": [
+            {
+              "property": "kn.fieldId",
+              "value": "system.governance.installed_contracts.storage_schema"
+            }
+          ]
+        },
+        {
+          "name": "managed_tables_json",
+          "logicalType": "string",
+          "required": true,
+          "primaryKey": false,
+          "description": "Canonical JSON array of the contract's table names",
+          "customProperties": [
+            {
+              "property": "kn.fieldId",
+              "value": "system.governance.installed_contracts.managed_tables_json"
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

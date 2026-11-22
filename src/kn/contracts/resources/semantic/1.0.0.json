@@ -1,0 +1,1687 @@
+{
+  "apiVersion": "v3.1.0",
+  "kind": "DataContract",
+  "id": "kn.core.semantic",
+  "name": "KN semantic meta-model",
+  "version": "1.0.0",
+  "status": "draft",
+  "customProperties": [
+    {
+      "property": "kn.storageSchema",
+      "value": "semantic"
+    }
+  ],
+  "schema": [
+    {
+      "name": "namespaces",
+      "logicalType": "object",
+      "physicalType": "table",
+      "description": "Domain and scheme/edition qualification boundaries.",
+      "properties": [
+        {
+          "name": "id",
+          "logicalType": "string",
+          "required": true,
+          "primaryKey": true,
+          "description": "Domain-qualified namespace",
+          "customProperties": [
+            {
+              "property": "kn.fieldId",
+              "value": "semantic.namespaces.id"
+            }
+          ]
+        },
+        {
+          "name": "domain",
+          "logicalType": "string",
+          "required": true,
+          "primaryKey": false,
+          "description": "Domain identifier",
+          "customProperties": [
+            {
+              "property": "kn.fieldId",
+              "value": "semantic.namespaces.domain"
+            }
+          ]
+        },
+        {
+          "name": "code",
+          "logicalType": "string",
+          "required": true,
+          "primaryKey": false,
+          "description": "Scheme or edition namespace code",
+          "customProperties": [
+            {
+              "property": "kn.fieldId",
+              "value": "semantic.namespaces.code"
+            }
+          ]
+        },
+        {
+          "name": "definition",
+          "logicalType": "string",
+          "required": true,
+          "primaryKey": false,
+          "description": "Namespace definition",
+          "customProperties": [
+            {
+              "property": "kn.fieldId",
+              "value": "semantic.namespaces.definition"
+            }
+          ]
+        }
+      ],
+      "customProperties": [
+        {
+          "property": "kn.index",
+          "value": [
+            {
+              "name": "semantic_namespaces_0_uq",
+              "fields": [
+                "domain",
+                "code"
+              ],
+              "method": "btree",
+              "unique": true
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "namespace_labels",
+      "logicalType": "object",
+      "physicalType": "table",
+      "description": "Localized namespace names.",
+      "properties": [
+        {
+          "name": "namespace_id",
+          "logicalType": "string",
+          "required": true,
+          "primaryKey": true,
+          "description": "Reference to namespaces",
+          "customProperties": [
+            {
+              "property": "kn.fieldId",
+              "value": "semantic.namespace_labels.namespace_id"
+            },
+            {
+              "property": "kn.foreignKey",
+              "value": {
+                "table": "namespaces",
+                "fields": [
+                  "namespace_id"
+                ],
+                "targetFields": [
+                  "id"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "locale",
+          "logicalType": "string",
+          "required": true,
+          "primaryKey": true,
+          "description": "BCP 47 language tag",
+          "customProperties": [
+            {
+              "property": "kn.fieldId",
+              "value": "semantic.namespace_labels.locale"
+            }
+          ]
+        },
+        {
+          "name": "label",
+          "logicalType": "string",
+          "required": true,
+          "primaryKey": false,
+          "description": "Preferred namespace label",
+          "customProperties": [
+            {
+              "property": "kn.fieldId",
+              "value": "semantic.namespace_labels.label"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "terms",
+      "logicalType": "object",
+      "physicalType": "table",
+      "description": "One identifier registry for every semantic kind; IDs never depend on load order.",
+      "properties": [
+        {
+          "name": "id",
+          "logicalType": "string",
+          "required": true,
+          "primaryKey": true,
+          "description": "Namespace plus native code",
+          "customProperties": [
+            {
+              "property": "kn.fieldId",
+              "value": "semantic.terms.id"
+            }
+          ]
+        },
+        {
+          "name": "namespace_id",
+          "logicalType": "string",
+          "required": true,
+          "primaryKey": false,
+          "description": "Reference to namespaces",
+          "customProperties": [
+            {
+              "property": "kn.fieldId",
+              "value": "semantic.terms.namespace_id"
+            },
+            {
+              "property": "kn.foreignKey",
+              "value": {
+                "table": "namespaces",
+                "fields": [
+                  "namespace_id"
+                ],
+                "targetFields": [
+                  "id"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "code",
+          "logicalType": "string",
+          "required": true,
+          "primaryKey": false,
+          "description": "Original string code, including leading zeroes",
+          "customProperties": [
+            {
+              "property": "kn.fieldId",
+              "value": "semantic.terms.code"
+            }
+          ]
+        },
+        {
+          "name": "kind",
+          "logicalType": "string",
+          "required": true,
+          "primaryKey": false,
+          "description": "Semantic dataset kind",
+          "customProperties": [
+            {
+              "property": "kn.fieldId",
+              "value": "semantic.terms.kind"
+            },
+            {
+              "property": "kn.enum",
+              "value": [
+                "entity_class",
+                "relation_type",
+                "concept_scheme",
+                "concept",
+                "concept_mapping",
+                "entity_tag",
+                "attribute_definition",
+                "condition_set",
+                "comparison_profile",
+                "rubric"
+              ]
+            }
+          ]
+        },
+        {
+          "name": "status",
+          "logicalType": "string",
+          "required": true,
+          "primaryKey": false,
+          "description": "Lifecycle status; deprecated terms remain resolvable",
+          "customProperties": [
+            {
+              "property": "kn.fieldId",
+              "value": "semantic.terms.status"
+            },
+            {
+              "property": "kn.enum",
+              "value": [
+                "draft",
+                "active",
+                "deprecated",
+                "replaced"
+              ]
+            }
+          ]
+        },
+        {
+          "name": "definition",
+          "logicalType": "string",
+          "required": true,
+          "primaryKey": false,
+          "description": "Definition in original language",
+          "customProperties": [
+            {
+              "property": "kn.fieldId",
+              "value": "semantic.terms.definition"
+            }
+          ]
+        }
+      ],
+      "customProperties": [
+        {
+          "property": "kn.index",
+          "value": [
+            {
+              "name": "semantic_terms_0_uq",
+              "fields": [
+                "namespace_id",
+                "code"
+              ],
+              "method": "btree",
+              "unique": true
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "labels",
+      "logicalType": "object",
+      "physicalType": "table",
+      "description": "One preferred label per term and locale, with localized definition and inverse relation label.",
+      "properties": [
+        {
+          "name": "term_id",
+          "logicalType": "string",
+          "required": true,
+          "primaryKey": true,
+          "description": "Reference to terms",
+          "customProperties": [
+            {
+              "property": "kn.fieldId",
+              "value": "semantic.labels.term_id"
+            },
+            {
+              "property": "kn.foreignKey",
+              "value": {
+                "table": "terms",
+                "fields": [
+                  "term_id"
+                ],
+                "targetFields": [
+                  "id"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "locale",
+          "logicalType": "string",
+          "required": true,
+          "primaryKey": true,
+          "description": "BCP 47 language tag",
+          "customProperties": [
+            {
+              "property": "kn.fieldId",
+              "value": "semantic.labels.locale"
+            }
+          ]
+        },
+        {
+          "name": "label",
+          "logicalType": "string",
+          "required": true,
+          "primaryKey": false,
+          "description": "Preferred label",
+          "customProperties": [
+            {
+              "property": "kn.fieldId",
+              "value": "semantic.labels.label"
+            }
+          ]
+        },
+        {
+          "name": "definition",
+          "logicalType": "string",
+          "required": false,
+          "primaryKey": false,
+          "description": "Localized definition",
+          "customProperties": [
+            {
+              "property": "kn.fieldId",
+              "value": "semantic.labels.definition"
+            }
+          ]
+        },
+        {
+          "name": "inverse_label",
+          "logicalType": "string",
+          "required": false,
+          "primaryKey": false,
+          "description": "Inverse relation label",
+          "customProperties": [
+            {
+              "property": "kn.fieldId",
+              "value": "semantic.labels.inverse_label"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "alternative_labels",
+      "logicalType": "object",
+      "physicalType": "table",
+      "description": "Additional original-language labels; never replace preferred labels.",
+      "properties": [
+        {
+          "name": "term_id",
+          "logicalType": "string",
+          "required": true,
+          "primaryKey": true,
+          "description": "Reference to terms",
+          "customProperties": [
+            {
+              "property": "kn.fieldId",
+              "value": "semantic.alternative_labels.term_id"
+            },
+            {
+              "property": "kn.foreignKey",
+              "value": {
+                "table": "terms",
+                "fields": [
+                  "term_id"
+                ],
+                "targetFields": [
+                  "id"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "locale",
+          "logicalType": "string",
+          "required": true,
+          "primaryKey": true,
+          "description": "BCP 47 language tag",
+          "customProperties": [
+            {
+              "property": "kn.fieldId",
+              "value": "semantic.alternative_labels.locale"
+            }
+          ]
+        },
+        {
+          "name": "label",
+          "logicalType": "string",
+          "required": true,
+          "primaryKey": true,
+          "description": "Alternative label",
+          "customProperties": [
+            {
+              "property": "kn.fieldId",
+              "value": "semantic.alternative_labels.label"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "entity_classes",
+      "logicalType": "object",
+      "physicalType": "table",
+      "description": "Domain-qualified entity classes with a primary parent.",
+      "properties": [
+        {
+          "name": "id",
+          "logicalType": "string",
+          "required": true,
+          "primaryKey": true,
+          "description": "Stable qualified identifier",
+          "customProperties": [
+            {
+              "property": "kn.fieldId",
+              "value": "semantic.entity_classes.id"
+            },
+            {
+              "property": "kn.foreignKey",
+              "value": {
+                "table": "terms",
+                "fields": [
+                  "id"
+                ],
+                "targetFields": [
+                  "id"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "parent_id",
+          "logicalType": "string",
+          "required": false,
+          "primaryKey": false,
+          "description": "Reference to entity_classes",
+          "customProperties": [
+            {
+              "property": "kn.fieldId",
+              "value": "semantic.entity_classes.parent_id"
+            },
+            {
+              "property": "kn.foreignKey",
+              "value": {
+                "table": "entity_classes",
+                "fields": [
+                  "parent_id"
+                ],
+                "targetFields": [
+                  "id"
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "relation_types",
+      "logicalType": "object",
+      "physicalType": "table",
+      "description": "Typed directional relations and their evidence requirements.",
+      "properties": [
+        {
+          "name": "id",
+          "logicalType": "string",
+          "required": true,
+          "primaryKey": true,
+          "description": "Stable qualified identifier",
+          "customProperties": [
+            {
+              "property": "kn.fieldId",
+              "value": "semantic.relation_types.id"
+            },
+            {
+              "property": "kn.foreignKey",
+              "value": {
+                "table": "terms",
+                "fields": [
+                  "id"
+                ],
+                "targetFields": [
+                  "id"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "source_class_id",
+          "logicalType": "string",
+          "required": true,
+          "primaryKey": false,
+          "description": "Reference to entity_classes",
+          "customProperties": [
+            {
+              "property": "kn.fieldId",
+              "value": "semantic.relation_types.source_class_id"
+            },
+            {
+              "property": "kn.foreignKey",
+              "value": {
+                "table": "entity_classes",
+                "fields": [
+                  "source_class_id"
+                ],
+                "targetFields": [
+                  "id"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "target_class_id",
+          "logicalType": "string",
+          "required": true,
+          "primaryKey": false,
+          "description": "Reference to entity_classes",
+          "customProperties": [
+            {
+              "property": "kn.fieldId",
+              "value": "semantic.relation_types.target_class_id"
+            },
+            {
+              "property": "kn.foreignKey",
+              "value": {
+                "table": "entity_classes",
+                "fields": [
+                  "target_class_id"
+                ],
+                "targetFields": [
+                  "id"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "cardinality",
+          "logicalType": "string",
+          "required": true,
+          "primaryKey": false,
+          "description": "Allowed endpoint multiplicity",
+          "customProperties": [
+            {
+              "property": "kn.fieldId",
+              "value": "semantic.relation_types.cardinality"
+            },
+            {
+              "property": "kn.enum",
+              "value": [
+                "one_to_one",
+                "one_to_many",
+                "many_to_one",
+                "many_to_many"
+              ]
+            }
+          ]
+        },
+        {
+          "name": "minimum_evidence",
+          "logicalType": "string",
+          "required": true,
+          "primaryKey": false,
+          "description": "Minimum evidence class",
+          "customProperties": [
+            {
+              "property": "kn.fieldId",
+              "value": "semantic.relation_types.minimum_evidence"
+            },
+            {
+              "property": "kn.enum",
+              "value": [
+                "primary",
+                "secondary",
+                "derived",
+                "extracted"
+              ]
+            }
+          ]
+        },
+        {
+          "name": "guarded_errors",
+          "logicalType": "string",
+          "required": true,
+          "primaryKey": false,
+          "description": "Common errors this relation prevents",
+          "customProperties": [
+            {
+              "property": "kn.fieldId",
+              "value": "semantic.relation_types.guarded_errors"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "concept_schemes",
+      "logicalType": "object",
+      "physicalType": "table",
+      "description": "Origin and edition verification; extensions retain their distinct origin.",
+      "properties": [
+        {
+          "name": "id",
+          "logicalType": "string",
+          "required": true,
+          "primaryKey": true,
+          "description": "Stable qualified identifier",
+          "customProperties": [
+            {
+              "property": "kn.fieldId",
+              "value": "semantic.concept_schemes.id"
+            },
+            {
+              "property": "kn.foreignKey",
+              "value": {
+                "table": "terms",
+                "fields": [
+                  "id"
+                ],
+                "targetFields": [
+                  "id"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "origin",
+          "logicalType": "string",
+          "required": true,
+          "primaryKey": false,
+          "description": "Scheme provenance class",
+          "customProperties": [
+            {
+              "property": "kn.fieldId",
+              "value": "semantic.concept_schemes.origin"
+            },
+            {
+              "property": "kn.enum",
+              "value": [
+                "official",
+                "kb_normalized",
+                "kb_extension",
+                "service_extension",
+                "native"
+              ]
+            }
+          ]
+        },
+        {
+          "name": "publisher",
+          "logicalType": "string",
+          "required": false,
+          "primaryKey": false,
+          "description": "Publishing body",
+          "customProperties": [
+            {
+              "property": "kn.fieldId",
+              "value": "semantic.concept_schemes.publisher"
+            }
+          ]
+        },
+        {
+          "name": "edition",
+          "logicalType": "string",
+          "required": false,
+          "primaryKey": false,
+          "description": "Publication edition",
+          "customProperties": [
+            {
+              "property": "kn.fieldId",
+              "value": "semantic.concept_schemes.edition"
+            }
+          ]
+        },
+        {
+          "name": "source_uri",
+          "logicalType": "string",
+          "required": false,
+          "primaryKey": false,
+          "description": "Publication URI",
+          "customProperties": [
+            {
+              "property": "kn.fieldId",
+              "value": "semantic.concept_schemes.source_uri"
+            }
+          ]
+        },
+        {
+          "name": "source_sha256",
+          "logicalType": "string",
+          "required": false,
+          "primaryKey": false,
+          "description": "Checked publication checksum",
+          "customProperties": [
+            {
+              "property": "kn.fieldId",
+              "value": "semantic.concept_schemes.source_sha256"
+            }
+          ]
+        },
+        {
+          "name": "verification_state",
+          "logicalType": "string",
+          "required": true,
+          "primaryKey": false,
+          "description": "Official publication verification",
+          "customProperties": [
+            {
+              "property": "kn.fieldId",
+              "value": "semantic.concept_schemes.verification_state"
+            },
+            {
+              "property": "kn.enum",
+              "value": [
+                "unverified",
+                "verified"
+              ]
+            }
+          ]
+        },
+        {
+          "name": "verification_reason",
+          "logicalType": "string",
+          "required": true,
+          "primaryKey": false,
+          "description": "Evidence or reason verification is unavailable",
+          "customProperties": [
+            {
+              "property": "kn.fieldId",
+              "value": "semantic.concept_schemes.verification_reason"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "concepts",
+      "logicalType": "object",
+      "physicalType": "table",
+      "description": "String concept codes, primary hierarchy, and retained replacement links.",
+      "properties": [
+        {
+          "name": "id",
+          "logicalType": "string",
+          "required": true,
+          "primaryKey": true,
+          "description": "Stable qualified identifier",
+          "customProperties": [
+            {
+              "property": "kn.fieldId",
+              "value": "semantic.concepts.id"
+            },
+            {
+              "property": "kn.foreignKey",
+              "value": {
+                "table": "terms",
+                "fields": [
+                  "id"
+                ],
+                "targetFields": [
+                  "id"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "scheme_id",
+          "logicalType": "string",
+          "required": true,
+          "primaryKey": false,
+          "description": "Reference to concept_schemes",
+          "customProperties": [
+            {
+              "property": "kn.fieldId",
+              "value": "semantic.concepts.scheme_id"
+            },
+            {
+              "property": "kn.foreignKey",
+              "value": {
+                "table": "concept_schemes",
+                "fields": [
+                  "scheme_id"
+                ],
+                "targetFields": [
+                  "id"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "parent_id",
+          "logicalType": "string",
+          "required": false,
+          "primaryKey": false,
+          "description": "Reference to concepts",
+          "customProperties": [
+            {
+              "property": "kn.fieldId",
+              "value": "semantic.concepts.parent_id"
+            },
+            {
+              "property": "kn.foreignKey",
+              "value": {
+                "table": "concepts",
+                "fields": [
+                  "parent_id"
+                ],
+                "targetFields": [
+                  "id"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "replacement_id",
+          "logicalType": "string",
+          "required": false,
+          "primaryKey": false,
+          "description": "Reference to concepts",
+          "customProperties": [
+            {
+              "property": "kn.fieldId",
+              "value": "semantic.concepts.replacement_id"
+            },
+            {
+              "property": "kn.foreignKey",
+              "value": {
+                "table": "concepts",
+                "fields": [
+                  "replacement_id"
+                ],
+                "targetFields": [
+                  "id"
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "concept_mappings",
+      "logicalType": "object",
+      "physicalType": "table",
+      "description": "SKOS mappings and separate analyst crosswalks with method and evidence.",
+      "properties": [
+        {
+          "name": "id",
+          "logicalType": "string",
+          "required": true,
+          "primaryKey": true,
+          "description": "Stable qualified identifier",
+          "customProperties": [
+            {
+              "property": "kn.fieldId",
+              "value": "semantic.concept_mappings.id"
+            },
+            {
+              "property": "kn.foreignKey",
+              "value": {
+                "table": "terms",
+                "fields": [
+                  "id"
+                ],
+                "targetFields": [
+                  "id"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "source_id",
+          "logicalType": "string",
+          "required": true,
+          "primaryKey": false,
+          "description": "Reference to concepts",
+          "customProperties": [
+            {
+              "property": "kn.fieldId",
+              "value": "semantic.concept_mappings.source_id"
+            },
+            {
+              "property": "kn.foreignKey",
+              "value": {
+                "table": "concepts",
+                "fields": [
+                  "source_id"
+                ],
+                "targetFields": [
+                  "id"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "target_id",
+          "logicalType": "string",
+          "required": true,
+          "primaryKey": false,
+          "description": "Reference to concepts",
+          "customProperties": [
+            {
+              "property": "kn.fieldId",
+              "value": "semantic.concept_mappings.target_id"
+            },
+            {
+              "property": "kn.foreignKey",
+              "value": {
+                "table": "concepts",
+                "fields": [
+                  "target_id"
+                ],
+                "targetFields": [
+                  "id"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "mapping_type",
+          "logicalType": "string",
+          "required": true,
+          "primaryKey": false,
+          "description": "Directional or symmetric mapping",
+          "customProperties": [
+            {
+              "property": "kn.fieldId",
+              "value": "semantic.concept_mappings.mapping_type"
+            },
+            {
+              "property": "kn.enum",
+              "value": [
+                "exactMatch",
+                "closeMatch",
+                "broadMatch",
+                "narrowMatch",
+                "relatedMatch",
+                "analyst_crosswalk"
+              ]
+            }
+          ]
+        },
+        {
+          "name": "method",
+          "logicalType": "string",
+          "required": true,
+          "primaryKey": false,
+          "description": "Mapping method",
+          "customProperties": [
+            {
+              "property": "kn.fieldId",
+              "value": "semantic.concept_mappings.method"
+            }
+          ]
+        },
+        {
+          "name": "evidence_id",
+          "logicalType": "string",
+          "required": true,
+          "primaryKey": false,
+          "description": "Evidence reference resolved by caller",
+          "customProperties": [
+            {
+              "property": "kn.fieldId",
+              "value": "semantic.concept_mappings.evidence_id"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "entity_tags",
+      "logicalType": "object",
+      "physicalType": "table",
+      "description": "Evidence-backed entity concepts with half-open validity.",
+      "properties": [
+        {
+          "name": "id",
+          "logicalType": "string",
+          "required": true,
+          "primaryKey": true,
+          "description": "Stable qualified identifier",
+          "customProperties": [
+            {
+              "property": "kn.fieldId",
+              "value": "semantic.entity_tags.id"
+            },
+            {
+              "property": "kn.foreignKey",
+              "value": {
+                "table": "terms",
+                "fields": [
+                  "id"
+                ],
+                "targetFields": [
+                  "id"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "entity_id",
+          "logicalType": "string",
+          "required": true,
+          "primaryKey": false,
+          "description": "KN object reference resolved by caller",
+          "customProperties": [
+            {
+              "property": "kn.fieldId",
+              "value": "semantic.entity_tags.entity_id"
+            }
+          ]
+        },
+        {
+          "name": "concept_id",
+          "logicalType": "string",
+          "required": true,
+          "primaryKey": false,
+          "description": "Reference to concepts",
+          "customProperties": [
+            {
+              "property": "kn.fieldId",
+              "value": "semantic.entity_tags.concept_id"
+            },
+            {
+              "property": "kn.foreignKey",
+              "value": {
+                "table": "concepts",
+                "fields": [
+                  "concept_id"
+                ],
+                "targetFields": [
+                  "id"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "method",
+          "logicalType": "string",
+          "required": true,
+          "primaryKey": false,
+          "description": "Tagging method",
+          "customProperties": [
+            {
+              "property": "kn.fieldId",
+              "value": "semantic.entity_tags.method"
+            }
+          ]
+        },
+        {
+          "name": "evidence_id",
+          "logicalType": "string",
+          "required": true,
+          "primaryKey": false,
+          "description": "Evidence reference resolved by caller",
+          "customProperties": [
+            {
+              "property": "kn.fieldId",
+              "value": "semantic.entity_tags.evidence_id"
+            }
+          ]
+        },
+        {
+          "name": "verification_state",
+          "logicalType": "string",
+          "required": true,
+          "primaryKey": false,
+          "description": "Tag review state",
+          "customProperties": [
+            {
+              "property": "kn.fieldId",
+              "value": "semantic.entity_tags.verification_state"
+            },
+            {
+              "property": "kn.enum",
+              "value": [
+                "unreviewed",
+                "corroborated",
+                "verified",
+                "disputed",
+                "rejected"
+              ]
+            }
+          ]
+        },
+        {
+          "name": "valid_from",
+          "logicalType": "timestamp",
+          "required": false,
+          "primaryKey": false,
+          "description": "Inclusive validity start",
+          "customProperties": [
+            {
+              "property": "kn.fieldId",
+              "value": "semantic.entity_tags.valid_from"
+            }
+          ]
+        },
+        {
+          "name": "valid_to",
+          "logicalType": "timestamp",
+          "required": false,
+          "primaryKey": false,
+          "description": "Exclusive validity end",
+          "customProperties": [
+            {
+              "property": "kn.fieldId",
+              "value": "semantic.entity_tags.valid_to"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "attribute_definitions",
+      "logicalType": "object",
+      "physicalType": "table",
+      "description": "Typed observation attributes with original unit and quantity type.",
+      "properties": [
+        {
+          "name": "id",
+          "logicalType": "string",
+          "required": true,
+          "primaryKey": true,
+          "description": "Stable qualified identifier",
+          "customProperties": [
+            {
+              "property": "kn.fieldId",
+              "value": "semantic.attribute_definitions.id"
+            },
+            {
+              "property": "kn.foreignKey",
+              "value": {
+                "table": "terms",
+                "fields": [
+                  "id"
+                ],
+                "targetFields": [
+                  "id"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "entity_class_id",
+          "logicalType": "string",
+          "required": true,
+          "primaryKey": false,
+          "description": "Reference to entity_classes",
+          "customProperties": [
+            {
+              "property": "kn.fieldId",
+              "value": "semantic.attribute_definitions.entity_class_id"
+            },
+            {
+              "property": "kn.foreignKey",
+              "value": {
+                "table": "entity_classes",
+                "fields": [
+                  "entity_class_id"
+                ],
+                "targetFields": [
+                  "id"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "value_type",
+          "logicalType": "string",
+          "required": true,
+          "primaryKey": false,
+          "description": "Attribute value type",
+          "customProperties": [
+            {
+              "property": "kn.fieldId",
+              "value": "semantic.attribute_definitions.value_type"
+            },
+            {
+              "property": "kn.enum",
+              "value": [
+                "string",
+                "integer",
+                "number",
+                "boolean",
+                "date",
+                "timestamp"
+              ]
+            }
+          ]
+        },
+        {
+          "name": "unit",
+          "logicalType": "string",
+          "required": false,
+          "primaryKey": false,
+          "description": "Original unit identifier",
+          "customProperties": [
+            {
+              "property": "kn.fieldId",
+              "value": "semantic.attribute_definitions.unit"
+            }
+          ]
+        },
+        {
+          "name": "quantity_type",
+          "logicalType": "string",
+          "required": false,
+          "primaryKey": false,
+          "description": "Quantity type identifier",
+          "customProperties": [
+            {
+              "property": "kn.fieldId",
+              "value": "semantic.attribute_definitions.quantity_type"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "condition_sets",
+      "logicalType": "object",
+      "physicalType": "table",
+      "description": "Named reusable observation condition sets.",
+      "properties": [
+        {
+          "name": "id",
+          "logicalType": "string",
+          "required": true,
+          "primaryKey": true,
+          "description": "Stable qualified identifier",
+          "customProperties": [
+            {
+              "property": "kn.fieldId",
+              "value": "semantic.condition_sets.id"
+            },
+            {
+              "property": "kn.foreignKey",
+              "value": {
+                "table": "terms",
+                "fields": [
+                  "id"
+                ],
+                "targetFields": [
+                  "id"
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "condition_values",
+      "logicalType": "object",
+      "physicalType": "table",
+      "description": "One explicit value per attribute in a condition set.",
+      "properties": [
+        {
+          "name": "condition_set_id",
+          "logicalType": "string",
+          "required": true,
+          "primaryKey": true,
+          "description": "Reference to condition_sets",
+          "customProperties": [
+            {
+              "property": "kn.fieldId",
+              "value": "semantic.condition_values.condition_set_id"
+            },
+            {
+              "property": "kn.foreignKey",
+              "value": {
+                "table": "condition_sets",
+                "fields": [
+                  "condition_set_id"
+                ],
+                "targetFields": [
+                  "id"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "attribute_id",
+          "logicalType": "string",
+          "required": true,
+          "primaryKey": true,
+          "description": "Reference to attribute_definitions",
+          "customProperties": [
+            {
+              "property": "kn.fieldId",
+              "value": "semantic.condition_values.attribute_id"
+            },
+            {
+              "property": "kn.foreignKey",
+              "value": {
+                "table": "attribute_definitions",
+                "fields": [
+                  "attribute_id"
+                ],
+                "targetFields": [
+                  "id"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "value",
+          "logicalType": "string",
+          "required": true,
+          "primaryKey": false,
+          "description": "Exact original condition value",
+          "customProperties": [
+            {
+              "property": "kn.fieldId",
+              "value": "semantic.condition_values.value"
+            }
+          ]
+        },
+        {
+          "name": "unit",
+          "logicalType": "string",
+          "required": false,
+          "primaryKey": false,
+          "description": "Original unit identifier",
+          "customProperties": [
+            {
+              "property": "kn.fieldId",
+              "value": "semantic.condition_values.unit"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "comparison_profiles",
+      "logicalType": "object",
+      "physicalType": "table",
+      "description": "Condition-bound comparison definitions, not ranking execution.",
+      "properties": [
+        {
+          "name": "id",
+          "logicalType": "string",
+          "required": true,
+          "primaryKey": true,
+          "description": "Stable qualified identifier",
+          "customProperties": [
+            {
+              "property": "kn.fieldId",
+              "value": "semantic.comparison_profiles.id"
+            },
+            {
+              "property": "kn.foreignKey",
+              "value": {
+                "table": "terms",
+                "fields": [
+                  "id"
+                ],
+                "targetFields": [
+                  "id"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "entity_class_id",
+          "logicalType": "string",
+          "required": true,
+          "primaryKey": false,
+          "description": "Reference to entity_classes",
+          "customProperties": [
+            {
+              "property": "kn.fieldId",
+              "value": "semantic.comparison_profiles.entity_class_id"
+            },
+            {
+              "property": "kn.foreignKey",
+              "value": {
+                "table": "entity_classes",
+                "fields": [
+                  "entity_class_id"
+                ],
+                "targetFields": [
+                  "id"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "condition_set_id",
+          "logicalType": "string",
+          "required": true,
+          "primaryKey": false,
+          "description": "Reference to condition_sets",
+          "customProperties": [
+            {
+              "property": "kn.fieldId",
+              "value": "semantic.comparison_profiles.condition_set_id"
+            },
+            {
+              "property": "kn.foreignKey",
+              "value": {
+                "table": "condition_sets",
+                "fields": [
+                  "condition_set_id"
+                ],
+                "targetFields": [
+                  "id"
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "profile_attributes",
+      "logicalType": "object",
+      "physicalType": "table",
+      "description": "Declared comparison attributes and required-field eligibility.",
+      "properties": [
+        {
+          "name": "profile_id",
+          "logicalType": "string",
+          "required": true,
+          "primaryKey": true,
+          "description": "Reference to comparison_profiles",
+          "customProperties": [
+            {
+              "property": "kn.fieldId",
+              "value": "semantic.profile_attributes.profile_id"
+            },
+            {
+              "property": "kn.foreignKey",
+              "value": {
+                "table": "comparison_profiles",
+                "fields": [
+                  "profile_id"
+                ],
+                "targetFields": [
+                  "id"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "attribute_id",
+          "logicalType": "string",
+          "required": true,
+          "primaryKey": true,
+          "description": "Reference to attribute_definitions",
+          "customProperties": [
+            {
+              "property": "kn.fieldId",
+              "value": "semantic.profile_attributes.attribute_id"
+            },
+            {
+              "property": "kn.foreignKey",
+              "value": {
+                "table": "attribute_definitions",
+                "fields": [
+                  "attribute_id"
+                ],
+                "targetFields": [
+                  "id"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "required",
+          "logicalType": "boolean",
+          "required": true,
+          "primaryKey": false,
+          "description": "Whether absence excludes matched ranking",
+          "customProperties": [
+            {
+              "property": "kn.fieldId",
+              "value": "semantic.profile_attributes.required"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "rubrics",
+      "logicalType": "object",
+      "physicalType": "table",
+      "description": "Named analyst policies; scores are not predictions.",
+      "properties": [
+        {
+          "name": "id",
+          "logicalType": "string",
+          "required": true,
+          "primaryKey": true,
+          "description": "Stable qualified identifier",
+          "customProperties": [
+            {
+              "property": "kn.fieldId",
+              "value": "semantic.rubrics.id"
+            },
+            {
+              "property": "kn.foreignKey",
+              "value": {
+                "table": "terms",
+                "fields": [
+                  "id"
+                ],
+                "targetFields": [
+                  "id"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "profile_id",
+          "logicalType": "string",
+          "required": true,
+          "primaryKey": false,
+          "description": "Reference to comparison_profiles",
+          "customProperties": [
+            {
+              "property": "kn.fieldId",
+              "value": "semantic.rubrics.profile_id"
+            },
+            {
+              "property": "kn.foreignKey",
+              "value": {
+                "table": "comparison_profiles",
+                "fields": [
+                  "profile_id"
+                ],
+                "targetFields": [
+                  "id"
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "rubric_criteria",
+      "logicalType": "object",
+      "physicalType": "table",
+      "description": "Explicit attribute weights and direction for an analyst rubric.",
+      "properties": [
+        {
+          "name": "rubric_id",
+          "logicalType": "string",
+          "required": true,
+          "primaryKey": true,
+          "description": "Reference to rubrics",
+          "customProperties": [
+            {
+              "property": "kn.fieldId",
+              "value": "semantic.rubric_criteria.rubric_id"
+            },
+            {
+              "property": "kn.foreignKey",
+              "value": {
+                "table": "rubrics",
+                "fields": [
+                  "rubric_id"
+                ],
+                "targetFields": [
+                  "id"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "attribute_id",
+          "logicalType": "string",
+          "required": true,
+          "primaryKey": true,
+          "description": "Reference to attribute_definitions",
+          "customProperties": [
+            {
+              "property": "kn.fieldId",
+              "value": "semantic.rubric_criteria.attribute_id"
+            },
+            {
+              "property": "kn.foreignKey",
+              "value": {
+                "table": "attribute_definitions",
+                "fields": [
+                  "attribute_id"
+                ],
+                "targetFields": [
+                  "id"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "weight",
+          "logicalType": "number",
+          "required": true,
+          "primaryKey": false,
+          "description": "Positive exact decimal weight",
+          "customProperties": [
+            {
+              "property": "kn.fieldId",
+              "value": "semantic.rubric_criteria.weight"
+            }
+          ]
+        },
+        {
+          "name": "direction",
+          "logicalType": "string",
+          "required": true,
+          "primaryKey": false,
+          "description": "Preferred value direction",
+          "customProperties": [
+            {
+              "property": "kn.fieldId",
+              "value": "semantic.rubric_criteria.direction"
+            },
+            {
+              "property": "kn.enum",
+              "value": [
+                "minimize",
+                "maximize"
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

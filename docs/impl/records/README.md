@@ -28,5 +28,12 @@ decision. A record can name a plan task by ID because plan headings disappear on
 | 0011 | `satcom-schema-governance` | [0011-data-contracts-satcom-schema-governance.md](0011-data-contracts-satcom-schema-governance.md) |
 | 0012 | `message-catalog-core` | [0012-localization-message-catalog-core.md](0012-localization-message-catalog-core.md) |
 | 0013 | `bilingual-acceptance-suite` (open) | [0013-localization-bilingual-acceptance-suite.md](0013-localization-bilingual-acceptance-suite.md) |
+| 0014 | `contract-toolchain-pin` | [0014-data-contracts-contract-toolchain-pin.md](0014-data-contracts-contract-toolchain-pin.md) |
+| 0015 | `contract-compiler` | [0015-data-contracts-contract-compiler.md](0015-data-contracts-contract-compiler.md) |
+| 0016 | `development-rebuild-mode` | [0016-data-contracts-development-rebuild-mode.md](0016-data-contracts-development-rebuild-mode.md) |
+| 0017 | `data-contracts-implementation-audit` | [0017-data-contracts-data-contracts-implementation-audit.md](0017-data-contracts-data-contracts-implementation-audit.md) |
+| 0018 | `adhoc` prefetched dataset locations | [0018-adhoc-prefetched-dataset-locations.md](0018-adhoc-prefetched-dataset-locations.md) |
+| 0019 | `storage-contract-registry` | [0019-data-contracts-storage-contract-registry.md](0019-data-contracts-storage-contract-registry.md) |
+| 0020 | `semantic-model-contracts` | [0020-ontology-taxonomy-semantic-model-contracts.md](0020-ontology-taxonomy-semantic-model-contracts.md) |
 
-Next unused sequence is `0014`.
+Next unused sequence is `0021`.

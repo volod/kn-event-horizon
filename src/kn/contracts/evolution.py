@@ -5,8 +5,9 @@ from dataclasses import replace
 import sqlalchemy as sa
 from alembic.operations import Operations
 
-from kn.contracts.loader import canonical
-from kn.contracts.model import Contract, Field, Table
+from kn.contracts.model import Contract, Field, Table, canonical
+from kn.contracts.physical import extensions
+from kn.contracts.registry import marker_table
 from kn.contracts.sqlalchemy import column_type, metadata
 
 
@@ -18,6 +19,11 @@ def additions(previous: Contract, current: Contract) -> dict[str, tuple[str, ...
         raise ValueError("contract identity or storage schema changed")
     if new_version <= old_version:
         raise ValueError("evolution requires a newer contract version")
+    if (
+        previous.references_json != current.references_json
+        or previous.source_profile != current.source_profile
+    ):
+        raise ValueError("reference or source profile changes require a reviewed migration")
     changes: dict[str, tuple[str, ...]] = {}
     new_tables = {table.name: table for table in current.tables}
     for old in previous.tables:
@@ -32,6 +38,8 @@ def additions(previous: Contract, current: Contract) -> dict[str, tuple[str, ...
 
 
 def _table_additions(old: Table, new: Table) -> tuple[str, ...]:
+    if old.extensions_json != new.extensions_json:
+        raise ValueError("table metadata changes require a reviewed migration")
     fields = {field.name: field for field in new.fields}
     for field in old.fields:
         candidate = fields.get(field.name)
@@ -46,15 +54,26 @@ def _table_additions(old: Table, new: Table) -> tuple[str, ...]:
 
 def _needs_review(field: Field) -> bool:
     return bool(
-        field.required or field.primary_key or field.reference or field.enum or field.partial_date
+        field.required
+        or field.primary_key
+        or field.reference
+        or field.enum
+        or field.partial_date
+        or (extensions(field).keys() - {"fieldId"})
     )
 
 
-def evolve(operations: Operations, previous: Contract, current: Contract) -> None:
+def evolve(
+    operations: Operations,
+    previous: Contract,
+    current: Contract,
+    *,
+    marker_schema: str | None = None,
+) -> None:
     """Called only by reviewed revisions referencing immutable old and new snapshots."""
     changes = additions(previous, current)
     model = metadata(current)
-    marker = model.tables[f"{current.schema + '.' if current.schema else ''}satcom_contract"]
+    marker = marker_table(marker_schema)
     installed = (
         operations.get_bind()
         .execute(
@@ -75,10 +94,15 @@ def evolve(operations: Operations, previous: Contract, current: Contract) -> Non
             if field.name in columns:
                 operations.add_column(
                     name,
-                    sa.Column(field.name, column_type(field), nullable=True),
+                    sa.Column(
+                        field.name,
+                        column_type(field),
+                        nullable=True,
+                        comment=field.description or None,
+                    ),
                     schema=current.schema,
                 )
-
+    _apply_comments(operations, previous, current)
     operations.get_bind().execute(
         marker.update()
         .where(marker.c.contract_id == current.contract_id)
@@ -88,3 +112,33 @@ def evolve(operations: Operations, previous: Contract, current: Contract) -> Non
             managed_tables_json=canonical([table.name for table in current.tables]),
         )
     )
+
+
+def _apply_comments(operations: Operations, previous: Contract, current: Contract) -> None:
+    """Descriptions are the only accepted change to existing tables and fields."""
+    for old in previous.tables:
+        new = current.table(old.name)
+        if new.description != old.description:
+            if new.description:
+                operations.create_table_comment(
+                    old.name,
+                    new.description,
+                    existing_comment=old.description or None,
+                    schema=current.schema,
+                )
+            else:
+                operations.drop_table_comment(
+                    old.name, existing_comment=old.description, schema=current.schema
+                )
+        fields = {field.name: field for field in new.fields}
+        for field in old.fields:
+            if fields[field.name].description != field.description:
+                operations.alter_column(
+                    old.name,
+                    field.name,
+                    comment=fields[field.name].description or None,
+                    existing_comment=field.description or None,
+                    existing_type=column_type(field),
+                    existing_nullable=not field.required,
+                    schema=current.schema,
+                )

@@ -15,6 +15,8 @@ from typing import cast
 from jsonschema import ValidationError
 from sqlalchemy.exc import SQLAlchemyError
 
+from kn.contracts.diagnostics import ContractError
+from kn.db.rebuild import RebuildRefused
 from kn.i18n import DEFAULT_LOCALE, Translator
 from kn.i18n.output import render_result
 from kn.i18n.parser import OperatorParser, parse_interface_options
@@ -42,7 +44,9 @@ def build_parser(
     subcommands.add_parser("info", help=tr.text("cli.info_help"))
     contracts = subcommands.add_parser("contract", help=tr.text("cli.contract_help"))
     contracts.add_argument("action", choices=("lint", "compile"))
+    contracts.add_argument("source", nargs="?", type=Path, help=tr.text("cli.contract_source_help"))
     contracts.add_argument("--output", type=Path, help=tr.text("cli.output_help"))
+    contracts.add_argument("--references", type=Path, help=tr.text("cli.references_help"))
     contracts.add_argument("--check", action="store_true", help=tr.text("cli.check_help"))
     database = subcommands.add_parser("db", help=tr.text("cli.db_help"))
     database.add_argument("action", choices=("upgrade", "verify", "rebuild"))
@@ -80,6 +84,14 @@ def main(argv: Sequence[str] | None = None) -> int:
     except SQLAlchemyError:
         _report_error(translator.text("cli.database_error"), "E_DATABASE", selected.json)
         return 1
+    except RebuildRefused:
+        _report_error(translator.text("cli.rebuild_refused"), "E_INPUT", selected.json)
+        return 1
+    except ContractError as error:
+        diagnostic = error.diagnostic()
+        message = translator.text("cli.contract_diagnostic", **diagnostic)
+        _report_error(message, "E_CONTRACT", selected.json, diagnostic)
+        return 1
     except ValidationError as error:
         path = ".".join(map(str, error.absolute_path))
         _report_error(
@@ -98,15 +110,20 @@ def main(argv: Sequence[str] | None = None) -> int:
     return 0
 
 
-def _report_error(message: str, code: str, json_output: bool) -> None:
-    _LOG.error("%s", json.dumps({"error": {"code": code}}) if json_output else message)
+def _report_error(
+    message: str, code: str, json_output: bool, diagnostic: dict[str, str] | None = None
+) -> None:
+    error = {"code": code, **(diagnostic or {})}
+    _LOG.error("%s", json.dumps({"error": error}, ensure_ascii=True) if json_output else message)
 
 
 def _run(args: argparse.Namespace) -> dict[str, object]:
     if args.command == "info":
         return asdict(project_info())
     if args.command == "contract":
-        return contract_operation(args.action, args.output, args.check)
+        return contract_operation(
+            args.action, args.output, args.check, args.source, args.references
+        )
     if args.command == "db":
         return database_operation(args.action)
     return satcom_operation(args.action, args.source, args.data_dir)

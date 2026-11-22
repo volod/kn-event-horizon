@@ -5,10 +5,14 @@ import pytest
 from kn.db.rebuild import rebuild
 
 
+@pytest.mark.parametrize("environment", [None, "released", "production", "Development", ""])
 def test_rebuild_refuses_released_environment_before_database_access(
     monkeypatch: pytest.MonkeyPatch,
+    environment: str | None,
 ) -> None:
-    monkeypatch.setenv("KN_ENVIRONMENT", "released")
+    monkeypatch.delenv("KN_ENVIRONMENT", raising=False)
+    if environment is not None:
+        monkeypatch.setenv("KN_ENVIRONMENT", environment)
     with pytest.raises(ValueError, match="released data"):
         rebuild(None)
 
@@ -25,14 +29,15 @@ def test_bad_connection_configuration_never_contains_password(
 def test_schema_checksum_tampering_is_refused(tmp_path, monkeypatch: pytest.MonkeyPatch) -> None:
     import shutil
 
-    from kn.contracts import loader
+    from kn.contracts import schemas
+    from kn.contracts.loader import load_contract
 
     resource = tmp_path / "resources"
-    shutil.copytree(loader.RESOURCES, resource)
+    shutil.copytree(schemas.RESOURCES, resource)
     (resource / "odcs-3.1.0.json").write_text("{}")
-    monkeypatch.setattr(loader, "RESOURCES", resource)
+    monkeypatch.setattr(schemas, "RESOURCES", resource)
     with pytest.raises(ValueError, match="checksum"):
-        loader.load_contract()
+        load_contract()
 
 
 def test_password_file_connection_hides_credentials(
@@ -58,3 +63,45 @@ def test_password_file_connection_hides_credentials(
     monkeypatch.setenv("KN_DATABASE_URL", "sqlite://")
     with pytest.raises(ValueError, match="PostgreSQL"):
         engine_from_env()
+
+
+def test_rebuild_command_guard_precedes_engine_creation(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    from unittest.mock import MagicMock
+
+    from kn import operations
+    from kn.cli import main
+
+    monkeypatch.setenv("KN_ENVIRONMENT", "released")
+    engine = MagicMock(side_effect=AssertionError("database accessed"))
+    monkeypatch.setattr(operations, "engine_from_env", engine)
+    assert main(["db", "rebuild"]) == 1
+    engine.assert_not_called()
+
+
+def test_rebuild_requires_caller_transaction(monkeypatch: pytest.MonkeyPatch) -> None:
+    from unittest.mock import MagicMock
+
+    monkeypatch.setenv("KN_ENVIRONMENT", "development")
+    connection = MagicMock()
+    connection.in_transaction.return_value = False
+    with pytest.raises(ValueError, match="transaction"):
+        rebuild(connection)
+    connection.execute.assert_not_called()
+
+
+@pytest.mark.parametrize("locale", ["en", "uk"])
+def test_rebuild_refusal_names_the_guard_in_both_locales(
+    monkeypatch: pytest.MonkeyPatch, caplog: pytest.LogCaptureFixture, locale: str
+) -> None:
+    from kn.cli import main
+    from kn.i18n import Translator
+
+    monkeypatch.setenv("KN_ENVIRONMENT", "released")
+    assert main(["--locale", locale, "db", "rebuild"]) == 1
+    assert caplog.records[-1].message == Translator(locale).text("cli.rebuild_refused")
+    assert "KN_ENVIRONMENT=development" in caplog.records[-1].message
+    caplog.clear()
+    assert main(["--json", "db", "rebuild"]) == 1
+    assert '"code": "E_INPUT"' in caplog.records[-1].message

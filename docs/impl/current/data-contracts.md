@@ -1,75 +1,121 @@
 # Data Contracts and Space Example Import
 
-The space domain has an initial SATCOM source dataset. SATCOM is a subset of space, not a domain,
-service, or PostgreSQL schema of its own. This implementation supplies the first bounded profile
-of the [data contracts capability](../../design/spec.md#data-contracts). The remaining ontology,
-identity, interchange, PostGIS and broader compiler work stays in the [plan](../plan.md).
+The space domain has an initial SATCOM source dataset: owner-supplied, prefetched files from a real
+space source, kept as the first data integration example. More prefetched datasets will follow
+through a shared path (`prefetched-dataset-method` in the [plan](../plan.md)); today the adapter is
+SATCOM-specific. SATCOM is a subset of space, not a domain, service, or PostgreSQL schema of its
+own. This implementation supplies the first bounded profile
+of the [data contracts capability](../../design/spec.md#data-contracts). The remaining ontology content,
+identity, interchange and raw replay work stays in the [plan](../plan.md).
 
 ## One definition for each model
 
 `src/kn/contracts/resources/satcom/1.0.0.json` is the ODCS source of truth for the example dataset.
-It declares `domain: space` and storage schema `space`. It contains all 28 CSV tables and four
-bookkeeping tables: `satcom_contract`, `satcom_imports`, `satcom_files`, and `satcom_rows`.
-The bundled resources ship in the wheel, so validation and deployment do not need network access.
+It declares `domain: space` and storage schema `space`. It contains all 28 CSV tables and three
+bookkeeping tables: `satcom_imports`, `satcom_files`, and `satcom_rows`. The bundled resources ship
+in the wheel, so validation and deployment do not need network access.
+
+## Deployment set
+
+`src/kn/contracts/resources/registry.json` is the reviewed list of deployed storage contracts, in
+deployment order, with paths relative to the registry and an optional reference catalog per entry:
+
+```json
+{
+  "contracts": [
+    {"path": "system/1.0.0.json"},
+    {"path": "satcom/1.0.0.json"},
+    {"path": "semantic/1.0.0.json"}
+  ]
+}
+```
+
+The semantic entry deploys the [ontology meta-model](ontology-taxonomy.md), with no content import.
+The first entry is the governance contract `kn.system.governance`. Its table
+`system.installed_contracts` is the installed-contract marker: one row per registered contract with
+version, digest, storage schema and table names. `kn.contracts.registry.registered_contracts()`
+loads and validates every entry without touching a database. It refuses a file outside the registry
+directory, a registry that does not start with the governance contract, a repeated contract ID, a
+field ID used by two contracts, and a table, primary key or index name used twice in one schema.
+Several contracts can share a schema; the SATCOM dataset and later prefetched datasets share
+`space`. The loader refuses a `kn.storageSchema` outside the ten platform schemas before it resolves
+any reference, and `kn db upgrade|verify|rebuild` load the registry before opening a connection.
+
+`kn db upgrade` and `kn db rebuild` create every registered contract as its schema owner through the
+Alembic baseline and record each marker row. `kn db verify`, every upgrade and rebuild, and every
+import check that the marker rows equal the registry (no missing, extra or drifted contract), that
+the structure of every registered table matches its contract, and that every table in a KN schema
+belongs to a registered contract. The Alembic version table `system.alembic_version` is the one
+exception, and partitions count with their parent. To register a contract, add its file and its
+entry, run `make contract-compile`, and rebuild the development database.
+
+Contracts refer to each other only by stable field IDs, which the registry keeps unique, and by KN
+IDs that the owning engines check. SQL foreign keys stay within one contract. A cross-schema
+foreign key would need `REFERENCES` grants and `USAGE` on another schema for its owner role, which
+the least-privilege policy refuses and verifies, and it would couple the drop and migration order of
+contracts. A capability whose integrity rule needs database-enforced references across schemas
+amends this decision together with the grants it needs.
 
 The official ODCS 3.1.0 JSON Schema is vendored with upstream and local checksums in `pins.json`.
-The local copy only escapes non-ASCII characters as JSON escapes. Validation checks this checksum,
-the official standard, the supported profile, names, stable field IDs, and references. Unsupported
-ODCS features, unknown or misplaced extensions, repeated extensions, missing metadata, and
-incompatible reference types fail instead of disappearing from an export.
+The local copy only escapes non-ASCII characters as JSON escapes. Both standard and extension
+schema checksums are mandatory and verified offline on every lint and compile.
 
-The implemented `kn.*` extensions are `storageSchema`, `sourceProfile`, `csv`, `fieldId`,
-`foreignKey` (ordered source and target columns), `enum`, `partialDate`, `precision`, and `scale`.
-Their closed schemas live in `loader.py`; supported ODCS keys live in `profile.py`. The wider
-extension families in the specification remain planned and are refused by this bounded profile.
+## Contract lint and toolchain
 
-`model.py` supplies immutable typed models. The same fields compile into:
+`kn contract lint <file.yaml>` validates YAML or JSON against ODCS 3.1.0 and the closed schemas for
+every `kn.*` family in the specification. Omitting the file validates every registered contract.
+Lint checks types, required members, allowed locations, duplicate extensions and unknown names.
+It does not resolve ontology, policy, vocabulary, mapping or dataset references. The
+[toolchain reference](data-contracts/toolchain.md) lists extension shapes, diagnostics, parser
+limits, and the pinned external tool's verification command.
 
-| Consumer | Representation |
-| --- | --- |
-| PostgreSQL | SQLAlchemy metadata; exact `NUMERIC(38,18)`, big integers, dates, text, booleans, required fields, composite keys, enum checks, and initially deferred composite foreign keys |
-| Elasticsearch | Strict mappings with date and numeric inference disabled; exact decimals are keyword strings, partial dates are keyword strings, full dates use `strict_date` |
-| Avro | Records, nullable unions with null defaults, `long`, dates, and standard decimal logical types with precision 38 and scale 18 |
-| JSON Schema | Closed objects, required fields, enums, dates, partial-date syntax and decimal strings for portable JSON |
+The compiler accepts supplied JSON or YAML contracts and resolves local reference catalogs before
+producing SQLAlchemy metadata, generated PostgreSQL DDL, strict Pydantic models, JSON Schema, Avro,
+Elasticsearch mappings, dbt sources and contract documentation. The
+[compiler reference](data-contracts/compiler.md) describes the supported profile, reference catalog,
+PostGIS and partition templates, output paths, and exact-byte drift checks.
 
-Elasticsearch mappings describe fields; JSON Schema and the importer enforce required values and
-allowed enums before indexing. Decimal keyword fields preserve precision but do not support numeric
-range aggregation. No Elasticsearch service or Avro transport is deployed.
-
-`make contract-check` validates and compares artifact digests with the reviewed manifest.
-`make ci` includes this gate. The PostgreSQL descriptor is generated from SQLAlchemy metadata,
-including column types, nullability, keys and checks, so physical mapping drift also fails CI.
-`make contract-compile` writes 96 portable artifacts, a PostgreSQL metadata descriptor and a digest
-manifest under `$DATA_DIR/contract/current/`. `kn contract compile --output <directory>` supports a selected
-runtime directory. SQLAlchemy metadata is consumed directly by Alembic; no SQL script is authored
-or executed by deployment.
+`make contract-check` validates every registered contract and compares the committed
+`generated/contracts/<contract-id>/` of each (SATCOM: 100 artifacts plus a manifest, including
+physical mappings and generated DDL) byte for byte with a fresh compile; a directory of an
+unregistered contract is drift. `make contract-compile` refreshes them. `kn contract compile` with a
+source defaults to `generated/contracts/<contract-id>/`, and `--output <directory>` selects another
+destination. Without a source, `--output <root>` receives one directory per registered contract.
+Normal upgrades and the explicit development rebuild both run the Alembic baseline over the
+contracts' SQLAlchemy metadata. No SQL text reaches the database:
+schema objects come from SQLAlchemy metadata, and the platform policy from typed statements.
 
 ## Development baseline and release evolution
 
-Development keeps contract version `1.0.0` and one Python Alembic baseline, `0001_satcom`, editable
-in place. A contract edit changes its digest. Refresh the artifact digest manifest after reviewing
-exports. Normal `make db-upgrade` verifies the installed digest and structure; it does not silently
-alter an existing projection to match edited development definitions.
+Development keeps contract version `1.0.0` and one Python Alembic baseline, `0001_baseline`,
+editable in place; it creates every registered contract. A contract edit changes its digest. Refresh
+the committed `generated/` output after reviewing it. Normal `make db-upgrade` verifies the
+installed digest and structure; it does not silently alter an existing projection to match edited
+development definitions.
 
 For a development model edit:
 
 1. Edit the `1.0.0` contract, baseline if needed, and regression fixtures.
-2. Refresh the reviewed artifact manifest and run `make ci`.
+2. Run `make contract-compile`, review the `generated/` diff, and run `make ci`.
 3. Set `KN_ENVIRONMENT=development` and run `make db-rebuild`.
 4. Run `make satcom-import` to restore the example dataset from the source package.
 
-Rebuild drops only tables listed in the current or previously installed contract manifest. It
-keeps other space tables, the other domain schemas, and package archives. Reflection does not
-follow foreign keys into unmanaged tables. A dependency from an unmanaged table can refuse the
-rebuild rather than being cascaded away. The rebuild and baseline application share one
-transaction and advisory lock. Without explicit development mode, including when
+Rebuild now recreates all ten KN schemas, removes obsolete KN tables, loads registered reviewed
+seeds and verifies the compiled catalog. It preserves external schemas and durable files. External
+dependencies and unsupported non-table objects refuse without cascade. The
+[development rebuild reference](data-contracts/rebuild.md) describes its transaction boundary,
+seed hook, safeguards and tests. Without explicit development mode, including when
 `KN_ENVIRONMENT=released`, rebuild fails before database access.
 
 At first release, freeze the baseline and contract `1.0.0`. Subsequent releases add contract
 snapshots and Python Alembic revisions. `evolution.py` supplies conservative diff validation and
 additive operations for new tables and nullable fields. It refuses removals, renames, type,
 identity, nullability, enum, reference and precision changes, and new constrained fields that need
-backfill. Additive evolution updates the installed contract marker. A revision calls this helper
+backfill. Changes to table metadata or reference definitions and new fields with semantic
+extensions require reviewed migrations instead of silently losing new compiler behavior.
+Additive evolution adds new fields with their comments, applies changed table and field
+descriptions, and updates the contract's row in `system.installed_contracts`. A revision calls this
+helper
 with reviewed old and new contracts; deployment never autogenerates or applies arbitrary drift.
 Destructive downgrades are refused. The full-model release gate remains `release-migration-mode`.
 
@@ -127,11 +173,34 @@ scenario conditions, finance bases, and terminal mass boundaries remain explicit
 Canonical identity matching, rights review and source onboarding remain required before publication
 or exchange. The importer does not fetch URLs or treat a local file as permission to crawl them.
 
-The compiler currently supports flat scalar models. PostgreSQL numeric bounds are chosen to hold
-this dataset exactly; oversized new values fail and keep their original input file available.
-Structural drift checking covers tables, columns, types, nullability and references through
-Alembic; it does not prove equivalence of arbitrary manually altered check expressions. The pinned
-standard and implemented extension subset are deliberately narrower than the future full compiler.
+The compiler supports flat scalar models and bounded WKT/PostGIS geometry templates. PostgreSQL
+numeric bounds hold this dataset exactly; oversized new values fail and keep their original input
+file available.
+Structural drift checking covers tables, columns, types including PostGIS geometry, nullability,
+comments and references through Alembic; it does not prove equivalence of arbitrary manually
+altered check expressions. The pinned standard and implemented ODCS profile remain bounded;
+ontology content, runtime semantic policies and interchange compilation remain separately planned.
+
+Known limitations, with what would reopen them:
+
+- The prefetched-dataset path is SATCOM-specific: its own commands (`kn space satcom`), bookkeeping
+  tables, archive directory (`$DATA_DIR/satcom-import/`), and a `kn.sourceProfile` fixed to
+  `satcom-csv/1`, and rebuild does not restore it. `prefetched-dataset-method` in the
+  [plan](../plan.md) generalizes it before the next dataset.
+- Registered contracts are package resources under `src/kn/contracts/resources/`, so source
+  installations and wheels deploy the same bytes. The specification's `contracts/core/` and
+  `domains/<domain>/contracts/` layout applies once contracts outside the package are deployed;
+  the registry then needs a reviewed path rule for them.
+- `load_contract()` without a path still loads the SATCOM contract for the SATCOM adapter and its
+  tests. Deployment code no longer relies on it; `prefetched-dataset-method` removes the default.
+- The digest covers the source document as written. Reordering tables or `customProperties`
+  entries changes the digest and `contract.json`, though every other artifact is byte-identical
+  after masking the digest, so a reorder costs a development rebuild or a release version bump.
+  This is kept so that the digest names exactly the reviewed text. Reopen it if reorders cause
+  review churn or when contracts are assembled from several files.
+- A development database created before the registry has revision `0001_satcom` and no
+  `system.installed_contracts`, so `make db-up` and `make db-verify` fail until
+  `KN_ENVIRONMENT=development make db-rebuild` and `make satcom-import` restore it.
 
 ## Verification
 
@@ -145,6 +214,25 @@ standard and implemented extension subset are deliberately narrower than the fut
   numeric values.
 - `tests/contracts/test_contracts.py`: deterministic exports, invalid contracts, PostgreSQL DDL
   compilation, independent fastavro schema parsing and exact decimal/date/null round trips.
+- `tests/contracts/test_physical.py`, `test_type_mapping.py`, `test_diagnostics.py` and
+  `test_generated.py`: derived names, value ranges, located refusals and the committed output.
+- `tests/contracts/test_statements.py`: typed platform statements, and no SQL string in production
+  code.
+- `tests/contracts/test_lint.py` and `test_document.py`: every extension family, invalid fixtures,
+  schema tampering, compiler refusal of lint-only metadata, and safe YAML/JSON failure paths.
+- `make contract-toolchain-check`: isolated pinned external linter and export probe, separate from
+  runtime dependencies and the deterministic network-free CI suite.
 
 The analysis, real import evidence and remaining scope are in
 [record 0011](../records/0011-data-contracts-satcom-schema-governance.md).
+The pinned lint toolchain and external export boundary are recorded in
+[record 0014](../records/0014-data-contracts-contract-toolchain-pin.md).
+
+The full compiler templates, offline reference resolution and drift acceptance are in
+[record 0015](../records/0015-data-contracts-contract-compiler.md).
+
+The all-schema rebuild and reviewed-seed hook are in
+[record 0016](../records/0016-data-contracts-development-rebuild-mode.md).
+
+The implementation audit of the group, its findings and their dispositions are in
+[record 0017](../records/0017-data-contracts-data-contracts-implementation-audit.md).

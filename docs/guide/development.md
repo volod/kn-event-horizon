@@ -113,14 +113,19 @@ Use repository checks to enforce testable rules and keep detailed procedures in 
 
 ## Contract and space example workflow
 
-Run `make contract-check` to validate the bundled open contracts and artifact digests, and
-`make contract-compile` to inspect generated schemas under `$DATA_DIR/contract/current/`.
+Run `make contract-check` to validate the bundled open contracts and compare the committed
+`generated/contracts/` output byte for byte, and `make contract-compile` to refresh that output
+(schemas, DDL, Pydantic models and dbt sources) after a contract or generator change. Review and
+commit the `generated/` diff with the change.
 The SATCOM example belongs to the existing space domain: `make satcom-validate` checks the
 owner-provided package and `make satcom-import` archives and imports it into the governed database.
 
 Development edits contract version `1.0.0` and one Alembic baseline in place. If a definition
 changes, explicitly set `KN_ENVIRONMENT=development`, run `make db-rebuild`, and backfill with
-`make satcom-import`. Released environments refuse rebuild. First release freezes the baseline;
+`make satcom-import`. Rebuild recreates all KN schemas and removes obsolete KN tables; external
+dependencies refuse atomically. See the [rebuild reference](../impl/current/data-contracts/rebuild.md)
+for the reviewed seed hook and boundaries. Released environments refuse rebuild. First release
+freezes the baseline;
 later schema changes use reviewed Python Alembic revisions and separate contract versions.
 See [data contracts](../impl/current/data-contracts.md) for preservation rules and current limits.
 

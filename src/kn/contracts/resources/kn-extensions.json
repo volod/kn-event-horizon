@@ -1,0 +1,659 @@
+{
+  "$schema": "https://json-schema.org/draft/2019-09/schema",
+  "title": "KN extension values v1",
+  "description": "Closed structural schemas. Reference resolution and compilation are separate gates.",
+  "type": "object",
+  "properties": {
+    "kn.entityClass": {
+      "$ref": "#/$defs/reference",
+      "x-kn-scopes": [
+        "table"
+      ]
+    },
+    "kn.relation": {
+      "type": "object",
+      "properties": {
+        "type": {
+          "$ref": "#/$defs/reference"
+        },
+        "sourceClass": {
+          "$ref": "#/$defs/reference"
+        },
+        "targetClass": {
+          "$ref": "#/$defs/reference"
+        }
+      },
+      "required": [
+        "type",
+        "sourceClass",
+        "targetClass"
+      ],
+      "additionalProperties": false,
+      "x-kn-scopes": [
+        "table"
+      ]
+    },
+    "kn.fieldId": {
+      "$ref": "#/$defs/reference",
+      "x-kn-scopes": [
+        "field"
+      ]
+    },
+    "kn.identity": {
+      "type": "object",
+      "properties": {
+        "strategy": {
+          "type": "string",
+          "enum": [
+            "uuidv7",
+            "external_key",
+            "source_qualified"
+          ]
+        },
+        "externalKeys": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/externalKey"
+          },
+          "minItems": 1,
+          "uniqueItems": true
+        },
+        "sourceRecordKey": {
+          "$ref": "#/$defs/references"
+        },
+        "sourceVersionField": {
+          "$ref": "#/$defs/reference"
+        },
+        "attributes": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/identityAttribute"
+          },
+          "minItems": 1,
+          "uniqueItems": true
+        },
+        "matchProfile": {
+          "$ref": "#/$defs/reference"
+        }
+      },
+      "required": [
+        "strategy",
+        "externalKeys",
+        "sourceRecordKey",
+        "attributes",
+        "matchProfile"
+      ],
+      "additionalProperties": false,
+      "x-kn-scopes": [
+        "table"
+      ]
+    },
+    "kn.updatePolicy": {
+      "type": "object",
+      "properties": {
+        "mode": {
+          "type": "string",
+          "enum": [
+            "priority",
+            "latest_observed",
+            "accumulate",
+            "fixed"
+          ]
+        },
+        "priorityCriteria": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "enum": [
+              "source_rank",
+              "evidence_class",
+              "data_time"
+            ]
+          },
+          "minItems": 1,
+          "uniqueItems": true
+        },
+        "minimumSourceRank": {
+          "type": "string",
+          "enum": [
+            "owner_entered",
+            "first_party",
+            "authorized_channel",
+            "third_party",
+            "unranked"
+          ]
+        },
+        "minimumEvidenceClass": {
+          "type": "string",
+          "enum": [
+            "primary",
+            "secondary",
+            "derived",
+            "extracted_candidate"
+          ]
+        },
+        "timeBasis": {
+          "type": "string",
+          "enum": [
+            "valid_from",
+            "published",
+            "observed"
+          ]
+        },
+        "valueTolerance": {
+          "type": "number",
+          "minimum": 0
+        },
+        "freshnessSeconds": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "emptyValueHandling": {
+          "type": "string",
+          "enum": [
+            "review",
+            "allow_clear"
+          ]
+        }
+      },
+      "required": [
+        "mode",
+        "priorityCriteria",
+        "minimumSourceRank",
+        "minimumEvidenceClass",
+        "timeBasis",
+        "valueTolerance",
+        "freshnessSeconds",
+        "emptyValueHandling"
+      ],
+      "additionalProperties": false,
+      "x-kn-scopes": [
+        "field"
+      ]
+    },
+    "kn.interchange": {
+      "type": "object",
+      "properties": {
+        "exposed": {
+          "type": "boolean"
+        },
+        "compatibility": {
+          "type": "string",
+          "enum": [
+            "stable",
+            "experimental",
+            "deprecated"
+          ]
+        },
+        "aliases": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/reference"
+          },
+          "minItems": 1,
+          "uniqueItems": true
+        },
+        "counterpartMappingRefs": {
+          "$ref": "#/$defs/references"
+        }
+      },
+      "required": [
+        "exposed",
+        "compatibility"
+      ],
+      "additionalProperties": false,
+      "x-kn-scopes": [
+        "contract",
+        "table",
+        "field"
+      ]
+    },
+    "kn.units": {
+      "type": "object",
+      "properties": {
+        "originalUnit": {
+          "$ref": "#/$defs/reference"
+        },
+        "normalizedUnit": {
+          "$ref": "#/$defs/reference"
+        },
+        "quantityType": {
+          "$ref": "#/$defs/reference"
+        },
+        "conversionRule": {
+          "$ref": "#/$defs/reference"
+        }
+      },
+      "required": [
+        "originalUnit",
+        "normalizedUnit",
+        "quantityType",
+        "conversionRule"
+      ],
+      "additionalProperties": false,
+      "x-kn-scopes": [
+        "field"
+      ]
+    },
+    "kn.comparisonProfile": {
+      "$ref": "#/$defs/reference",
+      "x-kn-scopes": [
+        "table",
+        "field"
+      ]
+    },
+    "kn.temporalProfile": {
+      "type": "object",
+      "properties": {
+        "eventTime": {
+          "$ref": "#/$defs/reference"
+        },
+        "publishedTime": {
+          "$ref": "#/$defs/reference"
+        },
+        "observedTime": {
+          "$ref": "#/$defs/reference"
+        },
+        "validFrom": {
+          "$ref": "#/$defs/reference"
+        },
+        "validTo": {
+          "$ref": "#/$defs/reference"
+        },
+        "recordedTime": {
+          "$ref": "#/$defs/reference"
+        },
+        "asOf": {
+          "type": "string",
+          "enum": [
+            "valid_time",
+            "knowledge_time",
+            "bitemporal"
+          ]
+        },
+        "nullSemantics": {
+          "type": "string",
+          "enum": [
+            "unknown",
+            "open_interval"
+          ]
+        }
+      },
+      "required": [
+        "asOf",
+        "nullSemantics"
+      ],
+      "additionalProperties": false,
+      "x-kn-scopes": [
+        "contract",
+        "table",
+        "field"
+      ]
+    },
+    "kn.spatialProfile": {
+      "type": "object",
+      "properties": {
+        "geometryType": {
+          "type": "string",
+          "enum": [
+            "Point",
+            "MultiPoint",
+            "LineString",
+            "MultiLineString",
+            "Polygon",
+            "MultiPolygon",
+            "GeometryCollection"
+          ]
+        },
+        "srid": {
+          "const": 4326
+        },
+        "precision": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 15
+        },
+        "coverageSemantics": {
+          "$ref": "#/$defs/reference"
+        },
+        "validity": {
+          "type": "string",
+          "enum": [
+            "required",
+            "allow_empty"
+          ]
+        }
+      },
+      "required": [
+        "geometryType",
+        "srid",
+        "precision",
+        "coverageSemantics",
+        "validity"
+      ],
+      "additionalProperties": false,
+      "x-kn-scopes": [
+        "field"
+      ]
+    },
+    "kn.evidence": {
+      "type": "object",
+      "properties": {
+        "required": {
+          "type": "boolean"
+        },
+        "assertionType": {
+          "type": "string",
+          "enum": [
+            "declared",
+            "observed",
+            "derived",
+            "reported"
+          ]
+        },
+        "minimumClass": {
+          "type": "string",
+          "enum": [
+            "primary",
+            "secondary",
+            "derived",
+            "extracted_candidate"
+          ]
+        },
+        "referenceFields": {
+          "$ref": "#/$defs/references"
+        }
+      },
+      "required": [
+        "required",
+        "assertionType",
+        "minimumClass",
+        "referenceFields"
+      ],
+      "additionalProperties": false,
+      "x-kn-scopes": [
+        "contract",
+        "table",
+        "field"
+      ]
+    },
+    "kn.licensePolicy": {
+      "type": "object",
+      "properties": {
+        "policyRef": {
+          "$ref": "#/$defs/reference"
+        },
+        "rights": {
+          "$ref": "#/$defs/references"
+        },
+        "exportAllowed": {
+          "type": "boolean"
+        },
+        "restrictions": {
+          "$ref": "#/$defs/references"
+        }
+      },
+      "required": [
+        "policyRef",
+        "rights",
+        "exportAllowed"
+      ],
+      "additionalProperties": false,
+      "x-kn-scopes": [
+        "contract",
+        "table",
+        "field"
+      ]
+    },
+    "kn.enumRef": {
+      "$ref": "#/$defs/reference",
+      "x-kn-scopes": [
+        "field"
+      ]
+    },
+    "kn.vocabularyRefs": {
+      "$ref": "#/$defs/references",
+      "x-kn-scopes": [
+        "field"
+      ]
+    },
+    "kn.index": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "$ref": "#/$defs/reference"
+          },
+          "fields": {
+            "$ref": "#/$defs/references"
+          },
+          "method": {
+            "type": "string",
+            "enum": [
+              "btree",
+              "hash",
+              "gist",
+              "gin",
+              "brin",
+              "spgist"
+            ]
+          },
+          "unique": {
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "name",
+          "fields",
+          "method",
+          "unique"
+        ],
+        "additionalProperties": false
+      },
+      "minItems": 1,
+      "uniqueItems": true,
+      "x-kn-scopes": [
+        "table"
+      ]
+    },
+    "kn.partition": {
+      "type": "object",
+      "properties": {
+        "strategy": {
+          "type": "string",
+          "enum": [
+            "range",
+            "list",
+            "hash"
+          ]
+        },
+        "fields": {
+          "$ref": "#/$defs/references"
+        }
+      },
+      "required": [
+        "strategy",
+        "fields"
+      ],
+      "additionalProperties": false,
+      "x-kn-scopes": [
+        "table"
+      ]
+    },
+    "kn.i18nKey": {
+      "$ref": "#/$defs/reference",
+      "x-kn-scopes": [
+        "contract",
+        "table",
+        "field"
+      ]
+    },
+    "kn.lineageRefs": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "dataset": {
+            "$ref": "#/$defs/reference"
+          },
+          "mapping": {
+            "$ref": "#/$defs/reference"
+          }
+        },
+        "required": [
+          "dataset",
+          "mapping"
+        ],
+        "additionalProperties": false
+      },
+      "minItems": 1,
+      "uniqueItems": true,
+      "x-kn-scopes": [
+        "contract",
+        "table",
+        "field"
+      ]
+    },
+    "kn.storageSchema": {
+      "type": "string",
+      "pattern": "^[a-z][a-z0-9_]{0,47}$",
+      "x-kn-scopes": [
+        "contract"
+      ]
+    },
+    "kn.sourceProfile": {
+      "const": "satcom-csv/1",
+      "x-kn-scopes": [
+        "contract"
+      ]
+    },
+    "kn.csv": {
+      "type": "boolean",
+      "x-kn-scopes": [
+        "table"
+      ]
+    },
+    "kn.foreignKey": {
+      "type": "object",
+      "properties": {
+        "table": {
+          "$ref": "#/$defs/reference"
+        },
+        "fields": {
+          "$ref": "#/$defs/references"
+        },
+        "targetFields": {
+          "$ref": "#/$defs/references"
+        }
+      },
+      "required": [
+        "table",
+        "fields",
+        "targetFields"
+      ],
+      "additionalProperties": false,
+      "x-kn-scopes": [
+        "field"
+      ]
+    },
+    "kn.enum": {
+      "$ref": "#/$defs/references",
+      "x-kn-scopes": [
+        "field"
+      ]
+    },
+    "kn.partialDate": {
+      "type": "boolean",
+      "x-kn-scopes": [
+        "field"
+      ]
+    },
+    "kn.precision": {
+      "type": "integer",
+      "minimum": 1,
+      "maximum": 38,
+      "x-kn-scopes": [
+        "field"
+      ]
+    },
+    "kn.scale": {
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 38,
+      "x-kn-scopes": [
+        "field"
+      ]
+    }
+  },
+  "additionalProperties": false,
+  "$defs": {
+    "reference": {
+      "type": "string",
+      "minLength": 1,
+      "pattern": "\\S"
+    },
+    "references": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/reference"
+      },
+      "minItems": 1,
+      "uniqueItems": true
+    },
+    "externalKey": {
+      "type": "object",
+      "properties": {
+        "namespace": {
+          "$ref": "#/$defs/reference"
+        },
+        "fields": {
+          "$ref": "#/$defs/references"
+        },
+        "authority": {
+          "type": "string",
+          "enum": [
+            "authoritative",
+            "source_qualified",
+            "weak"
+          ]
+        }
+      },
+      "required": [
+        "namespace",
+        "fields",
+        "authority"
+      ],
+      "additionalProperties": false
+    },
+    "identityAttribute": {
+      "type": "object",
+      "properties": {
+        "fieldId": {
+          "$ref": "#/$defs/reference"
+        },
+        "normalizer": {
+          "$ref": "#/$defs/reference"
+        },
+        "comparator": {
+          "$ref": "#/$defs/reference"
+        },
+        "authority": {
+          "type": "string",
+          "enum": [
+            "authoritative",
+            "source_qualified",
+            "weak"
+          ]
+        }
+      },
+      "required": [
+        "fieldId",
+        "normalizer",
+        "comparator",
+        "authority"
+      ],
+      "additionalProperties": false
+    }
+  }
+}

@@ -32,125 +32,7 @@ recorded decision before later groups build on the group.
 
 ## Agent Implementation Tasks
 
-### Data contracts -- `data-contracts`
-
-#### contract-toolchain-pin
-
-Contracts can only be authoritative once the standard and the exporter are pinned and checked.
-
-- Serves: `data-contracts` -- [Data contracts](../design/spec.md#data-contracts)
-- Agent status: CLEAR
-- Dependencies: Network access to the Bitol ODCS releases and, if needed, the Data Contract CLI
-  package. The initial profile pins v3.1.0; broader feature coverage remains to be validated.
-- User-visible outcome: `kn contract lint` validates ODCS YAML against the pinned JSON Schema and
-  the `kn.*` extension schemas.
-- Scope boundary: The pinned schema with its checksum, the extension JSON Schemas for every family
-  in the specification, and lint diagnostics. Compilation comes later.
-- Data and artifact paths: `contracts/schemas/`, `src/kn/contracts/`, `tests/contracts/`,
-  `deploy/versions.yaml`, `pyproject.toml`, `uv.lock`.
-- Execution path: Vendor the schema file with its checksum. Run Data Contract CLI as a pinned
-  development tool outside the runtime dependencies. Add valid and invalid fixture contracts.
-- Acceptance gates: Valid fixtures pass. An unknown extension, a missing required field, and a bad
-  type fail with actionable diagnostics. The checksum is verified in CI.
-- Documentation target: A new `current/data-contracts.md` page listed in the
-  [areas index](current.md#areas).
-
-#### contract-compiler
-
-Generated DDL and models must come only from contracts, deterministically.
-
-- Serves: `data-contracts` -- [Data contracts](../design/spec.md#data-contracts)
-- Agent status: CLEAR
-- Requires: `contract-toolchain-pin`
-- Dependencies: The initial [SQLAlchemy profile](current/data-contracts.md) and its remaining
-  ODCS feature gaps. Generated metadata applies to scratch schemas of the
-  [integration test harness](current/runtime-platform.md#integration-tests).
-- User-visible outcome: `kn contract compile` writes DDL, Pydantic models, JSON Schema, dbt source
-  definitions, and contract docs into `generated/`, and `--check` fails on drift.
-- Scope boundary: Reference checks, canonical serialization, the contract digest, and templates
-  for PostGIS geometry, checks, comments, and indexes. Python platform policy covers roles and
-  grants. Keep one editable development baseline and version evolution after first release.
-- Data and artifact paths: `src/kn/contracts/`, `generated/`, `src/kn/db/`,
-  `tests/contracts/`.
-- Execution path: Extend the shared model and SQLAlchemy compiler where a required ODCS feature
-  is unsupported. Keep engine exports deterministic and update the CI drift manifest.
-- Acceptance gates: Compiling twice is byte-identical. Generated DDL applies to the integration
-  database. A broken reference fails. Drift fails CI.
-- Documentation target: `current/data-contracts.md` listed in the
-  [areas index](current.md#areas).
-
-#### development-rebuild-mode
-
-Development keeps an explicit disposable rebuild alongside normal in-place migrations.
-
-- Serves: `data-contracts` -- [Data contracts](../design/spec.md#data-contracts)
-- Agent status: CLEAR
-- Requires: `contract-compiler`
-- Dependencies: none.
-- User-visible outcome: `kn db rebuild` drops and recreates the KN schemas from generated DDL and
-  loads the reviewed seeds. It refuses to run in an environment marked as released.
-- Scope boundary: Schema drop and recreate, the seed-load hook, grants, and the released-environment
-  guard. Raw replay and decision replay come in `rebuild-from-raw`. Vendor databases are never
-  touched.
-- Data and artifact paths: `src/kn/db/`, `src/kn/cli.py`, `tests/integration/`.
-- Execution path: Rebuild in one transaction per schema group, then verify catalog objects against
-  the compiled contracts.
-- Acceptance gates: A rebuild from empty creates every compiled object. A second rebuild is
-  identical. The loader role cannot run DDL. The released guard refuses.
-- Documentation target: `current/data-contracts.md` listed in the
-  [areas index](current.md#areas).
-
-#### data-contracts-implementation-audit (optional)
-
-Every schema, model, and generated artifact comes from the contract compiler, so a flaw in the
-toolchain or the rebuild multiplies across every later contract.
-
-- Serves: `data-contracts` -- [Data contracts](../design/spec.md#data-contracts)
-- Agent status: CLEAR
-- Requires: `contract-toolchain-pin`, `contract-compiler`, `development-rebuild-mode`
-- Dependencies: The accepted task records of the group and the [implementation
-  audit](../guide/planning-workflow.md#implementation-audits) checks.
-- User-visible outcome: Later groups compile their contracts with a verified, deterministic
-  toolchain. The audit record gives every check a result and every finding a disposition. The
-  current-state page lists known limitations, and each scheduled finding is a plan task.
-- Scope boundary: Focus: ODCS and `kn.*` extension validation and its messages; deterministic output
-  across runs, platforms, and input order; type, nullability, key, and unit mapping to DDL, models,
-  and JSON Schema; identifier length limits and reserved words; cross-contract references; a rebuild
-  that fails midway; the path to `release-migration-mode`, so that generated DDL can later drive
-  versioned migrations without a compiler rewrite. Fixes only; new behavior becomes plan tasks.
-- Data and artifact paths: `contracts/`, `src/kn/contracts/`, `src/kn/db/`, `generated/`,
-  `tests/contracts/`, `tests/integration/`, `docs/impl/plan.md`, and the task record.
-- Execution path: Rerun the group's acceptance commands, then work through the audit checks. Compile
-  twice and compare bytes, compile with a shuffled input order, interrupt a rebuild, and compare a
-  contract change with its generated DDL.
-- Acceptance gates: Two compiles give byte-identical output. An interrupted rebuild leaves no
-  partial schema in use. Every construct the compiler accepts has a generated-output test. Every
-  finding has a severity, evidence, and a disposition, no `blocker` is accepted, and every fix
-  starts from a failing regression test. `make ci` passes with the scheduled tasks in the plan.
-- Documentation target: `current/data-contracts.md` listed in the [areas index](current.md#areas).
-
 ### Ontology and taxonomy -- `ontology-taxonomy`
-
-#### semantic-model-contracts
-
-Ontology and taxonomy content needs its own contracted data model before any import.
-
-- Serves: `ontology-taxonomy` -- [Ontology and taxonomy](../design/spec.md#ontology-and-taxonomy)
-- Agent status: CLEAR
-- Requires: `contract-compiler`
-- Dependencies: none.
-- User-visible outcome: The `semantic` schema holds namespaces, entity classes, relation types,
-  concept schemes, concepts, mappings, entity tags, attribute definitions, condition sets,
-  comparison profiles, and rubrics, with per-locale labels.
-- Scope boundary: The contracts and their validation rules: unique IDs, no cycles, parents exist,
-  endpoints exist, mappings don't conflict, statuses, and verification states. No content import.
-- Data and artifact paths: `contracts/core/semantic/`, `src/kn/semantic/`, `tests/semantic/`.
-- Execution path: Write the contracts, compile, and add validation code with invalid fixtures for
-  every rule.
-- Acceptance gates: Fixtures with a cycle, a missing parent, a duplicate preferred label, an unknown
-  endpoint, and an ID collision are rejected. `make ci` passes.
-- Documentation target: A new `current/ontology-taxonomy.md` page listed in the
-  [areas index](current.md#areas).
 
 #### seed-vocabulary-import
 
@@ -158,8 +40,9 @@ The converted workbook proposals must become reviewed seed data with a row-by-ro
 
 - Serves: `ontology-taxonomy` -- [Ontology and taxonomy](../design/spec.md#ontology-and-taxonomy)
 - Agent status: CLEAR
-- Requires: `semantic-model-contracts`, `development-rebuild-mode`
-- Dependencies: The proposal JSON under `domains/<domain>/seeds/proposals/`, documented in
+- Dependencies: The [semantic meta-model](current/ontology-taxonomy.md), the
+  [reviewed seed hook](current/data-contracts/rebuild.md#reviewed-seed-hook) and
+  the proposal JSON under `domains/<domain>/seeds/proposals/`, documented in
   [domains/README.md](../../domains/README.md).
 - User-visible outcome: Every rebuild loads reviewed space, GDELT, and microelectronics ontology and
   taxonomy seeds with deterministic identifiers. A reconciliation report classifies every proposal
@@ -231,7 +114,7 @@ changing them later breaks stored data and links.
 
 - Serves: `ontology-taxonomy` -- [Ontology and taxonomy](../design/spec.md#ontology-and-taxonomy)
 - Agent status: CLEAR
-- Requires: `semantic-model-contracts`, `seed-vocabulary-import`, `verify-official-taxonomies`,
+- Requires: `seed-vocabulary-import`, `verify-official-taxonomies`,
   `skos-export`
 - Dependencies: The accepted task records of the group and the [implementation
   audit](../guide/planning-workflow.md#implementation-audits) checks.
@@ -263,8 +146,7 @@ Every later capability needs one durable KN ID per object before any claim refer
 
 - Serves: `object-identity` -- [Object identity](../design/spec.md#object-identity)
 - Agent status: CLEAR
-- Requires: `semantic-model-contracts`, `development-rebuild-mode`
-- Dependencies: none.
+- Dependencies: The [semantic meta-model](current/ontology-taxonomy.md).
 - User-visible outcome: The `identity` schema holds objects, identifiers with authority levels,
   identity attributes, source records with versions, links, match records, lifecycle events, and
   redirects. `kn db rebuild` replays the append-only identity event log in `$DATA_DIR/identity/`
@@ -509,7 +391,7 @@ Claims, evidence, and canonical facts need contracts that carry every provenance
 
 - Serves: `evidence-model` -- [Evidence model](../design/spec.md#evidence-model)
 - Agent status: CLEAR
-- Requires: `semantic-model-contracts`, `identity-registry-contracts`
+- Requires: `identity-registry-contracts`
 - Dependencies: none.
 - User-visible outcome: The `evidence` schema holds alias, claim, claim confirmation, evidence,
   relation assertion, canonical fact, and review item datasets with value-or-missing-reason
@@ -627,7 +509,6 @@ to be known before the contracts are fixed.
 - Serves: `part-supply-model` -- [Part and supply model](../design/spec.md#part-and-supply-model)
 - Agent status: CLEAR
 - Research: yes
-- Requires: `contract-toolchain-pin`
 - Dependencies: Public documentation of representative vendor channels: manufacturer product pages
   and datasheets for the watchlist families, distributor API documentation for the catalogue rows
   C01-C03, and the InvenTree API schema. The microelectronics attribute dictionary proposal.
@@ -712,8 +593,10 @@ Every candidate source must be visible and disabled before any crawler exists.
 
 - Serves: `source-management` -- [Source management](../design/spec.md#source-management)
 - Agent status: CLEAR
-- Requires: `development-rebuild-mode`
-- Dependencies: The data-source proposal JSON for space, microelectronics, and GDELT.
+- Dependencies: The [reviewed seed hook](current/data-contracts/rebuild.md#reviewed-seed-hook), the
+  [deployment set](current/data-contracts.md#deployment-set) that registers the catalogue contract
+  beside the governance contract in `system`, and the data-source proposal JSON for space,
+  microelectronics, and GDELT.
 - User-visible outcome: Every rebuild loads `system.source_catalogue` with 37 space, 65
   microelectronics, and 17 GDELT candidates. `kn source list` shows them in both locales.
 - Scope boundary: The catalogue contract, original IDs, lifecycle states, and access notes marked
@@ -919,16 +802,84 @@ Facts without a permitted machine-readable source need a disciplined manual path
 - Documentation target: `current/ingestion-engine.md` listed in the
   [areas index](current.md#areas).
 
+#### dataset-package-locations
+
+The SATCOM package can only be read from a local directory, so the owner cannot publish a new
+version on Google Drive for unattended re-import.
+
+- Serves: `ingestion-engine` -- [Ingestion engine](../design/spec.md#ingestion-engine)
+- Agent status: CLEAR
+- Dependencies: The [prefetched datasets](../design/spec.md#ingestion-engine) design and the current
+  [SATCOM import](current/data-contracts.md#source-preservation-and-import). Unit tests use a local
+  stub of the Drive API; the live run belongs to `publish-satcom-drive-package`.
+- User-visible outcome: `KN_SATCOM_SOURCE` in `.env` selects a local directory, a local ZIP, or
+  `gdrive:<file-id>`, and `make satcom-fetch` stages that package under
+  `$DATA_DIR/raw/space/satcom/<run-id>/` for `make satcom-import`. An unchanged Drive file ends
+  `not_modified` after one metadata request.
+- Scope boundary: The location resolver; the Drive v3 metadata and download client with a
+  read-only service-account key from `KN_GDRIVE_CREDENTIALS_FILE`; SHA-256 verification; safe
+  unpacking with file-count and size limits; the raw run directory with its manifest; and the SATCOM
+  commands as the first user. The module names no dataset, so `prefetched-dataset-method` reuses it.
+  Raw records stay blobs until `warc-raw-store`. No scheduler, no other Drive operation, and no
+  link-sharing URLs.
+- Data and artifact paths: `src/kn/engine/packages/`, `Makefile`, `.env.example`, `pyproject.toml`,
+  `uv.lock`, `$DATA_DIR/raw/space/satcom/`, `tests/engine/`.
+- Execution path: Write failing tests first: one snapshot identity from a fixture directory, its
+  ZIP, and the Drive stub; `not_modified`; hostile ZIPs; a Google-native item; a SHA-256 mismatch; a
+  missing key file; and no key path or token in logs. Then implement, adding `google-auth` as the
+  one runtime dependency with its lock update.
+- Acceptance gates: The prefetched-dataset evaluation items pass on fixtures without network access.
+  `make satcom-fetch satcom-import` from a ZIP of `.data/satcom_enriched_package` reaches the
+  existing snapshot `7ec6001f...` as a no-op. Output and logs hold no key material. `make ci`
+  passes.
+- Documentation target: `current/data-contracts.md` listed in the [areas index](current.md#areas).
+
+#### prefetched-dataset-method
+
+Owner-supplied datasets arrive as prefetched files. The SATCOM package is the first of several, but
+its integration is dataset-specific code beside the engine.
+
+- Serves: `ingestion-engine` -- [Ingestion engine](../design/spec.md#ingestion-engine)
+- Agent status: CLEAR
+- Requires: `warc-raw-store`, `mapping-and-quality-rules`, `dataset-package-locations`
+- Dependencies: Finding DC-16 of the [data contracts audit](records/0017-data-contracts-data-contracts-implementation-audit.md#findings),
+  the current [SATCOM import](current/data-contracts.md#source-preservation-and-import) as the first
+  dataset, and the `bulk_file` access method of the
+  [crawler configuration](../design/spec.md#source-management).
+- User-visible outcome: A prefetched dataset is a source with a reviewed configuration. `kn source
+  run` reads its supplied package directory, archives the package in the raw archive, and loads the
+  typed projection and raw cells through the engine loader. SATCOM moves to this path with its data,
+  tests, and evidence unchanged, and a further dataset needs only its contract, configuration, and
+  parser.
+- Scope boundary: A package profile in the source configuration (expected files and headers, CSV
+  dialect, snapshot identity); package locations from `dataset-package-locations`, with the
+  location variable named in the configuration; shared import, file, and raw-cell bookkeeping keyed
+  by source ID
+  instead of per-dataset tables; a `kn.sourceProfile` that is not fixed to `satcom-csv/1`; archive
+  placement under `raw/<domain>/<source-id>/<run-id>/`; and replay from the archive. The SATCOM
+  preservation rules stay: every file archived byte for byte, every cell kept, no formula or SQL
+  executed, and identical bytes a no-op. No fetching from the network.
+- Data and artifact paths: `src/kn/engine/`, `src/kn/domains/space/satcom/`,
+  `domains/space/sources/`, `tests/engine/`, `tests/domains/space/satcom/`.
+- Execution path: Add a second synthetic fixture dataset with failing tests first, then move the
+  generic parts of the SATCOM adapter into the engine until both pass with the SATCOM suite
+  unchanged.
+- Acceptance gates: Both datasets import, re-import as a no-op, and come back identically from the
+  archive. No core module names a dataset. A tampered archive and a package with a missing or extra
+  file are refused. `make ci` passes.
+- Documentation target: `current/ingestion-engine.md` listed in the
+  [areas index](current.md#areas).
+
 #### rebuild-from-raw
 
 Schema changes during development must cost a rebuild, never a re-fetch or a lost decision.
 
 - Serves: `ingestion-engine` -- [Ingestion engine](../design/spec.md#ingestion-engine)
 - Agent status: CLEAR
-- Requires: `curated-source-method`, `development-rebuild-mode`, `review-queue-cli`
+- Requires: `curated-source-method`, `prefetched-dataset-method`, `review-queue-cli`
 - Dependencies: none.
-- User-visible outcome: `kn db rebuild` replays the raw ledger, curated files, and decision logs
-  through current code, and reports orphaned decisions.
+- User-visible outcome: `kn db rebuild` replays the raw ledger, curated files, prefetched datasets,
+  and decision logs through current code, and reports orphaned decisions.
 - Scope boundary: Replay ordering, the replay of every source suite in `make ci-local`, and
   canonical row-hash comparison. No network access during rebuild.
 - Data and artifact paths: `src/kn/db/`, `src/kn/engine/replay.py`, `tests/integration/`.
@@ -2595,6 +2546,36 @@ prompts would be costly to unwind.
 - Documentation target: `current/ai-extraction.md` listed in the [areas index](current.md#areas).
 
 ## Human-Assisted Tasks
+
+### Ingestion engine -- `ingestion-engine`
+
+#### publish-satcom-drive-package
+
+Unattended re-import from Google Drive needs the owner's published package and a read-only account
+that the owner shares it with.
+
+- Serves: `ingestion-engine` -- [Ingestion engine](../design/spec.md#ingestion-engine)
+- Agent status: BLOCKED BY HUMAN
+- Requires: `dataset-package-locations`
+- Dependencies: The owner uploads the SATCOM package as one ZIP file to Google Drive, without
+  conversion to Google formats. The owner creates a Google Cloud service account with the Drive API
+  enabled, shares the file with it as a viewer, stores its key file under `$DATA_DIR/secrets/` with
+  mode `0600`, and sets `KN_SATCOM_SOURCE` and `KN_GDRIVE_CREDENTIALS_FILE` in `.env`. The owner
+  states the data rights (default `owner_private`) and whether periodic fetches are approved. An
+  agent prepares the checklist and the ZIP of `.data/satcom_enriched_package` with its SHA-256.
+- User-visible outcome: A recorded live fetch from the owner's Drive file, the rights and approval
+  decision, and the documented periodic command.
+- Scope boundary: Publication, access, and approval only. Credentials stay out of Git. Scheduled
+  collection beyond an operating-system timer comes with `scheduled-space-ingestion`.
+- Data and artifact paths: `.env` (local only), `$DATA_DIR/secrets/`, `$DATA_DIR/raw/space/satcom/`,
+  and the task record.
+- Execution path: The owner completes the checklist. The agent runs `make satcom-fetch
+  satcom-import` twice, then again after the owner uploads a changed revision.
+- Acceptance gates: The first fetch reaches the existing snapshot or imports a new one, the second
+  ends `not_modified` after one metadata request, and a changed revision imports a new snapshot
+  beside the earlier one. No key material appears in logs or the record. A refused access is a
+  valid negative result: it is recorded, and the dataset stays on its local location.
+- Documentation target: `current/data-contracts.md` listed in the [areas index](current.md#areas).
 
 ### InvenTree exchange -- `inventree-exchange`
 
