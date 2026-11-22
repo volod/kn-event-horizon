@@ -477,8 +477,15 @@ legends, tooltips, dashboard descriptions, exports, and user documentation. Engi
   `KN_LOCALE`. Machine-readable JSON output keeps stable keys and codes.
 - Formatting uses CLDR plural rules and locale-aware numbers and dates. Machine data uses ISO
   formats. Times display in UTC by default, with optional `Europe/Kyiv`. Text is UTF-8 end to end.
-- Vocabulary and entity labels are stored per locale with translation provenance. Originals are
-  preserved, and facts are never duplicated per locale.
+- Interface catalogs and crawled data have independent languages. Interface keys must exist in
+  every supported interface locale; missing interface translations fail validation.
+- Vocabulary, entity labels, and crawled text retain their original text, language tag (or `und`
+  when unknown), and source provenance, including Russian, Chinese, and other languages without
+  English or Ukrainian versions. Optional translations are derived text with provenance, never
+  replacements for the original or duplicate facts. Data display selects the requested language,
+  then English, then the original. It reports the selected language, provenance, and whether a
+  fallback occurred. An original already in the requested or fallback language is eligible in
+  that order. Missing translations never block ingestion or discard source text.
 - Superset enables `en` and `uk`. Dashboards are generated as locale twins from one semantic
   definition over the same datasets and metrics. Obsidian exports produce one locale per vault.
 - **Kestra waiver.** On 2026-11-20 the owner approved Kestra's native UI as an English-only
@@ -496,6 +503,8 @@ Evaluation:
 - CI fails when a key is missing in either locale, a key is unused, or a CLI handler contains a
   user-facing literal string.
 - Plural and formatting tests pass for both locales.
+- Multilingual data fixtures verify requested-language, English, and original fallback independently
+  of interface catalogs, retaining original text and translation provenance without mutation.
 - CLI golden outputs exist in both locales.
 - Browser screenshot smoke tests in both locales cover dashboards, filters, the map, the review
   queue, and the export README.
@@ -1683,7 +1692,7 @@ upstream before downstream.
 | 2 | `project-identity` | shipped | Import, CLI, and distribution-build tests agree on the `kn-event-horizon` identity | [Product core](../impl/current/product-core.md) |
 | 3 | `documentation-integrity` | shipped | Link, registry-plan, task-lane, metadata, ordering, prerequisites, forward-language, and closed-research register checks pass over fixtures and the repository tree | [Documentation checks](../guide/development.md#documentation-checks) |
 | 4 | `runtime-platform` | shipped | Pinned Compose database reaches healthy from empty volumes, keeps data across restart, publishes its port on loopback only, and serves integration tests on the development host | [Runtime platform](../impl/current/runtime-platform.md) |
-| 5 | `localization` | planned | Key coverage, plural, golden-output, and screenshot checks pass in `en` and `uk`; the Kestra waiver is the only English-only path | - |
+| 5 | `localization` | planned | Key coverage, plural, golden-output, and screenshot checks pass in `en` and `uk`; the Kestra waiver is the only English-only path | [Catalog core](../impl/current/localization.md) |
 | 6 | `data-contracts` | planned | Contracts compile deterministically, invalid contracts fail, drift fails CI, rebuild creates every schema, loaders cannot run DDL | [Initial space profile](../impl/current/data-contracts.md) |
 | 7 | `ontology-taxonomy` | planned | Every proposal row is classified, identifiers are stable, invalid hierarchies are rejected, SKOS round-trips | - |
 | 8 | `object-identity` | planned | KN IDs survive rebuilds; lifecycle, matching, partial-update, and lineage fixtures pass; calibrated classes meet the precision gate | - |

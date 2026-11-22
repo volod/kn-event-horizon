@@ -25,7 +25,9 @@ The README and the `pyproject.toml` description use the same project description
   `src/kn/metadata.py` holds `DISTRIBUTION_NAME` and `PACKAGE_NAME`, and falls back to
   `0.0.0+uninstalled` when distribution metadata is unavailable in a source-only checkout.
 - `src/kn/cli.py` owns argument parsing. `kn info` logs
-  `kn-event-horizon <version> (kn)`. Later operator subcommands attach to `build_parser()`.
+  `Project: kn-event-horizon <version> (kn)` in English.
+  [Localization](localization.md) describes `--locale`, `KN_LOCALE`, JSON, and bilingual help.
+  Operator subcommands attach to `build_parser()`.
 - `kn-plan --root <path>` prints the same plan summary as `make plan-status`.
 
 ## Verification
@@ -33,7 +35,7 @@ The README and the `pyproject.toml` description use the same project description
 | Check | Command | Expected result |
 | --- | --- | --- |
 | Installed import | `make doctor` | prints `kn-event-horizon` |
-| Installed CLI | `make run` | logs `kn-event-horizon 0.1.0 (kn)` |
+| Installed CLI | `make run` | logs `Project: kn-event-horizon 0.1.0 (kn)` |
 | Plan command | `.venv/bin/kn-plan` | the plan summary, same as `make plan-status` |
 | API and command tests | `make test` | `tests/test_metadata.py` and `tests/test_cli.py` pass |
 | Distribution build | `make build` | `kn_event_horizon-<version>.tar.gz` and a `py3-none-any` wheel |

@@ -106,7 +106,7 @@ lint-spec-plan: ## Check capability registry, plan tasks, and the closed-researc
 plan-status: ## Count tasks by lane/status and show declared priority
 	@"$(PY)" -m kn.quality.plan_summary --root "$(PROJECT_ROOT)"
 
-ci-checks: contract-check format-check lint typecheck complexity-gate shell-lint-gate lint-doc-links lint-spec-plan
+ci-checks: catalog-check contract-check format-check lint typecheck complexity-gate shell-lint-gate lint-doc-links lint-spec-plan
 
 ci: ci-checks test ## Run the required gate: checks and lightweight unit tests
 
@@ -161,3 +161,7 @@ db-upgrade: ## Apply Python platform policy and versioned Alembic migrations
 .PHONY: db-rebuild
 db-rebuild: ## Rebuild disposable SATCOM projections (requires KN_ENVIRONMENT=development)
 	@source "$(PROJECT_ROOT)/scripts/shared/common.sh"; kn_load_env; kn_db_govern rebuild
+
+.PHONY: catalog-check
+catalog-check: ## Check interface catalog parity, placeholders, key usage, and CLI literals
+	@"$(PY)" -m kn.quality.catalogs --root "$(PROJECT_ROOT)"

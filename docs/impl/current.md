@@ -22,4 +22,5 @@ documentation checks that came with the template are described in the
 | --- | --- |
 | [Product core](current/product-core.md) | Distribution, `kn` import package, `kn` and `kn-plan` commands, and identity verification |
 | [Runtime platform](current/runtime-platform.md) | Compose stack, the PostgreSQL and PostGIS service, `make db-*` targets, schemas, roles, the version manifest, the database integration test harness, and where each kind of test runs |
+| [Localization](current/localization.md) | Interface catalogs, CLI locale selection, CLDR plurals and numbers, catalog checks, and independent source-text fallback |
 | [Data contracts and space example import](current/data-contracts.md) | Editable version 1.0.0 baseline, SQLAlchemy and Alembic governance, portable engine artifacts, and lossless SATCOM example import within space |
