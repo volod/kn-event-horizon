@@ -23,7 +23,9 @@ def test_python_platform_generates_safe_policy_and_owns_default_grants() -> None
     statements = [str(call.args[0]) for call in conn.execute.call_args_list]
     assert "pg_advisory_xact_lock" in statements[0]
     assert statements.count("CREATE EXTENSION IF NOT EXISTS postgis WITH SCHEMA public") == 1
-    assert 'REVOKE ALL ON DATABASE "kn" FROM PUBLIC' in statements
+    assert "REVOKE ALL ON DATABASE kn FROM PUBLIC" in statements
+    assert "REVOKE CREATE ON SCHEMA public FROM PUBLIC" in statements
+    assert "ALTER EXTENSION postgis UPDATE" in statements
     assert sum(statement.startswith("CREATE ROLE ") for statement in statements) == 30
     assert sum(statement.startswith("CREATE SCHEMA ") for statement in statements) == 10
     assert not any("PASSWORD" in statement for statement in statements)
@@ -37,20 +39,33 @@ def test_python_platform_generates_safe_policy_and_owns_default_grants() -> None
     )
 
 
-def test_upgrade_uses_one_caller_transaction_and_resets_role(
+def test_upgrade_is_alembic_upgrade_head_in_the_caller_transaction(
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
     conn = connection()
-    apply = MagicMock()
     command = MagicMock()
-    monkeypatch.setattr(governance, "apply_platform", apply)
     monkeypatch.setattr(governance.command, "upgrade", command)
     governance.upgrade(conn)
-    assert apply.call_count == 2
     config, target = command.call_args.args
     assert config.attributes["connection"] is conn and target == "head"
-    assert "RESET ROLE" in [str(call.args[0]) for call in conn.execute.call_args_list]
     conn.commit.assert_not_called()
+
+
+def test_every_alembic_run_converges_the_platform_around_its_revisions(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    conn = connection()
+    events: list[str] = []
+    monkeypatch.setattr(governance, "apply_platform", lambda _: events.append("platform"))
+    conn.execute.side_effect = lambda statement: events.append(str(statement))
+    governance.governed_migrations(conn, lambda: events.append("revisions"))
+    assert events == [
+        "platform",
+        "SET LOCAL ROLE kn_system_owner",
+        "revisions",
+        "RESET ROLE",
+        "platform",
+    ]
 
 
 def test_verification_refuses_wrong_revision_unsafe_roles_and_owners(
@@ -66,7 +81,7 @@ def test_verification_refuses_wrong_revision_unsafe_roles_and_owners(
     conn.scalar.return_value = "intruder"
     with pytest.raises(ValueError, match="owner"):
         governance.verify(conn)
-    conn.scalar.side_effect = lambda statement, params: f"kn_{params['schema']}_owner"
+    conn.scalar.side_effect = [f"kn_{schema}_owner" for schema in platform.SCHEMAS]
     conn.execute.return_value.one_or_none.return_value = (True, False, False, False, False, False)
     with pytest.raises(ValueError, match="unsafe"):
         governance.verify(conn)

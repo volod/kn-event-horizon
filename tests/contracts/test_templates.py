@@ -105,15 +105,23 @@ def test_invalid_physical_intent_is_refused(tmp_path: Path, mutation: str) -> No
         load_contract(write_document(tmp_path, data))
 
 
-def test_default_directory_and_custom_check_require_output(tmp_path: Path, monkeypatch) -> None:
+def test_each_contract_checks_its_own_default_directory(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
     monkeypatch.chdir(tmp_path)
     assert cli.main(["contract", "compile"]) == 0
-    assert (tmp_path / "generated/manifest.json").is_file()
     data = compiler_document()
     data["schema"][0]["customProperties"] = []
     contract = load_contract(write_document(tmp_path, data))
-    with pytest.raises(ContractError, match="--output"):
+    with pytest.raises(ContractError, match="drift"):
         compile_contract(contract, check=True)
+    compile_contract(contract)
+    compile_contract(contract, check=True)
+    compile_contract(load_contract(), check=True)
+    assert sorted(path.name for path in (tmp_path / "generated" / "contracts").iterdir()) == [
+        "kn.space.satcom",
+        "space.example",
+    ]
 
 
 def test_canonical_outputs_ignore_object_key_order_and_bind_reference_payload(
@@ -186,3 +194,27 @@ def test_additive_evolution_refuses_unimplemented_new_metadata(change: str) -> N
     current = replace(current, tables=(table, *current.tables[1:]))
     with pytest.raises(ValueError, match="reviewed"):
         additions(previous, current)
+
+
+def single_table(tmp_path: Path, name: str) -> Path:
+    data = compiler_document()
+    table = data["schema"][0]
+    table["name"] = name
+    table["customProperties"] = []
+    table["properties"] = table["properties"][:1]
+    return write_document(tmp_path, data)
+
+
+@pytest.mark.parametrize("name", ["none", "true", "false", "string", "long", "null"])
+def test_names_reserved_by_generated_python_or_avro_are_refused(tmp_path: Path, name: str) -> None:
+    # None, True, and False are Python keywords; Avro forbids naming a record after a primitive.
+    with pytest.raises(ContractError, match="reserved"):
+        artifacts(load_contract(single_table(tmp_path, name)))
+
+
+@pytest.mark.parametrize("name", ["field", "decimal", "literal", "base_model", "config_dict"])
+def test_names_of_privately_imported_symbols_compile(tmp_path: Path, name: str) -> None:
+    result = artifacts(load_contract(single_table(tmp_path, name)))
+    namespace: dict = {}
+    exec(compile(result["pydantic/models.py"], "models.py", "exec"), namespace)
+    assert namespace["".join(part.capitalize() for part in name.split("_"))](id=1).id == 1

@@ -61,3 +61,23 @@ def test_document_depth_is_bounded_before_schema_validation(tmp_path: Path) -> N
     path.write_text(json.dumps(value))
     with pytest.raises(ContractError, match="depth"):
         document.read_document(path)
+
+
+@pytest.mark.parametrize(
+    "text", ['{"name": "a\\u0000b"}', '{"a\\u0000b": 1}', 'name: "a\\0b"', '{"list": ["\\u0000"]}']
+)
+def test_nul_characters_are_refused_because_postgresql_text_cannot_hold_them(
+    tmp_path: Path, text: str
+) -> None:
+    path = tmp_path / ("document.yaml" if text.startswith("name") else "document.json")
+    path.write_text(text)
+    with pytest.raises(ContractError, match="NUL"):
+        document.read_document(path)
+
+
+def test_the_root_hint_fits_contracts_and_reference_catalogs(tmp_path: Path) -> None:
+    path = tmp_path / "references.json"
+    path.write_text("[]")
+    with pytest.raises(ContractError) as error:
+        document.read_document(path)
+    assert "contract" not in error.value.hint

@@ -8,7 +8,7 @@ from pydantic import BaseModel
 from kn.contracts.diagnostics import ContractError
 from kn.contracts.model import Contract, Field, Table
 from kn.contracts.physical import extensions
-from kn.contracts.sqlalchemy import PARTIAL_DATE
+from kn.contracts.sqlalchemy import INTEGER_MAX, INTEGER_MIN, PARTIAL_DATE
 
 
 def model_name(table: Table) -> str:
@@ -28,18 +28,16 @@ def pydantic_models(contract: Contract) -> str:
         "",
     ]
     names: set[str] = set()
+    positions = {table.name: number for number, table in enumerate(contract.tables)}
     for table in sorted(contract.tables, key=lambda item: item.name):
         name = model_name(table)
-        if name in names or name in {
-            "BaseModel",
-            "Field",
-            "Literal",
-            "Decimal",
-            "Annotated",
-            "ConfigDict",
-            "AwareDatetime",
-        }:
-            raise ContractError((), "model", "table names must produce distinct Python class names")
+        # Imports are private, so only keywords (None, True, False) and repeats are refused.
+        if name in names or keyword.iskeyword(name):
+            raise ContractError(
+                ("schema", positions[table.name], "name"),
+                "model",
+                "rename tables whose Python class names are reserved or repeated",
+            )
         names.add(name)
         lines += [
             "",
@@ -84,9 +82,13 @@ def _annotation(field: Field) -> str:
             f"_kn_typing.Annotated[_kn_decimal.Decimal, _kn_pydantic.Field(max_digits={field.precision}, "
             f"decimal_places={field.scale}, allow_inf_nan=False)]"
         )
+    if field.logical_type == "integer":
+        return (
+            "_kn_typing.Annotated[_kn_builtins.int, "
+            f"_kn_pydantic.Field(ge={INTEGER_MIN}, le={INTEGER_MAX})]"
+        )
     return {
         "string": "_kn_builtins.str",
-        "integer": "_kn_builtins.int",
         "boolean": "_kn_builtins.bool",
         "date": "_kn_datetime.date",
         "timestamp": "_kn_pydantic.AwareDatetime",

@@ -38,6 +38,7 @@ def manifest(contract: Contract) -> dict[str, Any]:
             "primary_key": [column.name for column in table.primary_key],
             "foreign_keys": [
                 {
+                    "name": key.name,
                     "columns": list(key.column_keys),
                     "targets": [element.target_fullname for element in key.elements],
                     "deferrable": key.deferrable,

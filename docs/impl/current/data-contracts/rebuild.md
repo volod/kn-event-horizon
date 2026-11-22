@@ -21,33 +21,41 @@ command. Raw archive replay, identity event replay and decision replay remain pl
 
 ## Execution and transaction boundary
 
-`src/kn/db/rebuild.py` loads the bundled contract and generates its PostgreSQL DDL in memory using
-`kn.contracts.ddl.postgresql_ddl`. It never executes an artifact supplied through `generated/` or
-an archived source SQL file. The current bundle contains 32 SATCOM tables in `space`; the other nine
-schemas have no contracted datasets yet. Future storage contracts must be added explicitly to the
-deployment set together with their verification.
+`src/kn/db/rebuild.py` drops the KN schemas and then runs the normal `kn db upgrade` path:
+`alembic upgrade head`, whose environment converges the platform policy, and the editable baseline
+`0001_satcom`, which creates the bundled contract from its SQLAlchemy metadata as the schema owner
+and records the installed-contract marker. A rebuild and an upgrade of an empty database therefore
+use one mechanism. No SQL text is executed; the generated `postgresql/schema.sql` is a review
+artifact only, and an archived source `schema.sql` is evidence that nothing reads. The current
+bundle contains 32 SATCOM tables in `space`; the other nine schemas have no contracted datasets
+yet. A second storage contract needs the registry of `storage-contract-registry` in the
+[plan](../../plan.md).
 
 The caller owns the transaction. A nested transaction groups all KN schemas, because cross-schema
 references and the migration marker must stay consistent. The shared platform advisory lock
 serializes bootstrap, upgrade and rebuild. Rebuild reflects only KN tables without following
 foreign keys outside them, drops the tables without cascade, then drops the empty schemas with
-`RESTRICT`. It recreates schemas and grants through the shared Python policy, executes generated
-DDL as the schema owner, initializes the installed-contract marker, and stamps Alembic head.
-It then loads reviewed seeds and verifies the database before returning.
+SQLAlchemy `DropSchema`, which PostgreSQL applies as `RESTRICT`. It then loads reviewed seeds and
+verifies the database before returning.
 
 External dependencies refuse instead of being cascaded away. Non-table schema objects that the
 compiler does not manage, such as views, functions or standalone sequences, also refuse if they
 prevent an empty-schema drop. A refusal restores the previous schemas. Remove or migrate such
-objects explicitly before retrying. A failed DDL statement, seed loader or catalog check rolls back
-the complete group even when the caller catches the exception. No migration runs outside the
-caller's transaction.
+objects explicitly before retrying. A failed revision, seed loader or catalog check rolls back
+the complete group even when the caller catches the exception. A rebuild process that is killed
+midway leaves the previous committed schemas in use: readers keep the old catalog and wait for the
+dropped tables' locks, and the server rolls the transaction back when it notices the lost client.
+
+Without `KN_ENVIRONMENT=development`, the command reports
+`E_INPUT: rebuild requires KN_ENVIRONMENT=development; ...` in the selected locale.
 
 ## Reviewed seed hook
 
 `src/kn/db/seeds.py` owns the ordered `REVIEWED_SEED_LOADERS` registry. Each entry supplies a KN
-schema and a deterministic callable accepting the rebuild connection. The hook runs the callable
-as that schema's loader role, with DML privileges only, and then resets the role. Loaders must use
-the supplied transaction and must not commit independently. An exception aborts the rebuild.
+schema and a deterministic callable accepting the rebuild connection. The hook runs the callable as
+that schema's loader role (`SET LOCAL ROLE`), with DML privileges only, and then resets the role.
+Loaders must use the supplied transaction and must not commit independently. An exception aborts the
+rebuild.
 
 The registry is currently empty: ontology vocabulary and source catalogue review are separate plan
 tasks. Proposals are never loaded automatically, and SATCOM source imports are not seed data. Those
@@ -58,15 +66,22 @@ tasks will register loaders for their reviewed files; this task supplies and tes
 After the rebuild, the existing governance checks verify Alembic head, contract digest, table and
 column types, nullability, foreign keys, indexes, role attributes, schema isolation and table and
 sequence grants. `verify_compiled_catalog` additionally checks the exact compiled table set,
-primary key names and columns, check constraint names, and table and column comments. It does not
+primary key names and columns, check constraint and foreign key names, and table and column
+comments. Structural verification also compares PostGIS geometry types and SRIDs, which Alembic
+reflects as an unknown type. It does not
 prove equivalence of arbitrary manually edited check expressions.
 
 `tests/integration/test_rebuild.py` starts from empty KN schemas, rebuilds twice, compares catalog
-structure and deterministic seed rows, and exercises real loader DDL refusals. It plants missing
-checks, altered primary key names, missing comments, seed exceptions and SQL errors, obsolete
-tables, external dependencies and unsupported views. Destructive probes roll back and leave the
-original database in place. Run `make test-integration` against local PostGIS, or `make ci-local`
-for both the required CI gate and local-only tests.
+structure and deterministic seed rows, and exercises real loader DDL refusals. After the baseline it
+plants a dropped check, a renamed primary key or foreign key, and a missing comment, and it plants
+seed exceptions and SQL errors, obsolete tables, external dependencies and unsupported views. It
+also records every SQL string the rebuild sends and finds no `CREATE TABLE`.
+`tests/integration/test_rebuild_interrupt.py` kills a rebuild process while it holds the dropped
+schemas and checks that the catalog, a sentinel row and verification are unchanged. Destructive
+probes roll back and leave the original database in place. Run `make test-integration` against local
+PostGIS, or `make ci-local` for both the required CI gate and local-only tests.
 
 [Task record 0016](../../records/0016-data-contracts-development-rebuild-mode.md) preserves acceptance
-evidence and the plan transition.
+evidence and the plan transition, and the group audit in
+[record 0017](../../records/0017-data-contracts-data-contracts-implementation-audit.md) replaced the
+executed DDL string with the Alembic path.

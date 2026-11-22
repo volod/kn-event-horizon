@@ -16,6 +16,7 @@ from jsonschema import ValidationError
 from sqlalchemy.exc import SQLAlchemyError
 
 from kn.contracts.diagnostics import ContractError
+from kn.db.rebuild import RebuildRefused
 from kn.i18n import DEFAULT_LOCALE, Translator
 from kn.i18n.output import render_result
 from kn.i18n.parser import OperatorParser, parse_interface_options
@@ -82,6 +83,9 @@ def main(argv: Sequence[str] | None = None) -> int:
         result = _run(args)
     except SQLAlchemyError:
         _report_error(translator.text("cli.database_error"), "E_DATABASE", selected.json)
+        return 1
+    except RebuildRefused:
+        _report_error(translator.text("cli.rebuild_refused"), "E_INPUT", selected.json)
         return 1
     except ContractError as error:
         diagnostic = error.diagnostic()

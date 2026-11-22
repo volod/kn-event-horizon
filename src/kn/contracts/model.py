@@ -1,9 +1,23 @@
 """Small immutable model shared by validators, engines, and import adapters."""
 
+import json
 from dataclasses import dataclass
 from typing import Literal
 
 LogicalType = Literal["string", "integer", "number", "boolean", "date", "timestamp"]
+LOGICAL_TYPES: tuple[LogicalType, ...] = (
+    "string",
+    "integer",
+    "number",
+    "boolean",
+    "date",
+    "timestamp",
+)
+
+
+def canonical(value: object) -> str:
+    """Sorted, compact ASCII JSON: the serialization behind every digest and stored document."""
+    return json.dumps(value, ensure_ascii=True, sort_keys=True, separators=(",", ":"))
 
 
 @dataclass(frozen=True)

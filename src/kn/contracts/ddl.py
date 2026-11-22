@@ -16,7 +16,9 @@ def postgresql_ddl(contract: Contract) -> str:
     statements: list[str] = []
 
     def emit(statement: sa.schema.DDLElement) -> None:
-        statements.append(_ascii_sql(str(statement.compile(dialect=postgres)).strip()) + ";")
+        text = _ascii_sql(str(statement.compile(dialect=postgres)).strip())
+        # No literal spans lines after escaping, so trailing blanks are layout only.
+        statements.append("\n".join(line.rstrip() for line in text.splitlines()) + ";")
 
     for table in tables:
         emit(sa.schema.CreateTable(table, include_foreign_key_constraints=[]))
@@ -34,15 +36,15 @@ def postgresql_ddl(contract: Contract) -> str:
 
 
 def _ascii_sql(statement: str) -> str:
-    """PostgreSQL Unicode escape literals preserve text in an ASCII SQL artifact."""
+    """Unicode escape literals keep non-ASCII text and line breaks in a one-line ASCII literal."""
 
     def literal(match: re.Match[str]) -> str:
         value = match.group()
-        if value.isascii():
+        if value.isascii() and value.isprintable():
             return value
         escaped = "".join(
             char
-            if ord(char) < 128
+            if char.isascii() and char.isprintable()
             else (f"\\{ord(char):04x}" if ord(char) <= 0xFFFF else f"\\+{ord(char):06x}")
             for char in value.replace("\\", "\\\\")
         )

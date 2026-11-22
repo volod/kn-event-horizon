@@ -142,12 +142,12 @@ quality-report: ## Report Python/shell files over the 250-line soft limit
 		xargs -0 -r wc -l | awk '$$2 != "total" && $$1 > 250 {print}' | sort -nr
 
 .PHONY: contract-check contract-compile satcom-validate satcom-import db-upgrade
-contract-check: ## Validate open contracts and check generated artifact digests
-	@"$(VENV)/bin/kn" contract lint
-	@"$(VENV)/bin/kn" contract compile --check
+contract-check: ## Validate open contracts and check committed generated/ output byte for byte
+	@cd "$(PROJECT_ROOT)" && "$(VENV)/bin/kn" contract lint
+	@cd "$(PROJECT_ROOT)" && "$(VENV)/bin/kn" contract compile --check
 
-contract-compile: ## Compile contract artifacts under DATA_DIR
-	@"$(VENV)/bin/kn" contract compile --output "$(DATA_ROOT)/contract/current"
+contract-compile: ## Refresh the committed generated/contracts/ output for review
+	@cd "$(PROJECT_ROOT)" && "$(VENV)/bin/kn" contract compile
 
 .PHONY: contract-toolchain-check
 contract-toolchain-check: ## Run the locked external linter/exporter in an isolated tool environment

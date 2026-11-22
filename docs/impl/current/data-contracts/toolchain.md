@@ -49,12 +49,15 @@ Failures return exit code 1. Structured validation and parse failures use `E_CON
 `path`, `rule`, and `hint` fields under `error` in JSON mode. Paths use `$` followed by JSON Pointer
 segments, for example `$/schema/0/properties/0/customProperties/0/value`. Hints name the expected
 constraint without echoing rejected values. Invalid syntax reports a line and column when the
-parser provides them. Unreadable files use the existing `E_INPUT` error.
+parser provides them. Unreadable files use the existing `E_INPUT` error. Compile-profile refusals
+after lint, such as an unsupported key or type, a missing stable field ID, or a nullable primary
+key, are `E_CONTRACT` diagnostics with the same location format.
 
 `document.py` accepts one UTF-8 JSON or YAML object, up to 8 MiB and 32 nesting levels. It rejects
 duplicate mapping keys,
-non-string keys, aliases, recursive input, unsafe tags, non-finite numbers, and YAML values outside
-the JSON data model. Implicit YAML dates remain strings. Input references and URLs are data;
+non-string keys, aliases, recursive input, unsafe tags, non-finite numbers, NUL characters in keys
+or strings (PostgreSQL text cannot hold them), and YAML values outside the JSON data model. The same
+reader loads reference catalogs. Implicit YAML dates remain strings. Input references and URLs are data;
 lint does not retrieve or execute them. JSON is read directly to keep the bundled contract fast.
 
 ## Extension shapes

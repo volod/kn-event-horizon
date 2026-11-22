@@ -22,6 +22,7 @@
   "cli.locale_help": "interface language (en or uk)",
   "cli.options": "options",
   "cli.output_help": "compiled artifact directory",
+  "cli.rebuild_refused": "E_INPUT: rebuild requires KN_ENVIRONMENT=development; a released or unmarked environment is never rebuilt.",
   "cli.references_help": "local compiler reference catalog (JSON or YAML)",
   "cli.satcom_help": "validate or import the SATCOM example dataset",
   "cli.source_help": "source package directory",

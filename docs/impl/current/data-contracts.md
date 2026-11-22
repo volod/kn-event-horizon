@@ -1,7 +1,10 @@
 # Data Contracts and Space Example Import
 
-The space domain has an initial SATCOM source dataset. SATCOM is a subset of space, not a domain,
-service, or PostgreSQL schema of its own. This implementation supplies the first bounded profile
+The space domain has an initial SATCOM source dataset: owner-supplied, prefetched files from a real
+space source, kept as the first data integration example. More prefetched datasets will follow
+through a shared path (`prefetched-dataset-method` in the [plan](../plan.md)); today the adapter is
+SATCOM-specific. SATCOM is a subset of space, not a domain, service, or PostgreSQL schema of its
+own. This implementation supplies the first bounded profile
 of the [data contracts capability](../../design/spec.md#data-contracts). The remaining ontology,
 identity, interchange and raw replay work stays in the [plan](../plan.md).
 
@@ -31,11 +34,13 @@ Elasticsearch mappings, dbt sources and contract documentation. The
 [compiler reference](data-contracts/compiler.md) describes the supported profile, reference catalog,
 PostGIS and partition templates, output paths, and exact-byte drift checks.
 
-`make contract-check` validates the bundled contract and checks the reviewed artifact digest
-manifest, including physical mappings and generated DDL. `make contract-compile` writes 103 artifacts
-plus a manifest under `$DATA_DIR/contract/current/`. `kn contract compile` defaults to `generated/`;
-`--output <directory>` selects another destination. Normal Alembic upgrades consume SQLAlchemy
-metadata; the explicit development rebuild executes DDL freshly generated from the same contract.
+`make contract-check` validates the bundled contract and compares the committed
+`generated/contracts/kn.space.satcom/` (103 artifacts plus a manifest, including physical mappings
+and generated DDL) byte for byte with a fresh compile. `make contract-compile` refreshes that
+directory. `kn contract compile` defaults to `generated/contracts/<contract-id>/`; `--output
+<directory>` selects another destination. Normal upgrades and the explicit development rebuild both
+run the Alembic baseline over the contract's SQLAlchemy metadata. No SQL text reaches the database:
+schema objects come from SQLAlchemy metadata, and the platform policy from typed statements.
 
 ## Development baseline and release evolution
 
@@ -47,7 +52,7 @@ alter an existing projection to match edited development definitions.
 For a development model edit:
 
 1. Edit the `1.0.0` contract, baseline if needed, and regression fixtures.
-2. Refresh the reviewed artifact manifest and run `make ci`.
+2. Run `make contract-compile`, review the `generated/` diff, and run `make ci`.
 3. Set `KN_ENVIRONMENT=development` and run `make db-rebuild`.
 4. Run `make satcom-import` to restore the example dataset from the source package.
 
@@ -64,7 +69,8 @@ additive operations for new tables and nullable fields. It refuses removals, ren
 identity, nullability, enum, reference and precision changes, and new constrained fields that need
 backfill. Changes to table metadata or reference definitions and new fields with semantic
 extensions require reviewed migrations instead of silently losing new compiler behavior.
-Additive evolution updates the installed contract marker. A revision calls this helper
+Additive evolution adds new fields with their comments, applies changed table and field
+descriptions, and updates the installed contract marker. A revision calls this helper
 with reviewed old and new contracts; deployment never autogenerates or applies arbitrary drift.
 Destructive downgrades are refused. The full-model release gate remains `release-migration-mode`.
 
@@ -125,10 +131,31 @@ or exchange. The importer does not fetch URLs or treat a local file as permissio
 The compiler supports flat scalar models and bounded WKT/PostGIS geometry templates. PostgreSQL
 numeric bounds hold this dataset exactly; oversized new values fail and keep their original input
 file available.
-Structural drift checking covers tables, columns, types, nullability and references through
-Alembic; it does not prove equivalence of arbitrary manually altered check expressions. The pinned
-standard and implemented ODCS profile remain bounded; ontology content, cross-contract SQL
-references, runtime semantic policies and interchange compilation remain separately planned.
+Structural drift checking covers tables, columns, types including PostGIS geometry, nullability,
+comments and references through Alembic; it does not prove equivalence of arbitrary manually
+altered check expressions. The pinned standard and implemented ODCS profile remain bounded;
+ontology content, runtime semantic policies and interchange compilation remain separately planned.
+
+Known limitations, with what would reopen them:
+
+- The prefetched-dataset path is SATCOM-specific: its own commands (`kn space satcom`), bookkeeping
+  tables, archive directory (`$DATA_DIR/satcom-import/`), and a `kn.sourceProfile` fixed to
+  `satcom-csv/1`, and rebuild does not restore it. `prefetched-dataset-method` in the
+  [plan](../plan.md) generalizes it before the next dataset.
+- One storage contract is deployed. Upgrade, rebuild, verification and the installed-contract
+  marker (`space.satcom_contract`) know only the bundled SATCOM contract, `kn.storageSchema` is not
+  checked against the platform schemas at compile time, and cross-contract SQL references are
+  refused. `storage-contract-registry` in the [plan](../plan.md) owns this before the first second
+  contract.
+- The digest covers the source document as written. Reordering tables or `customProperties`
+  entries changes the digest and `contract.json`, though every other artifact is byte-identical
+  after masking the digest, so a reorder costs a development rebuild or a release version bump.
+  This is kept so that the digest names exactly the reviewed text. Reopen it if reorders cause
+  review churn or when contracts are assembled from several files.
+- A development database created before the audit keeps its old single-column foreign key names
+  (`fk_<table>_import_id_`) until the next `make db-rebuild`. Structural verification compares
+  references by columns, so `make db-verify` passes; the compiled-catalog check of a rebuild
+  compares names.
 
 ## Verification
 
@@ -142,6 +169,10 @@ references, runtime semantic policies and interchange compilation remain separat
   numeric values.
 - `tests/contracts/test_contracts.py`: deterministic exports, invalid contracts, PostgreSQL DDL
   compilation, independent fastavro schema parsing and exact decimal/date/null round trips.
+- `tests/contracts/test_physical.py`, `test_type_mapping.py`, `test_diagnostics.py` and
+  `test_generated.py`: derived names, value ranges, located refusals and the committed output.
+- `tests/contracts/test_statements.py`: typed platform statements, and no SQL string in production
+  code.
 - `tests/contracts/test_lint.py` and `test_document.py`: every extension family, invalid fixtures,
   schema tampering, compiler refusal of lint-only metadata, and safe YAML/JSON failure paths.
 - `make contract-toolchain-check`: isolated pinned external linter and export probe, separate from
@@ -157,3 +188,6 @@ The full compiler templates, offline reference resolution and drift acceptance a
 
 The all-schema rebuild and reviewed-seed hook are in
 [record 0016](../records/0016-data-contracts-development-rebuild-mode.md).
+
+The implementation audit of the group, its findings and their dispositions are in
+[record 0017](../records/0017-data-contracts-data-contracts-implementation-audit.md).

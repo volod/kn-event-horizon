@@ -16,7 +16,7 @@ helper. The targets refuse to run as root and need Docker Engine with the Compos
 | `make db-up` | Creates the password file and `$DATA_DIR/postgres/` if they are missing, starts the service, waits up to 180 s for server readiness, then runs Python platform governance, Alembic upgrade, contract and privilege verification, and prints the host address and the password file path. When the service does not become healthy, it prints the last 30 log lines and a hint about a taken port or a failed first initialization, and exits 1. |
 | `make db-down` | Removes the containers and the networks. `$DATA_DIR/postgres/` is kept. |
 | `make db-reset` | Runs `db-down`, deletes `$DATA_DIR/postgres/`, then runs `db-up`. The password file and the rest of `$DATA_DIR` are kept. It refuses a `DATA_DIR` that is empty, relative, or `/`, and refuses `KN_ENVIRONMENT=released`. |
-| `make db-upgrade` | Applies Python platform policy and the Alembic head, then verifies the installed contract. |
+| `make db-upgrade` | Runs `alembic upgrade head`, whose environment converges the Python platform policy, then verifies the installed contract. |
 | `make db-rebuild` | Recreates all disposable KN schemas from compiled DDL when `KN_ENVIRONMENT=development`; runs reviewed seed hooks and verifies the catalog. See [rebuild](data-contracts/rebuild.md). |
 | `make db-verify` | Runs the Python role, contract and structure probes against the running database. It prints `kn roles verified: 10 schemas, 30 roles, postgis 3.7.0`, or fails with an error that names the first failed check. |
 | `make test-integration` | Runs the tests marked `integration` against the running database. It does not start or stop the database. See [Integration tests](#integration-tests). |
@@ -78,10 +78,17 @@ the container. Unix socket connections inside the container are trusted, and onl
 `src/kn/contracts/resources/platform.json`. `make db-up` starts the server, then invokes
 `kn db upgrade` through the host virtual environment. The mounted init directory contains only
 `.gitkeep`, replacing the image's own init SQL so `kn` has no `topology` schema or
-`template_postgis` database. Deployment has no SQL files.
+`template_postgis` database. Deployment has no SQL files and sends no SQL text: the policy uses
+the typed statements of `src/kn/db/statements.py` (roles, grants, default privileges, the extension,
+schema owners, and role switches), SQLAlchemy `CreateSchema` and `DropSchema`, and Core queries
+over the system catalogs in `src/kn/db/catalog.py`. `tests/contracts/test_statements.py` fails when
+production code sends a SQL string.
 
-The Python platform policy, Alembic upgrade and verification run in one transaction. The policy
-first takes transaction-level advisory lock `(0x4B4E4253, 0)`; concurrent deployments serialize.
+`kn db upgrade` is `alembic upgrade head` on one caller transaction, followed by verification. The
+Alembic environment (`src/kn/db/migrations/env.py`) converges the platform policy before and after
+the revisions on every run, so an image update or a new schema reaches an existing database. The
+policy first takes transaction-level advisory lock `(0x4B4E4253, 0)`; concurrent deployments
+serialize.
 Failures return nonzero and roll back governance changes; server readiness alone is not successful
 deployment. Retry `make db-upgrade` after correcting the error. Contract digest drift during
 development needs an explicit guarded rebuild and source backfill, described under

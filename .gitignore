@@ -23,7 +23,6 @@ __pycache__/
 /build/
 /dist/
 /.eggs/
-/generated/
 
 # Editors and operating systems
 .DS_Store

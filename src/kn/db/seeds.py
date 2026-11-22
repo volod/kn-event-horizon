@@ -4,7 +4,8 @@ from collections.abc import Callable
 
 from sqlalchemy.engine import Connection
 
-from kn.db.platform import SCHEMAS, ddl
+from kn.db.platform import SCHEMAS, role_name
+from kn.db.statements import ResetRole, SetRole
 
 # Append a schema and deterministic loader only after its reviewed seed task is accepted.
 REVIEWED_SEED_LOADERS: tuple[tuple[str, Callable[[Connection], None]], ...] = ()
@@ -15,6 +16,6 @@ def load_reviewed_seeds(connection: Connection) -> None:
     for schema, loader in REVIEWED_SEED_LOADERS:
         if schema not in SCHEMAS:
             raise ValueError("reviewed seeds must target a KN schema")
-        ddl(connection, f"SET LOCAL ROLE kn_{schema}_loader")
+        connection.execute(SetRole(role_name(schema, "loader")))
         loader(connection)
-        ddl(connection, "RESET ROLE")
+        connection.execute(ResetRole())

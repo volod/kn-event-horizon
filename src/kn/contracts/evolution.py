@@ -5,8 +5,7 @@ from dataclasses import replace
 import sqlalchemy as sa
 from alembic.operations import Operations
 
-from kn.contracts.loader import canonical
-from kn.contracts.model import Contract, Field, Table
+from kn.contracts.model import Contract, Field, Table, canonical
 from kn.contracts.physical import extensions
 from kn.contracts.sqlalchemy import column_type, metadata
 
@@ -88,9 +87,15 @@ def evolve(operations: Operations, previous: Contract, current: Contract) -> Non
             if field.name in columns:
                 operations.add_column(
                     name,
-                    sa.Column(field.name, column_type(field), nullable=True),
+                    sa.Column(
+                        field.name,
+                        column_type(field),
+                        nullable=True,
+                        comment=field.description or None,
+                    ),
                     schema=current.schema,
                 )
+    _apply_comments(operations, previous, current)
 
     operations.get_bind().execute(
         marker.update()
@@ -101,3 +106,33 @@ def evolve(operations: Operations, previous: Contract, current: Contract) -> Non
             managed_tables_json=canonical([table.name for table in current.tables]),
         )
     )
+
+
+def _apply_comments(operations: Operations, previous: Contract, current: Contract) -> None:
+    """Descriptions are the only accepted change to existing tables and fields."""
+    for old in previous.tables:
+        new = current.table(old.name)
+        if new.description != old.description:
+            if new.description:
+                operations.create_table_comment(
+                    old.name,
+                    new.description,
+                    existing_comment=old.description or None,
+                    schema=current.schema,
+                )
+            else:
+                operations.drop_table_comment(
+                    old.name, existing_comment=old.description, schema=current.schema
+                )
+        fields = {field.name: field for field in new.fields}
+        for field in old.fields:
+            if fields[field.name].description != field.description:
+                operations.alter_column(
+                    old.name,
+                    field.name,
+                    comment=fields[field.name].description or None,
+                    existing_comment=field.description or None,
+                    existing_type=column_type(field),
+                    existing_nullable=not field.required,
+                    schema=current.schema,
+                )

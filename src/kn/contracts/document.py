@@ -14,6 +14,7 @@ from kn.contracts.diagnostics import ContractError, Location
 
 MAX_DOCUMENT_BYTES = 8 * 1024 * 1024
 MAX_DOCUMENT_DEPTH = 32
+NUL = "\x00"
 
 
 class ContractLoader(yaml.SafeLoader):
@@ -48,14 +49,24 @@ def _json_value(value: Any, path: Location = ()) -> None:
         raise ContractError(path, "depth", f"limit nesting to {MAX_DOCUMENT_DEPTH} levels")
     if isinstance(value, dict):
         for key, child in value.items():
+            _text(key, path)
             _json_value(child, (*path, key))
     elif isinstance(value, list):
         for index, child in enumerate(value):
             _json_value(child, (*path, index))
+    elif isinstance(value, str):
+        _text(value, path)
     elif isinstance(value, float) and not math.isfinite(value):
         raise ContractError(path, "number", "use finite JSON numbers")
     elif value is not None and not isinstance(value, (str, int, float, bool)):
         raise ContractError(path, "type", "use JSON-compatible YAML values")
+
+
+def _text(value: str, path: Location) -> None:
+    if NUL in value:
+        raise ContractError(
+            path, "character", "remove NUL characters; PostgreSQL text cannot hold them"
+        )
 
 
 def _json_pairs(pairs: list[tuple[str, Any]]) -> dict[str, Any]:
@@ -93,5 +104,5 @@ def read_document(path: Path) -> dict[str, Any]:
     except (RecursionError, UnicodeError):
         raise ContractError((), "syntax", "use UTF-8 and reduce document nesting") from None
     if not isinstance(data, dict):
-        raise ContractError((), "type", "use a contract object at the document root")
+        raise ContractError((), "type", "use a JSON or YAML object at the document root")
     return data

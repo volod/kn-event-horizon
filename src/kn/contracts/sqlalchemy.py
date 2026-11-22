@@ -5,14 +5,19 @@ from typing import Any
 import sqlalchemy as sa
 
 from kn.contracts.model import Contract, Field, Table
-from kn.contracts.physical import column_names, extensions
+from kn.contracts.names import check_name, foreign_key_name, primary_key_name, table_references
+from kn.contracts.physical import (
+    ENUM_CHECK,
+    GEOMETRY_CHECK,
+    check_kinds,
+    column_names,
+    extensions,
+)
 
 PARTIAL_DATE = r"^[0-9]{4}(-[0-9]{2}(-[0-9]{2})?)?$"
-NAMING = {
-    "pk": "pk_%(table_name)s",
-    "fk": "fk_%(table_name)s_%(column_0_name)s_%(column_1_name)s",
-    "ck": "ck_%(table_name)s_%(constraint_name)s",
-}
+# Integer fields are BIGINT; wire and native validators accept the same range.
+INTEGER_MIN = -(2**63)
+INTEGER_MAX = 2**63 - 1
 
 
 class Geometry(sa.types.UserDefinedType[Any]):
@@ -47,17 +52,19 @@ def column_type(field: Field) -> sa.types.TypeEngine[Any]:
 def metadata(contract: Contract, schema: str | None = None) -> sa.MetaData:
     """Create fresh metadata; snapshot references remain deferrable across cyclic tables."""
     target = schema if schema is not None else contract.schema
-    result = sa.MetaData(schema=target or None, naming_convention=NAMING)
+    result = sa.MetaData(schema=target or None)
     for model in sorted(contract.tables, key=lambda item: item.name):
         table = sa.Table(
             model.name,
             result,
             *[
+                # No sequence: identifiers come from durable inputs, never from load order.
                 sa.Column(
                     field.name,
                     column_type(field),
                     nullable=not field.required,
                     primary_key=field.primary_key,
+                    autoincrement=False,
                     comment=field.description or None,
                     info={"field_id": field.field_id},
                 )
@@ -67,6 +74,7 @@ def metadata(contract: Contract, schema: str | None = None) -> sa.MetaData:
             comment=model.description or None,
             **_table_options(model),
         )
+        table.primary_key.name = primary_key_name(model)
         for index in extensions(model).get("index", []):
             sa.Index(
                 index["name"],
@@ -75,7 +83,21 @@ def metadata(contract: Contract, schema: str | None = None) -> sa.MetaData:
                 postgresql_using=index["method"],
             )
         for field in model.fields:
-            _constraints(table, field, target)
+            for kind in check_kinds(field):
+                table.append_constraint(_check(table, model, field, kind))
+        for ref in table_references(model):
+            table.append_constraint(
+                sa.ForeignKeyConstraint(
+                    list(ref.fields),
+                    [
+                        f"{target + '.' if target else ''}{ref.table}.{name}"
+                        for name in ref.target_fields
+                    ],
+                    name=foreign_key_name(model, ref),
+                    deferrable=True,
+                    initially="DEFERRED",
+                )
+            )
     return result
 
 
@@ -88,34 +110,14 @@ def _table_options(model: Table) -> dict[str, Any]:
     return {"postgresql_partition_by": f"{partition['strategy'].upper()} ({columns})"}
 
 
-def _constraints(table: sa.Table, field: Field, target: str) -> None:
-    spatial = extensions(field).get("spatialProfile")
-    if spatial:
-        valid: sa.ColumnElement[bool] = sa.func.ST_IsValid(table.c[field.name])
-        if spatial["validity"] == "required":
-            valid = sa.and_(valid, ~sa.func.ST_IsEmpty(table.c[field.name]))
-        table.append_constraint(sa.CheckConstraint(valid, name=f"{field.name}_geometry"))
-    if field.enum:
-        table.append_constraint(
-            sa.CheckConstraint(table.c[field.name].in_(field.enum), name=f"{field.name}_enum")
-        )
-    if field.partial_date:
-        table.append_constraint(
-            sa.CheckConstraint(
-                table.c[field.name].op("~")(PARTIAL_DATE), name=f"{field.name}_precision"
-            ).ddl_if(dialect="postgresql")
-        )
-    if field.reference:
-        ref = field.reference
-        columns = list(ref.fields)
-        targets = [
-            f"{target + '.' if target else ''}{ref.table}.{name}" for name in ref.target_fields
-        ]
-        if not any(
-            list(key.column_keys) == columns
-            and [element.target_fullname for element in key.elements] == targets
-            for key in table.foreign_key_constraints
-        ):
-            table.append_constraint(
-                sa.ForeignKeyConstraint(columns, targets, deferrable=True, initially="DEFERRED")
-            )
+def _check(table: sa.Table, model: Table, field: Field, kind: str) -> sa.CheckConstraint:
+    column = table.c[field.name]
+    name = check_name(model, field, kind)
+    if kind == GEOMETRY_CHECK:
+        valid: sa.ColumnElement[bool] = sa.func.ST_IsValid(column)
+        if extensions(field)["spatialProfile"]["validity"] == "required":
+            valid = sa.and_(valid, ~sa.func.ST_IsEmpty(column))
+        return sa.CheckConstraint(valid, name=name)
+    if kind == ENUM_CHECK:
+        return sa.CheckConstraint(column.in_(field.enum), name=name)
+    return sa.CheckConstraint(column.op("~")(PARTIAL_DATE), name=name).ddl_if(dialect="postgresql")

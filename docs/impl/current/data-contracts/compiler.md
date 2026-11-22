@@ -13,11 +13,15 @@ make contract-compile
 ```
 
 Without a source, compilation uses the bundled SATCOM contract. Without an output directory, it
-writes `generated/` relative to the working directory. `make contract-compile` keeps the existing
-runtime destination `$DATA_DIR/contract/current/`. These are generated review artifacts. Normal upgrades
-consume SQLAlchemy metadata through Python Alembic revisions. The explicit
-[development rebuild](rebuild.md) executes DDL freshly compiled from the bundled contract, with
-role policy supplied separately by shared Python governance.
+writes `generated/contracts/<contract-id>/` relative to the working directory, and `--check`
+compares the same directory. A contract ID that is not a plain file name (letters, digits, `.`,
+`_`, `-`, not starting with `.`) needs `--output`. `make contract-compile` refreshes the committed
+`generated/contracts/kn.space.satcom/` from the project root, and `make contract-check` compares it
+byte for byte. Other generators keep their own directories under `generated/`.
+
+These are review artifacts; nothing executes them. Normal upgrades and the
+[development rebuild](rebuild.md) both run the Alembic baseline over the same SQLAlchemy metadata,
+and the platform policy uses typed SQLAlchemy statements, so no SQL text reaches the database.
 
 | Path inside the output | Content |
 | --- | --- |
@@ -33,10 +37,14 @@ role policy supplied separately by shared Python governance.
 | `jsonschema/<table>.json` | Closed JSON Schema wire validation with KN metadata |
 | `manifest.json` | Contract digest and SHA-256 for every generated artifact |
 
-SATCOM generates 103 artifacts plus the manifest. Files use ASCII and LF line endings. JSON uses
-sorted object keys and compact separators. YAML source definitions use JSON syntax, which is also
+SATCOM generates 103 artifacts plus the manifest. Files use ASCII and LF line endings, and no line
+ends in a blank, so `git diff --check` stays clean. JSON uses sorted object keys and compact
+separators. YAML source definitions use JSON syntax, which is also
 valid YAML. Source array order remains significant, including column order, composite keys and
 policy priority criteria. Reordering JSON object keys or using equivalent YAML changes no bytes.
+Reordering tables or `customProperties` entries changes only `contract.json` and the digest, which
+every artifact embeds; see [known limitations](../data-contracts.md#observed-package-and-limitations).
+Two processes with different hash seeds, and Python 3.12 and 3.13, give byte-identical output.
 
 The contract digest covers canonical input. With a reference catalog, it covers the canonical
 `{"contract": ..., "references": ...}` object instead. Changing a referenced definition therefore
@@ -54,7 +62,13 @@ The compiler accepts flat ODCS object/table models, stable `kn.fieldId` on every
 `kn.sourceProfile` is optional outside the SATCOM adapter. Scalar types are string, integer,
 number, boolean, date and timestamp. SQL identifiers are lowercase letters, digits and underscores,
 start with a letter, and have at most 48 characters. PostgreSQL reserved words are quoted.
-Unsupported ODCS properties and nested types fail rather than being dropped.
+Unsupported ODCS properties and nested types fail rather than being dropped. Every refusal is an
+`E_CONTRACT` diagnostic with a rule, a value-free hint, and a JSON Pointer into the supplied
+document, for example `$/schema/0/properties/2/customProperties` for a misplaced `kn.precision`.
+Table names whose generated Python class would be `None`, `True`, or `False`, and names of Avro
+primitive types (`null`, `boolean`, `int`, `long`, `float`, `double`, `bytes`, `string`), are
+refused as reserved. Generated models import their dependencies privately, so tables such as
+`field` or `decimal` compile.
 
 `--references` accepts a local JSON or YAML object through the same bounded, duplicate-rejecting
 parser as contracts. It never fetches URLs. Each reference kind maps IDs to definition objects:
@@ -95,7 +109,13 @@ or rights enforcement. Those remain owned by their respective capability tasks.
 ## PostgreSQL and native model templates
 
 Generated DDL creates tables first, then sorted deferred foreign keys, indexes and comments. This
-supports cyclic references without depending on set iteration order. Schemas and PostGIS must
+supports cyclic references without depending on set iteration order. `src/kn/contracts/names.py`
+derives every constraint name once, for DDL, `postgresql/metadata.json`, and catalog verification:
+`pk_<table>`, `fk_<table>_<every referencing column>`, and `ck_<table>_<field>_<geometry|enum|precision>`.
+A name over the PostgreSQL limit of 63 bytes keeps its first 54 characters and gains `_` and eight
+hex digits of its SHA-256. Compilation refuses names that coincide: a table named like another
+table's primary key index, an index named like a table, or two references that derive one name.
+Integer primary keys are plain `BIGINT` with no sequence or default. Schemas and PostGIS must
 already be provisioned by the Python platform policy. Check and enum literals are escaped by the
 PostgreSQL dialect; non-ASCII literals use PostgreSQL Unicode escapes, preserving original text.
 No contract field is treated as executable SQL.
@@ -113,32 +133,44 @@ must include partition columns. Child partitions and their bounds are not inferr
 reviewed migrations before inserting data. Arbitrary SQL checks, predicates and operator classes
 are outside this profile.
 
-Pydantic models forbid extra fields and coercion, preserve exact `Decimal`, require aware UTC-capable
-timestamps, and retain nullable versus required fields. Date values remain native dates; partial
-dates remain strings. SQL uses `NUMERIC(precision,scale)` and `TIMESTAMP WITH TIME ZONE`; wire decimal
-values remain strings. Geometry validation occurs in PostGIS; portable models carry WKT strings
-and spatial metadata. Python keywords and Pydantic attribute names use field aliases. Private
-module imports prevent column names such as `date` and `str` from shadowing Python types.
+Pydantic models forbid extra fields and coercion, preserve exact `Decimal`, require aware
+UTC-capable timestamps, bound integers to the `BIGINT` range, and retain nullable versus required
+fields. Date values remain native dates; partial dates remain strings. SQL uses
+`NUMERIC(precision,scale)` and `TIMESTAMP WITH TIME ZONE`; wire decimal values remain strings.
+Geometry validation occurs in PostGIS; portable models carry WKT strings and spatial metadata.
+Python keywords and Pydantic attribute names use field aliases. Private module imports prevent
+column names such as `date` and `str` from shadowing Python types.
+
+JSON Schema wire validation accepts only values that PostgreSQL stores unchanged. Integers have the
+`BIGINT` range. A `NUMERIC(p,s)` string has at most `p - s` integer digits and `s` fractional digits,
+ignoring leading and trailing zeros as PostgreSQL and Pydantic do, because PostgreSQL silently
+rounds extra fractional digits. Dates match `YYYY-MM-DD`. Timestamps need an explicit offset (`Z` or
+`+hh:mm`) and at most six fractional digits; PostgreSQL would read a naive timestamp in the session
+time zone. These are patterns, because `format` is only an annotation in JSON Schema 2020-12.
 
 ## Drift and verification
 
-With `--output --check`, compilation compares the exact file set, manifest and bytes without
-writing anything. Missing, changed, extra or symlinked artifacts fail. Normal recompilation removes
-obsolete engine files named by the previous generated manifest, preserving unrelated files.
+With `--check`, compilation compares the exact file set, manifest and bytes of the output directory
+without writing anything. Missing, changed, extra or symlinked artifacts fail. Normal recompilation
+removes obsolete engine files named by the previous generated manifest, preserving unrelated files.
 Malformed or unsafe previous manifests fail before writes; symlinked destinations are refused.
 Compilation is not an atomic directory transaction: an interrupted write can leave drift, which
 `--check` detects and a rerun repairs.
 
-Without `--output`, `--check` compares the bundled SATCOM artifacts against the reviewed packaged
-`1.0.0.artifacts.json`. Custom contracts require an explicit output for checking. `make ci` runs the
-bundled manifest check, so generator or mapping changes fail until their output is reviewed and
-that manifest is refreshed. Copy the reviewed generated `manifest.json` into the packaged manifest
-after an intentional SATCOM generator change; do not bypass the drift check.
+The committed `generated/contracts/kn.space.satcom/` is the one drift reference. `make ci` runs
+`make contract-check`, so a contract, mapping or generator change fails until `make contract-compile`
+refreshes the directory and the diff is reviewed and committed. Review the generated DDL and models
+in that diff; do not bypass the check.
 
 `tests/contracts/test_compiler.py`, `test_templates.py` and `test_references.py` cover supplied
 contracts, reference kinds, endpoint mismatches, strict native models, deterministic bytes, stale
-files, unsafe manifests and drift. `tests/integration/test_contract_compiler.py` executes generated
-SQL in scratch schemas: the complete SATCOM model, Unicode comments, invalid geometry and SRIDs,
-GiST indexes, and a partitioned parent. Run `make ci-local` after `make db-up` for both test sets.
-The acceptance evidence is in
-[record 0015](../../records/0015-data-contracts-contract-compiler.md).
+files, unsafe manifests and drift. `test_physical.py` covers derived names, `test_type_mapping.py`
+the wire and native value ranges, `test_diagnostics.py` located refusals, and `test_generated.py`
+the committed output and default directories. `tests/integration/test_contract_compiler.py` executes
+generated SQL in scratch schemas: the complete SATCOM model, Unicode comments, invalid geometry and
+SRIDs, GiST indexes, and a partitioned parent. `tests/integration/test_contract_governance.py`
+applies long and composite names and verifies the compiled catalog, evolves with comments, and
+refuses a changed geometry type. Run `make ci-local` after `make db-up` for both test sets. The
+acceptance evidence is in [record 0015](../../records/0015-data-contracts-contract-compiler.md), and
+the audit of the group in [record
+0017](../../records/0017-data-contracts-data-contracts-implementation-audit.md).

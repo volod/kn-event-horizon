@@ -10,8 +10,9 @@ from sqlalchemy.exc import DBAPIError
 from kn.contracts import load_contract
 from kn.db import seeds
 from kn.db.governance import verify
-from kn.db.platform import SCHEMAS, ddl
+from kn.db.platform import SCHEMAS
 from kn.db.rebuild import rebuild
+from kn.db.statements import SetRole
 from tests.integration.harness import IntegrationDatabase, ScratchSchemas
 
 
@@ -80,7 +81,7 @@ def test_rebuild_from_empty_is_identical_and_loads_seeds_as_loader(
         "CREATE TABLE public.forbidden (id integer)",
     ):
         with pytest.raises(DBAPIError), connection.begin_nested():
-            ddl(connection, "SET LOCAL ROLE kn_space_loader")
+            connection.execute(SetRole("kn_space_loader"))
             connection.exec_driver_sql(statement)
 
 
@@ -135,25 +136,40 @@ def test_rebuild_removes_obsolete_tables_in_every_kn_schema(
     assert connection.scalar(sa.text(f"SELECT id FROM {schema}.vendor")) == 7
 
 
-@pytest.mark.parametrize("corruption", ["check", "primary_key", "comment"])
-def test_broken_generated_object_rolls_back_before_returning(
-    rebuild_connection: Connection, monkeypatch: pytest.MonkeyPatch, corruption: str
+@pytest.mark.parametrize(
+    "damage",
+    [
+        "ALTER TABLE space.countries DROP CONSTRAINT {check}",
+        "ALTER TABLE space.aliases_crosswalk RENAME CONSTRAINT pk_aliases_crosswalk TO wrong_key",
+        "COMMENT ON COLUMN space.countries.country_iso2 IS NULL",
+        "ALTER TABLE space.aliases_crosswalk RENAME CONSTRAINT {reference} TO wrong_reference",
+    ],
+)
+def test_damaged_baseline_object_rolls_back_before_returning(
+    rebuild_connection: Connection, monkeypatch: pytest.MonkeyPatch, damage: str
 ) -> None:
-    from kn.contracts.ddl import postgresql_ddl
+    from kn.contracts.sqlalchemy import metadata
     from kn.db import rebuild as module
 
-    generated = postgresql_ddl(load_contract())
-    # Simulate a broken generated artifact without weakening the contract definition.
-    lines = generated.splitlines()
-    if corruption == "primary_key":
-        broken = generated.replace("pk_aliases_crosswalk", "wrong_primary_key")
-    else:
-        marker = "CHECK (" if corruption == "check" else "COMMENT ON"
-        line = next(line for line in lines if marker in line)
-        broken = generated.replace(line, "")
-    monkeypatch.setattr(module, "postgresql_ddl", lambda _: broken)
+    model = metadata(load_contract())
+    check = next(
+        str(item.name)
+        for item in model.tables["space.countries"].constraints
+        if isinstance(item, sa.CheckConstraint)
+    )
+    reference = min(
+        str(item.name) for item in model.tables["space.aliases_crosswalk"].foreign_key_constraints
+    )
+    real_upgrade = module.upgrade
+
+    def damaged(connection: Connection) -> None:
+        # Simulate an object that differs from the compiled contract after the baseline.
+        real_upgrade(connection)
+        connection.exec_driver_sql(damage.format(check=check, reference=reference))
+
+    monkeypatch.setattr(module, "upgrade", damaged)
     before = catalog(rebuild_connection)
-    with pytest.raises(ValueError, match=r"constraint|primary key|comment|structure"):
+    with pytest.raises(ValueError, match=r"constraint|primary key|comment|foreign key|structure"):
         rebuild(rebuild_connection)
     assert catalog(rebuild_connection) == before
 
@@ -181,3 +197,20 @@ def test_noncontracted_view_refuses_without_partial_drop(rebuild_connection: Con
     assert "uncompiled" in sa.inspect(rebuild_connection).get_view_names(schema="analytics")
     rebuild_connection.exec_driver_sql("DROP VIEW analytics.uncompiled")
     assert catalog(rebuild_connection) == before
+
+
+def test_rebuild_creates_schemas_through_alembic_without_sql_text(
+    rebuild_connection: Connection, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    """Schema objects come from SQLAlchemy constructs in the Alembic baseline, as in upgrade."""
+    statements: list[str] = []
+    original = Connection.exec_driver_sql
+
+    def record(self: Connection, statement: str, *args: object, **kwargs: object) -> object:
+        statements.append(statement)
+        return original(self, statement, *args, **kwargs)  # type: ignore[arg-type]
+
+    monkeypatch.setattr(Connection, "exec_driver_sql", record)
+    rebuild(rebuild_connection)
+    assert not [statement for statement in statements if "CREATE TABLE" in statement.upper()]
+    assert sa.inspect(rebuild_connection).has_table("satcom_contract", schema="space")

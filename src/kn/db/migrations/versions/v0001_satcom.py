@@ -4,8 +4,9 @@ from alembic import op
 
 from kn.contracts import load_contract
 from kn.contracts.sqlalchemy import metadata
-from kn.db.governance import install_contract
-from kn.db.platform import ddl
+from kn.db.governance import MIGRATION_SCHEMA, install_contract
+from kn.db.platform import role_name
+from kn.db.statements import SetRole
 
 revision = "0001_satcom"
 down_revision = None
@@ -16,11 +17,11 @@ depends_on = None
 def upgrade() -> None:
     contract = load_contract()
     connection = op.get_bind()
-    ddl(connection, "SET LOCAL ROLE kn_space_owner")
+    op.execute(SetRole(role_name(contract.schema, "owner")))
     model = metadata(contract)
     model.create_all(connection, checkfirst=False)
     install_contract(connection, contract)
-    ddl(connection, "SET LOCAL ROLE kn_system_owner")
+    op.execute(SetRole(role_name(MIGRATION_SCHEMA, "owner")))
 
 
 def downgrade() -> None:

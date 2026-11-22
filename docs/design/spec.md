@@ -245,7 +245,8 @@ The project has two phases. The switch between them is the
   require new semantic versions and reviewed Python Alembic revisions from contract diffs. Refuse
   destructive or incompatible changes until a reviewed expand/backfill/contract migration exists.
 - There are no handwritten SQL deployment files. Development keeps the same governance mechanism
-  that release migrations use, without accumulating revisions for provisional models.
+  that release migrations use, without accumulating revisions for provisional models: a rebuild
+  drops the KN schemas and runs the same Alembic upgrade.
 - The raw archive, Git-managed seeds and curation files, decision logs, the identity event log, and
   the exchange ledger are the durable inputs. The database is a reproducible projection of them.
 - Review decisions re-attach after rebuild by deterministic claim keys. A decision that no longer
@@ -542,9 +543,17 @@ definitions, and contract documentation. Compile-time semantic references resolv
 reviewed catalog; no network lookup or runtime policy execution occurs during compilation. Decimal
 values remain exact; partial dates stay strings with declared precision rather than invented days.
 Unsupported types or metadata fail.
-PostgreSQL deployment uses Python Alembic revisions and a shared Python role/extension policy;
-there are no handwritten SQL deployment scripts. Generated artifacts cannot redefine contracts.
+PostgreSQL deployment is `alembic upgrade head`: Python Alembic revisions over contract-generated
+SQLAlchemy metadata, whose environment converges a shared Python role/extension policy on every
+run. Every database statement is a SQLAlchemy or Alembic construct; there are no handwritten SQL
+deployment scripts, and no SQL text is executed. Generated artifacts, including generated DDL, are
+review output and cannot redefine contracts.
 
+SATCOM is the first prefetched source dataset: owner-supplied files from a real space source,
+integrated as a data example. More prefetched datasets follow it, and each comes through the same
+shared path as any `bulk_file` source, with its own contract and no dataset-specific engine code.
+Its package can stay local or be published on Google Drive, as described under
+[prefetched datasets](#ingestion-engine).
 The initial SATCOM import contract preserves all 28 reference tables, native textual IDs,
 composite keys, deferrable references, enums, decimal values, partial dates, claims, source
 verification states, formulas and input claim references, aliases, and missing reasons. Source IDs
@@ -1117,6 +1126,34 @@ capture of the cited page is stored where that is permitted. The rows go through
 and validation. This method is required where no permitted machine-readable source exists, such as
 tariffs, coverage statements, and operator disclosures.
 
+**Prefetched datasets.** An owner-supplied dataset arrives as a package of files prepared outside
+KN, as the SATCOM package did. It is a `bulk_file` source whose configuration declares a package
+profile (expected files and headers, CSV dialect, and dataset contract), limits, and the name of the
+environment variable that holds the package location. Each machine sets that variable in `.env`, so
+a copy can move without a Git change. Unset, the location is the configured default directory under
+`DATA_DIR`.
+
+| Location | Value | Access |
+| --- | --- | --- |
+| Local directory | A path | Read in place |
+| Local archive | A path ending in `.zip` | Unpacked into the run directory |
+| Google Drive file | `gdrive:<file-id>` | Drive API v3, read-only, with a service-account key from a secret file |
+
+A Drive fetch reads the file's metadata first: name, MIME type, size, SHA-256, and head revision.
+When the SHA-256 equals the last fetched one, the run ends `not_modified` after that one request.
+Otherwise the fetch downloads within the declared size limit, checks the bytes against the SHA-256,
+and writes them to `$DATA_DIR/raw/<domain>/<source-id>/<run-id>/` before anything is unpacked. The
+item must be a ZIP file. Google Docs, Sheets, and folder items are refused: conversion changes bytes,
+and a folder is not one snapshot. Unpacking refuses absolute and parent paths, links, duplicate
+names, and archives over the declared file count or unpacked size. The snapshot identity covers the
+unpacked files, so republishing identical files is a no-op even when the ZIP was rebuilt, and each
+changed snapshot imports beside the earlier ones. Only `www.googleapis.com` is contacted, through
+the allowlist and TLS checks of [source safety](#source-safety-and-data-rights). The key file path
+comes from the environment, and the key never appears in Git, logs, raw records, or stored URIs.
+The Drive file ID may be committed, because only the shared service account can read the file.
+Periodic re-import runs through [orchestration](#orchestration); before that, an operating-system
+timer may run the same command.
+
 **TDD growth rule.** The engine starts as a skeleton proven on a synthetic fixture source. Each real
 source then adds failing fixture tests first, then the general engine change that makes them pass.
 The core never branches on a source ID. On every change, `make ci-local` runs all source fixture
@@ -1124,6 +1161,8 @@ suites plus a full rebuild from the fixture archive. Logs are structured English
 redacted, and user-facing messages are localized.
 
 Boundary: no exactly-once network claim, and no per-source special cases inside the core.
+Prefetched datasets use no link-sharing download URLs, no Drive folder listing, no writes to Drive,
+and no coding-agent connector in the pipeline.
 
 Evaluation:
 
@@ -1132,9 +1171,15 @@ Evaluation:
   source each produce the declared status, with no cursor jump and with secrets redacted.
 - Existing good facts are kept and marked stale.
 - Two rebuilds produce identical canonical tables by row hash.
+- The same package files give the same snapshot identity from a local directory, a local ZIP, and
+  a Drive file. An unchanged Drive file costs one metadata request and imports nothing.
+- A ZIP with a parent path, a link, a duplicate name, or too many or too large files, a Google-native
+  Drive item, and a download whose SHA-256 differs from its metadata are refused before import.
 
 Negative result: when a source cannot be expressed by configuration plus a parser, the engine gains
-a general mechanism with tests, or the source stays disabled.
+a general mechanism with tests, or the source stays disabled. When the Drive API cannot serve the
+package within the declared limits, the dataset stays on a local location with the reason
+recorded.
 
 ### Data interchange
 
@@ -1695,14 +1740,14 @@ upstream before downstream.
 | 2 | `project-identity` | shipped | Import, CLI, and distribution-build tests agree on the `kn-event-horizon` identity | [Product core](../impl/current/product-core.md) |
 | 3 | `documentation-integrity` | shipped | Link, registry-plan, task-lane, metadata, ordering, prerequisites, forward-language, and closed-research register checks pass over fixtures and the repository tree | [Documentation checks](../guide/development.md#documentation-checks) |
 | 4 | `runtime-platform` | shipped | Pinned Compose database reaches healthy from empty volumes, keeps data across restart, publishes its port on loopback only, and serves integration tests on the development host | [Runtime platform](../impl/current/runtime-platform.md) |
-| 5 | `data-contracts` | shipped | Contracts compile deterministically, invalid contracts fail, drift fails CI, rebuild creates every schema, loaders cannot run DDL | [Compiler and development rebuild](../impl/current/data-contracts.md) |
+| 5 | `data-contracts` | planned | Contracts compile deterministically, invalid contracts fail, drift fails CI, rebuild creates every schema, loaders cannot run DDL | [Compiler and development rebuild](../impl/current/data-contracts.md) |
 | 6 | `ontology-taxonomy` | planned | Every proposal row is classified, identifiers are stable, invalid hierarchies are rejected, SKOS round-trips | - |
 | 7 | `object-identity` | planned | KN IDs survive rebuilds; lifecycle, matching, partial-update, and lineage fixtures pass; calibrated classes meet the precision gate | - |
 | 8 | `raw-archive` | planned | WARC round trip, atomic write, ledger reindex, redaction, revisit, and corruption checks pass | - |
 | 9 | `evidence-model` | planned | Conflict, time, provenance-lookup, idempotence, confirmation, update-policy, and decision-replay fixtures pass | - |
 | 10 | `part-supply-model` | planned | Every vendor coverage group maps or records an exclusion; part, variant, offer, price, and substitute fixtures pass | - |
 | 11 | `source-management` | planned | Catalogue import is complete; configuration validation refuses unapproved enablement; error and status mapping fixtures pass | - |
-| 12 | `ingestion-engine` | planned | Failure-mode fixtures yield declared statuses without cursor jumps; two rebuilds produce identical canonical tables | - |
+| 12 | `ingestion-engine` | planned | Failure-mode fixtures yield declared statuses without cursor jumps; two rebuilds produce identical canonical tables; a prefetched package gives one snapshot from every location | - |
 | 13 | `data-interchange` | planned | Contract diffs enforce version bumps; packages reproduce and round-trip; upgrade chains and three-way sync fixtures pass | - |
 | 14 | `inventree-exchange` | planned | The target release imports deterministically; approved plans apply idempotently with read-back; schema drift blocks writes; the upgrade check classifies candidate releases; `vl-itree` passes read and write exchange | - |
 | 15 | `obsidian-export` | planned | Fixture vault verifies hashes and links, excludes restricted rights and secrets, and reproduces identically | - |

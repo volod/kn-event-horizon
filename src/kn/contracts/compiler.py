@@ -1,4 +1,4 @@
-"""Write contract artifacts, or verify bytes and reviewed digests without mutation."""
+"""Write contract artifacts, or verify their exact bytes without mutation."""
 
 import hashlib
 import json
@@ -7,11 +7,22 @@ from pathlib import Path
 
 from kn.contracts.diagnostics import ContractError
 from kn.contracts.exports import artifacts
-from kn.contracts.loader import canonical
-from kn.contracts.model import Contract
-from kn.contracts.schemas import RESOURCES, SATCOM
+from kn.contracts.model import Contract, canonical
+from kn.contracts.names import IDENTIFIER_BODY
 
-DEFAULT_OUTPUT = Path("generated")
+# Committed review output: one directory per contract, beside other generators' directories.
+GENERATED_CONTRACTS = Path("generated") / "contracts"
+PLAIN_DIRECTORY = re.compile(r"^[A-Za-z0-9][A-Za-z0-9._-]{0,127}$")
+ENGINE_ARTIFACT = re.compile(rf"(?:avro|elasticsearch|jsonschema)/{IDENTIFIER_BODY}\.json")
+
+
+def default_output(contract: Contract) -> Path:
+    """The compile and check default, relative to the working directory."""
+    if not PLAIN_DIRECTORY.fullmatch(contract.contract_id):
+        raise ContractError(
+            ("id",), "output", "supply --output for a contract ID that is not a plain file name"
+        )
+    return GENERATED_CONTRACTS / contract.contract_id
 
 
 def compile_contract(contract: Contract, output: Path | None = None, check: bool = False) -> None:
@@ -20,17 +31,7 @@ def compile_contract(contract: Contract, output: Path | None = None, check: bool
         "contract_digest": contract.digest,
         "artifacts": {name: hashlib.sha256(value).hexdigest() for name, value in content.items()},
     }
-    if check and output is None:
-        bundled_id = json.loads(SATCOM.read_text(encoding="ascii"))["id"]
-        if contract.contract_id != bundled_id:
-            raise ContractError((), "drift", "supply --output to check a custom contract")
-        expected = RESOURCES / "satcom" / f"{contract.version}.artifacts.json"
-        if not expected.is_file() or json.loads(expected.read_text(encoding="ascii")) != manifest:
-            raise ContractError(
-                (), "drift", "review generated output and update the artifact digest manifest"
-            )
-        return
-    destination = output if output is not None else DEFAULT_OUTPUT
+    destination = output if output is not None else default_output(contract)
     content["manifest.json"] = (canonical(manifest) + "\n").encode("ascii")
     _safe_paths(destination, content)
     if check:
@@ -72,9 +73,6 @@ def _stale_artifacts(output: Path, content: dict[str, bytes]) -> set[str]:
     if not isinstance(entries, dict):
         raise ContractError((), "manifest", "restore the previous generated artifact manifest")
     stale = set(entries) - content.keys()
-    if any(
-        not re.fullmatch(r"(?:avro|elasticsearch|jsonschema)/[a-z][a-z0-9_]{0,47}\.json", name)
-        for name in stale
-    ):
+    if any(not ENGINE_ARTIFACT.fullmatch(name) for name in stale):
         raise ContractError((), "manifest", "only managed engine artifacts can be removed")
     return stale

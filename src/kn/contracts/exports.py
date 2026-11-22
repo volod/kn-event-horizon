@@ -4,9 +4,9 @@ import hashlib
 from typing import Any
 
 from kn.contracts.ddl import postgresql_ddl
+from kn.contracts.diagnostics import ContractError
 from kn.contracts.field_exports import json_field
-from kn.contracts.loader import canonical
-from kn.contracts.model import Contract, Field, Table
+from kn.contracts.model import Contract, Field, Table, canonical
 from kn.contracts.physical import extensions
 from kn.contracts.postgresql import manifest as postgresql_manifest
 from kn.contracts.templates import contract_docs, dbt_sources, pydantic_models
@@ -29,7 +29,20 @@ def _avro_type(field: Field) -> object:
     return types[field.logical_type]
 
 
+# Avro forbids defining a named type with a primitive type name, in any namespace.
+AVRO_PRIMITIVES = frozenset(
+    {"null", "boolean", "int", "long", "float", "double", "bytes", "string"}
+)
+
+
 def avro(contract: Contract, table: Table) -> dict[str, Any]:
+    if table.name in AVRO_PRIMITIVES:
+        number = next(i for i, item in enumerate(contract.tables) if item.name == table.name)
+        raise ContractError(
+            ("schema", number, "name"),
+            "avro",
+            "rename tables named after Avro primitive types; those names are reserved",
+        )
     fields: list[dict[str, Any]] = []
     for field in table.fields:
         item: dict[str, Any] = {
