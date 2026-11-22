@@ -1,20 +1,15 @@
 """GitHub Actions runs only the lightweight gate; local-only tests stay on the development host."""
 
-import os
 import shlex
-import subprocess
-from pathlib import Path
 from typing import Any
 
 import yaml
 
 from tests.conftest import LOCAL_SELECTION, UNIT_SELECTION
+from tests.deploy.make_dry_run import ROOT, pytest_commands
 
-ROOT = Path(__file__).resolve().parents[2]
 WORKFLOW = yaml.safe_load((ROOT / ".github" / "workflows" / "ci.yml").read_text(encoding="utf-8"))
 GITHUB_TARGET = "ci-github"
-# Variables of a calling make that would change a nested make -n.
-MAKE_VARIABLES = ("MAKEFLAGS", "MFLAGS", "MAKELEVEL", "MAKEOVERRIDES")
 
 
 def _jobs() -> dict[str, Any]:
@@ -29,22 +24,10 @@ def _run_commands() -> list[str]:
 
 def _pytest_selections(target: str) -> list[str]:
     """The -m expression of every pytest command that make would run for the target."""
-    environment = {key: value for key, value in os.environ.items() if key not in MAKE_VARIABLES}
-    result = subprocess.run(
-        ["make", "--no-print-directory", "-n", "-C", str(ROOT), target],
-        env=environment,
-        capture_output=True,
-        text=True,
-        check=True,
-    )
-    selections = []
-    for line in result.stdout.splitlines():
-        if " pytest " not in line:
-            continue
-        words = shlex.split(line.rsplit(";", 1)[-1])
-        options = words[words.index("pytest") + 1 :]
-        selections.append(options[options.index("-m") + 1] if "-m" in options else "")
-    return selections
+    return [
+        options[options.index("-m") + 1] if "-m" in options else ""
+        for options in pytest_commands(target)
+    ]
 
 
 def test_no_github_job_starts_a_service_or_a_job_container() -> None:

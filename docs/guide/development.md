@@ -53,7 +53,9 @@ id. Keep fixtures under `tests/` only when they are small, deterministic, safe t
 required for CI.
 
 `.env.example` declares `DATA_DIR=.data`, and relative values resolve against the project root.
-Ruff, mypy, pytest, and complexipy caches stay below the same root. `.gitignore` excludes runtime
+A `DATA_DIR` in `.env` wins over the environment. The `Makefile` resolves it through `kn_load_env`,
+so Ruff, mypy, pytest, and complexipy caches stay below the same root as the database volume, also
+when the path contains spaces. `.gitignore` excludes runtime
 artifacts, local environments, secrets, caches, and root build outputs without hiding same-named
 source subpackages.
 

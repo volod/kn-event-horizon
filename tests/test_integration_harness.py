@@ -89,6 +89,23 @@ def test_the_description_names_the_server_without_the_password() -> None:
     assert database.describe() == "kn@127.0.0.1:15432/kn"
 
 
+def test_a_failing_test_prints_its_database_argument_without_the_password(tmp_path: Path) -> None:
+    (tmp_path / "pytest.ini").write_text("[pytest]\n")
+    module = tmp_path / "test_fails.py"
+    module.write_text(
+        "import pytest\n\nfrom tests.integration.harness import IntegrationDatabase\n\n\n"
+        "@pytest.fixture\ndef database():\n"
+        f"    return IntegrationDatabase('dbname=kn', {SECRET!r})\n\n\n"
+        "def test_fails(database):\n    assert database.conninfo == 'other'\n"
+    )
+
+    result = _pytest("-c", str(tmp_path / "pytest.ini"), "--rootdir", str(tmp_path), str(module))
+
+    assert result.returncode == 1, result.stdout + result.stderr
+    assert "database = IntegrationDatabase(conninfo='dbname=kn')" in result.stdout
+    assert SECRET not in result.stdout + result.stderr
+
+
 def test_an_unreachable_database_fails_with_a_hint_and_no_password(tmp_path: Path) -> None:
     database = IntegrationDatabase(_missing_socket(tmp_path), SECRET)
 

@@ -18,7 +18,14 @@ BEGIN;
 -- Re-runs would otherwise print a "skipping" notice for every existing object.
 SET LOCAL client_min_messages = warning;
 
+-- Concurrent runs wait for each other; otherwise one fails with "tuple concurrently updated".
+-- The two-key lock ("KNBS" in ASCII) never collides with the single bigint keys of product code.
+DO $lock$ BEGIN PERFORM pg_advisory_xact_lock(x'4B4E4253'::int, 0); END $lock$;
+
 CREATE EXTENSION IF NOT EXISTS postgis WITH SCHEMA public;
+-- A new image digest can bring a newer PostGIS. The library loads at once, but the installed
+-- extension keeps its old SQL objects until it is updated. A no-op when it is current.
+ALTER EXTENSION postgis UPDATE;
 
 DO $bootstrap$
 DECLARE

@@ -7,6 +7,8 @@ from typing import Any
 import pytest
 import yaml
 
+from tests.deploy.bootstrap_sql import BOOTSTRAP, VERIFY, sql_text_array
+
 ROOT = Path(__file__).resolve().parents[2]
 DEPLOY = ROOT / "deploy"
 DIGEST = re.compile(r"^sha256:[0-9a-f]{64}$")
@@ -40,13 +42,6 @@ def _load(name: str) -> dict[str, Any]:
 COMPOSE = _load("compose.yaml")
 MANIFEST = _load("versions.yaml")
 SERVICES: dict[str, dict[str, Any]] = COMPOSE["services"]
-
-
-def _sql_array(path: Path, variable: str) -> set[str]:
-    text = path.read_text(encoding="utf-8")
-    match = re.search(rf"{variable}\s+CONSTANT\s+text\[\]\s*:=\s*ARRAY\[(.*?)\]", text, re.S)
-    assert match, f"{path.name}: no {variable} array"
-    return set(re.findall(r"'([a-z_]+)'", match.group(1)))
 
 
 def test_every_manifest_image_is_the_pinned_image_of_its_service() -> None:
@@ -103,6 +98,13 @@ def test_every_other_network_is_internal_and_unreachable_from_the_host() -> None
         assert network["driver_opts"][f"{BRIDGE}gateway_mode_ipv4"] == "isolated", name
 
 
+def test_the_database_resolves_no_external_name() -> None:
+    # Docker's embedded resolver forwards names it does not know to the host's resolvers, past the
+    # disabled source NAT. A resolver on the container's own loopback answers nothing, while
+    # service names on the stack networks still resolve.
+    assert SERVICES["postgres"]["dns"] == [LOOPBACK]
+
+
 @pytest.mark.parametrize("name", sorted(SERVICES))
 def test_every_service_runs_unprivileged_with_a_healthcheck(name: str) -> None:
     service = SERVICES[name]
@@ -141,9 +143,8 @@ def test_database_volume_lives_under_data_dir_and_is_never_created_by_docker() -
 def test_bootstrap_and_probe_cover_core_schemas_and_every_domain_package() -> None:
     domains = {path.name for path in (ROOT / "domains").iterdir() if path.is_dir()}
     expected = CORE_SCHEMAS | domains
-    postgres = DEPLOY / "postgres"
-    assert _sql_array(postgres / "initdb" / "10-kn-bootstrap.sql", "kn_schemas") == expected
-    assert _sql_array(postgres / "verify-roles.sql", "expected_schemas") == expected
+    assert set(sql_text_array(BOOTSTRAP, "kn_schemas")) == expected
+    assert set(sql_text_array(VERIFY, "expected_schemas")) == expected
 
 
 def test_only_the_kn_bootstrap_runs_at_initialization() -> None:

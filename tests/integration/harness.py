@@ -8,7 +8,7 @@ file that holds the password. `make test-integration` sets both for the local da
 import re
 import secrets
 from collections.abc import Iterable, Mapping
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Any
 
@@ -72,7 +72,8 @@ class IntegrationDatabase:
     """A configured integration database. Its password is never part of a message."""
 
     conninfo: str
-    password: str | None = None
+    # Kept out of the representation, which pytest prints for the arguments of a failing test.
+    password: str | None = field(default=None, repr=False)
 
     @classmethod
     def from_environment(cls, environ: Mapping[str, str]) -> "IntegrationDatabase | None":

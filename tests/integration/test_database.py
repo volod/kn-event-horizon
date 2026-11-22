@@ -38,13 +38,15 @@ def test_the_database_runs_the_pinned_server_with_the_bootstrap_extensions(
 ) -> None:
     row = db_connection.execute(
         "SELECT current_setting('server_version'), public.postgis_lib_version(), "
+        "(SELECT extversion FROM pg_catalog.pg_extension WHERE extname = 'postgis'), "
         "(SELECT array_agg(extname::text ORDER BY extname) FROM pg_catalog.pg_extension)"
     ).fetchone()
 
     assert row is not None
-    version, postgis, extensions = row
+    version, library, installed, extensions = row
     assert version.split()[0] == COMPONENTS["postgresql"]
-    assert postgis == COMPONENTS["postgis"]
+    # The library comes with the image; the installed version stays until the bootstrap updates it.
+    assert (library, installed) == (COMPONENTS["postgis"], COMPONENTS["postgis"])
     assert extensions == BOOTSTRAP_EXTENSIONS
 
 

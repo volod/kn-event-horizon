@@ -4,9 +4,12 @@ PROJECT_ROOT := $(patsubst %/,%,$(dir $(abspath $(lastword $(MAKEFILE_LIST)))))
 VENV := $(PROJECT_ROOT)/.venv
 PY := $(VENV)/bin/python
 PYTHON_VERSION ?= 3.12
-DATA_DIR ?= .data
-DATA_ROOT := $(if $(filter /%,$(DATA_DIR)),$(DATA_DIR),$(PROJECT_ROOT)/$(DATA_DIR))
-PYTEST_CACHE := -o cache_dir=$(DATA_ROOT)/cache/pytest
+# DATA_DIR resolves as in the shell helpers (kn_load_env): from .env when it sets it, else from the
+# environment, else .data, with a relative path from the project root. Recipes quote it.
+DATA_ROOT := $(shell source "$(PROJECT_ROOT)/scripts/shared/common.sh" && kn_load_env && \
+	printf '%s' "$$DATA_DIR")
+$(if $(DATA_ROOT),,$(error cannot resolve DATA_DIR with scripts/shared/common.sh))
+PYTEST_CACHE := -o "cache_dir=$(DATA_ROOT)/cache/pytest"
 # GitHub Actions runs only the lightweight unit tests. Tests that need a service endpoint
 # (integration) or large memory or a long run time (heavy) run only locally. tests/conftest.py
 # defines the same expressions, and tests/deploy/test_ci_workflow.py checks that they agree.

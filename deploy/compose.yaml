@@ -50,6 +50,10 @@ services:
     networks:
       - internal
       - loopback
+    # The database resolves no external name. Docker's embedded resolver still answers service
+    # names on the stack networks, and forwards other names to this address, where none answers.
+    dns:
+      - 127.0.0.1
     healthcheck:
       # Healthy means the final server accepts TCP (the init-time server is socket-only) and the
       # bootstrap committed. The bootstrap is one transaction, so one of its roles witnesses it.

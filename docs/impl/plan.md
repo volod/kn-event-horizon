@@ -32,38 +32,6 @@ recorded decision before later groups build on the group.
 
 ## Agent Implementation Tasks
 
-### Runtime platform -- `runtime-platform`
-
-#### runtime-platform-implementation-audit (optional)
-
-The database service and test harness carry every later group, so defects in pinning, roles, or test
-isolation are cheapest to fix before contracts compile against them.
-
-- Serves: `runtime-platform` -- [Runtime platform](../design/spec.md#runtime-platform)
-- Agent status: CLEAR
-- Dependencies: The accepted task records of the group and the [implementation
-  audit](../guide/planning-workflow.md#implementation-audits) checks. Docker Engine with Compose v2.
-- User-visible outcome: Later groups build on a verified database service and test harness. The
-  audit record gives every check a result and every finding a disposition. The current-state page
-  lists known limitations, and each scheduled finding is a plan task.
-- Scope boundary: Focus: image pins by tag and digest and the path to a new PostgreSQL or PostGIS
-  major; role and default privileges for schemas that later groups add; healthcheck and restart
-  behavior; volume ownership and `DATA_DIR` handling; secrets kept out of Compose files and logs;
-  test database isolation, parallel runs, and cleanup; the split between the GitHub unit gate and
-  the local-only tests; the loopback-only database port and outbound traffic from the database
-  container, which [record 0007](records/0007-adhoc-database-loopback-port.md) could not measure.
-  Fixes only; new behavior becomes plan tasks.
-- Data and artifact paths: `deploy/`, `tests/integration/`, `tests/conftest.py`,
-  `.github/workflows/ci.yml`, `Makefile`, `docs/impl/plan.md`, and the task record.
-- Execution path: Rerun the group's acceptance commands, then work through the audit checks. Start
-  from empty volumes, probe each role with one granted and one refused operation, run the
-  integration suite twice in parallel, and restart the service during a test.
-- Acceptance gates: A role acting outside its grants is refused by a test. Parallel and repeated
-  integration runs leave no shared state. Every finding has a severity, evidence, and a disposition,
-  no `blocker` is accepted, and every fix starts from a failing regression test. `make ci` passes
-  with the scheduled tasks in the plan.
-- Documentation target: `current/runtime-platform.md` listed in the [areas index](current.md#areas).
-
 ### Localization -- `localization`
 
 #### message-catalog-core
