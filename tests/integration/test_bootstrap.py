@@ -6,10 +6,12 @@ changes nothing on a database that `make db-up` started.
 
 import threading
 
-import psycopg
+import sqlalchemy as sa
 import yaml
+from sqlalchemy.exc import SQLAlchemyError
 
-from tests.deploy.bootstrap_sql import ROOT, bootstrap_script
+from kn.db.platform import apply_platform
+from tests.deploy.make_dry_run import ROOT
 from tests.integration.harness import Connection, IntegrationDatabase
 
 MANIFEST = yaml.safe_load((ROOT / "deploy" / "versions.yaml").read_text(encoding="utf-8"))
@@ -20,23 +22,29 @@ ROUNDS = 3
 LOCK_TIMEOUT = "30s"
 
 
-def _apply(database: IntegrationDatabase, script: str, start: threading.Barrier) -> None:
-    with database.connect(autocommit=True) as connection:
-        connection.execute("SELECT set_config('lock_timeout', %s, false)", [LOCK_TIMEOUT])
+def _apply(database: IntegrationDatabase, start: threading.Barrier) -> None:
+    engine = sa.create_engine("postgresql+psycopg://", creator=database.connect)
+    try:
         for _ in range(ROUNDS):
             start.wait()
-            connection.execute(script)
+            with engine.begin() as connection:
+                connection.execute(
+                    sa.text("SELECT set_config('lock_timeout', :timeout, true)"),
+                    {"timeout": LOCK_TIMEOUT},
+                )
+                apply_platform(connection)
+    finally:
+        engine.dispose()
 
 
 def test_concurrent_bootstrap_runs_all_succeed(integration_database: IntegrationDatabase) -> None:
-    script = bootstrap_script()
     start = threading.Barrier(CONCURRENT_RUNS)
-    failures: list[psycopg.Error] = []
+    failures: list[SQLAlchemyError] = []
 
     def run() -> None:
         try:
-            _apply(integration_database, script, start)
-        except psycopg.Error as error:
+            _apply(integration_database, start)
+        except SQLAlchemyError as error:
             failures.append(error)
             start.abort()
         except threading.BrokenBarrierError:
@@ -54,8 +62,12 @@ def test_concurrent_bootstrap_runs_all_succeed(integration_database: Integration
 def test_the_bootstrap_brings_postgis_to_the_version_of_the_image(
     integration_database: IntegrationDatabase, db_connection: Connection
 ) -> None:
-    with integration_database.connect(autocommit=True) as connection:
-        connection.execute(bootstrap_script())
+    engine = sa.create_engine("postgresql+psycopg://", creator=integration_database.connect)
+    try:
+        with engine.begin() as connection:
+            apply_platform(connection)
+    finally:
+        engine.dispose()
 
     row = db_connection.execute(
         "SELECT installed_version, default_version FROM pg_catalog.pg_available_extensions "

@@ -106,7 +106,7 @@ lint-spec-plan: ## Check capability registry, plan tasks, and the closed-researc
 plan-status: ## Count tasks by lane/status and show declared priority
 	@"$(PY)" -m kn.quality.plan_summary --root "$(PROJECT_ROOT)"
 
-ci-checks: format-check lint typecheck complexity-gate shell-lint-gate lint-doc-links lint-spec-plan
+ci-checks: contract-check format-check lint typecheck complexity-gate shell-lint-gate lint-doc-links lint-spec-plan
 
 ci: ci-checks test ## Run the required gate: checks and lightweight unit tests
 
@@ -137,3 +137,27 @@ db-verify: ## Probe schemas, roles, and privileges in the running database (roll
 quality-report: ## Report Python/shell files over the 250-line soft limit
 	@find src tests scripts -type f \( -name '*.py' -o -name '*.sh' \) -print0 | \
 		xargs -0 -r wc -l | awk '$$2 != "total" && $$1 > 250 {print}' | sort -nr
+
+.PHONY: contract-check contract-compile satcom-validate satcom-import db-upgrade
+contract-check: ## Validate open contracts and check generated artifact digests
+	@"$(VENV)/bin/kn" contract lint
+	@"$(VENV)/bin/kn" contract compile --check
+
+contract-compile: ## Compile portable schemas under DATA_DIR
+	@"$(VENV)/bin/kn" contract compile --output "$(DATA_ROOT)/contract/current"
+
+satcom-validate: ## Validate the supplied SATCOM package without writing
+	@"$(VENV)/bin/kn" space satcom validate "$(DATA_ROOT)/satcom_enriched_package"
+
+satcom-import: ## Archive and import SATCOM into the governed database
+	@source "$(PROJECT_ROOT)/scripts/shared/common.sh"; kn_load_env; \
+		KN_DATABASE_URL="postgresql://postgres@127.0.0.1:$$(kn_db_host_port)/kn" \
+		KN_DATABASE_PASSWORD_FILE="$$(kn_db_password_file)" \
+		"$(VENV)/bin/kn" space satcom import "$(DATA_ROOT)/satcom_enriched_package" --data-dir "$(DATA_ROOT)"
+
+db-upgrade: ## Apply Python platform policy and versioned Alembic migrations
+	@source "$(PROJECT_ROOT)/scripts/shared/common.sh"; kn_load_env; kn_db_govern upgrade
+
+.PHONY: db-rebuild
+db-rebuild: ## Rebuild disposable SATCOM projections (requires KN_ENVIRONMENT=development)
+	@source "$(PROJECT_ROOT)/scripts/shared/common.sh"; kn_load_env; kn_db_govern rebuild

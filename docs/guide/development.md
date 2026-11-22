@@ -108,3 +108,16 @@ Use repository checks to enforce testable rules and keep detailed procedures in 
 - Cursor Agent uses the root policy directly. Projects copied from the template can add scoped
   project rules for directory-specific guidance. [Cursor rules](https://cursor.com/docs/rules)
 - [GEMINI.md](../../GEMINI.md) routes Gemini contributors to the shared policy.
+
+## Contract and space example workflow
+
+Run `make contract-check` to validate the bundled open contracts and artifact digests, and
+`make contract-compile` to inspect generated schemas under `$DATA_DIR/contract/current/`.
+The SATCOM example belongs to the existing space domain: `make satcom-validate` checks the
+owner-provided package and `make satcom-import` archives and imports it into the governed database.
+
+Development edits contract version `1.0.0` and one Alembic baseline in place. If a definition
+changes, explicitly set `KN_ENVIRONMENT=development`, run `make db-rebuild`, and backfill with
+`make satcom-import`. Released environments refuse rebuild. First release freezes the baseline;
+later schema changes use reviewed Python Alembic revisions and separate contract versions.
+See [data contracts](../impl/current/data-contracts.md) for preservation rules and current limits.

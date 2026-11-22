@@ -25,5 +25,6 @@ decision. A record can name a plan task by ID because plan headings disappear on
 | 0008 | `database-integration-harness` | [0008-runtime-platform-database-integration-harness.md](0008-runtime-platform-database-integration-harness.md) |
 | 0009 | `adhoc` local-only service tests | [0009-adhoc-local-only-service-tests.md](0009-adhoc-local-only-service-tests.md) |
 | 0010 | `runtime-platform-implementation-audit` | [0010-runtime-platform-runtime-platform-implementation-audit.md](0010-runtime-platform-runtime-platform-implementation-audit.md) |
+| 0011 | `satcom-schema-governance` | [0011-data-contracts-satcom-schema-governance.md](0011-data-contracts-satcom-schema-governance.md) |
 
-Next unused sequence is `0011`.
+Next unused sequence is `0012`.

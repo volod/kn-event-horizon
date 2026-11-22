@@ -21,3 +21,13 @@ images:
     selection: >-
       Newest PostgreSQL major with a stable official PostGIS image at pin time. PostgreSQL 19 had
       only release-candidate images (19rc2-3.7). PostGIS 3.7 is the newest stable minor.
+
+schema_governance:
+  standard: ODCS-3.1.0
+  schema_checksums: src/kn/contracts/resources/pins.json
+  platform_policy: src/kn/contracts/resources/platform.json
+  space_example_contract: src/kn/contracts/resources/satcom/1.0.0.json
+  development_baseline: "0001_satcom"
+  development_policy: edit-version-1.0.0-in-place-and-rebuild
+  release_policy: freeze-baseline-then-reviewed-versioned-alembic-revisions
+  tool_versions: uv.lock

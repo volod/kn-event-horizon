@@ -84,3 +84,6 @@ def db_connection(integration_database: IntegrationDatabase) -> Iterator[Connect
         yield connection
     finally:
         connection.close()
+
+
+from tests.domains.space.satcom.fixtures import source_package  # noqa: E402, F401

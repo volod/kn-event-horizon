@@ -7,7 +7,7 @@ from typing import Any
 import pytest
 import yaml
 
-from tests.deploy.bootstrap_sql import BOOTSTRAP, VERIFY, sql_text_array
+from kn.db.platform import SCHEMAS
 
 ROOT = Path(__file__).resolve().parents[2]
 DEPLOY = ROOT / "deploy"
@@ -143,10 +143,10 @@ def test_database_volume_lives_under_data_dir_and_is_never_created_by_docker() -
 def test_bootstrap_and_probe_cover_core_schemas_and_every_domain_package() -> None:
     domains = {path.name for path in (ROOT / "domains").iterdir() if path.is_dir()}
     expected = CORE_SCHEMAS | domains
-    assert set(sql_text_array(BOOTSTRAP, "kn_schemas")) == expected
-    assert set(sql_text_array(VERIFY, "expected_schemas")) == expected
+    assert set(SCHEMAS) == expected
 
 
-def test_only_the_kn_bootstrap_runs_at_initialization() -> None:
+def test_initialization_disables_vendor_sql_and_governance_owns_ddl() -> None:
     scripts = sorted(path.name for path in (DEPLOY / "postgres" / "initdb").iterdir())
-    assert scripts == ["10-kn-bootstrap.sql"]
+    assert scripts == [".gitkeep"]
+    assert not list(DEPLOY.rglob("*.sql"))

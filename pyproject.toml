@@ -17,7 +17,12 @@ classifiers = [
   "Programming Language :: Python :: 3.12",
   "Programming Language :: Python :: 3.13",
 ]
-dependencies = []
+dependencies = [
+  "alembic>=1.17,<2",
+  "jsonschema>=4.25,<5",
+  "psycopg[binary]>=3.3,<4",
+  "sqlalchemy>=2.0.44,<3",
+]
 
 [project.optional-dependencies]
 dev = [
@@ -31,6 +36,8 @@ dev = [
   "radon==6.0.1",
   "ruff>=0.11,<0.17",
   "shellcheck-py==0.11.0.1",
+  "types-jsonschema>=4.25,<5",
+  "fastavro>=1.12,<2",
 ]
 
 [project.scripts]
@@ -45,6 +52,10 @@ Issues = "https://github.com/volod/kn-event-horizon/issues"
 
 [tool.setuptools.packages.find]
 where = ["src"]
+
+[tool.setuptools.package-data]
+"kn.contracts" = ["resources/**/*.json"]
+"kn.db" = ["migrations/*.py", "migrations/versions/*.py"]
 
 [tool.ruff]
 line-length = 100

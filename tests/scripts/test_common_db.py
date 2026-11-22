@@ -181,19 +181,18 @@ def test_test_env_refuses_an_invalid_port(tmp_path: Path) -> None:
 
 @pytest.mark.skipif(os.geteuid() == 0, reason="the helpers refuse to run as root")
 def test_db_up_prepares_a_private_volume_then_waits_and_bootstraps(tmp_path: Path) -> None:
-    result = _run(tmp_path, "kn_db_up")
+    result = _run(tmp_path, 'kn_db_govern() { echo "GOVERN $*"; }; kn_db_up')
 
     assert result.returncode == 0, result.stderr
     assert _mode(tmp_path / "data" / "postgres") == 0o700
     calls = [call for call in _calls(tmp_path) if "compose version" not in call]
-    assert len(calls) == 2
+    assert len(calls) == 1
     identity, password_file, port, up = calls[0].split("|")
     assert identity == f"{os.getuid()}:{os.getgid()}"
     assert password_file == str(tmp_path / "data" / "secrets" / "postgres-password")
     assert port == DEFAULT_HOST_PORT
     assert up == f"compose --file {COMPOSE_FILE} up --detach --wait --wait-timeout 180 postgres"
-    assert " exec -T postgres psql " in calls[1]
-    assert calls[1].endswith("--file=/docker-entrypoint-initdb.d/10-kn-bootstrap.sql")
+    assert "GOVERN upgrade" in result.stdout
     assert f"127.0.0.1:{DEFAULT_HOST_PORT}" in result.stdout
     assert password_file in result.stdout
 
@@ -229,7 +228,7 @@ def test_reset_replaces_only_the_database_volume(tmp_path: Path) -> None:
     secret.parent.mkdir()
     secret.write_text("kept")
 
-    result = _run(tmp_path, "kn_db_reset")
+    result = _run(tmp_path, "kn_db_govern() { return 0; }; kn_db_reset")
 
     assert result.returncode == 0, result.stderr
     assert list((data / "postgres").iterdir()) == []
@@ -238,3 +237,10 @@ def test_reset_replaces_only_the_database_volume(tmp_path: Path) -> None:
     commands = [call.split("|")[3] for call in _calls(tmp_path) if "compose version" not in call]
     assert commands[0] == f"compose --file {COMPOSE_FILE} down"
     assert " up " in f" {commands[1]} "
+
+
+def test_reset_refuses_a_released_environment_before_docker(tmp_path: Path) -> None:
+    result = _run(tmp_path, "kn_db_reset", KN_ENVIRONMENT="released")
+    assert result.returncode == 1
+    assert "released environment" in result.stderr
+    assert _calls(tmp_path) == []

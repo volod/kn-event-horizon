@@ -55,16 +55,13 @@ services:
     dns:
       - 127.0.0.1
     healthcheck:
-      # Healthy means the final server accepts TCP (the init-time server is socket-only) and the
-      # bootstrap committed. The bootstrap is one transaction, so one of its roles witnesses it.
-      # After a failed first initialization the image skips init on restart; this keeps it
-      # unhealthy instead of serving a database without its schemas and roles.
+      # Server readiness precedes host-side Python governance; make db-up then applies and
+      # verifies the atomic role policy and Alembic head before it reports success.
       test:
         - CMD-SHELL
         - >-
           pg_isready --host=127.0.0.1 --port=5432 --dbname=kn --username=postgres --timeout=3
-          --quiet && psql --no-psqlrc --no-password --tuples-only --no-align --username=postgres
-          --dbname=kn --command="SELECT to_regrole('kn_system_owner') IS NOT NULL" | grep -qx t
+          --quiet
       interval: 10s
       timeout: 5s
       retries: 5

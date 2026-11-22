@@ -1,0 +1,106 @@
+"""Runtime privilege and structural checks generated from policy and contract models."""
+
+import secrets
+
+import sqlalchemy as sa
+from alembic.autogenerate import compare_metadata
+from alembic.migration import MigrationContext
+from sqlalchemy.engine import Connection
+
+from kn.contracts import load_contract
+from kn.contracts.sqlalchemy import metadata
+from kn.db.platform import ROLE_KINDS, SCHEMAS, ddl
+
+
+def verify_structure(connection: Connection) -> None:
+    contract = load_contract()
+    managed = {table.name for table in contract.tables}
+
+    def include_name(name: str | None, kind: str, parents: dict[str, str | None]) -> bool:
+        if kind == "schema":
+            return name == contract.schema
+        if kind == "table":
+            return name in managed and parents.get("schema_name") == contract.schema
+        return (
+            parents.get("schema_name") == contract.schema and parents.get("table_name") in managed
+        )
+
+    context = MigrationContext.configure(
+        connection,
+        opts={
+            "include_schemas": True,
+            "include_name": include_name,
+            "version_table_schema": "system",
+            "compare_type": True,
+        },
+    )
+    if compare_metadata(context, metadata(contract)):
+        raise ValueError("database structure differs from the contract; rebuild or migrate")
+
+
+def verify_privileges(connection: Connection) -> None:
+    """Probe default grants inside a savepoint and always remove every probe."""
+    savepoint = connection.begin_nested()
+    try:
+        for schema in SCHEMAS:
+            _schema_privileges(connection, schema)
+            _table_privileges(connection, schema)
+    finally:
+        savepoint.rollback()
+
+
+def _expect(actual: object, expected: object, context: str) -> None:
+    if actual != expected:
+        raise ValueError(f"privilege mismatch: {context}")
+
+
+def _schema_privileges(connection: Connection, schema: str) -> None:
+    for kind in ROLE_KINDS:
+        role = f"kn_{schema}_{kind}"
+        for other in SCHEMAS:
+            for privilege in ("USAGE", "CREATE"):
+                allowed = other == schema and (privilege == "USAGE" or kind == "owner")
+                value = connection.scalar(
+                    sa.select(sa.func.has_schema_privilege(role, other, privilege))
+                )
+                _expect(value, allowed, f"{role} {privilege} {other}")
+        for privilege, allowed in (("CONNECT", True), ("TEMPORARY", False)):
+            value = connection.scalar(
+                sa.select(
+                    sa.func.has_database_privilege(role, sa.func.current_database(), privilege)
+                )
+            )
+            _expect(value, allowed, f"{role} {privilege} database")
+        value = connection.scalar(sa.select(sa.func.has_schema_privilege(role, "public", "CREATE")))
+        _expect(value, False, f"{role} CREATE public")
+
+
+def _table_privileges(connection: Connection, schema: str) -> None:
+    name = f"kn_role_probe_{secrets.token_hex(4)}"
+    ddl(connection, f"SET LOCAL ROLE kn_{schema}_owner")
+    table = sa.Table(
+        name,
+        sa.MetaData(schema=schema),
+        sa.Column("id", sa.BigInteger(), sa.Identity(), primary_key=True),
+    )
+    table.create(connection)
+    ddl(connection, "RESET ROLE")
+    for kind in ROLE_KINDS:
+        role = f"kn_{schema}_{kind}"
+        for privilege in ("SELECT", "INSERT", "UPDATE", "DELETE", "TRUNCATE"):
+            allowed = (
+                kind == "owner"
+                or privilege == "SELECT"
+                or (kind == "loader" and privilege != "TRUNCATE")
+            )
+            value = connection.scalar(
+                sa.select(sa.func.has_table_privilege(role, f"{schema}.{name}", privilege))
+            )
+            _expect(value, allowed, f"{role} {privilege} table")
+        for privilege in ("USAGE", "SELECT"):
+            value = connection.scalar(
+                sa.select(
+                    sa.func.has_sequence_privilege(role, f"{schema}.{name}_id_seq", privilege)
+                )
+            )
+            _expect(value, kind != "reader", f"{role} {privilege} sequence")
