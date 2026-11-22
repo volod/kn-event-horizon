@@ -1,0 +1,616 @@
+{
+  "crosswalks": [
+    {
+      "code": "A",
+      "mapping_type": "exactMatch",
+      "reason": "Same Figure 9 category and branch; local display disambiguation and identifiers do not change its meaning.",
+      "target_code": "A"
+    },
+    {
+      "code": "A.AMP",
+      "mapping_type": "exactMatch",
+      "reason": "Same Figure 9 category and branch; local display disambiguation and identifiers do not change its meaning.",
+      "target_code": "A.AMP"
+    },
+    {
+      "code": "A.AMP.PREC",
+      "mapping_type": "broadMatch",
+      "reason": "Precision/instrumentation amplifier specializes amplifier.",
+      "target_code": "A.AMP"
+    },
+    {
+      "code": "A.AMP.RF",
+      "mapping_type": "broadMatch",
+      "reason": "RF LNA/PA/amplifier specializes amplifier.",
+      "target_code": "A.AMP"
+    },
+    {
+      "code": "A.PM",
+      "mapping_type": "exactMatch",
+      "reason": "Same Figure 9 category and branch; local display disambiguation and identifiers do not change its meaning.",
+      "target_code": "A.PM"
+    },
+    {
+      "code": "A.PM.DRV",
+      "mapping_type": "broadMatch",
+      "reason": "Gate/motor driver IC specializes power management in the local product classification.",
+      "target_code": "A.PM"
+    },
+    {
+      "code": "A.PM.HARV",
+      "mapping_type": "broadMatch",
+      "reason": "Energy-harvesting/battery-management IC specializes power management.",
+      "target_code": "A.PM"
+    },
+    {
+      "code": "A.PM.REG",
+      "mapping_type": "broadMatch",
+      "reason": "DC/DC, LDO and PMIC are power-management IC types.",
+      "target_code": "A.PM"
+    },
+    {
+      "code": "A.SC",
+      "mapping_type": "exactMatch",
+      "reason": "Same Figure 9 category and branch; local display disambiguation and identifiers do not change its meaning.",
+      "target_code": "A.SC"
+    },
+    {
+      "code": "A.SC.ADC",
+      "mapping_type": "analyst_crosswalk",
+      "reason": "ADC and AFE is a combined label; analog front ends may include more than signal conversion.",
+      "target_code": "A.SC"
+    },
+    {
+      "code": "A.SC.DAC",
+      "mapping_type": "broadMatch",
+      "reason": "DAC specializes signal conversion.",
+      "target_code": "A.SC"
+    },
+    {
+      "code": "A.SC.RF",
+      "mapping_type": "analyst_crosswalk",
+      "reason": "RF transceiver/converter is a composite local grouping associated with signal conversion.",
+      "target_code": "A.SC"
+    },
+    {
+      "code": "L",
+      "mapping_type": "exactMatch",
+      "reason": "Same Figure 9 category and branch; local display disambiguation and identifiers do not change its meaning.",
+      "target_code": "L"
+    },
+    {
+      "code": "L.ASIC",
+      "mapping_type": "exactMatch",
+      "reason": "Same Figure 9 category and branch; local display disambiguation and identifiers do not change its meaning.",
+      "target_code": "L.ASIC"
+    },
+    {
+      "code": "L.ASIC.RF",
+      "mapping_type": "broadMatch",
+      "reason": "Digital-dominant connectivity ASIC specializes ASIC.",
+      "target_code": "L.ASIC"
+    },
+    {
+      "code": "L.ASIC.SEC",
+      "mapping_type": "broadMatch",
+      "reason": "Security/cryptographic ASIC specializes ASIC.",
+      "target_code": "L.ASIC"
+    },
+    {
+      "code": "L.CPU",
+      "mapping_type": "exactMatch",
+      "reason": "Same Figure 9 category and branch; local display disambiguation and identifiers do not change its meaning.",
+      "target_code": "L.CPU"
+    },
+    {
+      "code": "L.DSP",
+      "mapping_type": "exactMatch",
+      "reason": "Same Figure 9 category and branch; local display disambiguation and identifiers do not change its meaning.",
+      "target_code": "L.DSP"
+    },
+    {
+      "code": "L.GPU",
+      "mapping_type": "exactMatch",
+      "reason": "Same Figure 9 category and branch; local display disambiguation and identifiers do not change its meaning.",
+      "target_code": "L.GPU"
+    },
+    {
+      "code": "L.GPU.EDGE",
+      "mapping_type": "broadMatch",
+      "reason": "Embedded GPU specializes GPU.",
+      "target_code": "L.GPU"
+    },
+    {
+      "code": "L.IPU",
+      "mapping_type": "exactMatch",
+      "reason": "Same Figure 9 category and branch; local display disambiguation and identifiers do not change its meaning.",
+      "target_code": "L.IPU"
+    },
+    {
+      "code": "L.IPU.ANALOG",
+      "mapping_type": "analyst_crosswalk",
+      "reason": "Analog/mixed-signal AI accelerator has no explicit Figure 9 node; the IPU association is an analyst decision.",
+      "target_code": "L.IPU"
+    },
+    {
+      "code": "L.IPU.NEURO",
+      "mapping_type": "analyst_crosswalk",
+      "reason": "Neuromorphic accelerator has no explicit Figure 9 node; the IPU association is an analyst decision.",
+      "target_code": "L.IPU"
+    },
+    {
+      "code": "L.IPU.NPU",
+      "mapping_type": "analyst_crosswalk",
+      "reason": "Digital inference accelerator/NPU is associated with the IPU branch as a local engineering interpretation, not an OECD-defined subtype.",
+      "target_code": "L.IPU"
+    },
+    {
+      "code": "L.MCU",
+      "mapping_type": "exactMatch",
+      "reason": "Same Figure 9 category and branch; local display disambiguation and identifiers do not change its meaning.",
+      "target_code": "L.MCU"
+    },
+    {
+      "code": "L.MCU.AI",
+      "mapping_type": "broadMatch",
+      "reason": "MCU with an integrated accelerator remains an MCU specialization.",
+      "target_code": "L.MCU"
+    },
+    {
+      "code": "L.MCU.RF",
+      "mapping_type": "analyst_crosswalk",
+      "reason": "Wireless MCU / radio SoC is a composite local label; MCU is its intended classification, not a claim that all radio SoCs are MCUs.",
+      "target_code": "L.MCU"
+    },
+    {
+      "code": "L.MCU.RT",
+      "mapping_type": "broadMatch",
+      "reason": "Real-time/control MCU is an MCU specialization.",
+      "target_code": "L.MCU"
+    },
+    {
+      "code": "L.MCU.ULP",
+      "mapping_type": "broadMatch",
+      "reason": "Ultra-low-power MCU is a specialization of MCU.",
+      "target_code": "L.MCU"
+    },
+    {
+      "code": "L.MPU",
+      "mapping_type": "exactMatch",
+      "reason": "Same Figure 9 category and branch; local display disambiguation and identifiers do not change its meaning.",
+      "target_code": "L.MPU"
+    },
+    {
+      "code": "L.MPU.EDGE",
+      "mapping_type": "analyst_crosswalk",
+      "reason": "The mixed SoC/MPU label is associated with MPU by analyst classification; Figure 9 has no SoC category.",
+      "target_code": "L.MPU"
+    },
+    {
+      "code": "L.MPU.VISION",
+      "mapping_type": "analyst_crosswalk",
+      "reason": "Vision/multimedia SoC/MPU is a mixed local grouping; no equivalence with the entire MPU category is asserted.",
+      "target_code": "L.MPU"
+    },
+    {
+      "code": "L.PLD",
+      "mapping_type": "exactMatch",
+      "reason": "Same Figure 9 category and branch; local display disambiguation and identifiers do not change its meaning.",
+      "target_code": "L.PLD"
+    },
+    {
+      "code": "L.PLD.FPGA",
+      "mapping_type": "exactMatch",
+      "reason": "Same Figure 9 category and branch; local display disambiguation and identifiers do not change its meaning.",
+      "target_code": "L.PLD.FPGA"
+    },
+    {
+      "code": "L.PLD.FPGA.HIGH",
+      "mapping_type": "broadMatch",
+      "reason": "High-throughput FPGA specializes FPGA/FPLD.",
+      "target_code": "L.PLD.FPGA"
+    },
+    {
+      "code": "L.PLD.FPGA.SMALL",
+      "mapping_type": "broadMatch",
+      "reason": "Low-density FPGA specializes FPGA/FPLD.",
+      "target_code": "L.PLD.FPGA"
+    },
+    {
+      "code": "L.PLD.FPGA.SOC",
+      "mapping_type": "analyst_crosswalk",
+      "reason": "SoC FPGA is a composite system grouping associated with FPGA/FPLD; no native SoC taxonomy category is asserted.",
+      "target_code": "L.PLD.FPGA"
+    },
+    {
+      "code": "M",
+      "mapping_type": "exactMatch",
+      "reason": "Same Figure 9 category and branch; local display disambiguation and identifiers do not change its meaning.",
+      "target_code": "M"
+    },
+    {
+      "code": "M.NV",
+      "mapping_type": "exactMatch",
+      "reason": "Same Figure 9 category and branch; local display disambiguation and identifiers do not change its meaning.",
+      "target_code": "M.NV"
+    },
+    {
+      "code": "M.NV.FLASH",
+      "mapping_type": "exactMatch",
+      "reason": "Same Figure 9 category and branch; local display disambiguation and identifiers do not change its meaning.",
+      "target_code": "M.NV.FLASH"
+    },
+    {
+      "code": "M.NV.FLASH.NAND",
+      "mapping_type": "exactMatch",
+      "reason": "Same Figure 9 category and branch; local display disambiguation and identifiers do not change its meaning.",
+      "target_code": "M.NV.FLASH.NAND"
+    },
+    {
+      "code": "M.NV.FLASH.NOR",
+      "mapping_type": "exactMatch",
+      "reason": "Same Figure 9 category and branch; local display disambiguation and identifiers do not change its meaning.",
+      "target_code": "M.NV.FLASH.NOR"
+    },
+    {
+      "code": "M.NV.NVRAM",
+      "mapping_type": "exactMatch",
+      "reason": "Same Figure 9 category and branch; local display disambiguation and identifiers do not change its meaning.",
+      "target_code": "M.NV.NVRAM"
+    },
+    {
+      "code": "M.NV.NVRAM.MRAM",
+      "mapping_type": "broadMatch",
+      "reason": "MRAM is a non-volatile random-access memory specialization.",
+      "target_code": "M.NV.NVRAM"
+    },
+    {
+      "code": "M.NV.NVRAM.RRAM",
+      "mapping_type": "analyst_crosswalk",
+      "reason": "The grouped ReRAM/PCM/FeRAM subtype tag is an analyst association with NVRAM; Figure 9 does not distinguish these technologies.",
+      "target_code": "M.NV.NVRAM"
+    },
+    {
+      "code": "M.NV.ROM",
+      "mapping_type": "exactMatch",
+      "reason": "Same Figure 9 category and branch; local display disambiguation and identifiers do not change its meaning.",
+      "target_code": "M.NV.ROM"
+    },
+    {
+      "code": "M.V",
+      "mapping_type": "exactMatch",
+      "reason": "Same Figure 9 category and branch; local display disambiguation and identifiers do not change its meaning.",
+      "target_code": "M.V"
+    },
+    {
+      "code": "M.V.DRAM",
+      "mapping_type": "exactMatch",
+      "reason": "Same Figure 9 category and branch; local display disambiguation and identifiers do not change its meaning.",
+      "target_code": "M.V.DRAM"
+    },
+    {
+      "code": "M.V.SRAM",
+      "mapping_type": "exactMatch",
+      "reason": "Same Figure 9 category and branch; local display disambiguation and identifiers do not change its meaning.",
+      "target_code": "M.V.SRAM"
+    },
+    {
+      "code": "O",
+      "mapping_type": "exactMatch",
+      "reason": "Same Figure 9 category and branch; local display disambiguation and identifiers do not change its meaning.",
+      "target_code": "O"
+    },
+    {
+      "code": "O.DISC",
+      "mapping_type": "exactMatch",
+      "reason": "Same Figure 9 category and branch; local display disambiguation and identifiers do not change its meaning.",
+      "target_code": "O.DISC"
+    },
+    {
+      "code": "O.DISC.DIO",
+      "mapping_type": "broadMatch",
+      "reason": "Discrete diode/rectifier/protection semiconductor specializes discrete semiconductors.",
+      "target_code": "O.DISC"
+    },
+    {
+      "code": "O.DISC.SW",
+      "mapping_type": "broadMatch",
+      "reason": "Discrete power transistor/switch specializes discrete semiconductors.",
+      "target_code": "O.DISC"
+    },
+    {
+      "code": "O.OPTO",
+      "mapping_type": "exactMatch",
+      "reason": "Same Figure 9 category and branch; local display disambiguation and identifiers do not change its meaning.",
+      "target_code": "O.OPTO"
+    },
+    {
+      "code": "O.OPTO.CIS",
+      "mapping_type": "analyst_crosswalk",
+      "reason": "CMOS image sensor/focal plane is associated with optoelectronics; a focal-plane assembly need not be a single semiconductor type.",
+      "target_code": "O.OPTO"
+    },
+    {
+      "code": "O.OPTO.EMIT",
+      "mapping_type": "broadMatch",
+      "reason": "LED, VCSEL and semiconductor laser specialize optoelectronics.",
+      "target_code": "O.OPTO"
+    },
+    {
+      "code": "O.OPTO.PHOT",
+      "mapping_type": "broadMatch",
+      "reason": "Photodiode, SPAD and optical semiconductor detector specialize optoelectronics.",
+      "target_code": "O.OPTO"
+    },
+    {
+      "code": "O.OPTO.PIC",
+      "mapping_type": "analyst_crosswalk",
+      "reason": "Photonic integrated circuits are associated with optoelectronics without claiming Figure 9 defines their material or implementation scope.",
+      "target_code": "O.OPTO"
+    },
+    {
+      "code": "O.OTHER",
+      "mapping_type": "exactMatch",
+      "reason": "Same Figure 9 category and branch; local display disambiguation and identifiers do not change its meaning.",
+      "target_code": "O.OTHER"
+    },
+    {
+      "code": "O.OTHER.Q",
+      "mapping_type": "analyst_crosswalk",
+      "reason": "Emerging semiconductor devices is an open-ended local grouping associated with the residual Others branch; no OECD-defined equivalence is asserted.",
+      "target_code": "O.OTHER"
+    },
+    {
+      "code": "O.SENS",
+      "mapping_type": "exactMatch",
+      "reason": "Same Figure 9 category and branch; local display disambiguation and identifiers do not change its meaning.",
+      "target_code": "O.SENS"
+    },
+    {
+      "code": "O.SENS.ACO",
+      "mapping_type": "broadMatch",
+      "reason": "MEMS microphone/acoustic/ultrasound semiconductor sensor specializes sensors and actuators.",
+      "target_code": "O.SENS"
+    },
+    {
+      "code": "O.SENS.ACT",
+      "mapping_type": "broadMatch",
+      "reason": "MEMS semiconductor actuator/transducer specializes sensors and actuators.",
+      "target_code": "O.SENS"
+    },
+    {
+      "code": "O.SENS.ENV",
+      "mapping_type": "broadMatch",
+      "reason": "Environmental semiconductor sensor specializes sensors and actuators.",
+      "target_code": "O.SENS"
+    },
+    {
+      "code": "O.SENS.IMU",
+      "mapping_type": "analyst_crosswalk",
+      "reason": "Accelerometer/gyro/IMU may include integrated modules; sensors and actuators is the intended analyst association.",
+      "target_code": "O.SENS"
+    },
+    {
+      "code": "O.SENS.MAG",
+      "mapping_type": "broadMatch",
+      "reason": "Magnetic/Hall/current semiconductor sensor specializes sensors and actuators.",
+      "target_code": "O.SENS"
+    },
+    {
+      "code": "O.SENS.RAD",
+      "mapping_type": "analyst_crosswalk",
+      "reason": "Integrated radar sensing device may combine multiple semiconductor functions; the sensor association is local.",
+      "target_code": "O.SENS"
+    },
+    {
+      "code": "O.SENS.RANGE",
+      "mapping_type": "analyst_crosswalk",
+      "reason": "ToF/ranging sensor module is associated with sensors and actuators; a module is not asserted to be an OECD semiconductor category.",
+      "target_code": "O.SENS"
+    },
+    {
+      "code": "O.SENS.SMART",
+      "mapping_type": "analyst_crosswalk",
+      "reason": "Smart/event sensor with embedded compute is a composite engineering grouping associated with sensors and actuators.",
+      "target_code": "O.SENS"
+    },
+    {
+      "code": "X",
+      "mapping_type": null,
+      "reason": "Non-chip products and enabling assets is outside the semiconductor-type scope of Figure 9.",
+      "target_code": null
+    },
+    {
+      "code": "X.DEV",
+      "mapping_type": null,
+      "reason": "Development kits are enabling products, not semiconductor types.",
+      "target_code": null
+    },
+    {
+      "code": "X.FAB",
+      "mapping_type": null,
+      "reason": "Process platforms/equipment are production assets, not semiconductor types.",
+      "target_code": null
+    },
+    {
+      "code": "X.IP",
+      "mapping_type": null,
+      "reason": "Licensable semiconductor IP is an intangible design asset, not a semiconductor type.",
+      "target_code": null
+    },
+    {
+      "code": "X.MAT",
+      "mapping_type": null,
+      "reason": "Wafers/materials/packaging are enabling inputs, not Figure 9 semiconductor types.",
+      "target_code": null
+    },
+    {
+      "code": "X.MOD",
+      "mapping_type": null,
+      "reason": "Module/SiP/board is packaging or assembly, not a Figure 9 semiconductor type; see page 31 on packaging.",
+      "target_code": null
+    },
+    {
+      "code": "X.SW",
+      "mapping_type": null,
+      "reason": "EDA/compiler/SDK/runtime is software, not a semiconductor type.",
+      "target_code": null
+    }
+  ],
+  "format": "kn.semantic.oecd-figure9.v1",
+  "locator": "Figure 9, printed/PDF page 30; packaging boundary on page 31",
+  "nodes": [
+    {
+      "code": "L",
+      "parent_code": null,
+      "source_label": "IC-Logic"
+    },
+    {
+      "code": "L.CPU",
+      "parent_code": "L",
+      "source_label": "CPU"
+    },
+    {
+      "code": "L.MPU",
+      "parent_code": "L",
+      "source_label": "MPU"
+    },
+    {
+      "code": "L.GPU",
+      "parent_code": "L",
+      "source_label": "GPU"
+    },
+    {
+      "code": "L.ASIC",
+      "parent_code": "L",
+      "source_label": "ASIC"
+    },
+    {
+      "code": "L.MCU",
+      "parent_code": "L",
+      "source_label": "MCU"
+    },
+    {
+      "code": "L.DSP",
+      "parent_code": "L",
+      "source_label": "DSP"
+    },
+    {
+      "code": "L.IPU",
+      "parent_code": "L",
+      "source_label": "IPU"
+    },
+    {
+      "code": "L.PLD",
+      "parent_code": "L",
+      "source_label": "Programmable Logic Devices"
+    },
+    {
+      "code": "L.PLD.FPGA",
+      "parent_code": "L.PLD",
+      "source_label": "FPGA/FPLD"
+    },
+    {
+      "code": "M",
+      "parent_code": null,
+      "source_label": "IC-Memory"
+    },
+    {
+      "code": "M.V",
+      "parent_code": "M",
+      "source_label": "Volatile"
+    },
+    {
+      "code": "M.V.DRAM",
+      "parent_code": "M.V",
+      "source_label": "DRAM"
+    },
+    {
+      "code": "M.V.SRAM",
+      "parent_code": "M.V",
+      "source_label": "SRAM"
+    },
+    {
+      "code": "M.NV",
+      "parent_code": "M",
+      "source_label": "Non-Volatile"
+    },
+    {
+      "code": "M.NV.ROM",
+      "parent_code": "M.NV",
+      "source_label": "ROM"
+    },
+    {
+      "code": "M.NV.NVRAM",
+      "parent_code": "M.NV",
+      "source_label": "NVRAM"
+    },
+    {
+      "code": "M.NV.FLASH",
+      "parent_code": "M.NV",
+      "source_label": "Flash"
+    },
+    {
+      "code": "M.NV.FLASH.NOR",
+      "parent_code": "M.NV.FLASH",
+      "source_label": "NOR"
+    },
+    {
+      "code": "M.NV.FLASH.NAND",
+      "parent_code": "M.NV.FLASH",
+      "source_label": "NAND"
+    },
+    {
+      "code": "A",
+      "parent_code": null,
+      "source_label": "IC-Analog"
+    },
+    {
+      "code": "A.PM",
+      "parent_code": "A",
+      "source_label": "Power Management"
+    },
+    {
+      "code": "A.SC",
+      "parent_code": "A",
+      "source_label": "Signal Conversion"
+    },
+    {
+      "code": "A.AMP",
+      "parent_code": "A",
+      "source_label": "Amplifier"
+    },
+    {
+      "code": "O",
+      "parent_code": null,
+      "source_label": "Others"
+    },
+    {
+      "code": "O.OPTO",
+      "parent_code": "O",
+      "source_label": "Optoelectronics"
+    },
+    {
+      "code": "O.SENS",
+      "parent_code": "O",
+      "source_label": "Sensors and actuators"
+    },
+    {
+      "code": "O.DISC",
+      "parent_code": "O",
+      "source_label": "Discrete"
+    },
+    {
+      "code": "O.OTHER",
+      "parent_code": "O",
+      "source_label": "Others"
+    }
+  ],
+  "publication": {
+    "edition": "Chips, nodes and wafers, August 2024, Figure 9",
+    "publisher": "OECD",
+    "source_sha256": "25f7ec43f76d5fc1ddac65d1a16b179262aa8b68371545eef87ccac384d40083",
+    "source_uri": "https://www.oecd.org/content/dam/oecd/en/publications/reports/2024/08/chips-nodes-and-wafers_1189c2a2/f68de895-en.pdf"
+  },
+  "reviewed_on": "2026-11-22"
+}

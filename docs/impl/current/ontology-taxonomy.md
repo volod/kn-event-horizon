@@ -74,7 +74,8 @@ stay separate from SKOS mappings. Scheme origin remains one of `official`, `kb_n
 `kb_extension`, `service_extension`, or `native`; verification never rewrites it. Verification
 states are `unverified` and `verified`, both with a reason. Verified schemes require publisher,
 edition, a credential-free HTTP(S) publication URI and a lowercase SHA-256 checksum. These checks
-establish evidence shape; comparing an official publication remains a separate review task.
+establish evidence shape; the [publication reviews](ontology-taxonomy/verification.md) bind
+reviewed scheme metadata to the checked seed content and record comparison boundaries.
 
 Tag verification states are `unreviewed`, `corroborated`, `verified`, `disputed`, and `rejected`.
 Validity intervals are half-open and increasing when both ends exist; unknown ends stay null.
@@ -106,6 +107,8 @@ execute conversions, ranking or evidence selection.
 - `make test-integration`: the new round trip and existing registry deployment/rebuild verification.
 
 The [task record](../records/0020-ontology-taxonomy-semantic-model-contracts.md) contains acceptance
-evidence. [Seed import and proposal reconciliation](ontology-taxonomy/seeds.md) are available. Publication
-comparison and SKOS export remain in the [plan](../plan.md), so the ontology-taxonomy capability
-remains planned.
+evidence. The [separate verified OECD product scheme and crosswalks](ontology-taxonomy/oecd.md)
+are available alongside the original mixed product vocabulary.
+[Seed import and proposal reconciliation](ontology-taxonomy/seeds.md) and
+[official publication comparison](ontology-taxonomy/verification.md) are available. SKOS export
+remains in the [plan](../plan.md), so the ontology-taxonomy capability remains planned.

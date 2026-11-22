@@ -1,7 +1,6 @@
 """Reconcile proposals for review and load only explicitly packaged reviewed snapshots."""
 
 import json
-import re
 from collections import Counter
 from pathlib import Path
 from typing import Any
@@ -14,11 +13,20 @@ from sqlalchemy.engine import Connection
 from kn.contracts.sqlalchemy import metadata
 from kn.db.statements import SetConstraints
 from kn.semantic import validate_model
+from kn.semantic.oecd_reference import publication_references
 from kn.semantic.proposals import DOMAINS, Proposal, read_proposals
 from kn.semantic.seed_model import SeedBuilder, encoded
+from kn.semantic.seed_oecd import (
+    enrich_report,
+    import_oecd,
+    validate_oecd,
+    validate_oecd_provenance,
+)
 from kn.semantic.seed_ontology import CLASS_SHEETS, import_classes, import_relation
+from kn.semantic.seed_provenance import validate_provenance
 from kn.semantic.seed_vocabulary import import_concepts
 from kn.semantic.structure import Snapshot, semantic_contract
+from kn.semantic.verification import review_schemes
 
 RESOURCES = Path(__file__).with_name("resources")
 FIXTURE_PATH = Path("tests/semantic/fixtures/proposal_examples.json")
@@ -62,8 +70,13 @@ def reconcile(
                 "formulas_not_evaluated": row.formulas,
             }
         )
+    enrich_report(report, import_oecd(builders["microelectronics"], proposals, RESOURCES))
     documents = {domain: builder.document() for domain, builder in builders.items()}
-    validate_model(merge_snapshots([document["snapshot"] for document in documents.values()]))
+    for domain, document in documents.items():
+        review_schemes(document["snapshot"], RESOURCES / f"{domain}-verification.json", domain)
+    snapshot = merge_snapshots([document["snapshot"] for document in documents.values()])
+    validate_model(snapshot, publication_references(RESOURCES))
+    validate_oecd(snapshot, RESOURCES)
     return documents, report, fixtures
 
 
@@ -104,7 +117,7 @@ def _decision(builder: SeedBuilder, row: Proposal) -> tuple[str, str, list[str]]
         identifiers, reason = import_relation(builder, row)
     else:
         identifiers = import_concepts(builder, row)
-        reason = "Controlled vocabulary with domain/scheme qualification; original metadata retained, publication unverified."
+        reason = "Controlled vocabulary with domain/scheme qualification; original metadata retained, publication state and scope recorded in verification review."
     if not identifiers:
         return "needs_mapping", reason if row.sheet == "02_relations" else POLICY_REASON, []
     status = "duplicate" if set(identifiers) <= before else "accepted"
@@ -147,6 +160,7 @@ def import_proposals(root: Path, data_dir: Path, *, check: bool = False) -> dict
 def reviewed_snapshot(resources: Path = RESOURCES) -> Snapshot:
     """Explicit filenames, independent of cwd; proposals and examples are never runtime inputs."""
     snapshots: list[Snapshot] = []
+    references = publication_references(resources)
     for domain in DOMAINS:
         document = json.loads((resources / f"{domain}.json").read_bytes())
         if (
@@ -156,11 +170,17 @@ def reviewed_snapshot(resources: Path = RESOURCES) -> Snapshot:
             or document.get("domain") != domain
         ):
             raise ValueError("invalid reviewed seed envelope")
-        validate_model(document["snapshot"])
-        _validate_provenance(document)
+        validate_model(document["snapshot"], references)
+        validate_provenance(document)
+        if domain == "microelectronics":
+            validate_oecd_provenance(document, resources)
+        review_schemes(
+            document["snapshot"], resources / f"{domain}-verification.json", domain, check=True
+        )
         snapshots.append(document["snapshot"])
     snapshot = merge_snapshots(snapshots)
-    validate_model(snapshot)
+    validate_model(snapshot, references)
+    validate_oecd(snapshot, resources)
     return snapshot
 
 
@@ -203,32 +223,3 @@ def _check_references(connection: Connection, model: MetaData) -> None:
     )
     connection.execute(SetConstraints("semantic", names, deferred=False))
     connection.execute(SetConstraints("semantic", names, deferred=True))
-
-
-def _validate_provenance(document: dict[str, Any]) -> None:
-    provenance = document["provenance"]
-    identifiers = {row["id"] for row in document["snapshot"].get("terms", [])}
-    if not isinstance(provenance, dict) or set(provenance) != identifiers:
-        raise ValueError("every reviewed term requires provenance")
-    for sources in provenance.values():
-        if not isinstance(sources, list) or not sources:
-            raise ValueError("reviewed provenance requires source rows")
-        for source in sources:
-            _validate_locator(source)
-
-
-def _validate_locator(source: object) -> None:
-    if not isinstance(source, dict):
-        raise ValueError("reviewed provenance requires a source locator object")
-    for key in ("file", "sheet", "workbook_file", "sha256", "workbook_sha256"):
-        required = source.get(key)
-        if not isinstance(required, str) or not required.strip():
-            raise ValueError("reviewed provenance requires source file, digest, sheet, and row")
-    for key in ("sha256", "workbook_sha256"):
-        if re.fullmatch(r"[0-9a-f]{64}", source[key]) is None:
-            raise ValueError("reviewed provenance requires SHA-256 digests")
-    if type(source.get("row")) is not int or source["row"] < 1:
-        raise ValueError("reviewed provenance requires a positive row locator")
-    path = Path(source["file"])
-    if path.is_absolute() or ".." in path.parts:
-        raise ValueError("reviewed provenance file must be repository-relative")

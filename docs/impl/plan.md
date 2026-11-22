@@ -34,31 +34,6 @@ recorded decision before later groups build on the group.
 
 ### Ontology and taxonomy -- `ontology-taxonomy`
 
-#### verify-official-taxonomies
-
-Concepts that name an official standard cannot be shown as official until checked against the
-publication.
-
-- Serves: `ontology-taxonomy` -- [Ontology and taxonomy](../design/spec.md#ontology-and-taxonomy)
-- Agent status: CLEAR
-- Research: yes
-- Dependencies: Public access to the ESA GPT, ESA Technology Tree v4.1 (STM-277), NASA 2024
-  Technology Taxonomy, EUSPA EU Space Market Report 2026, ECS SRIA 2026, OECD "Chips, nodes and
-  wafers", and GDELT lookup publications.
-- User-visible outcome: Each scheme records a verified edition, URI, and checksum, or stays
-  `unverified` with a stated reason, and interfaces label it accordingly.
-- Scope boundary: Documentation reading and comparison only. No full-dictionary import for GDELT,
-  which is source work in `gdelt-source-dictionaries`.
-- Data and artifact paths: `domains/<domain>/seeds/verification.json`, `tests/semantic/`, and the
-  task record.
-- Execution path: Compare codes and labels with each official document, and record mismatches and
-  missing leaves.
-- Acceptance gates: Every scheme has a verification state with evidence. A mismatch keeps the
-  concept unverified rather than changing it silently. A negative result (publication
-  inaccessible) is valid when recorded.
-- Documentation target: `current/ontology-taxonomy.md` listed in the
-  [areas index](current.md#areas).
-
 #### skos-export
 
 Vocabularies need a standard interchange format.
@@ -85,7 +60,7 @@ changing them later breaks stored data and links.
 
 - Serves: `ontology-taxonomy` -- [Ontology and taxonomy](../design/spec.md#ontology-and-taxonomy)
 - Agent status: CLEAR
-- Requires: `verify-official-taxonomies`, `skos-export`
+- Requires: `skos-export`
 - Dependencies: The accepted task records of the group and the [implementation
   audit](../guide/planning-workflow.md#implementation-audits) checks.
 - User-visible outcome: Claims and exports reference stable, verified concepts. The audit record
@@ -2774,7 +2749,7 @@ Leaving the development phase is the owner's decision.
 - Serves: `release-readiness` -- [Release readiness](../design/spec.md#release-readiness)
 - Agent status: HUMAN-GATED
 - Requires: `review-ukrainian-terminology`, `review-space-dashboards`, `performance-gate`,
-  `verify-official-taxonomies`, `skos-export`, `vl-itree-write-acceptance`,
+  `skos-export`, `vl-itree-write-acceptance`,
   `inventree-upgrade-check`, `identity-match-calibration`
 - Dependencies: The evidence of every capability evaluation, compiled by an agent into a release
   checklist. Through their own prerequisites, these gates cover the bilingual suite, all three

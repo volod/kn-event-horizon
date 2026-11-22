@@ -629,6 +629,10 @@ How seed content moves:
   (STM-277), the NASA 2024 Technology Taxonomy, EUSPA EU Space Market Report 2026 segments, ECS
   SRIA 2026, OECD "Chips, nodes and wafers" Figure 9, and the GDELT CAMEO, GKG theme, and GCAM
   lookups.
+- The OECD Figure 9 categories have a separate official scheme, with internal KN identifiers
+  explicitly distinguished from source notations. The existing mixed product tree keeps its IDs
+  and normalized origin. Reviewed crosswalks cite checksum-pinned publication and mapping-decision
+  artifacts; unsupported equivalence and non-chip matches are never inferred.
 - Analyst extensions are never presented as official. The GDELT and some space schemes in the
   proposals are explicit subsets, never complete dictionaries.
 

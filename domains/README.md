@@ -48,6 +48,8 @@ JSON. Verification against an official vocabulary remains a separate review.
 `<domain>/seeds/semantic.json` links to the packaged reviewed snapshot and term provenance.
 `make seed-import` stages a new conversion and all-row reconciliation under
 `$DATA_DIR/seed-import/<run-id>/`; `make seed-check` compares it with the reviewed files and example
-fixture. Rebuilds load only these reviewed files. All schemes remain unverified, and examples are
-fixtures only. See the [seed reference](../docs/impl/current/ontology-taxonomy/seeds.md) for review,
+fixture. Rebuilds load only these reviewed files. Each `<domain>/seeds/verification.json` records
+publication evidence or a local-vocabulary decision. Four schemes or scoped subsets verify; twelve schemes
+remain unverified with reasons. Examples remain fixtures only.
+See the [seed reference](../docs/impl/current/ontology-taxonomy/seeds.md) for review,
 identifiers, unmapped rows and verification.

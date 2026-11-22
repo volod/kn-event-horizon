@@ -51,4 +51,4 @@ def test_reviewed_resources_load_outside_repository(
     tmp_path: Path, monkeypatch: pytest.MonkeyPatch
 ) -> None:
     monkeypatch.chdir(tmp_path)
-    assert len(reviewed_snapshot()["terms"]) == 726
+    assert len(reviewed_snapshot()["terms"]) == 825

@@ -33,7 +33,9 @@ def test_reviewed_seeds_rebuild_twice_idempotency_and_conflict(
     rebuild(connection)
     first = stored_snapshot(connection)
     expected = reviewed_snapshot()
-    assert len(first["terms"]) == 726
+    assert len(first["terms"]) == 825
+    assert len(first["concept_mappings"]) == 69
+    assert sum(row["verification_state"] == "verified" for row in first["concept_schemes"]) == 4
     for name, rows in expected.items():
         assert len(first[name]) == len(rows)
         assert {

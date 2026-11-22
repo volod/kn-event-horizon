@@ -7,7 +7,7 @@ from typing import Any
 
 from kn.semantic.proposals import Proposal
 from kn.semantic.structure import Snapshot
-from kn.semantic.terms import DATASETS
+from kn.semantic.terms import DATASETS, UNLABELED_KINDS
 
 
 def native_code(label: str) -> str:
@@ -85,11 +85,12 @@ class SeedBuilder:
                 "definition": definition,
             },
         )
-        for locale in ("en", "uk"):
-            row = {"term_id": identifier, "locale": locale, "label": label}
-            if inverse:
-                row["inverse_label"] = inverse
-            self.add("labels", row)
+        if kind not in UNLABELED_KINDS:
+            for locale in ("en", "uk"):
+                row = {"term_id": identifier, "locale": locale, "label": label}
+                if inverse:
+                    row["inverse_label"] = inverse
+                self.add("labels", row)
         if kind == "concept_scheme":
             fields["origin"] = origin
         self.add(DATASETS[kind], {"id": identifier, **fields})
@@ -111,7 +112,7 @@ class SeedBuilder:
             "scheme",
             "concept_scheme",
             namespace,
-            "Proposal subset, not a complete or verified official dictionary.",
+            "Proposal-derived vocabulary subset; see scheme verification state and review scope.",
             proposal,
             origin=origin,
             verification_state="unverified",

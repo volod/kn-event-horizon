@@ -48,7 +48,7 @@ A proposal edit does not change the next rebuild until its reviewed files are up
 | --- | --- | --- | --- | --- | --- |
 | Space | 33 | 32 | 5 | 231 | 301 |
 | GDELT | 28 | 42 | 5 | 110 | 185 |
-| Microelectronics | 27 | 58 | 5 | 150 | 240 |
+| Microelectronics | 27 | 58 | 6 | 179 | 339 |
 
 The reconciliation covers 1,173 rows: 612 accepted, one duplicate, 477 needing mapping, and 83
 rejected. Rejected rows comprise 56 explanatory note rows and 27 example/template rows. The latter
@@ -65,6 +65,10 @@ observation, or entity tag is created from an example.
   `kb_normalized`; local engineering extensions never become official. The two `Others` labels in
   the product tree include their codes. ESA technology domains become parents, and rows without a
   subdomain create no artificial `None` leaf.
+- The [separate OECD Figure 9 scheme](oecd.md) adds 29 verified categories and 69 reviewed product
+  mappings, while all existing product references and the mixed tree stay unchanged. Seven
+  non-chip categories have explicit unmapped reasons. Mapping evidence resolves to the packaged
+  publication-review artifact through an explicit caller registry.
 - Relations have explicit endpoint pairs. A named combined class is resolved before splitting a
   slash-separated union. `member_of_constellation` becomes `contains_spacecraft` in the reverse
   direction; `variant_of` shares `has_mpn` and accounts for the duplicate row. `operates` has the
@@ -77,8 +81,9 @@ observation, or entity tag is created from an example.
   plus generic asset/system/network/material/software endpoints. Their definitions are local
   import decisions, anchored to the proposal ontology; no pilot data rows become seed entities.
 
-All 15 schemes remain `unverified` with a reason, and all terms are `draft`. Official comparison
-belongs to `verify-official-taxonomies`. Both locale slots currently retain source spelling;
+All 16 schemes have [publication or local-vocabulary reviews](verification.md): four schemes or
+scoped subsets are `verified` and twelve schemes are `unverified` with reasons. All terms remain `draft`.
+Both locale slots currently retain source spelling;
 provenance explicitly marks Ukrainian terminology review as pending. This is a documented fallback,
 not evidence of reviewed Ukrainian translations.
 
@@ -111,7 +116,8 @@ The loader does not read proposals, instantiate fixtures, fetch publications, or
   under reordered proposals, inverse direction, fixture isolation, both CLI locales and error paths.
 - `make test-integration`: exact content after two rebuilds, idempotent seed loading, stored-content
   conflict rollback, existing registry, privilege and rebuild failure paths.
-- `make build`: packages the three seed resources for use outside the repository.
+- `make build`: packages the seed snapshots, verification and publication-review resources.
 
 [Task record 0021](../../records/0021-ontology-taxonomy-seed-vocabulary-import.md) records acceptance
-evidence. Publication verification, executable pending policies and SKOS export remain open.
+evidence. [Publication verification](verification.md) is available; executable pending policies
+and SKOS export remain open.

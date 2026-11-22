@@ -6,8 +6,15 @@ from pathlib import Path
 import pytest
 
 from kn.semantic import validate_model
+from kn.semantic.oecd_reference import publication_references
 from kn.semantic.proposals import DOMAINS, read_proposals
-from kn.semantic.seeds import FIXTURE_PATH, import_proposals, reconcile, reviewed_snapshot
+from kn.semantic.seeds import (
+    FIXTURE_PATH,
+    RESOURCES,
+    import_proposals,
+    reconcile,
+    reviewed_snapshot,
+)
 
 ROOT = Path(__file__).resolve().parents[2]
 
@@ -38,9 +45,7 @@ def test_every_proposal_row_is_reconciled_and_provenance_is_durable() -> None:
         snapshot = document["snapshot"]
         assert set(document["provenance"]) == {term["id"] for term in snapshot["terms"]}
         assert not snapshot.get("entity_tags")
-        assert all(
-            scheme["verification_state"] == "unverified" for scheme in snapshot["concept_schemes"]
-        )
+        assert all(scheme["verification_reason"] for scheme in snapshot["concept_schemes"])
 
 
 def test_conversion_runs_are_identical_and_match_reviewed_files(tmp_path: Path) -> None:
@@ -52,8 +57,8 @@ def test_conversion_runs_are_identical_and_match_reviewed_files(tmp_path: Path) 
         p.name: p.read_bytes() for p in right.iterdir()
     }
     snapshot = reviewed_snapshot()
-    validate_model(snapshot)
-    assert len(snapshot["terms"]) == 726
+    validate_model(snapshot, publication_references(RESOURCES))
+    assert len(snapshot["terms"]) == 825
     assert (ROOT / FIXTURE_PATH).read_bytes() == (left / "fixtures.json").read_bytes()
 
 

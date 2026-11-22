@@ -2228,31 +2228,39 @@
       {
         "id": "gdelt.applications.scheme",
         "origin": "kb_extension",
-        "verification_reason": "Official publication comparison is pending.",
+        "verification_reason": "Unverified local vocabulary; no official edition or publication is claimed. Origin remains kb_extension.",
         "verification_state": "unverified"
       },
       {
+        "edition": "CAMEO lookup for GDELT 1.0/2.0, retrieved 2026-11-22",
         "id": "gdelt.cameo_v2.scheme",
         "origin": "official",
-        "verification_reason": "Official publication comparison is pending.",
+        "publisher": "The GDELT Project",
+        "source_sha256": "ccbfa4f59f62028399363dd8a9458b64128b5044d29df591bad718cdeccc145d",
+        "source_uri": "https://www.gdeltproject.org/data/lookups/CAMEO.eventcodes.txt",
+        "verification_reason": "Unverified: CAMEO 20 source label is USE UNCONVENTIONAL MASS VIOLENCE, while the seed says Engage in unconventional mass violence. Other 21 included codes and labels agree ignoring case.",
         "verification_state": "unverified"
       },
       {
+        "edition": "November 2021 theme lookup, announced 2021-11-20",
         "id": "gdelt.gkg_themes_2021.scheme",
         "origin": "official",
-        "verification_reason": "Official publication comparison is pending.",
-        "verification_state": "unverified"
+        "publisher": "The GDELT Project",
+        "source_sha256": "9cfd25544b1c9ca705dc43633b636bdb092805ab524b45c5739a15f719a999cf",
+        "source_uri": "https://data.gdeltproject.org/api/v2/guides/LOOKUP-GKGTHEMES.TXT",
+        "verification_reason": "Verified 43 native codes only against the November 2021 linked lookup; 59,272 other codes are absent. No full dictionary or Ukrainian terminology verification is claimed.",
+        "verification_state": "verified"
       },
       {
         "id": "gdelt.services.scheme",
         "origin": "service_extension",
-        "verification_reason": "Official publication comparison is pending.",
+        "verification_reason": "Unverified local vocabulary; no official edition or publication is claimed. Origin remains service_extension.",
         "verification_state": "unverified"
       },
       {
         "id": "gdelt.technology.scheme",
         "origin": "kb_extension",
-        "verification_reason": "Official publication comparison is pending.",
+        "verification_reason": "Unverified local vocabulary; no official edition or publication is claimed. Origin remains kb_extension.",
         "verification_state": "unverified"
       }
     ],
@@ -6671,7 +6679,7 @@
       },
       {
         "code": "scheme",
-        "definition": "Proposal subset, not a complete or verified official dictionary.",
+        "definition": "Proposal-derived vocabulary subset; see scheme verification state and review scope.",
         "id": "gdelt.applications.scheme",
         "kind": "concept_scheme",
         "namespace_id": "gdelt.applications",
@@ -6679,7 +6687,7 @@
       },
       {
         "code": "scheme",
-        "definition": "Proposal subset, not a complete or verified official dictionary.",
+        "definition": "Proposal-derived vocabulary subset; see scheme verification state and review scope.",
         "id": "gdelt.cameo_v2.scheme",
         "kind": "concept_scheme",
         "namespace_id": "gdelt.cameo_v2",
@@ -6687,7 +6695,7 @@
       },
       {
         "code": "scheme",
-        "definition": "Proposal subset, not a complete or verified official dictionary.",
+        "definition": "Proposal-derived vocabulary subset; see scheme verification state and review scope.",
         "id": "gdelt.gkg_themes_2021.scheme",
         "kind": "concept_scheme",
         "namespace_id": "gdelt.gkg_themes_2021",
@@ -6695,7 +6703,7 @@
       },
       {
         "code": "scheme",
-        "definition": "Proposal subset, not a complete or verified official dictionary.",
+        "definition": "Proposal-derived vocabulary subset; see scheme verification state and review scope.",
         "id": "gdelt.services.scheme",
         "kind": "concept_scheme",
         "namespace_id": "gdelt.services",
@@ -6703,7 +6711,7 @@
       },
       {
         "code": "scheme",
-        "definition": "Proposal subset, not a complete or verified official dictionary.",
+        "definition": "Proposal-derived vocabulary subset; see scheme verification state and review scope.",
         "id": "gdelt.technology.scheme",
         "kind": "concept_scheme",
         "namespace_id": "gdelt.technology",

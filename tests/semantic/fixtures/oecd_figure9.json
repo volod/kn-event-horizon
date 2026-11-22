@@ -1,0 +1,147 @@
+[
+  {
+    "code": "L",
+    "parent_code": null,
+    "source_label": "IC-Logic"
+  },
+  {
+    "code": "L.CPU",
+    "parent_code": "L",
+    "source_label": "CPU"
+  },
+  {
+    "code": "L.MPU",
+    "parent_code": "L",
+    "source_label": "MPU"
+  },
+  {
+    "code": "L.GPU",
+    "parent_code": "L",
+    "source_label": "GPU"
+  },
+  {
+    "code": "L.ASIC",
+    "parent_code": "L",
+    "source_label": "ASIC"
+  },
+  {
+    "code": "L.MCU",
+    "parent_code": "L",
+    "source_label": "MCU"
+  },
+  {
+    "code": "L.DSP",
+    "parent_code": "L",
+    "source_label": "DSP"
+  },
+  {
+    "code": "L.IPU",
+    "parent_code": "L",
+    "source_label": "IPU"
+  },
+  {
+    "code": "L.PLD",
+    "parent_code": "L",
+    "source_label": "Programmable Logic Devices"
+  },
+  {
+    "code": "L.PLD.FPGA",
+    "parent_code": "L.PLD",
+    "source_label": "FPGA/FPLD"
+  },
+  {
+    "code": "M",
+    "parent_code": null,
+    "source_label": "IC-Memory"
+  },
+  {
+    "code": "M.V",
+    "parent_code": "M",
+    "source_label": "Volatile"
+  },
+  {
+    "code": "M.V.DRAM",
+    "parent_code": "M.V",
+    "source_label": "DRAM"
+  },
+  {
+    "code": "M.V.SRAM",
+    "parent_code": "M.V",
+    "source_label": "SRAM"
+  },
+  {
+    "code": "M.NV",
+    "parent_code": "M",
+    "source_label": "Non-Volatile"
+  },
+  {
+    "code": "M.NV.ROM",
+    "parent_code": "M.NV",
+    "source_label": "ROM"
+  },
+  {
+    "code": "M.NV.NVRAM",
+    "parent_code": "M.NV",
+    "source_label": "NVRAM"
+  },
+  {
+    "code": "M.NV.FLASH",
+    "parent_code": "M.NV",
+    "source_label": "Flash"
+  },
+  {
+    "code": "M.NV.FLASH.NOR",
+    "parent_code": "M.NV.FLASH",
+    "source_label": "NOR"
+  },
+  {
+    "code": "M.NV.FLASH.NAND",
+    "parent_code": "M.NV.FLASH",
+    "source_label": "NAND"
+  },
+  {
+    "code": "A",
+    "parent_code": null,
+    "source_label": "IC-Analog"
+  },
+  {
+    "code": "A.PM",
+    "parent_code": "A",
+    "source_label": "Power Management"
+  },
+  {
+    "code": "A.SC",
+    "parent_code": "A",
+    "source_label": "Signal Conversion"
+  },
+  {
+    "code": "A.AMP",
+    "parent_code": "A",
+    "source_label": "Amplifier"
+  },
+  {
+    "code": "O",
+    "parent_code": null,
+    "source_label": "Others"
+  },
+  {
+    "code": "O.OPTO",
+    "parent_code": "O",
+    "source_label": "Optoelectronics"
+  },
+  {
+    "code": "O.SENS",
+    "parent_code": "O",
+    "source_label": "Sensors and actuators"
+  },
+  {
+    "code": "O.DISC",
+    "parent_code": "O",
+    "source_label": "Discrete"
+  },
+  {
+    "code": "O.OTHER",
+    "parent_code": "O",
+    "source_label": "Others"
+  }
+]
