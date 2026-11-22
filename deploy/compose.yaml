@@ -1,0 +1,93 @@
+# KN Event Horizon runtime stack. Use the make db-up, db-down, and db-reset targets, which source
+# scripts/shared/common.sh to set KN_UID, KN_GID, DATA_DIR, KN_POSTGRES_PASSWORD_FILE, and
+# KN_POSTGRES_HOST_PORT. Image pins must match deploy/versions.yaml. Only the database publishes a
+# port, and only on 127.0.0.1.
+name: kn-event-horizon
+
+services:
+  postgres:
+    image: docker.io/postgis/postgis:18-3.7@sha256:fe440a27c6567aefa932e988962e5827bb2c29e4b97dac2ca5268f5eafe10262
+    # Runs as the invoking host user, so $DATA_DIR/postgres and the secret file stay owned by them.
+    user: "${KN_UID:?run through make db-up}:${KN_GID:?run through make db-up}"
+    restart: unless-stopped
+    read_only: true
+    cap_drop: [ALL]
+    security_opt: ["no-new-privileges:true"]
+    shm_size: 256m
+    stop_grace_period: 1m
+    environment:
+      POSTGRES_DB: kn
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD_FILE: /run/secrets/postgres_password
+      # TCP always needs a password, even inside the container. The builtin C.UTF-8 collation does
+      # not change with the image's C library; linguistic order uses explicit ICU collations.
+      POSTGRES_INITDB_ARGS: >-
+        --encoding=UTF8 --locale-provider=builtin --locale=C.UTF-8
+        --auth-local=trust --auth-host=scram-sha-256
+    secrets:
+      - postgres_password
+    volumes:
+      - type: bind
+        source: ${DATA_DIR:?run through make db-up}/postgres
+        target: /var/lib/postgresql
+        bind:
+          create_host_path: false
+      # Replaces the image's init script, which also adds topology and a template database.
+      - type: bind
+        source: ./postgres/initdb
+        target: /docker-entrypoint-initdb.d
+        read_only: true
+    tmpfs:
+      - /tmp
+      - /var/run/postgresql:uid=${KN_UID},gid=${KN_GID},mode=0775
+    # Host tools and tests connect here. The non-standard default host port leaves 5432 to another
+    # PostgreSQL on the same host. The server inside still listens on 5432.
+    ports:
+      - target: 5432
+        host_ip: 127.0.0.1
+        published: "${KN_POSTGRES_HOST_PORT:?run through make db-up}"
+        protocol: tcp
+    networks:
+      - internal
+      - loopback
+    # The database resolves no external name. Docker's embedded resolver still answers service
+    # names on the stack networks, and forwards other names to this address, where none answers.
+    dns:
+      - 127.0.0.1
+    healthcheck:
+      # Healthy means the final server accepts TCP (the init-time server is socket-only) and the
+      # bootstrap committed. The bootstrap is one transaction, so one of its roles witnesses it.
+      # After a failed first initialization the image skips init on restart; this keeps it
+      # unhealthy instead of serving a database without its schemas and roles.
+      test:
+        - CMD-SHELL
+        - >-
+          pg_isready --host=127.0.0.1 --port=5432 --dbname=kn --username=postgres --timeout=3
+          --quiet && psql --no-psqlrc --no-password --tuples-only --no-align --username=postgres
+          --dbname=kn --command="SELECT to_regrole('kn_system_owner') IS NOT NULL" | grep -qx t
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 1m
+      start_interval: 1s
+
+networks:
+  internal:
+    internal: true
+    enable_ipv6: false
+    driver_opts:
+      # Without this, the host's bridge address can still reach container ports.
+      com.docker.network.bridge.gateway_mode_ipv4: isolated
+  # Carries only the published port: Docker publishes no port of a container that is attached to
+  # internal networks only. Services reach each other over internal, never over this network.
+  loopback:
+    enable_ipv6: false
+    driver_opts:
+      # Binds every published port to loopback, also one written without an address.
+      com.docker.network.bridge.host_binding_ipv4: 127.0.0.1
+      # No source NAT: outbound packets keep their private address, so outside replies never return.
+      com.docker.network.bridge.enable_ip_masquerade: "false"
+
+secrets:
+  postgres_password:
+    file: ${KN_POSTGRES_PASSWORD_FILE:?run through make db-up}

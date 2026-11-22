@@ -19,5 +19,11 @@ decision. A record can name a plan task by ID because plan headings disappear on
 | 0002 | `adhoc` knowledge platform specification | [0002-adhoc-knowledge-platform-specification.md](0002-adhoc-knowledge-platform-specification.md) |
 | 0003 | Specification and plan audit | [Audit record](0003-adhoc-specification-audit.md) |
 | 0004 | `adhoc` InvenTree interchange and object identity specification | [0004-adhoc-inventree-interchange-specification.md](0004-adhoc-inventree-interchange-specification.md) |
+| 0005 | `adhoc` group implementation audit tasks | [0005-adhoc-group-implementation-audits.md](0005-adhoc-group-implementation-audits.md) |
+| 0006 | `compose-database-service` | [0006-runtime-platform-compose-database-service.md](0006-runtime-platform-compose-database-service.md) |
+| 0007 | `adhoc` database loopback port | [0007-adhoc-database-loopback-port.md](0007-adhoc-database-loopback-port.md) |
+| 0008 | `database-integration-harness` | [0008-runtime-platform-database-integration-harness.md](0008-runtime-platform-database-integration-harness.md) |
+| 0009 | `adhoc` local-only service tests | [0009-adhoc-local-only-service-tests.md](0009-adhoc-local-only-service-tests.md) |
+| 0010 | `runtime-platform-implementation-audit` | [0010-runtime-platform-runtime-platform-implementation-audit.md](0010-runtime-platform-runtime-platform-implementation-audit.md) |
 
-Next unused sequence is `0005`.
+Next unused sequence is `0011`.

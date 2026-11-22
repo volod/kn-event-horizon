@@ -22,6 +22,12 @@ include the resulting `uv.lock` change.
 `make ci` is the required fast gate. GitHub Actions runs its explicit alias, `make ci-github`, on
 Python 3.12 and 3.13 after `uv sync --locked --extra dev`. It checks formatting, Ruff rules, mypy,
 complexity, shell scripts, documentation links, specification and plan integrity, and tests.
+GitHub Actions runs only lightweight unit tests: no test there needs a service endpoint, large
+memory, or a long run time. Tests that do carry the `integration` or `heavy` marker and run only on
+the development host, through `make test-integration` or `make ci-local`, which runs `make ci` and
+then every local-only test against the database from `make db-up`. A plan gate that names CI for
+such a test is met by `make ci-local`. See
+[where tests run](../impl/current/runtime-platform.md#where-tests-run).
 
 `make quality` adds branch coverage, Markdown style, and source/wheel builds. Run it before release
 or after changing project infrastructure. `make quality-report` reports files over the 250-line soft
@@ -47,7 +53,9 @@ id. Keep fixtures under `tests/` only when they are small, deterministic, safe t
 required for CI.
 
 `.env.example` declares `DATA_DIR=.data`, and relative values resolve against the project root.
-Ruff, mypy, pytest, and complexipy caches stay below the same root. `.gitignore` excludes runtime
+A `DATA_DIR` in `.env` wins over the environment. The `Makefile` resolves it through `kn_load_env`,
+so Ruff, mypy, pytest, and complexipy caches stay below the same root as the database volume, also
+when the path contains spaces. `.gitignore` excludes runtime
 artifacts, local environments, secrets, caches, and root build outputs without hiding same-named
 source subpackages.
 

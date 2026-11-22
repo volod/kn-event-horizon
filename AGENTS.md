@@ -37,6 +37,9 @@ Tool-specific files contain only integration-specific routing.
 - Keep tests deterministic and network-free unless a task explicitly declares an external run.
 - `make ci` is the required gate: format check, lint, typing, tests, complexity, shell lint,
   documentation links, and spec-plan integrity.
+- GitHub Actions runs only `make ci-github`: lightweight unit tests without a service endpoint,
+  large memory, or a long run time. Mark tests that need those `integration` or `heavy`; they run
+  locally with `make ci-local`, which also meets a plan gate that names CI for them.
 - `make quality` adds coverage, Markdown lint, and a package build. Fix findings at their source;
   do not weaken checks to fit new code.
 - Use `make format` to apply formatting. Fix Markdown findings by hand.

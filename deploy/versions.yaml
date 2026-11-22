@@ -1,0 +1,23 @@
+# Version manifest of the runtime platform: every pinned image, schema, and tool.
+#
+# Images are pinned by an exact tag and the digest of the image index that the tag named at pin
+# time. Floating tags such as latest are never used. deploy/compose.yaml must reference each image
+# as <image>:<tag>@<digest>; tests/deploy/test_compose.py checks that the two files agree.
+# Change the tag, digest, component versions, and pin date together. A version conflict is
+# recorded here with the compatible fallback that was chosen.
+
+images:
+  postgres:
+    service: postgres
+    image: docker.io/postgis/postgis
+    tag: "18-3.7"
+    digest: sha256:fe440a27c6567aefa932e988962e5827bb2c29e4b97dac2ca5268f5eafe10262
+    platforms: [linux/amd64]
+    components:
+      postgresql: "18.7"
+      postgis: "3.7.0"
+      base: "Debian 13 (trixie)"
+    pinned: "2026-11-21"
+    selection: >-
+      Newest PostgreSQL major with a stable official PostGIS image at pin time. PostgreSQL 19 had
+      only release-candidate images (19rc2-3.7). PostGIS 3.7 is the newest stable minor.

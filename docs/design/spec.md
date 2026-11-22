@@ -365,9 +365,11 @@ These rules bind every capability and every domain.
 ## Reproducible environment
 
 The environment is created from `pyproject.toml` and committed `uv.lock`. Local development and
-GitHub Actions both call Make targets and use the same locked development extra. Tool caches follow
-`DATA_DIR`; the shared environment helper chooses `UV_LINK_MODE=copy` only when uv's cache and the
-checkout live on different filesystems.
+GitHub Actions both call Make targets and use the same locked development extra. GitHub Actions
+runs only lightweight unit tests; tests that need a service endpoint, large memory, or a long run
+time run on the development host through `make ci-local`. Tool caches follow `DATA_DIR`; the shared
+environment helper chooses `UV_LINK_MODE=copy` only when uv's cache and the checkout live on
+different filesystems.
 
 Boundary: the skeleton controls Python dependencies and checks. It does not install system packages,
 provision external services, or guarantee reproducibility for undeclared tools.
@@ -439,17 +441,22 @@ capabilities: Kestra (orchestration), Superset and Redis if its profile requires
 dashboards), the reverse proxy (operations hardening), the optional inference server (AI
 extraction), and a test-only `inventree` profile with pinned InvenTree releases and their own
 databases (InvenTree exchange). The test profile never connects to an owner instance. Volumes
-live under `DATA_DIR`, services have healthchecks, networks are internal, and no database port is
-published. Secrets come from a local
+live under `DATA_DIR`, services have healthchecks, and services reach each other over internal
+networks. The database port is published only on the host loopback address, on a configurable,
+non-standard default port, so that another PostgreSQL on the same host keeps the standard port.
+Every TCP login needs a password. Secrets come from a local
 `.env` or secret files that are never committed. Role bootstrap creates owner, loader, and reader
 roles per schema. A version manifest records every pinned image, schema, and tool. Integration
-tests run against the Compose database locally and against a PostGIS service container in CI.
+tests run against the Compose database on the development host. GitHub Actions runs no database
+test.
 
 Boundary: a single host, not high availability. No Kubernetes and no managed cloud services.
 
-Evaluation: from empty volumes, `make db-up` reaches healthy, and a restart preserves data. No
-database port is reachable from outside the Compose network, and no default production password
-exists. Integration tests pass locally and in CI.
+Evaluation: from empty volumes, `make db-up` reaches healthy, and a restart preserves data. The
+database answers on the host loopback port only with a password. It does not answer on another
+host address or to a container on another Docker network, and no default production password
+exists. Integration tests pass on the development host, and the GitHub gate passes without a
+database.
 
 Negative result: a version conflict is recorded in the manifest with the compatible fallback chosen.
 Floating `latest` tags are never used.
@@ -1087,9 +1094,9 @@ tariffs, coverage statements, and operator disclosures.
 
 **TDD growth rule.** The engine starts as a skeleton proven on a synthetic fixture source. Each real
 source then adds failing fixture tests first, then the general engine change that makes them pass.
-The core never branches on a source ID. On every change, CI runs all source fixture suites plus a
-full rebuild from the fixture archive. Logs are structured English JSON with secrets redacted, and
-user-facing messages are localized.
+The core never branches on a source ID. On every change, `make ci-local` runs all source fixture
+suites plus a full rebuild from the fixture archive. Logs are structured English JSON with secrets
+redacted, and user-facing messages are localized.
 
 Boundary: no exactly-once network claim, and no per-source special cases inside the core.
 
@@ -1661,7 +1668,7 @@ upstream before downstream.
 | 1 | `reproducible-environment` | shipped | A fresh locked environment reaches the complete CI gate without manual repair | [Development guide](../guide/development.md) |
 | 2 | `project-identity` | shipped | Import, CLI, and distribution-build tests agree on the `kn-event-horizon` identity | [Product core](../impl/current/product-core.md) |
 | 3 | `documentation-integrity` | shipped | Link, registry-plan, task-lane, metadata, ordering, prerequisites, forward-language, and closed-research register checks pass over fixtures and the repository tree | [Documentation checks](../guide/development.md#documentation-checks) |
-| 4 | `runtime-platform` | planned | Pinned Compose database reaches healthy from empty volumes, keeps data across restart, exposes no port, and serves integration tests locally and in CI | - |
+| 4 | `runtime-platform` | shipped | Pinned Compose database reaches healthy from empty volumes, keeps data across restart, publishes its port on loopback only, and serves integration tests on the development host | [Runtime platform](../impl/current/runtime-platform.md) |
 | 5 | `localization` | planned | Key coverage, plural, golden-output, and screenshot checks pass in `en` and `uk`; the Kestra waiver is the only English-only path | - |
 | 6 | `data-contracts` | planned | Contracts compile deterministically, invalid contracts fail, drift fails CI, rebuild creates every schema, loaders cannot run DDL | - |
 | 7 | `ontology-taxonomy` | planned | Every proposal row is classified, identifiers are stable, invalid hierarchies are rejected, SKOS round-trips | - |

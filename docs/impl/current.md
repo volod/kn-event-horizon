@@ -21,3 +21,4 @@ documentation checks that came with the template are described in the
 | Page | Owns |
 | --- | --- |
 | [Product core](current/product-core.md) | Distribution, `kn` import package, `kn` and `kn-plan` commands, and identity verification |
+| [Runtime platform](current/runtime-platform.md) | Compose stack, the PostgreSQL and PostGIS service, `make db-*` targets, schemas, roles, the version manifest, the database integration test harness, and where each kind of test runs |
