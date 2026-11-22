@@ -119,5 +119,5 @@ The loader does not read proposals, instantiate fixtures, fetch publications, or
 - `make build`: packages the seed snapshots, verification and publication-review resources.
 
 [Task record 0021](../../records/0021-ontology-taxonomy-seed-vocabulary-import.md) records acceptance
-evidence. [Publication verification](verification.md) is available; executable pending policies
-and SKOS export remain open.
+evidence. [Publication verification](verification.md) and [SKOS export](skos.md) are available;
+executable pending policies remain open.

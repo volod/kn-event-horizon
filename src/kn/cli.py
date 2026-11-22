@@ -24,6 +24,7 @@ from kn.metadata import project_info
 from kn.operations import contract_operation, database_operation, satcom_operation
 from kn.quality.project_root import discover_project_root
 from kn.semantic.seeds import import_proposals
+from kn.semantic.skos import export_scheme
 
 _LOG = logging.getLogger("kn.operator")
 
@@ -66,14 +67,23 @@ def build_parser(
         help=tr.text("cli.data_dir_help"),
     )
     vocabulary = subcommands.add_parser("vocabulary", help=tr.text("cli.vocabulary_help"))
-    vocabulary.add_argument("action", choices=("import-proposals",))
-    vocabulary.add_argument("--check", action="store_true", help=tr.text("cli.seed_check_help"))
-    vocabulary.add_argument(
-        "--data-dir",
-        type=Path,
-        default=Path(os.environ.get("DATA_DIR", ".data")),
-        help=tr.text("cli.data_dir_help"),
+    actions = vocabulary.add_subparsers(
+        dest="action", required=True, title=tr.text("cli.commands"), parser_class=parser_class
     )
+    proposals = actions.add_parser("import-proposals", help=tr.text("cli.seed_import_help"))
+    proposals.add_argument("--check", action="store_true", help=tr.text("cli.seed_check_help"))
+    export = actions.add_parser("export", help=tr.text("cli.skos_export_help"))
+    export.add_argument(
+        "--format", choices=("skos",), required=True, help=tr.text("cli.skos_format_help")
+    )
+    export.add_argument("--scheme", required=True, help=tr.text("cli.skos_scheme_help"))
+    for action in (proposals, export):
+        action.add_argument(
+            "--data-dir",
+            type=Path,
+            default=Path(os.environ.get("DATA_DIR", ".data")),
+            help=tr.text("cli.data_dir_help"),
+        )
     return parser
 
 
@@ -138,6 +148,8 @@ def _run(args: argparse.Namespace) -> dict[str, object]:
     if args.command == "db":
         return database_operation(args.action)
     if args.command == "vocabulary":
+        if args.action == "export":
+            return export_scheme(args.scheme, args.data_dir)
         return import_proposals(discover_project_root(), args.data_dir, check=args.check)
     return satcom_operation(args.action, args.source, args.data_dir)
 

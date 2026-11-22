@@ -34,25 +34,6 @@ recorded decision before later groups build on the group.
 
 ### Ontology and taxonomy -- `ontology-taxonomy`
 
-#### skos-export
-
-Vocabularies need a standard interchange format.
-
-- Serves: `ontology-taxonomy` -- [Ontology and taxonomy](../design/spec.md#ontology-and-taxonomy)
-- Agent status: CLEAR
-- Dependencies: RDFLib as the justified dependency.
-- User-visible outcome: `kn vocabulary export --format skos --scheme <id>` writes Turtle with `en`
-  and `uk` labels, hierarchy, notations, definitions, and mappings.
-- Scope boundary: Export only. SKOS never becomes the source of truth.
-- Data and artifact paths: `src/kn/semantic/skos.py`, `$DATA_DIR/skos/<run-id>/`,
-  `tests/semantic/`.
-- Execution path: Map the meta-model to SKOS terms, and keep analyst crosswalks as distinct
-  mapping properties.
-- Acceptance gates: The export parses with RDFLib, labels round-trip, and an analyst extension is
-  never typed as an official scheme.
-- Documentation target: `current/ontology-taxonomy.md` listed in the
-  [areas index](current.md#areas).
-
 #### ontology-taxonomy-implementation-audit (optional)
 
 Concept IDs, schemes, and crosswalks become references in claims, exports, and dashboards, so
@@ -60,7 +41,6 @@ changing them later breaks stored data and links.
 
 - Serves: `ontology-taxonomy` -- [Ontology and taxonomy](../design/spec.md#ontology-and-taxonomy)
 - Agent status: CLEAR
-- Requires: `skos-export`
 - Dependencies: The accepted task records of the group and the [implementation
   audit](../guide/planning-workflow.md#implementation-audits) checks.
 - User-visible outcome: Claims and exports reference stable, verified concepts. The audit record
@@ -2749,7 +2729,7 @@ Leaving the development phase is the owner's decision.
 - Serves: `release-readiness` -- [Release readiness](../design/spec.md#release-readiness)
 - Agent status: HUMAN-GATED
 - Requires: `review-ukrainian-terminology`, `review-space-dashboards`, `performance-gate`,
-  `skos-export`, `vl-itree-write-acceptance`,
+  `vl-itree-write-acceptance`,
   `inventree-upgrade-check`, `identity-match-calibration`
 - Dependencies: The evidence of every capability evaluation, compiled by an agent into a release
   checklist. Through their own prerequisites, these gates cover the bilingual suite, all three

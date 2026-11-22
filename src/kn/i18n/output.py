@@ -11,6 +11,8 @@ def render_result(translator: Translator, command: str, result: dict[str, object
         assert isinstance(contracts, list)
         return "\n".join(translator.text("cli.contract_ok", **item) for item in contracts)
     if command == "vocabulary":
+        if result["status"] == "exported":
+            return translator.text("cli.skos_ok", **result)
         return translator.text("cli.seed_ok", **result)
     if command == "db":
         return translator.text("cli.db_ok")

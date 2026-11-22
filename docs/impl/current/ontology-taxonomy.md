@@ -110,5 +110,7 @@ The [task record](../records/0020-ontology-taxonomy-semantic-model-contracts.md)
 evidence. The [separate verified OECD product scheme and crosswalks](ontology-taxonomy/oecd.md)
 are available alongside the original mixed product vocabulary.
 [Seed import and proposal reconciliation](ontology-taxonomy/seeds.md) and
-[official publication comparison](ontology-taxonomy/verification.md) are available. SKOS export
-remains in the [plan](../plan.md), so the ontology-taxonomy capability remains planned.
+[official publication comparison](ontology-taxonomy/verification.md) are available.
+[SKOS Turtle export](ontology-taxonomy/skos.md) preserves labels, hierarchy, mappings, scheme
+origins, verification states and publication boundaries. The ontology-taxonomy capability is shipped;
+its optional implementation audit remains in the [plan](../plan.md).

@@ -95,7 +95,8 @@ requires stored scheme metadata to equal that review and refuses stale content b
 writes. It never overwrites labels, codes or origins. A changed projection requires a new comparison
 and digest; updating only the seed cannot retain an old verification. Reviewed states and reasons
 are available in both locale runs' staged snapshots and in rebuilt `concept_schemes` rows. Future
-interfaces and SKOS export must carry these states and subset boundaries; they are not yet shipped.
+interfaces must carry these states and subset boundaries. [SKOS export](skos.md) carries them for
+every included scheme, including crosswalk counterparts.
 
 - `make seed-check` repeats the normal CLI path and checks reviewed snapshots and proposal fixtures.
 - `make ci` compares 268 selected publication rows offline, pins the three label mismatches, checks

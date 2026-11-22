@@ -34,7 +34,12 @@
   "cli.usage": "usage: ",
   "cli.validated": "SATCOM {import_id}: validated; {tables}",
   "cli.validation_error": "E_CONTRACT: contract validation failed at {path}.",
-  "cli.vocabulary_help": "reconcile vocabulary proposals for review",
+  "cli.vocabulary_help": "review and export controlled vocabularies",
   "cli.seed_check_help": "compare staged seeds and fixtures with reviewed files",
-  "cli.seed_ok": "Reconciled {rows} proposal rows. Report: {report}"
+  "cli.seed_ok": "Reconciled {rows} proposal rows. Report: {report}",
+  "cli.seed_import_help": "reconcile vocabulary proposals for review",
+  "cli.skos_export_help": "export a reviewed vocabulary scheme as SKOS Turtle",
+  "cli.skos_format_help": "interchange format (skos)",
+  "cli.skos_scheme_help": "qualified concept scheme ID, including .scheme",
+  "cli.skos_ok": "Exported {scheme_id}: {concepts} concepts; origin {origin}; {verification_state}. Turtle: {path}"
 }
