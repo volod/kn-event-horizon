@@ -90,6 +90,10 @@ required work that depends on optional work.
 `make plan-status` and `kn-plan` use `plan_summary.py`. They count work and surface lane
 priority after filtering tasks whose explicit prerequisites are still open. Contributors verify
 manual prerequisites before taking a task.
+They prefer required MODEL tasks over DELIVERY tasks across capability groups, preserving registry
+order for ties. `plan_dependencies.py` rejects MODEL tasks that hide an open DELIVERY prerequisite,
+and the integrity check validates stage values. The [schema-first guide](schema-first-development.md)
+lists the model sequence, contract owners, runtime splits and integrated baseline checkpoint.
 
 `make lint-spec-plan` also runs `research_register.py` over the
 [closed-research register](../impl/future-research.md). It reports, with the register line:

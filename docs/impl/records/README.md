@@ -42,5 +42,7 @@ decision. A record can name a plan task by ID because plan headings disappear on
 | 0025 | `ontology-taxonomy-implementation-audit` | [0025-ontology-taxonomy-ontology-taxonomy-implementation-audit.md](0025-ontology-taxonomy-ontology-taxonomy-implementation-audit.md) |
 | 0026 | `adhoc` independent RDF parsers and host prerequisites | [0026-adhoc-independent-rdf-parsers-and-host-prerequisites.md](0026-adhoc-independent-rdf-parsers-and-host-prerequisites.md) |
 | 0027 | `vocabulary-text-integrity` | [0027-ontology-taxonomy-vocabulary-text-integrity.md](0027-ontology-taxonomy-vocabulary-text-integrity.md) |
+| 0028 | `adhoc` human verification model review | [0028-adhoc-human-verification-model-review.md](0028-adhoc-human-verification-model-review.md) |
+| 0029 | `adhoc` schema-first plan priorities | [0029-adhoc-schema-first-plan-priorities.md](0029-adhoc-schema-first-plan-priorities.md) |
 
-Next unused sequence is `0028`.
+Next unused sequence is `0030`.

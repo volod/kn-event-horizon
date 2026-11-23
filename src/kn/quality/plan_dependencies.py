@@ -3,7 +3,7 @@
 import re
 from graphlib import CycleError, TopologicalSorter
 
-from kn.quality.plan_model import Task
+from kn.quality.plan_model import MODEL_STAGE, Task
 
 _TASK_ID = re.compile(r"`([a-z0-9][a-z0-9-]*)`")
 
@@ -26,6 +26,10 @@ def _task_findings(task: Task, tasks_by_id: dict[str, Task]) -> list[str]:
             findings.append(f"{where}: requires unknown open task `{identifier}`")
         elif prerequisite.optional and not task.optional:
             findings.append(f"{where}: required work depends on optional task `{identifier}`")
+        elif task.execution_stage == MODEL_STAGE and prerequisite.execution_stage != MODEL_STAGE:
+            findings.append(
+                f"{where}: MODEL task requires DELIVERY task `{identifier}`; split the runtime work first"
+            )
     return findings
 
 

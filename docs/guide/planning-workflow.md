@@ -58,6 +58,14 @@ Long prerequisite lists can continue on the next line with two spaces of indenta
 `make plan-status` skips tasks with an open `Requires` entry, then lists priority in each lane.
 Check the `Dependencies` field and the task's acceptance gates before starting.
 
+Tasks may declare `Execution stage: MODEL` for shared contracts, stable identifiers, durable log
+formats, source/configuration schemas and fixture-based baseline validation. The default is
+`DELIVERY`, which includes runtime engines, workflows, live source runs and dashboards. Among
+eligible tasks, required work precedes optional work, then MODEL precedes DELIVERY, then registry
+and document order break ties. MODEL tasks may require only other MODEL tasks; split mixed work
+before assigning this stage rather than hiding a runtime dependency. Stages never override
+`Requires`, external dependencies or human authorization.
+
 ## Task shape
 
 Task ids are stable lowercase slugs. A task heading may end with `(optional)`. Use this structure:
@@ -71,6 +79,7 @@ Describe the unresolved operator problem in present or future tense.
 
 - Serves: `capability-id` -- [Specification section](../design/spec.md#section)
 - Agent status: CLEAR
+- Execution stage: DELIVERY
 - Dependencies: none.
 - User-visible outcome: State what becomes possible or trustworthy.
 - Scope boundary: State what is in scope and explicitly out of scope.
@@ -92,8 +101,11 @@ Capability groups follow the registry. Within a group:
 3. required work before optional refinements;
 4. cheap deterministic work before expensive runs.
 
-The summary prefers required work across capabilities, then uses registry and document order.
+The summary prefers required work across capabilities, then MODEL before DELIVERY, then registry
+and document order, after filtering open prerequisites.
 If capability priorities change, edit the registry order and move the same groups in both lanes.
+Capability groups remain in that navigation order even when a MODEL task in a later group is
+selected before an earlier group's DELIVERY work.
 
 ## Implementation audits
 

@@ -10,6 +10,7 @@ from pathlib import Path
 from kn.quality.plan_dependencies import dependency_findings
 from kn.quality.plan_model import (
     AGENT_SECTION,
+    EXECUTION_STAGES,
     HUMAN_SECTION,
     PLAN_SECTIONS,
     Capability,
@@ -90,11 +91,14 @@ def _task_identity_findings(task: Task, known: set[str], identifiers: set[str]) 
 
 def _task_metadata_findings(task: Task) -> list[str]:
     where = f"{PLAN_DOC}: `{task.identifier}`"
-    return [
+    findings = [
         f"{where}: missing non-empty `{field.title()}` field"
         for field in REQUIRED_FIELDS
         if not task.fields.get(field)
     ]
+    if task.execution_stage not in EXECUTION_STAGES:
+        findings.append(f"{where}: execution stage must be MODEL or DELIVERY")
+    return findings
 
 
 def _task_status_findings(task: Task) -> list[str]:

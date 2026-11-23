@@ -85,7 +85,27 @@ Normal upgrades and the explicit development rebuild both run the Alembic baseli
 contracts' SQLAlchemy metadata. No SQL text reaches the database:
 schema objects come from SQLAlchemy metadata, and the platform policy from typed statements.
 
+## Human verification metadata
+
+The deployed contracts currently define 50 tables and 465 fields, with no common optional human
+verification timestamp or actor/version-bound verification ledger. SATCOM `verification_status`
+is imported source data; semantic `verification_state`, publication `reviewed_on` dates and label
+`review_reference` values have their existing specialized meanings. None is a universal human
+verification time. Existing data must not be backfilled as human-verified from those values.
+
+The [model review](../records/0028-adhoc-human-verification-model-review.md) records this gap.
+The [shared design](../../design/human-verification.md) and the evidence-model tasks
+`human-verification-contracts` and `human-verification-projections` in the [plan](../plan.md)
+specify optional UTC metadata for records and field values with durable, version-bound decisions.
+They are not implemented. This review changes no production contract, source package, or database.
+
 ## Development baseline and release evolution
+
+The [schema-first plan](../../guide/schema-first-development.md) schedules the unbuilt shared and
+domain model before runtime consumers. The compiler and guarded rebuild described here remain
+available; the combined `development-model-baseline` is still planned, so the full data-contracts
+capability is marked planned until that cross-model acceptance passes. The checkpoint adds no
+release freeze and does not change the existing development rebuild requirement.
 
 Development keeps contract version `1.0.0` and one Python Alembic baseline, `0001_baseline`,
 editable in place; it creates every registered contract. A contract edit changes its digest. Refresh

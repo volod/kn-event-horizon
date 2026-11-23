@@ -8,6 +8,8 @@ Domain detail lives in the [space](domains/space.md), [GDELT](domains/gdelt.md),
 [microelectronics](domains/microelectronics.md) design pages. The seed proposals that those pages
 reference are described in [domains/README.md](../../domains/README.md). Counterpart-system detail
 lives in the [InvenTree exchange](integrations/inventree.md) design page.
+The [human verification design](human-verification.md) defines the planned shared optional
+timestamp, reviewer, content-version and replay model across application data.
 
 The registry order is the implementation line followed by the
 [forward plan](../impl/plan.md). `make lint-spec-plan` makes disagreement between those documents a

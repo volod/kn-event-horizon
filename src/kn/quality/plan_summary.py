@@ -11,6 +11,7 @@ from kn.quality.plan_integrity import PLAN_DOC, integrity_findings
 from kn.quality.plan_model import (
     AGENT_SECTION,
     HUMAN_SECTION,
+    MODEL_STAGE,
     Task,
     read_tasks,
 )
@@ -26,7 +27,11 @@ def _lane_priority(tasks: list[Task], section: str) -> str:
     lane_tasks = [task for task in tasks if task.section == section]
     candidates = (task for task in lane_tasks if not prerequisites(task))
     # Validated document order preserves registry order between tasks of equal priority.
-    task = min(candidates, key=lambda task: task.optional, default=None)
+    task = min(
+        candidates,
+        key=lambda task: (task.optional, task.execution_stage != MODEL_STAGE),
+        default=None,
+    )
     if task is None:
         return "all waiting on prerequisites" if lane_tasks else "none"
     optional = " (optional)" if task.optional else ""
@@ -50,6 +55,11 @@ def summary_lines(project_root: Path) -> list[str]:
             f"{status}={count}" for status, count in sorted(status_counts.items()) if status
         )
         lines.append(f"statuses: {rendered}")
+    stages = Counter(task.execution_stage for task in tasks)
+    lines.append(
+        "execution stages: "
+        + ", ".join(f"{stage}={count}" for stage, count in sorted(stages.items()))
+    )
     lines.append(f"priority agent task: {_lane_priority(tasks, AGENT_SECTION)}")
     lines.append(f"priority human task: {_lane_priority(tasks, HUMAN_SECTION)}")
     return lines
