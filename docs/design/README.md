@@ -11,8 +11,8 @@ lives in the [InvenTree exchange](integrations/inventree.md) design page.
 The [human verification design](human-verification.md) defines the planned shared optional
 timestamp, reviewer, content-version and replay model across application data.
 
-The registry order is the implementation line followed by the
-[forward plan](../impl/plan.md). `make lint-spec-plan` makes disagreement between those documents a
-build failure.
+The registry identifies specification owners. The [forward plan](../impl/plan.md) orders
+delivery groups, their audits and downstream consumers.
+`make lint-spec-plan` checks their agreement.
 
 Current behavior is indexed by [current implementation](../impl/current.md).

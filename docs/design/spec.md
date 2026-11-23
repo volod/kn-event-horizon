@@ -86,7 +86,7 @@ The repository foundation includes:
 - shared instructions for Codex, Claude Code, Cursor, and Gemini;
 - a living capability registry and forward-plan/current-state lifecycle.
 
-The product adds, in implementation order: a runtime platform, localization, data contracts, an
+The product includes a runtime platform, localization, data contracts, an
 ontology and taxonomy model, object identity, a raw archive, an evidence model, a part and supply
 model, source management, an ingestion engine, data interchange, InvenTree exchange, and Obsidian
 export (the core engine). Identity, partial-update tracking, interchange, and compatibility are
@@ -428,7 +428,7 @@ stays in the plan, available behavior in current pages, and measurements in task
 
 An optional `Requires` field declares open task prerequisites across either lane. Plan summaries
 skip tasks waiting on these prerequisites and rank the remaining tasks by required status, then
-registry and document order. Contributors verify external or manual prerequisites from the task.
+written lane order. Contributors verify external or manual prerequisites from the task.
 
 Boundary. The checks establish structural agreement. Product value, the strength of acceptance
 criteria, completion evidence, and external prerequisites require contributor judgment. The
@@ -550,13 +550,11 @@ KN extension JSON Schemas. No top-level keys are added to ODCS. The extension fa
 | `kn.i18nKey` | Stable display key resolved through the message catalogs |
 | `kn.lineageRefs` | Declared datasets and mappings, not observed runtime lineage |
 
-The [schema-first sequence](../guide/schema-first-development.md) implements shared verification,
-identity, provenance, source/run state, supply/measurements, exchange and domain contracts before
-their runtime consumers. An integrated `development-model-baseline` acceptance compiles and
-rebuilds the complete set with deterministic fixtures. Model acceptance does not require live
-source collection, scored matching, a workflow CLI or full ingestion replay. These later behaviors
-retain their own acceptance gates. Additive projections and source-specific extensions can follow;
-changes to shared keys, types or meanings require explicit model work and baseline revalidation.
+The [contract workflow](../guide/schema-first-development.md) establishes shared keys and
+validates each contract before its writer uses it. Each delivery group tests the registered
+subset and its consumer boundary. The integrated `development-model-baseline` gate compiles
+and rebuilds the complete set with deterministic fixtures before release approval. Changes
+to shared keys, types or meanings require explicit model work and baseline revalidation.
 
 The compiler (`kn contract lint|compile`) validates against a checksum-pinned ODCS schema and
 closed KN extensions. It produces canonical digests, SQLAlchemy metadata and generated DDL,
@@ -1804,23 +1802,18 @@ available implementation. Capabilities that the starter template provides are de
 [contributor guide](../guide/README.md) instead, so the current-state area holds only this
 project's own product behavior. A shipped capability may still have optional extension work.
 
-Row order groups related capabilities and guides placement of otherwise ready tasks within an
-execution stage. The agent plan writes dependency order directly, allowing capability headings
-to recur; the human lane retains registry grouping.
-Declared task dependencies take precedence; a cross-cutting foundation can therefore precede
-the runtime work of an earlier capability.
-For task scheduling, the checked MODEL execution stage takes precedence over DELIVERY among
-eligible tasks of equal required/optional status. Document order breaks ties within a stage;
-it does not force runtime features ahead of another capability's schema foundation. MODEL work
-uses compiled contracts and deterministic database/fixture checks, independent of live pipelines.
+Registry rows identify capability owners. The agent lane orders delivery groups by their
+prerequisites and the result each group supplies. Each ends with an implementation audit.
+The human lane retains registry grouping. MODEL and DELIVERY classify task evidence. Select
+ready required tasks in written order before optional work.
 
 | # | Capability | Status | How it is evaluated | Implementation |
 | --- | --- | --- | --- | --- |
 | 1 | `reproducible-environment` | shipped | A fresh locked environment reaches the complete CI gate without manual repair | [Development guide](../guide/development.md) |
 | 2 | `project-identity` | shipped | Import, CLI, and distribution-build tests agree on the `kn-event-horizon` identity | [Product core](../impl/current/product-core.md) |
-| 3 | `documentation-integrity` | shipped | Link, registry-plan, task-lane, execution-stage scheduling, metadata, ordering, prerequisite, forward-language and closed-research checks pass over fixtures and the repository tree | [Documentation checks](../guide/development.md#documentation-checks) |
+| 3 | `documentation-integrity` | shipped | Link, registry-plan, task-lane, delivery-group audit gates, metadata, ordering, prerequisite, forward-language and closed-research checks pass over fixtures and the repository tree | [Documentation checks](../guide/development.md#documentation-checks) |
 | 4 | `runtime-platform` | shipped | Pinned Compose database reaches healthy from empty volumes, keeps data across restart, publishes its port on loopback only, and serves integration tests on the development host | [Runtime platform](../impl/current/runtime-platform.md) |
-| 5 | `data-contracts` | planned | Contracts compile deterministically, invalid contracts fail, drift fails CI, rebuild creates every schema, loaders cannot run DDL; the integrated core/domain baseline passes before runtime consumers | [Compiler and development rebuild](../impl/current/data-contracts.md) |
+| 5 | `data-contracts` | planned | Contracts compile deterministically, invalid contracts fail, drift fails CI, rebuild creates every schema, loaders cannot run DDL; the integrated core/domain baseline passes before release approval | [Compiler and development rebuild](../impl/current/data-contracts.md) |
 | 6 | `ontology-taxonomy` | planned | Every proposal row is classified, identifiers are stable, invalid hierarchies are rejected, SKOS round-trips | [Semantic model, reviewed seeds and SKOS export](../impl/current/ontology-taxonomy.md) |
 | 7 | `evidence-model` | planned | Conflict, time, provenance, update policy and replay pass; optional version-bound human verification covers every registered dataset | [Shared human verification protocol](../impl/current/evidence-model.md) |
 | 8 | `object-identity` | planned | KN IDs survive rebuilds; lifecycle, matching, partial-update, and lineage fixtures pass; calibrated classes meet the precision gate | [Registry contracts and replay](../impl/current/object-identity.md) |
@@ -1852,7 +1845,8 @@ scope growth. Use this lifecycle in order:
 2. Amend the owning section of this specification, including what the capability does not do.
 3. Declare the measurement, acceptance signal, and valid negative result before implementation.
 4. Add a `planned` registry row with that evaluation.
-5. Put tasks under the capability in the implementation line; every task declares `Serves`.
+5. Place tasks in delivery groups, declare the owning capability in `Serves`, and include the
+   closing audit and consumer prerequisites.
 6. Build and evaluate, document available behavior under current state, remove finished plan scope,
    and change the registry row to `shipped` with its implementation link. Follow the
    [completion workflow](../guide/planning-workflow.md#completion-transition) for the evidence and
@@ -1866,27 +1860,26 @@ instead of creating an implementation workaround that the specification cannot e
 The registry and [implementation plan](../impl/plan.md) are two views of one product. The executable
 contract requires:
 
-- every task serves a registered capability and sits in its capability group;
+- every task serves a registered capability and identifies its delivery group or human-lane capability;
 - every capability declares an evaluation;
 - every planned capability has at least one open task;
 - every shipped capability links to its current-state documentation, or to the contributor guide
   when the template provides it;
-- human-lane groups follow registry order; agent capability headings can recur in execution order;
+- human-lane groups follow registry order; each agent delivery group is contiguous;
 - every task declares the required outcome, boundary, execution, and acceptance fields;
 - lane statuses match whether an agent can finish independently or a human action gates acceptance;
 - required agent tasks precede all optional agent refinements; within the human lane this applies
   within each capability;
 - explicit task prerequisites identify open tasks, form no cycles, and keep required work
   independent of optional refinements;
-- execution stages are MODEL or DELIVERY (the default); MODEL prerequisites are also MODEL;
+- execution stages are MODEL or DELIVERY (the default);
 - same-lane prerequisites precede dependents, including ancestors reached through another lane;
-- agent MODEL tasks precede DELIVERY tasks within each required/optional class;
+- each agent group ends with an audit that requires all members and gates downstream consumers;
 - every closed-research section names a task that is no longer open, carries its four parts in
   order, and names only open tasks as reopening paths.
 
-The check is structural by design. Product priority changes use explicit task stages, prerequisites
-and registry order. The checker validates these declarations; it does not infer priorities from
-task names or estimate their schema impact.
+The check is structural by design. Product priority changes use explicit task prerequisites
+and written delivery-group order. Contributors review the product rationale for that order.
 
 ## Success criteria
 

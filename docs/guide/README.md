@@ -4,5 +4,5 @@
   checks, and agent adapters that came with the project template.
 - [Planning workflow](planning-workflow.md) covers capability discovery, task lanes, ordering, the
   transition from forward plan to current state, and closing or reopening research questions.
-- [Schema-first development](schema-first-development.md) covers MODEL priorities, model ownership,
-  the early dependency sequence, and the integrated baseline before runtime consumers.
+- [Contract development](schema-first-development.md) covers model ownership, fixture checks within
+  delivery groups and integrated acceptance before release.

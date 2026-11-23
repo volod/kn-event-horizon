@@ -1,4 +1,4 @@
-"""The written agent lane follows dependencies and the schema-first execution stages."""
+"""The written agent lane follows dependencies and delivery group audits."""
 
 from pathlib import Path
 
@@ -41,13 +41,13 @@ def test_agent_prerequisite_through_a_human_gate_must_also_come_first(tmp_path: 
 
 
 @pytest.mark.parametrize("optional", [False, True])
-def test_model_after_delivery_in_the_same_class_is_rejected(tmp_path: Path, optional: bool) -> None:
+def test_model_after_delivery_in_the_same_group_is_allowed(tmp_path: Path, optional: bool) -> None:
     delivery = task_block("delivery", optional=optional)
     model = task_block("model", optional=optional).replace(
         "- Dependencies: none.", "- Execution stage: MODEL\n- Dependencies: none."
     )
     findings = integrity_findings(write_project(tmp_path, plan=plan_with(delivery, model)))
-    assert any("agent task order" in item and "MODEL" in item for item in findings)
+    assert findings == []
 
 
 def test_required_work_after_another_capability_optional_task_is_rejected(tmp_path: Path) -> None:

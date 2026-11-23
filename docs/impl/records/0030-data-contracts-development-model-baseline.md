@@ -135,3 +135,9 @@ Extend combined fixture coverage as these models register. Accept the full basel
 all owning tasks, shared-model compatibility, durable decision provenance, canonical/SATCOM
 ownership, recovery/backfill and the original CI/local gates have evidence. This partial check
 does not waive any original acceptance gate.
+
+## Revised scheduling
+
+The [delivery-group review](0034-adhoc-delivery-group-audit.md) moves full-model acceptance to
+the release path. The original work contract above records the earlier sequence. Full registry
+and rebuild gates remain open. Each group exercises its registered subset as it grows.

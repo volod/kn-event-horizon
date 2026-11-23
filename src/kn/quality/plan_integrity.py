@@ -85,7 +85,7 @@ def _task_identity_findings(task: Task, known: set[str], identifiers: set[str]) 
         findings.append(f"{where}: no valid `Serves` capability id")
     elif task.serves not in known:
         findings.append(f"{where}: serves unregistered capability `{task.serves}`")
-    elif task.group != task.serves:
+    elif task.section == HUMAN_SECTION and task.group != task.serves:
         findings.append(f"{where}: serves `{task.serves}` under `{task.group}`")
     return findings
 

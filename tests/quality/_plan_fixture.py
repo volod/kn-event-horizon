@@ -35,8 +35,21 @@ Describe future product behavior.
 """
 
 
+def audit_block(group: str, members: tuple[str, ...], optional: bool = False) -> str:
+    block = task_block(f"{group}-implementation-audit", optional=optional)
+    if members:
+        ids = ", ".join(f"`{identifier}`" for identifier in members)
+        block = block.replace("- Dependencies:", f"- Requires: {ids}\n- Dependencies:")
+    return block
+
+
 def plan_with(*blocks: str, human_blocks: tuple[str, ...] = ()) -> str:
     agent_content = "\n".join(blocks) if blocks else "No open agent tasks."
+    if blocks:
+        ids = tuple(block.split()[1] for block in blocks)
+        agent_content += "\n" + audit_block(
+            "feature", ids, "(optional)" in blocks[0].splitlines()[0]
+        )
     human_content = "\n".join(human_blocks) if human_blocks else "No open human tasks."
     return f"""# Plan
 

@@ -1,12 +1,10 @@
 # Registered Model Baseline Check
 
 `make model-baseline` provides combined-registry fixture validation for the available governance,
-SATCOM, semantic, human verification and identity contracts: 61 tables and 544 fields. It prepares the
-integrated
-development checkpoint. The complete checkpoint remains open in the [plan](../../plan.md): its 14 remaining
-prerequisite model tasks still need claims, dataset-wide human verification projections,
-supply, source/run, exchange and canonical domain contracts. Passing this subset does not accept
-those missing models, adopt a new shared database baseline or freeze a release.
+SATCOM, semantic, human verification and identity contracts: 61 tables and 544 fields. The full
+checkpoint in the [plan](../../plan.md) also requires claims, dataset-wide verification,
+supply, source/run, exchange and canonical domain fixtures. Each delivery group extends the
+subset check. The integrated result and its audit gate release approval.
 
 ## Run and evidence
 

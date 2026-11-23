@@ -60,22 +60,16 @@ Long prerequisite lists can continue on the next line with two spaces of indenta
 `make plan-status` skips tasks with an open `Requires` entry, then lists priority in each lane.
 Check the `Dependencies` field and the task's acceptance gates before starting.
 
-Tasks may declare `Execution stage: MODEL` for shared contracts, stable identifiers, durable log
-formats, source/configuration schemas and fixture-based baseline validation. The default is
-`DELIVERY`, which includes runtime engines, workflows, live source runs and dashboards. Among
-eligible tasks, required work precedes optional work, then MODEL precedes DELIVERY, then registry
-order guides placement of otherwise ready tasks. The agent document order must follow these
-classes, and the summary uses document order within each class. MODEL tasks may require only
-other MODEL tasks; split mixed work before assigning this stage rather than hiding a runtime
-dependency. Stages never override
-`Requires`, external dependencies or human authorization.
+Tasks can label contracts and fixture-based storage work `Execution stage: MODEL`. Other work
+defaults to DELIVERY. These labels describe the work for reporting. Dependencies and the order
+of delivery groups determine when it can start.
 
 ## Task shape
 
 Task ids are stable lowercase slugs. A task heading may end with `(optional)`. Use this structure:
 
 ```markdown
-### Capability name -- `capability-id`
+### Delivery group name -- `group-id`
 
 #### stable-task-id
 
@@ -99,40 +93,37 @@ the same capability.
 
 ## Ordering
 
-The agent lane is a dependency-ordered execution list across capabilities. Place every agent
-prerequisite before its dependent, including dependencies reached through a human task. Order
-required MODEL tasks first, required DELIVERY tasks next, then optional MODEL and optional
-DELIVERY work. MODEL tasks cannot depend on DELIVERY tasks, and required tasks cannot depend on
-optional work, so these classes do not conflict with the dependency graph.
+The agent lane consists of contiguous delivery groups. Name the group for an observable outcome,
+place prerequisites before dependents, and keep the specification owner in each task's `Serves`
+field. A group may cross capability boundaries. Keep required groups first. Human tasks retain
+their capability headings and explicit approvals. Scan past a blocked task to find independent
+ready work. MODEL and DELIVERY can occur in either order when dependencies permit it.
 
-Construct the list by repeatedly choosing a task whose prerequisites have already been placed.
-Order the complete dependency graph this way, then retain each task in its declared lane.
-Within a class, use registry order to choose between ready capabilities and preserve the existing
-task order within an owner where dependencies allow. Repeat capability headings when execution
-returns to that owner; a single contiguous group cannot express cross-capability dependencies.
-Keep every task under the heading matching its `Serves` field. The human lane keeps registry
-grouping and prerequisite order within that lane.
-
-The summary filters open prerequisites and uses the written order within each required/optional
-and execution-stage class. Read the agent lane from top to bottom, skipping tasks whose human or
-external prerequisites are still outstanding. Such gates remain real dependencies; moving a task
-does not supply access or authorization. The integrity gate rejects same-lane dependency
-inversions and agent class inversions. If priorities change, revise the registry and reorder the
-affected task sequence while keeping these rules.
+End each group with `<group-id>-implementation-audit`. Its prerequisites cover every open member,
+including measured runs, directly or through another member. A consumer in another agent group
+requires the producing audit, directly or transitively. Name any human decisions separately.
+Keep a human approval that enables the group's own run inside that dependency path. Split fixture
+delivery and external acceptance when one can be audited independently. Once only the audit
+remains, keep its heading and run it against accepted records.
 
 ## Implementation audits
 
-Each capability has an optional `<group>-implementation-audit` task in the agent lane.
-The audit checks the group's built work against its specification section and identifies
-assumptions that later groups consume. Findings are fixed or scheduled while they are still
-cheap to change. Optional audits follow required agent work in the written sequence and
-can be selected while remaining required tasks wait on human or external gates.
+Each required group has a required closing audit. An optional extension has an audit with the
+same optional status and must pass it to claim acceptance of that extension. Compare the group
+with the owning spec sections, the actual normal entry point and named downstream consumers.
+Reproduce the member acceptance gates, including measured results and required human evidence.
+For human decisions and one-time external writes, verify the recorded approval, receipts and
+read-back evidence. Repeat a live operation only within its authorization. Document remaining
+uncertainties, supported limits and conditions for re-evaluation.
 
-The audit requires the group's required `CLEAR` tasks. The group's open `RUN NEEDED` and human-lane
-tasks are reviewed for the readiness of their inputs, not for results. Required work never depends
-on an audit. A group without required `CLEAR` tasks has an audit that requires its other tasks. A
-clean audit is a valid result when the record shows the evidence for each check. The task names
-the group's focus areas in its scope boundary and its planted cases in its execution path.
+Record findings when discovered during implementation as well as during the audit. For each,
+give a stable ID, severity, evidence, affected consumer, owner and disposition. Fix in-scope
+defects with a failing regression. Give deferred bugs, specified features and quality
+improvements a forward task with a concrete acceptance check and link its ID from the finding.
+Route new product promises through specification review. Insert prerequisite fixes before the audit and
+add their IDs to its `Requires`. A blocker keeps the audit open. For nonblocking follow-ups,
+gate affected consumers where necessary and document the residual risk. A clean audit records
+commands, results and the boundaries actually checked.
 
 The record gives each check a result:
 
@@ -168,6 +159,7 @@ command and its output, or a failing test), and one disposition:
 | Scheduled bug | A defect too large for the audit becomes a plan task in the owning group, with observed behavior, impact, and an acceptance check. |
 | Scheduled feature | A missing behavior that the specification already promises becomes a plan task with its operator problem. Tasks that need it gain a `Requires` entry. |
 | Specification change | A change to a product promise follows [Choose the work contract](#choose-the-work-contract) before any task is planned. |
+| Quality improvement | Schedule a measurable reliability, maintainability or verification improvement with an owner and acceptance check. |
 | Research | An uncertain path becomes a task with `Research: yes`. |
 | Accepted | A risk kept on purpose is listed under known limitations on the current-state page, with its reason and what would reopen it. |
 

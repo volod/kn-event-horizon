@@ -104,14 +104,10 @@ why authority, exact time and version binding are required.
 
 ## Development baseline and release evolution
 
-The [schema-first plan](../../guide/schema-first-development.md) schedules the unbuilt shared and
-domain model before runtime consumers. The compiler and guarded rebuild described here remain
-available. `make model-baseline` now checks combined fixture rebuilds for the four registered
-contracts and preserves evidence; the [baseline check reference](data-contracts/model-baseline.md)
-describes its coverage and remaining gates. The complete `development-model-baseline` still has
-15 open prerequisite model tasks, so the full data-contracts capability remains planned until
-cross-model acceptance passes. The checkpoint adds no release freeze and does not change the
-existing development rebuild requirement.
+The [contract workflow](../../guide/schema-first-development.md) pairs each contract with its
+first consumer. `make model-baseline` checks the registered subset and preserves evidence.
+The [baseline reference](data-contracts/model-baseline.md) describes its current coverage.
+The full integrated check and its audit remain release prerequisites.
 
 Development keeps contract version `1.0.0` and one Python Alembic baseline, `0001_baseline`,
 editable in place; it creates every registered contract. A contract edit changes its digest. Refresh

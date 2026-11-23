@@ -56,7 +56,7 @@ class Task:
 
     @property
     def execution_stage(self) -> str:
-        """Model foundations have scheduling priority; existing tasks default to delivery."""
+        """Describe the type of work independently of its scheduling priority."""
         return self.fields.get("execution stage", DELIVERY_STAGE).strip().upper()
 
 

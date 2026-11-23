@@ -86,18 +86,13 @@ The distribution, import package, and commands are described in
 placement, lane statuses, required metadata, human-lane registry order, and forward-only language.
 `plan_dependencies.py` checks open task references across both lanes for unknown IDs, cycles, and
 required work that depends on optional work. `plan_order.py` rejects prerequisites placed after
-their same-lane dependents, including ancestors reached through the other lane. It also requires
-the agent lane to place required work before optional work and MODEL before DELIVERY within each
-class. Capability headings can recur in that execution sequence.
+their same-lane dependents, including ancestors reached through the other lane. Each agent group
+must end with an audit covering all open members. Cross-group consumers must wait for the producer audit.
 
-`make plan-status` and `kn-plan` use `plan_summary.py`. They count work and surface lane
-priority after filtering tasks whose explicit prerequisites are still open. Contributors verify
-manual prerequisites before taking a task.
-They prefer required MODEL tasks over DELIVERY tasks across capability groups, using the written
-execution order for ties. `plan_dependencies.py` rejects MODEL tasks that hide an open DELIVERY
-prerequisite,
-and the integrity check validates stage values. The [schema-first guide](schema-first-development.md)
-lists the model sequence, contract owners, runtime splits and integrated baseline checkpoint.
+`make plan-status` and `kn-plan` count tasks by lane, status and stage. They first filter
+open prerequisites, then select required before optional work in written order. Contributors
+verify external inputs and authorization. The [contract workflow](schema-first-development.md)
+describes the per-group fixture and integrated release checks.
 
 `make lint-spec-plan` also runs `research_register.py` over the
 [closed-research register](../impl/future-research.md). It reports, with the register line:

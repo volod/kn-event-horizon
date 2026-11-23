@@ -17,21 +17,9 @@ def staged(
     )
 
 
-def test_model_precedes_earlier_delivery_task(tmp_path: Path) -> None:
-    root = write_project(tmp_path, plan=plan_with(staged("model"), task_block("build-ui")))
-    assert "priority agent task: model [feature]" in summary_lines(root)
-
-
-def test_model_priority_crosses_capability_groups(tmp_path: Path) -> None:
-    plan = plan_with(staged("model"))
-    earlier = task_block("earlier-workflow", capability="foundation")
-    plan = plan.replace(
-        "## Human-Assisted Tasks",
-        f"### Foundation -- `foundation`\n\n{earlier}\n## Human-Assisted Tasks",
-        1,
-    )
-    root = write_project(tmp_path, plan=plan)
-    assert "priority agent task: model [feature]" in summary_lines(root)
+def test_delivery_before_ready_model_in_written_order(tmp_path: Path) -> None:
+    root = write_project(tmp_path, plan=plan_with(task_block("build-ui"), staged("model")))
+    assert "priority agent task: build-ui [feature]" in summary_lines(root)
 
 
 def test_prerequisite_filter_runs_before_stage_priority(tmp_path: Path) -> None:
@@ -42,25 +30,18 @@ def test_prerequisite_filter_runs_before_stage_priority(tmp_path: Path) -> None:
     assert "priority agent task: base-model [feature]" in summary_lines(root)
 
 
-def test_optional_model_never_delays_required_delivery(tmp_path: Path) -> None:
-    root = write_project(
-        tmp_path, plan=plan_with(task_block("required-ui"), staged("optional-model", optional=True))
-    )
-    assert "priority agent task: required-ui [feature]" in summary_lines(root)
-
-
 @pytest.mark.parametrize("stage", ["FAST", "MODEL DELIVERY", ""])
 def test_invalid_execution_stage_is_rejected(tmp_path: Path, stage: str) -> None:
     root = write_project(tmp_path, plan=plan_with(staged("model", stage)))
     assert any("execution stage" in finding.lower() for finding in integrity_findings(root))
 
 
-def test_model_cannot_hide_a_delivery_prerequisite(tmp_path: Path) -> None:
+def test_model_can_use_a_completed_delivery_prerequisite(tmp_path: Path) -> None:
     model = staged("model").replace(
         "- Dependencies: none.", "- Requires: `engine`\n- Dependencies: none."
     )
-    root = write_project(tmp_path, plan=plan_with(model, task_block("engine")))
-    assert any("MODEL" in finding and "DELIVERY" in finding for finding in integrity_findings(root))
+    root = write_project(tmp_path, plan=plan_with(task_block("engine"), model))
+    assert integrity_findings(root) == []
 
 
 def test_human_model_prerequisite_is_preserved(tmp_path: Path) -> None:
