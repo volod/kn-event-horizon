@@ -139,17 +139,34 @@ ordering, so version 1 adds neither the dlt REST client nor its paginators. Revi
 paginator reuse if the fetch implementation can exercise it against archived-response fixtures
 while preserving that ordering. See the [dlt REST client API](https://dlthub.com/docs/api_reference/dlt/sources/helpers/rest_client/client).
 
+## Onboard a source
+
+The [onboarding guide](../../guide/source-onboarding.md) covers documentation review, bounded
+sampling, investigation, fixtures, review, enablement approval, and scheduling. It provides
+templates for the terms dossier, investigation report, fixture sanitization worksheet, and
+review checklist. Sampling and enablement each require a recorded owner decision.
+
+`make fixture-check` runs in `make ci` and scans regular UTF-8 files under directories named
+`fixtures` anywhere in `tests/`. It refuses recognizable credentials, personal data patterns,
+and files it cannot inspect. Diagnostics report locations and rule categories. The
+[fixture procedure](../../guide/source-onboarding.md#4-build-and-sanitize-fixtures) lists the
+formats and explains the manual review for rights and sensitive data.
+
 ## Verification
 
 - `make ci` reconciles every seed against its original proposal row, validates malformed
   inputs and rank references, checks both CLI locales, and detects generated-contract drift.
 - `make ci` also runs the crawler fixtures, checks the declared retry class for every code, and
   exercises CLI diagnostics and enabled configurations with missing or failing evidence.
+- The fixture check has regression cases for planted credentials and personal data, encodings,
+  approved placeholders, and unscannable files.
 - `make test-integration` checks repeated PostgreSQL rebuilds, the reader role, and rollback
   on seed conflicts or unknown override IDs. The [combined baseline](data-contracts/model-baseline.md)
   compares all stored catalogue fields across two rebuilds.
 
-[Catalogue record 0035](../records/0035-source-management-source-catalogue-import.md) and
-[crawler configuration record 0036](../records/0036-source-management-crawler-config-schema.md)
-preserve acceptance evidence. The [onboarding workflow](../plan.md#source-onboarding-workflow)
-and [source health](../plan.md#ingestion-state-contracts) remain in the forward plan.
+[Catalogue record 0035](../records/0035-source-management-source-catalogue-import.md),
+[crawler configuration record 0036](../records/0036-source-management-crawler-config-schema.md),
+and [onboarding record 0037](../records/0037-source-management-source-onboarding-workflow.md)
+preserve acceptance evidence. The
+[source admission audit](../plan.md#source-admission-implementation-audit) and
+[source health](../plan.md#ingestion-state-contracts) remain in the forward plan.

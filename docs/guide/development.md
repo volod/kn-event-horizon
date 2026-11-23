@@ -35,15 +35,19 @@ include the resulting `uv.lock` change.
 
 `make ci` is the required fast gate. GitHub Actions runs its explicit alias, `make ci-github`, on
 Python 3.12 and 3.13 after `uv sync --locked --extra dev`. It checks formatting, Ruff rules, mypy,
-complexity, shell scripts, documentation links, specification and plan integrity, message catalogs,
-and tests. `make catalog-check` checks interface key coverage and CLI literals; see
-[localization](../impl/current/localization.md#verification).
+complexity, shell scripts, fixture sanitization, documentation links, specification and plan
+integrity, message catalogs, and tests. `make catalog-check` checks interface key coverage and
+CLI literals. See the [localization verification](../impl/current/localization.md#verification).
 GitHub Actions runs only lightweight unit tests: no test there needs a service endpoint, large
 memory, or a long run time. Tests that do carry the `integration` or `heavy` marker and run only on
 the development host, through `make test-integration` or `make ci-local`, which runs `make ci` and
 then every local-only test against the database from `make db-up`. A plan gate that names CI for
 such a test is met by `make ci-local`. See
 [where tests run](../impl/current/runtime-platform.md#where-tests-run).
+
+`make fixture-check` scans fixture directories under `tests/` for credentials and personal data.
+See the [fixture procedure](source-onboarding.md#4-build-and-sanitize-fixtures) for supported
+formats, diagnostic rules, and manual review.
 
 `make quality` adds branch coverage, Markdown style, and source/wheel builds. Run it before release
 or after changing project infrastructure. `make quality-report` reports files over the 250-line soft

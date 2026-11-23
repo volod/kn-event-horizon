@@ -6,3 +6,5 @@
   transition from forward plan to current state, and closing or reopening research questions.
 - [Contract development](schema-first-development.md) covers model ownership, fixture checks within
   delivery groups and integrated acceptance before release.
+- [Source onboarding](source-onboarding.md) covers terms review, bounded sampling, fixtures, and
+  enablement approvals.

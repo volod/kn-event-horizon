@@ -30,7 +30,7 @@ export MYPY_CACHE_DIR := $(DATA_ROOT)/cache/mypy
 
 .PHONY: help bootstrap venv lock run doctor format format-check lint typecheck test coverage \
 	test-integration ci-local skos-reference-check \
-	complexity-gate shell-lint-gate lint-md lint-doc-links lint-spec-plan plan-status \
+	complexity-gate shell-lint-gate fixture-check lint-md lint-doc-links lint-spec-plan plan-status \
 	ci-checks ci ci-github build quality code-quality quality-report \
 	db-up db-down db-reset db-verify
 
@@ -119,7 +119,10 @@ lint-spec-plan: ## Check capability registry, plan tasks, and the closed-researc
 plan-status: ## Count tasks by lane/status and show declared priority
 	@"$(PY)" -m kn.quality.plan_summary --root "$(PROJECT_ROOT)"
 
-ci-checks: catalog-check contract-check format-check lint typecheck complexity-gate shell-lint-gate lint-doc-links lint-spec-plan
+fixture-check: ## Check test fixture files for credentials and personal data
+	@"$(PY)" -m kn.quality.fixture_sanitization --root "$(PROJECT_ROOT)"
+
+ci-checks: catalog-check contract-check format-check lint typecheck complexity-gate shell-lint-gate fixture-check lint-doc-links lint-spec-plan
 
 ci: ci-checks test ## Run the required gate: checks and lightweight unit tests
 

@@ -51,5 +51,6 @@ decision. A record can name a plan task by ID because plan headings disappear on
 | 0034 | Delivery-group plan audit | [0034-adhoc-delivery-group-audit.md](0034-adhoc-delivery-group-audit.md) |
 | 0035 | `source-catalogue-import` | [Source catalogue import](0035-source-management-source-catalogue-import.md) |
 | 0036 | `crawler-config-schema` | [Crawler configuration schema](0036-source-management-crawler-config-schema.md) |
+| 0037 | `source-onboarding-workflow` | [Source onboarding workflow](0037-source-management-source-onboarding-workflow.md) |
 
-Next unused sequence is `0037`.
+Next unused sequence is `0038`.

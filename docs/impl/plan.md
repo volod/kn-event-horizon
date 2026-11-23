@@ -23,7 +23,7 @@ chains. First release freezes this baseline and enables subsequent versioned mig
 The external interchange contract and counterpart adapters remain
 independently versioned. Object identity, partial-update tracking, interchange, and InvenTree
 compatibility are core work and come before the domain pipelines.
-Source tasks follow the [onboarding workflow](../design/spec.md#source-management) and the
+Source tasks follow the [onboarding workflow](../guide/source-onboarding.md) and the
 [TDD growth rule](../design/spec.md#ingestion-engine). Each source adds failing fixtures first, then
 general engine changes, and reruns every earlier source suite plus a rebuild from the fixture
 archive.
@@ -32,38 +32,16 @@ archive.
 
 ### Source keys and onboarding -- `source-admission`
 
-#### source-onboarding-workflow
-
-Coding-agent source investigation needs a fixed, safe procedure before the first real source.
-
-- Serves: `source-management` -- [Source management](../design/spec.md#source-management)
-- Agent status: CLEAR
-- Dependencies: The [crawler configuration and enablement checks](current/source-management.md#validate-crawler-configurations).
-- User-visible outcome: Contributors follow a documented workflow with templates for the terms
-  dossier, investigation report, fixture sanitization, and review checklist. `AGENTS.md` states the
-  untrusted-content rule for agents reading source material.
-- Scope boundary: Documentation and templates only, plus a fixture-sanitization check that rejects
-  credentials and personal data in fixtures.
-- Data and artifact paths: `docs/guide/source-onboarding.md`, `docs/guide/templates/`,
-  `AGENTS.md`, `tests/fixtures/`, `tests/quality/`.
-- Execution path: Write the guide from the specification's steps, and add the sanitization check to
-  `make ci`.
-- Acceptance gates: The guide links resolve. The sanitization check fails on a planted secret
-  fixture. `make ci` passes.
-- Documentation target: `current/source-management.md` listed in the
-  [areas index](current.md#areas).
-
 #### source-admission-implementation-audit
 
 Verify the source keys and onboarding handoff against its specification and the next consumer.
 
 - Serves: `source-management` -- [Source management](../design/spec.md#source-management)
 - Agent status: CLEAR
-- Requires: `source-onboarding-workflow`
 - Dependencies: The [catalogue import record](records/0035-source-management-source-catalogue-import.md),
   the [crawler configuration record](records/0036-source-management-crawler-config-schema.md),
-  other group acceptance records, and the
-  [audit procedure](../guide/planning-workflow.md#implementation-audits).
+  the [source onboarding record](records/0037-source-management-source-onboarding-workflow.md),
+  and the [audit procedure](../guide/planning-workflow.md#implementation-audits).
 - User-visible outcome: The group has reproducible acceptance evidence and owned follow-up work.
 - Scope boundary: Verify this group's outputs, failure paths and downstream compatibility.
 - Data and artifact paths: Group fixtures, the numbered audit record and the forward plan.
