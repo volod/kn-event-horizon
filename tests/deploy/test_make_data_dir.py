@@ -34,7 +34,8 @@ def _pytest_caches(target: str, project: Path, **env: str) -> list[str]:
 
 
 @pytest.mark.parametrize(
-    "target", ["test", "test-integration", "test-bilingual", "bilingual-acceptance"]
+    "target",
+    ["test", "test-integration", "test-bilingual", "bilingual-acceptance", "model-baseline"],
 )
 def test_a_data_dir_with_a_space_is_one_pytest_cache_path(tmp_path: Path, target: str) -> None:
     data_dir = tmp_path / "audit data"

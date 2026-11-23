@@ -6,6 +6,7 @@ from kn.contracts.diagnostics import ContractError, Location
 from kn.contracts.model import LOGICAL_TYPES, Field, LogicalType, Reference, canonical
 
 SEMANTIC_EXTENSIONS = {
+    "humanVerification",
     "entityClass",
     "relation",
     "identity",

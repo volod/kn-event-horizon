@@ -112,7 +112,7 @@ def test_main_returns_failure_for_invalid_documents(tmp_path: Path) -> None:
     assert main(["--root", str(tmp_path)]) == 1
 
 
-def test_returning_to_an_earlier_capability_violates_registry_order(tmp_path: Path) -> None:
+def test_agent_capability_headings_can_recur_in_execution_order(tmp_path: Path) -> None:
     foundation = task_block(identifier="build-foundation", capability="foundation")
     repeat = task_block(identifier="more-foundation", capability="foundation")
     plan = (
@@ -126,7 +126,7 @@ def test_returning_to_an_earlier_capability_violates_registry_order(tmp_path: Pa
 
     findings = integrity_findings(write_project(tmp_path, plan=plan))
 
-    assert any("do not follow registry order" in finding for finding in findings)
+    assert findings == []
 
 
 @pytest.mark.parametrize(

@@ -584,6 +584,49 @@
       "x-kn-scopes": [
         "field"
       ]
+    },
+    "kn.humanVerification": {
+      "type": "object",
+      "x-kn-scopes": [
+        "table"
+      ],
+      "properties": {
+        "strategy": {
+          "enum": [
+            "external",
+            "decision-log"
+          ]
+        },
+        "resolver": {
+          "const": "contract-v1"
+        },
+        "recordFields": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/reference"
+          },
+          "minItems": 1,
+          "uniqueItems": true
+        },
+        "fieldContexts": {
+          "type": "object",
+          "additionalProperties": {
+            "type": "array",
+            "items": {
+              "$ref": "#/$defs/reference"
+            },
+            "minItems": 1,
+            "uniqueItems": true
+          }
+        }
+      },
+      "required": [
+        "strategy",
+        "resolver",
+        "recordFields",
+        "fieldContexts"
+      ],
+      "additionalProperties": false
     }
   },
   "additionalProperties": false,

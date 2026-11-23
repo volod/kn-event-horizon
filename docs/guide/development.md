@@ -83,15 +83,19 @@ The distribution, import package, and commands are described in
 ## Documentation checks
 
 `plan_model.py` reads the capability registry and task metadata. `plan_integrity.py` checks group
-placement, lane statuses, required metadata, registry order, and forward-only language.
+placement, lane statuses, required metadata, human-lane registry order, and forward-only language.
 `plan_dependencies.py` checks open task references across both lanes for unknown IDs, cycles, and
-required work that depends on optional work.
+required work that depends on optional work. `plan_order.py` rejects prerequisites placed after
+their same-lane dependents, including ancestors reached through the other lane. It also requires
+the agent lane to place required work before optional work and MODEL before DELIVERY within each
+class. Capability headings can recur in that execution sequence.
 
 `make plan-status` and `kn-plan` use `plan_summary.py`. They count work and surface lane
 priority after filtering tasks whose explicit prerequisites are still open. Contributors verify
 manual prerequisites before taking a task.
-They prefer required MODEL tasks over DELIVERY tasks across capability groups, preserving registry
-order for ties. `plan_dependencies.py` rejects MODEL tasks that hide an open DELIVERY prerequisite,
+They prefer required MODEL tasks over DELIVERY tasks across capability groups, using the written
+execution order for ties. `plan_dependencies.py` rejects MODEL tasks that hide an open DELIVERY
+prerequisite,
 and the integrity check validates stage values. The [schema-first guide](schema-first-development.md)
 lists the model sequence, contract owners, runtime splits and integrated baseline checkpoint.
 

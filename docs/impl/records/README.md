@@ -44,5 +44,8 @@ decision. A record can name a plan task by ID because plan headings disappear on
 | 0027 | `vocabulary-text-integrity` | [0027-ontology-taxonomy-vocabulary-text-integrity.md](0027-ontology-taxonomy-vocabulary-text-integrity.md) |
 | 0028 | `adhoc` human verification model review | [0028-adhoc-human-verification-model-review.md](0028-adhoc-human-verification-model-review.md) |
 | 0029 | `adhoc` schema-first plan priorities | [0029-adhoc-schema-first-plan-priorities.md](0029-adhoc-schema-first-plan-priorities.md) |
+| 0030 | `development-model-baseline` (open) | [0030-data-contracts-development-model-baseline.md](0030-data-contracts-development-model-baseline.md) |
+| 0031 | `adhoc` dependency-ordered plan | [0031-adhoc-dependency-ordered-plan.md](0031-adhoc-dependency-ordered-plan.md) |
+| 0032 | `human-verification-contracts` | [0032-evidence-model-human-verification-contracts.md](0032-evidence-model-human-verification-contracts.md) |
 
-Next unused sequence is `0030`.
+Next unused sequence is `0033`.

@@ -80,7 +80,7 @@ def _add_tables(result: sa.MetaData, contract: Contract, target: str) -> None:
                     primary_key=field.primary_key,
                     autoincrement=False,
                     comment=field.description or None,
-                    info={"field_id": field.field_id},
+                    info={"field_id": field.field_id, "logical_type": field.logical_type},
                 )
                 for field in model.fields
             ],

@@ -1,10 +1,11 @@
 # Human Verification Metadata
 
 This is a required extension of the [evidence model](spec.md#human-verification-metadata).
-It is specified and planned; the [current model](../impl/current/data-contracts.md#human-verification-metadata)
-does not implement it yet. The operator problem is to distinguish data that a person checked from
-data merely imported, corroborated, or accepted by automated validation, while leaving unchecked
-data usable. Future verification workflows consume this metadata instead of inventing a new
+The [shared decision protocol](../impl/current/evidence-model.md) is implemented; dataset-wide
+coverage and read projections remain planned. The operator problem is to distinguish data that a
+person checked from data merely imported, corroborated, or accepted by automated validation, while
+leaving unchecked data usable. Future verification workflows consume this metadata instead of
+inventing a new
 meaning for each domain.
 
 ## Coverage and granularity
@@ -26,10 +27,11 @@ use their contract field IDs and typed primary keys.
 | Imports, file manifests, raw rows and contract markers | Exact artifact or record version; integrity review does not certify all enclosed facts |
 | Future identities, claims, canonical facts, offers, documents and derived values | Stable identity/claim/observation keys and reviewed content version; lineage alone grants no verification |
 
-All 50 currently deployed tables need an explicit coverage entry, including the 18 semantic,
-28 SATCOM domain, three SATCOM bookkeeping and one governance tables. Future registered contracts
-need coverage too. Immutable source bytes, CSV headers and publication manifests are preserved;
-verification metadata is attached externally or through KN projections. Audit decisions retain
+All 50 tables in the original review inventory need explicit coverage, including the 18 semantic,
+28 SATCOM domain, three SATCOM bookkeeping and one governance tables. Newly registered contracts,
+including the shared decision log, need coverage too. Immutable source bytes, CSV headers and
+publication manifests are preserved; verification metadata is attached externally or through KN
+projections. Audit decisions retain
 their own actor and event times; recording a decision does not recursively approve that decision
 or its payload. No technical record or data group silently defaults to verified.
 
@@ -58,7 +60,8 @@ enablement or identity operation is not automatically a factual verification of 
 Existing verification states keep their domain meanings. Publication comparison, terminology
 review, source assertions and human factual acceptance must be distinguishable by target and
 purpose. A generic timestamp never bypasses canonical selection, rights, evidence or safety rules.
-Historical `verified` labels and date-only `reviewed_on` values do not justify a timestamp: migration
+Historical `verified` labels and date-only `reviewed_on` values do not justify a timestamp:
+migration
 leaves it null until an attributable review with an exact time exists.
 
 ## Durable decisions and version binding

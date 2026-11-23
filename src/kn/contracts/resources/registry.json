@@ -8,6 +8,9 @@
     },
     {
       "path": "semantic/1.0.0.json"
+    },
+    {
+      "path": "evidence/1.0.0.json"
     }
   ]
 }

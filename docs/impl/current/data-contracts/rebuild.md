@@ -29,8 +29,8 @@ owner, in registry order, and records one row per contract in `system.installed_
 rebuild and an upgrade of an empty database therefore use one mechanism. No SQL text is executed;
 the generated `postgresql/schema.sql` is a review artifact only, and an archived source
 `schema.sql` is evidence that nothing reads. The current set holds the governance table in
-`system`, 31 SATCOM tables in `space`, and 18 semantic tables in `semantic`; the other seven
-schemas have no contracted datasets.
+`system`, 31 SATCOM tables in `space`, 18 semantic tables in `semantic`, and the human decision
+table in `evidence`; the other six schemas have no contracted datasets.
 `rebuild()` and `upgrade()` accept another validated set, which the integration tests use for
 fixture contracts in `space` and `semantic`.
 
@@ -68,7 +68,9 @@ SATCOM source imports are not seed data. Source catalogue loading remains a sepa
 
 After the rebuild, the existing governance checks verify Alembic head, contract digest, table and
 column types, nullability, foreign keys, indexes, role attributes, schema isolation and table and
-sequence grants. `verify_compiled_catalog` additionally checks the exact compiled table set,
+sequence grants. Marker verification compares every stored field: contract ID, version, digest,
+storage schema and the exact managed-table list, using the same definition as marker creation.
+`verify_compiled_catalog` additionally checks the exact compiled table set,
 primary key names and columns, check constraint and foreign key names, and table and column
 comments. Structural verification also compares PostGIS geometry types and SRIDs, which Alembic
 reflects as an unknown type. It does not
@@ -86,6 +88,9 @@ views. It also records every SQL string the rebuild sends and finds no `CREATE T
 schemas and checks that the catalog, a sentinel row and verification are unchanged. Destructive
 probes roll back and leave the original database in place. Run `make test-integration` against local
 PostGIS, or `make ci-local` for both the required CI gate and local-only tests.
+The [combined fixture check](model-baseline.md) rebuilds the complete registered set twice with
+real SATCOM, semantic rows and durable human decision fixtures together; its full-model checkpoint
+remains open.
 
 [Task record 0016](../../records/0016-data-contracts-development-rebuild-mode.md) preserves acceptance
 evidence and the plan transition, and the group audit in

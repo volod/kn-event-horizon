@@ -89,8 +89,7 @@ def test_verification_refuses_wrong_revision_unsafe_roles_and_owners(
 def test_contract_verification_refuses_missing_marker_and_digest_drift(
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
-    from types import SimpleNamespace
-
+    from kn.contracts.model import canonical
     from kn.contracts.registry import registered_contracts
 
     conn = connection()
@@ -102,18 +101,31 @@ def test_contract_verification_refuses_missing_marker_and_digest_drift(
     inspector.has_table.return_value = True
     contracts = registered_contracts()
     rows = [
-        SimpleNamespace(contract_id=item.contract_id, version=item.version, digest=item.digest)
+        {
+            "contract_id": item.contract_id,
+            "version": item.version,
+            "digest": item.digest,
+            "storage_schema": item.schema,
+            "managed_tables_json": canonical([table.name for table in item.tables]),
+        }
         for item in contracts
     ]
     for installed in (
         [],
         rows[:1],
-        [*rows[:1], SimpleNamespace(**{**vars(rows[1]), "digest": "old"})],
+        *[
+            [rows[0], {**rows[1], field: value}, *rows[2:]]
+            for field, value in (
+                ("digest", "old"),
+                ("storage_schema", "identity"),
+                ("managed_tables_json", "[]"),
+            )
+        ],
     ):
-        conn.execute.return_value = installed
+        conn.execute.return_value.mappings.return_value = installed
         with pytest.raises(ValueError, match="digest drift"):
             governance.verify_contracts(conn)
-    conn.execute.return_value = rows
+    conn.execute.return_value.mappings.return_value = rows
     structure, tables = MagicMock(), MagicMock()
     monkeypatch.setattr(governance, "verify_structure", structure)
     monkeypatch.setattr(governance, "verify_registered_tables", tables)

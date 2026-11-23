@@ -25,7 +25,8 @@ deployment order, with paths relative to the registry and an optional reference 
   "contracts": [
     {"path": "system/1.0.0.json"},
     {"path": "satcom/1.0.0.json"},
-    {"path": "semantic/1.0.0.json"}
+    {"path": "semantic/1.0.0.json"},
+    {"path": "evidence/1.0.0.json"}
   ]
 }
 ```
@@ -87,25 +88,28 @@ schema objects come from SQLAlchemy metadata, and the platform policy from typed
 
 ## Human verification metadata
 
-The deployed contracts currently define 50 tables and 465 fields, with no common optional human
-verification timestamp or actor/version-bound verification ledger. SATCOM `verification_status`
-is imported source data; semantic `verification_state`, publication `reviewed_on` dates and label
-`review_reference` values have their existing specialized meanings. None is a universal human
-verification time. Existing data must not be backfilled as human-verified from those values.
+The [shared human verification protocol](evidence-model.md) adds a registered decision-log contract
+and typed record/field targets, UTC/null semantics, authenticated reviewer context, durable history
+and transactional application. The registry now defines 51 tables and 473 fields. Dataset-wide
+coverage and read projections remain open in `human-verification-projections` in the
+[plan](../plan.md).
 
-The [model review](../records/0028-adhoc-human-verification-model-review.md) records this gap.
-The [shared design](../../design/human-verification.md) and the evidence-model tasks
-`human-verification-contracts` and `human-verification-projections` in the [plan](../plan.md)
-specify optional UTC metadata for records and field values with durable, version-bound decisions.
-They are not implemented. This review changes no production contract, source package, or database.
+SATCOM `verification_status` is imported source data; semantic `verification_state`, publication
+`reviewed_on` dates and label `review_reference` values retain their specialized meanings. None
+sets a universal human verification time. Existing data is not backfilled as human-verified from
+those values. The [model review](../records/0028-adhoc-human-verification-model-review.md) records
+why authority, exact time and version binding are required.
 
 ## Development baseline and release evolution
 
 The [schema-first plan](../../guide/schema-first-development.md) schedules the unbuilt shared and
 domain model before runtime consumers. The compiler and guarded rebuild described here remain
-available; the combined `development-model-baseline` is still planned, so the full data-contracts
-capability is marked planned until that cross-model acceptance passes. The checkpoint adds no
-release freeze and does not change the existing development rebuild requirement.
+available. `make model-baseline` now checks combined fixture rebuilds for the four registered
+contracts and preserves evidence; the [baseline check reference](data-contracts/model-baseline.md)
+describes its coverage and remaining gates. The complete `development-model-baseline` still has
+15 open prerequisite model tasks, so the full data-contracts capability remains planned until
+cross-model acceptance passes. The checkpoint adds no release freeze and does not change the
+existing development rebuild requirement.
 
 Development keeps contract version `1.0.0` and one Python Alembic baseline, `0001_baseline`,
 editable in place; it creates every registered contract. A contract edit changes its digest. Refresh
@@ -229,6 +233,9 @@ Known limitations, with what would reopen them:
   additive release-style evolution, concurrent platform bootstrap and existing role isolation.
 - `make db-verify`: Alembic head, installed contract digest, structural drift, role attributes,
   schema isolation, table/sequence default privileges and PostGIS. Probe tables are rolled back.
+- `make model-baseline`: compile all registered contracts, rebuild and replay combined fixtures
+  twice, and compare every stored value and complete marker. This covers the registered subset;
+  the remaining shared/domain models and dataset-wide review projections remain open acceptance work.
 - `tests/domains/space/satcom/real_sample.json`: 168 reference-closed rows selected from the owner
   package. Tests mix snapshots and plant missing references, duplicate keys, bad dates, enums and
   numeric values.

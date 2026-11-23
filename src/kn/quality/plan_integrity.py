@@ -18,6 +18,7 @@ from kn.quality.plan_model import (
     read_registry,
     read_tasks,
 )
+from kn.quality.plan_order import task_order_findings
 from kn.quality.project_root import discover_project_root
 
 _LOG = logging.getLogger(__name__)
@@ -155,8 +156,10 @@ def _order_findings(capabilities: list[Capability], tasks: list[Task]) -> list[s
     line = [capability.identifier for capability in capabilities]
     findings: list[str] = []
     for section in PLAN_SECTIONS:
-        findings.extend(_section_order_findings(line, tasks, section))
+        if section == HUMAN_SECTION:
+            findings.extend(_section_order_findings(line, tasks, section))
         findings.extend(_optional_order_findings(tasks, section))
+    findings.extend(f"{PLAN_DOC}: {finding}" for finding in task_order_findings(tasks))
     return findings
 
 

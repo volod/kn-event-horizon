@@ -83,6 +83,14 @@ coverage: ## Run the lightweight unit tests and enforce the coverage floor
 test-integration: ## Run the database integration tests locally against make db-up
 	@$(LOCAL_PYTEST) -m integration
 
+.PHONY: model-baseline
+model-baseline: ## Check registered-model fixture rebuilds and retain evidence (make db-up first)
+	@source "$(PROJECT_ROOT)/scripts/shared/common.sh"; kn_load_env; kn_db_test_env || exit 1; \
+		mkdir -p "$$DATA_DIR/model-baseline"; \
+		artifact_dir=$$(mktemp -d "$$DATA_DIR/model-baseline/check-XXXXXXXX") || exit 1; \
+		"$(PY)" -m pytest $(PYTEST_CACHE) tests/integration/test_model_baseline.py \
+		--basetemp "$$artifact_dir/fixtures" --junitxml "$$artifact_dir/results.xml"
+
 complexity-gate: ## Fail on Radon D-or-worse or cognitive complexity above 15
 	@output="$$($(VENV)/bin/radon cc src tests -s -n D)"; \
 		if [ -n "$$output" ]; then printf '%s\n' "$$output"; exit 1; fi

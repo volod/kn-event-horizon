@@ -36,7 +36,9 @@ def test_invalid_plan_summary_refuses_to_schedule(tmp_path: Path) -> None:
 def test_required_work_precedes_optional_work_across_capabilities(tmp_path: Path) -> None:
     optional = task_block(identifier="refine-foundation", capability="foundation", optional=True)
     plan = plan_with(task_block()).replace(
-        "### Feature", f"### Foundation -- `foundation`\n\n{optional}\n### Feature", 1
+        "## Human-Assisted Tasks",
+        f"### Foundation -- `foundation`\n\n{optional}\n## Human-Assisted Tasks",
+        1,
     )
     root = write_project(tmp_path, spec=SPEC, plan=plan)
 

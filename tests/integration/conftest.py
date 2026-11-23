@@ -7,6 +7,7 @@ import sqlalchemy as sa
 from sqlalchemy.engine import Connection
 
 from tests.integration.harness import IntegrationDatabase
+from tests.integration.review_support import review_database  # noqa: F401
 
 
 @pytest.fixture

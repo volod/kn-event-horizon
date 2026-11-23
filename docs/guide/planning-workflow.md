@@ -44,6 +44,8 @@ that states what would reopen the question.
 Use the optional `Requires` field for open tasks that must leave the plan before work can start.
 List backticked task IDs separated by commas. IDs can refer to either lane. The integrity check
 rejects missing IDs, cycles, and required tasks that depend on optional work.
+Within each lane, prerequisites must appear before their dependents, including an ancestor
+reached through the other lane. Cross-lane gates keep their own lane and remain blocking.
 
 ```markdown
 - Requires: `prepare-fixtures`, `approve-inputs`
@@ -62,8 +64,10 @@ Tasks may declare `Execution stage: MODEL` for shared contracts, stable identifi
 formats, source/configuration schemas and fixture-based baseline validation. The default is
 `DELIVERY`, which includes runtime engines, workflows, live source runs and dashboards. Among
 eligible tasks, required work precedes optional work, then MODEL precedes DELIVERY, then registry
-and document order break ties. MODEL tasks may require only other MODEL tasks; split mixed work
-before assigning this stage rather than hiding a runtime dependency. Stages never override
+order guides placement of otherwise ready tasks. The agent document order must follow these
+classes, and the summary uses document order within each class. MODEL tasks may require only
+other MODEL tasks; split mixed work before assigning this stage rather than hiding a runtime
+dependency. Stages never override
 `Requires`, external dependencies or human authorization.
 
 ## Task shape
@@ -89,29 +93,40 @@ Describe the unresolved operator problem in present or future tense.
 - Documentation target: [Current-state area](../impl/current.md#areas).
 ```
 
-The plan integrity gate requires every field. Human-lane tasks use a human-lane status. Optional work
-follows required work within its capability.
+The plan integrity gate requires every field. Human-lane tasks use a human-lane status. Optional
+agent work follows all required agent work; within the human lane it follows required work for
+the same capability.
 
 ## Ordering
 
-Capability groups follow the registry. Within a group:
+The agent lane is a dependency-ordered execution list across capabilities. Place every agent
+prerequisite before its dependent, including dependencies reached through a human task. Order
+required MODEL tasks first, required DELIVERY tasks next, then optional MODEL and optional
+DELIVERY work. MODEL tasks cannot depend on DELIVERY tasks, and required tasks cannot depend on
+optional work, so these classes do not conflict with the dependency graph.
 
-1. hard prerequisites;
-2. changes to inputs that later evaluation consumes;
-3. required work before optional refinements;
-4. cheap deterministic work before expensive runs.
+Construct the list by repeatedly choosing a task whose prerequisites have already been placed.
+Order the complete dependency graph this way, then retain each task in its declared lane.
+Within a class, use registry order to choose between ready capabilities and preserve the existing
+task order within an owner where dependencies allow. Repeat capability headings when execution
+returns to that owner; a single contiguous group cannot express cross-capability dependencies.
+Keep every task under the heading matching its `Serves` field. The human lane keeps registry
+grouping and prerequisite order within that lane.
 
-The summary prefers required work across capabilities, then MODEL before DELIVERY, then registry
-and document order, after filtering open prerequisites.
-If capability priorities change, edit the registry order and move the same groups in both lanes.
-Capability groups remain in that navigation order even when a MODEL task in a later group is
-selected before an earlier group's DELIVERY work.
+The summary filters open prerequisites and uses the written order within each required/optional
+and execution-stage class. Read the agent lane from top to bottom, skipping tasks whose human or
+external prerequisites are still outstanding. Such gates remain real dependencies; moving a task
+does not supply access or authorization. The integrity gate rejects same-lane dependency
+inversions and agent class inversions. If priorities change, revise the registry and reorder the
+affected task sequence while keeping these rules.
 
 ## Implementation audits
 
-Each capability group in the agent lane ends with an optional `<group>-implementation-audit` task.
-The audit checks the group's built work against its specification section before later groups
-build on it, so that known issues are fixed or scheduled while they are still cheap to change.
+Each capability has an optional `<group>-implementation-audit` task in the agent lane.
+The audit checks the group's built work against its specification section and identifies
+assumptions that later groups consume. Findings are fixed or scheduled while they are still
+cheap to change. Optional audits follow required agent work in the written sequence and
+can be selected while remaining required tasks wait on human or external gates.
 
 The audit requires the group's required `CLEAR` tasks. The group's open `RUN NEEDED` and human-lane
 tasks are reviewed for the readiness of their inputs, not for results. Required work never depends

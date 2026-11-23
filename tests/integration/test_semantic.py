@@ -1,31 +1,17 @@
 """The semantic contract stores exact values and enforces keys, enums and deferred FKs."""
 
-import json
-from datetime import datetime
 from decimal import Decimal
-from pathlib import Path
 
 import pytest
 import sqlalchemy as sa
 from sqlalchemy.exc import IntegrityError
 
 from kn.contracts.sqlalchemy import metadata
-from kn.semantic import Snapshot, validate_model
+from kn.semantic import validate_model
 from kn.semantic.structure import semantic_contract
 from tests.integration.harness import IntegrationDatabase, ScratchSchemas
+from tests.integration.semantic_fixtures import native_rows, text_fixture
 from tests.semantic.conftest import REFERENCES
-
-
-def _text_fixture() -> Snapshot:
-    snapshot = json.loads((Path(__file__).parents[1] / "semantic/fixtures/model.json").read_text())
-    next(row for row in snapshot["terms"] if row["id"] == "space.demo.001")["definition"] = None
-    reviewed_label = next(
-        row
-        for row in snapshot["labels"]
-        if row["term_id"] == "space.demo.001" and row["locale"] == "uk"
-    )
-    reviewed_label["review_reference"] = "fixture:reviewed-translation"
-    return snapshot
 
 
 def test_semantic_round_trip_and_database_constraints(
@@ -34,8 +20,9 @@ def test_semantic_round_trip_and_database_constraints(
     schema = scratch_schemas.schema("semantic")
     contract = semantic_contract()
     model = metadata(contract, schema)
-    snapshot = _text_fixture()
+    snapshot = text_fixture()
     validate_model(snapshot, REFERENCES)
+    native = native_rows(contract, snapshot)
     engine = sa.create_engine("postgresql+psycopg://", creator=integration_database.connect)
     try:
         with engine.connect() as connection, connection.begin():
@@ -43,15 +30,7 @@ def test_semantic_round_trip_and_database_constraints(
             # Reverse table order proves that deferred references permit unordered input.
             for definition in reversed(contract.tables):
                 table = model.tables[f"{schema}.{definition.name}"]
-                for row in snapshot[definition.name]:
-                    native = dict(row)
-                    for field in definition.fields:
-                        value = native.get(field.name)
-                        if value is not None and field.logical_type == "timestamp":
-                            native[field.name] = datetime.fromisoformat(value)
-                        elif value is not None and field.logical_type == "number":
-                            native[field.name] = Decimal(value)
-                    connection.execute(table.insert().values(**native))
+                connection.execute(table.insert(), native[definition.name])
             connection.exec_driver_sql("SET CONSTRAINTS ALL IMMEDIATE")
             criteria = model.tables[f"{schema}.rubric_criteria"]
             assert connection.scalar(sa.select(criteria.c.weight)) == Decimal("1.25")

@@ -26,7 +26,7 @@ INVALID_PLAN_MESSAGE = "plan is invalid; run make lint-spec-plan"
 def _lane_priority(tasks: list[Task], section: str) -> str:
     lane_tasks = [task for task in tasks if task.section == section]
     candidates = (task for task in lane_tasks if not prerequisites(task))
-    # Validated document order preserves registry order between tasks of equal priority.
+    # The agent document order already follows dependencies and execution stages.
     task = min(
         candidates,
         key=lambda task: (task.optional, task.execution_stage != MODEL_STAGE),

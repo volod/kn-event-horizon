@@ -10,14 +10,18 @@ that no later additive schema work will be needed.
 
 Tasks may declare `Execution stage: MODEL`; otherwise their stage is `DELIVERY`.
 `make plan-status` first excludes tasks with open `Requires`, then selects required before
-optional, MODEL before DELIVERY, and registry/document order within those classes. The summary
+optional, MODEL before DELIVERY, and written task order within those classes. The summary
 reports stage counts. Stages never grant source access or remove external/manual prerequisites.
+The agent lane now writes that execution sequence directly: all 17 required model tasks come
+first, with `development-model-baseline` after its 16 prerequisites. Required runtime work and
+then optional refinements follow. Same-lane prerequisites appear before their dependents.
 
 The integrity gate accepts only MODEL and DELIVERY. A MODEL task cannot depend on an open
 DELIVERY task. Split mixed contract/runtime work or retain DELIVERY with an explicit dependency;
-do not hide a producer task in `Dependencies` to obtain priority. Capability groups stay in
-registry order in both lanes for navigation. The evidence-model group precedes identity so the
-shared verification contract can be selected first without adding false technical dependencies.
+do not hide a producer task in `Dependencies` to obtain priority. Agent capability headings can
+recur as dependency order returns to an owner; each task retains its original `Serves` capability.
+The human lane retains registry grouping and explicit approvals. Registry order guides ties when
+constructing the agent sequence; the summary follows document order among otherwise equal tasks.
 
 ## Model sequence
 
@@ -111,3 +115,5 @@ does not replace the [release migration switch](../design/spec.md#release-readin
 
 The [prioritization record](../impl/records/0029-adhoc-schema-first-plan-priorities.md) retains the
 complete before/after task inventory and dry scheduling evidence.
+The [ordering correction](../impl/records/0031-adhoc-dependency-ordered-plan.md) records the physical
+task reorder and the checks that prevent dependencies from drifting behind their dependents.

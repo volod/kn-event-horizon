@@ -1804,11 +1804,13 @@ available implementation. Capabilities that the starter template provides are de
 [contributor guide](../guide/README.md) instead, so the current-state area holds only this
 project's own product behavior. A shipped capability may still have optional extension work.
 
-Row order groups related capabilities and breaks scheduling ties within an execution stage.
+Row order groups related capabilities and guides placement of otherwise ready tasks within an
+execution stage. The agent plan writes dependency order directly, allowing capability headings
+to recur; the human lane retains registry grouping.
 Declared task dependencies take precedence; a cross-cutting foundation can therefore precede
 the runtime work of an earlier capability.
 For task scheduling, the checked MODEL execution stage takes precedence over DELIVERY among
-eligible tasks of equal required/optional status. Registry order breaks ties within a stage;
+eligible tasks of equal required/optional status. Document order breaks ties within a stage;
 it does not force runtime features ahead of another capability's schema foundation. MODEL work
 uses compiled contracts and deterministic database/fixture checks, independent of live pipelines.
 
@@ -1820,7 +1822,7 @@ uses compiled contracts and deterministic database/fixture checks, independent o
 | 4 | `runtime-platform` | shipped | Pinned Compose database reaches healthy from empty volumes, keeps data across restart, publishes its port on loopback only, and serves integration tests on the development host | [Runtime platform](../impl/current/runtime-platform.md) |
 | 5 | `data-contracts` | planned | Contracts compile deterministically, invalid contracts fail, drift fails CI, rebuild creates every schema, loaders cannot run DDL; the integrated core/domain baseline passes before runtime consumers | [Compiler and development rebuild](../impl/current/data-contracts.md) |
 | 6 | `ontology-taxonomy` | planned | Every proposal row is classified, identifiers are stable, invalid hierarchies are rejected, SKOS round-trips | [Semantic model, reviewed seeds and SKOS export](../impl/current/ontology-taxonomy.md) |
-| 7 | `evidence-model` | planned | Conflict, time, provenance, update policy and replay pass; optional version-bound human verification covers every registered dataset | - |
+| 7 | `evidence-model` | planned | Conflict, time, provenance, update policy and replay pass; optional version-bound human verification covers every registered dataset | [Shared human verification protocol](../impl/current/evidence-model.md) |
 | 8 | `object-identity` | planned | KN IDs survive rebuilds; lifecycle, matching, partial-update, and lineage fixtures pass; calibrated classes meet the precision gate | - |
 | 9 | `raw-archive` | planned | WARC round trip, atomic write, ledger reindex, redaction, revisit, and corruption checks pass | - |
 | 10 | `part-supply-model` | planned | Every vendor coverage group maps or records an exclusion; part, variant, offer, price, and substitute fixtures pass | - |
@@ -1869,13 +1871,16 @@ contract requires:
 - every planned capability has at least one open task;
 - every shipped capability links to its current-state documentation, or to the contributor guide
   when the template provides it;
-- groups follow registry order in each task lane;
+- human-lane groups follow registry order; agent capability headings can recur in execution order;
 - every task declares the required outcome, boundary, execution, and acceptance fields;
 - lane statuses match whether an agent can finish independently or a human action gates acceptance;
-- required tasks precede optional refinements within a capability;
+- required agent tasks precede all optional agent refinements; within the human lane this applies
+  within each capability;
 - explicit task prerequisites identify open tasks, form no cycles, and keep required work
   independent of optional refinements;
 - execution stages are MODEL or DELIVERY (the default); MODEL prerequisites are also MODEL;
+- same-lane prerequisites precede dependents, including ancestors reached through another lane;
+- agent MODEL tasks precede DELIVERY tasks within each required/optional class;
 - every closed-research section names a task that is no longer open, carries its four parts in
   order, and names only open tasks as reopening paths.
 

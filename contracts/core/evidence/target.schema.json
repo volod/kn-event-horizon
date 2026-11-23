@@ -1,0 +1,119 @@
+{
+  "$defs": {
+    "KeyPart": {
+      "additionalProperties": false,
+      "properties": {
+        "field_id": {
+          "minLength": 1,
+          "pattern": "\\S",
+          "title": "Field Id",
+          "type": "string"
+        },
+        "kind": {
+          "enum": [
+            "string",
+            "integer",
+            "number",
+            "boolean",
+            "date",
+            "timestamp"
+          ],
+          "title": "Kind",
+          "type": "string"
+        },
+        "value": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "integer"
+            },
+            {
+              "type": "boolean"
+            }
+          ],
+          "title": "Value"
+        }
+      },
+      "required": [
+        "field_id",
+        "kind",
+        "value"
+      ],
+      "title": "KeyPart",
+      "type": "object"
+    }
+  },
+  "additionalProperties": false,
+  "properties": {
+    "contract_id": {
+      "minLength": 1,
+      "pattern": "\\S",
+      "title": "Contract Id",
+      "type": "string"
+    },
+    "dataset": {
+      "minLength": 1,
+      "pattern": "\\S",
+      "title": "Dataset",
+      "type": "string"
+    },
+    "key": {
+      "items": {
+        "$ref": "#/$defs/KeyPart"
+      },
+      "minItems": 1,
+      "title": "Key",
+      "type": "array"
+    },
+    "scope": {
+      "enum": [
+        "record",
+        "field"
+      ],
+      "title": "Scope",
+      "type": "string"
+    },
+    "field_id": {
+      "anyOf": [
+        {
+          "minLength": 1,
+          "pattern": "\\S",
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Field Id"
+    },
+    "version": {
+      "pattern": "^[0-9a-f]{64}$",
+      "title": "Version",
+      "type": "string"
+    },
+    "purpose": {
+      "enum": [
+        "factual",
+        "publication",
+        "terminology",
+        "integrity",
+        "workflow"
+      ],
+      "title": "Purpose",
+      "type": "string"
+    }
+  },
+  "required": [
+    "contract_id",
+    "dataset",
+    "key",
+    "scope",
+    "version",
+    "purpose"
+  ],
+  "title": "Target",
+  "type": "object"
+}

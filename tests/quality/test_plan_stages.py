@@ -18,7 +18,7 @@ def staged(
 
 
 def test_model_precedes_earlier_delivery_task(tmp_path: Path) -> None:
-    root = write_project(tmp_path, plan=plan_with(task_block("build-ui"), staged("model")))
+    root = write_project(tmp_path, plan=plan_with(staged("model"), task_block("build-ui")))
     assert "priority agent task: model [feature]" in summary_lines(root)
 
 
@@ -26,7 +26,9 @@ def test_model_priority_crosses_capability_groups(tmp_path: Path) -> None:
     plan = plan_with(staged("model"))
     earlier = task_block("earlier-workflow", capability="foundation")
     plan = plan.replace(
-        "### Feature", f"### Foundation -- `foundation`\n\n{earlier}\n### Feature", 1
+        "## Human-Assisted Tasks",
+        f"### Foundation -- `foundation`\n\n{earlier}\n## Human-Assisted Tasks",
+        1,
     )
     root = write_project(tmp_path, plan=plan)
     assert "priority agent task: model [feature]" in summary_lines(root)
@@ -36,7 +38,7 @@ def test_prerequisite_filter_runs_before_stage_priority(tmp_path: Path) -> None:
     waiting = staged("dependent-model").replace(
         "- Dependencies: none.", "- Requires: `base-model`\n- Dependencies: none."
     )
-    root = write_project(tmp_path, plan=plan_with(task_block("ui"), waiting, staged("base-model")))
+    root = write_project(tmp_path, plan=plan_with(staged("base-model"), waiting, task_block("ui")))
     assert "priority agent task: base-model [feature]" in summary_lines(root)
 
 
