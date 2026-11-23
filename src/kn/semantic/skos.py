@@ -4,17 +4,20 @@ from pathlib import Path
 from uuid import uuid4
 
 from rdflib import Graph, Literal, Namespace, URIRef
-from rdflib.namespace import DCTERMS, OWL, RDF, SKOS
+from rdflib.namespace import DCTERMS, OWL, RDF, RDFS, SKOS
 
 from kn.semantic import ExternalReferences, validate_model
 from kn.semantic.oecd_reference import publication_references
 from kn.semantic.proposals import DOMAINS
 from kn.semantic.seeds import RESOURCES, reviewed_snapshot
 from kn.semantic.structure import Row, Snapshot, indexed
+from kn.semantic.text import select_label
 from kn.semantic.verification import VerificationReport
 
 KN = Namespace("urn:kn:semantic:")
 TERM = Namespace("urn:kn:term:")
+LABEL_SELECTION = Namespace("urn:kn:label-selection:")
+DISPLAY_LOCALES = ("en", "uk")
 MAX_BMP_CODEPOINT = 0xFFFF
 MAPPING_PROPERTIES = {
     name: SKOS[name]
@@ -65,6 +68,8 @@ def skos_graph(
         ("dcterms", DCTERMS),
         ("rdf", RDF),
         ("owl", OWL),
+        ("rdfs", RDFS),
+        ("selection", LABEL_SELECTION),
     ):
         graph.bind(prefix, namespace)
     for key in sorted(scheme_ids):
@@ -124,12 +129,14 @@ def _terms(graph: Graph, snapshot: Snapshot, included: set[str]) -> None:
         if row["id"] in included:
             _term(graph, row)
     _labels(graph, snapshot, included)
+    _label_selections(graph, snapshot, included)
 
 
 def _term(graph: Graph, row: Row) -> None:
     subject = term_uri(row["id"])
     graph.add((subject, DCTERMS.identifier, Literal(row["id"])))
-    graph.add((subject, SKOS.definition, Literal(row["definition"])))
+    if row.get("definition") is not None:
+        graph.add((subject, SKOS.definition, Literal(row["definition"])))
     graph.add((subject, KN.status, Literal(row["status"])))
     if row["kind"] == "concept":
         graph.add((subject, SKOS.notation, Literal(row["code"])))
@@ -162,6 +169,31 @@ def _review_notes(graph: Graph) -> None:
                 graph.add((subject, KN.contentSha256, Literal(review.content_sha256)))
 
 
+def _label_selections(graph: Graph, snapshot: Snapshot, included: set[str]) -> None:
+    labelled = {row["term_id"] for row in snapshot.get("labels", [])} & included
+    for identifier in sorted(labelled):
+        for locale in DISPLAY_LOCALES:
+            chosen = select_label(snapshot, identifier, locale)
+            selection = LABEL_SELECTION[identifier + ":" + locale]
+            graph.add((term_uri(identifier), KN.labelSelection, selection))
+            graph.add((selection, RDF.type, KN.LabelSelection))
+            graph.add((selection, KN.requestedLanguage, Literal(locale)))
+            graph.add((selection, KN.selectedLanguage, Literal(chosen.variant.language)))
+            graph.add(
+                (selection, RDFS.label, Literal(chosen.variant.text, lang=chosen.variant.language))
+            )
+            graph.add((selection, KN.provenance, Literal(chosen.variant.provenance)))
+            graph.add((selection, KN.fallback, Literal(chosen.fallback)))
+            graph.add((selection, KN.isOriginal, Literal(chosen.is_original)))
+
+
+def _fallbacks(graph: Graph, locale: str) -> int:
+    return sum(
+        graph.value(selection, KN.fallback) == Literal(True)
+        for selection in graph.subjects(KN.requestedLanguage, Literal(locale))
+    )
+
+
 def export_scheme(scheme_id: str, data_dir: Path) -> dict[str, object]:
     """Write an ASCII Turtle artifact only after reviewed content passes all checks."""
     snapshot = reviewed_snapshot()
@@ -192,4 +224,6 @@ def export_scheme(scheme_id: str, data_dir: Path) -> dict[str, object]:
         "concepts": sum(row["scheme_id"] == scheme_id for row in snapshot["concepts"]),
         "origin": scheme["origin"],
         "verification_state": scheme["verification_state"],
+        "fallbacks_en": _fallbacks(graph, "en"),
+        "fallbacks_uk": _fallbacks(graph, "uk"),
     }

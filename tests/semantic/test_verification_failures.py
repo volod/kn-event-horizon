@@ -19,9 +19,17 @@ CHANGES = ["label", "uk_label", "code", "parent", "status", "removed", "added"]
 def changed_space(change: str) -> dict:
     """The reviewed space snapshot with one edit inside the verified ESA technology scheme."""
     data = json.loads((RESOURCES / "space.json").read_bytes())["snapshot"]
-    if change in {"label", "uk_label"}:
-        locale = "uk" if change == "uk_label" else "en"
-        next(row for row in data["labels"] if row["term_id"] == TERM and row["locale"] == locale)[
+    if change == "uk_label":
+        data["labels"].append(
+            {
+                "term_id": TERM,
+                "locale": "uk",
+                "label": "Reviewed translation",
+                "review_reference": "fixture:terminology",
+            }
+        )
+    elif change == "label":
+        next(row for row in data["labels"] if row["term_id"] == TERM and row["locale"] == "en")[
             "label"
         ] += " changed"
     elif change in {"code", "status"}:

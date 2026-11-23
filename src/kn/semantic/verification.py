@@ -37,6 +37,17 @@ class Publication(BaseModel):
     comparison: str = Field(min_length=1)
 
 
+class TextRevision(BaseModel):
+    """A recorded text cleanup preserves the existing publication comparison outcome."""
+
+    model_config = ConfigDict(extra="forbid", strict=True)
+
+    previous_content_sha256: str = Field(pattern=r"^[0-9a-f]{64}$")
+    record: str = Field(min_length=1)
+    note: str = Field(min_length=1)
+    comparison_unchanged: Literal[True]
+
+
 class SchemeReview(BaseModel):
     model_config = ConfigDict(extra="forbid", strict=True)
 
@@ -52,6 +63,7 @@ class SchemeReview(BaseModel):
     scope: str = Field(min_length=1)
     comparison: str = Field(min_length=1)
     findings: list[Finding]
+    text_revision: TextRevision | None = None
 
 
 class VerificationReport(BaseModel):

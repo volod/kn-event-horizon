@@ -15,6 +15,23 @@ def validate_provenance(document: dict[str, Any]) -> None:
             raise ValueError("reviewed provenance requires source rows")
         for source in sources:
             _validate_locator(source)
+            if source.get("source_language") != "en" or not isinstance(source.get("values"), dict):
+                raise ValueError(
+                    "proposal provenance requires English source language and original values"
+                )
+    _reviewed_labels(document["snapshot"])
+
+
+def _reviewed_labels(snapshot: dict[str, Any]) -> None:
+    for dataset in ("labels", "namespace_labels", "alternative_labels"):
+        for row in snapshot.get(dataset, []):
+            if row["locale"].lower() != "en" and not row.get("review_reference"):
+                raise ValueError("derived seed labels require a terminology review reference")
+    for dataset, key in (("labels", "term_id"), ("namespace_labels", "namespace_id")):
+        subjects = {row[key] for row in snapshot.get(dataset, [])}
+        english = {row[key] for row in snapshot.get(dataset, []) if row["locale"].lower() == "en"}
+        if subjects != english:
+            raise ValueError("proposal content requires its English preferred label")
 
 
 def _validate_locator(source: object) -> None:

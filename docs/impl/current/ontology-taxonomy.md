@@ -16,8 +16,8 @@ The contract has 18 tables:
 | Tables | Purpose |
 | --- | --- |
 | `namespaces`, `namespace_labels` | Domain and scheme/edition boundaries and localized names |
-| `terms` | Shared IDs, original string codes, kind, status and definition |
-| `labels`, `alternative_labels` | Preferred labels, localized definitions, inverse relation labels and alternatives |
+| `terms` | Shared IDs, original string codes, kind, status and optional prose definition |
+| `labels`, `alternative_labels` | Source-language preferred labels, localized definitions, inverse labels, alternatives and translation review references |
 | `entity_classes` | Classes and their primary parent |
 | `relation_types` | Source/target classes, cardinality, minimum evidence and guarded errors |
 | `concept_schemes` | Origin, publisher, edition, publication URI, checksum and verification reason |
@@ -36,8 +36,11 @@ native term codes allow ASCII letters, digits, underscores, dots, colons and hyp
 explicit, independent of input ordering, and shared across semantic kinds. A term has exactly one
 matching subtype row. Namespaces and terms cannot reuse an ID.
 
-Named terms and namespaces require preferred labels in `en` and `uk`; additional language tags
-are supported. Concept preferred labels are unique per scheme and language; other named terms
+Named terms and namespaces require at least one preferred label in its source language;
+translations are optional. [Text integrity](ontology-taxonomy/text.md) requires English originals
+for proposal-derived seeds, review references for derived translations, and an explicit reviewed
+identity marker for identical English and Ukrainian text. Concept preferred labels are unique per
+scheme and language; other named terms
 are unique within their kind and namespace. Comparison uses Unicode NFC, case folding and collapsed
 whitespace, while storage preserves the original text. Each term has one preferred label per
 language tag, compared without case. Alternative labels require a preferred label in the same
@@ -133,10 +136,10 @@ of the group records its findings and their dispositions.
 
 ## Known limitations
 
-- Every `uk` label is a copy of the English proposal text, and every concept definition is a JSON
-  dump of the proposal columns. Both are stored and exported as if they were Ukrainian labels and
-  definitions. `vocabulary-text-integrity` in the [plan](../plan.md) corrects them; translations
-  come from `review-ukrainian-terminology`.
+- Ukrainian vocabulary translations remain absent pending `review-ukrainian-terminology`.
+  [Display and export](ontology-taxonomy/text.md#skos-and-interfaces) select English source text
+  with its actual language and explicit fallback. Concept definitions remain absent until genuine
+  prose is supplied; proposal columns remain in provenance.
 - Exported term URIs use `urn:kn:term:<id>`, and `kn` is not a registered URN namespace.
   `decide-vocabulary-uri-namespace` lets the owner choose a base before any consumer stores the
   URIs.

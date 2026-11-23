@@ -20,8 +20,12 @@ def test_duplicate_preferred_labels_in_a_scheme_are_rejected(model: Snapshot) ->
 
 
 @pytest.mark.parametrize("dataset", ["labels", "namespace_labels"])
-def test_required_locale_labels_cannot_be_missing(model: Snapshot, dataset: str) -> None:
-    model[dataset] = [row for row in model[dataset] if row["locale"] != "uk"]
+def test_named_terms_and_namespaces_need_a_preferred_label(model: Snapshot, dataset: str) -> None:
+    model[dataset] = (
+        [row for row in model[dataset] if row["term_id"] != "space.demo.003"]
+        if dataset == "labels"
+        else []
+    )
     with pytest.raises(ContractError, match=r"semantic\.locale"):
         validate_model(model, REFERENCES)
 

@@ -41,5 +41,5 @@
   "cli.skos_export_help": "export a reviewed vocabulary scheme as SKOS Turtle",
   "cli.skos_format_help": "interchange format (skos)",
   "cli.skos_scheme_help": "qualified concept scheme ID, including .scheme",
-  "cli.skos_ok": "Exported {scheme_id}: {concepts} concepts; origin {origin}; {verification_state}. Turtle: {path}"
+  "cli.skos_ok": "Exported {scheme_id}: {concepts} concepts; origin {origin}; {verification_state}. Turtle: {path} Label fallbacks: en={fallbacks_en}, uk={fallbacks_uk}."
 }

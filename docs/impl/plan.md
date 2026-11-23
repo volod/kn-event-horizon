@@ -34,39 +34,6 @@ recorded decision before later groups build on the group.
 
 ### Ontology and taxonomy -- `ontology-taxonomy`
 
-#### vocabulary-text-integrity
-
-Every Ukrainian label of the reviewed seeds is a copy of the English proposal text, and every
-concept definition is a JSON dump of proposal columns. The database and SKOS therefore present
-untranslated text as Ukrainian and spreadsheet metadata as definitions.
-
-- Serves: `ontology-taxonomy` -- [Ontology and taxonomy](../design/spec.md#ontology-and-taxonomy)
-- Agent status: CLEAR
-- Dependencies: Findings ON-04 and ON-05 of the
-  [ontology audit](records/0025-ontology-taxonomy-ontology-taxonomy-implementation-audit.md#findings),
-  the [localization data rules](../design/spec.md#localization), and the shared
-  [text selector](current/localization.md#source-data-and-translations).
-- User-visible outcome: Seed labels carry the language of their text: proposal labels are `en`,
-  and a `uk` label exists only as a reviewed translation. Interfaces and the SKOS export fall back
-  from `uk` to `en` and report the fallback. A concept definition is a definition or absent; the
-  proposal columns stay in provenance and the reconciliation.
-- Scope boundary: The label rule of the semantic validator (a named term needs one preferred label,
-  English for proposal content), the seed import, nullable definitions if the contract needs them,
-  the SKOS mapping, and new content digests for the publication reviews with a recorded statement
-  that the comparisons are unchanged. Writing translations is `review-ukrainian-terminology`.
-- Data and artifact paths: `src/kn/semantic/`, `src/kn/contracts/resources/semantic/`,
-  `src/kn/semantic/resources/`, `domains/<domain>/seeds/`, `generated/contracts/`,
-  `tests/semantic/`.
-- Execution path: Write failing tests first: no `uk` label equals its `en` label unless a review
-  marks the text as identical in both languages, no definition parses as JSON, and the SKOS export
-  of every scheme has no `@uk` copy. Then change the import, the validator and the export, and
-  rerun `make seed-check`.
-- Acceptance gates: The tests pass for all 16 schemes. The reviewed seeds and SKOS output contain
-  only real `uk` labels. Every publication review keeps its comparison result under its new
-  digest. `make ci` passes.
-- Documentation target: `current/ontology-taxonomy.md` listed in the
-  [areas index](current.md#areas).
-
 #### official-publication-drift-check (optional)
 
 The publication reviews pin checksums of mutable URLs, but nothing notices when a publisher
@@ -2745,10 +2712,10 @@ Core Ukrainian terminology needs review by a Ukrainian technical speaker.
 
 - Serves: `localization` -- [Localization](../design/spec.md#localization)
 - Agent status: HUMAN-GATED
-- Requires: `bilingual-acceptance-suite`, `vocabulary-text-integrity`
+- Requires: `bilingual-acceptance-suite`
 - Dependencies: A Ukrainian technical speaker named by the owner. An agent prepares a glossary
   export of every `uk` UI string and every vocabulary label that still falls back to English, with
-  context.
+  context and the [translation review fields](current/ontology-taxonomy/text.md#label-and-review-rules).
 - User-visible outcome: Reviewed Ukrainian terminology for the UI, the vocabularies, and the
   operator quickstart.
 - Scope boundary: Review and corrections of catalogs and labels.

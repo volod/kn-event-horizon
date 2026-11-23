@@ -78,7 +78,7 @@
       ],
       "expected": {
         "exit_code": 0,
-        "stderr": "Contract kn.system.governance 1.0.0 d11eb70b855741d6901677151d2b8bb048cf41b0aa074feae24f0db370c51d06\nContract kn.space.satcom 1.0.0 498e717814a2eb29e44756f256fd3dab4277b069812f4b54e2bb42a496d2ec10\nContract kn.core.semantic 1.0.0 24931173efca9a0e47d10c75d0e00fb325bfc608207a32e7db8c17126f5fb58d\n",
+        "stderr": "Contract kn.system.governance 1.0.0 d11eb70b855741d6901677151d2b8bb048cf41b0aa074feae24f0db370c51d06\nContract kn.space.satcom 1.0.0 498e717814a2eb29e44756f256fd3dab4277b069812f4b54e2bb42a496d2ec10\nContract kn.core.semantic 1.0.0 5dfdbc18f4452ba7dca18fc5e11738d7b27a75593b38664e3b6c920aab83a760\n",
         "stdout": ""
       },
       "id": "contract-lint"
@@ -91,7 +91,7 @@
       ],
       "expected": {
         "exit_code": 0,
-        "stderr": "Contract kn.system.governance 1.0.0 d11eb70b855741d6901677151d2b8bb048cf41b0aa074feae24f0db370c51d06\nContract kn.space.satcom 1.0.0 498e717814a2eb29e44756f256fd3dab4277b069812f4b54e2bb42a496d2ec10\nContract kn.core.semantic 1.0.0 24931173efca9a0e47d10c75d0e00fb325bfc608207a32e7db8c17126f5fb58d\n",
+        "stderr": "Contract kn.system.governance 1.0.0 d11eb70b855741d6901677151d2b8bb048cf41b0aa074feae24f0db370c51d06\nContract kn.space.satcom 1.0.0 498e717814a2eb29e44756f256fd3dab4277b069812f4b54e2bb42a496d2ec10\nContract kn.core.semantic 1.0.0 5dfdbc18f4452ba7dca18fc5e11738d7b27a75593b38664e3b6c920aab83a760\n",
         "stdout": ""
       },
       "id": "contract-check"
@@ -336,7 +336,7 @@
       ],
       "expected": {
         "exit_code": 0,
-        "stderr": "\u041a\u043e\u043d\u0442\u0440\u0430\u043a\u0442 kn.system.governance 1.0.0 d11eb70b855741d6901677151d2b8bb048cf41b0aa074feae24f0db370c51d06\n\u041a\u043e\u043d\u0442\u0440\u0430\u043a\u0442 kn.space.satcom 1.0.0 498e717814a2eb29e44756f256fd3dab4277b069812f4b54e2bb42a496d2ec10\n\u041a\u043e\u043d\u0442\u0440\u0430\u043a\u0442 kn.core.semantic 1.0.0 24931173efca9a0e47d10c75d0e00fb325bfc608207a32e7db8c17126f5fb58d\n",
+        "stderr": "\u041a\u043e\u043d\u0442\u0440\u0430\u043a\u0442 kn.system.governance 1.0.0 d11eb70b855741d6901677151d2b8bb048cf41b0aa074feae24f0db370c51d06\n\u041a\u043e\u043d\u0442\u0440\u0430\u043a\u0442 kn.space.satcom 1.0.0 498e717814a2eb29e44756f256fd3dab4277b069812f4b54e2bb42a496d2ec10\n\u041a\u043e\u043d\u0442\u0440\u0430\u043a\u0442 kn.core.semantic 1.0.0 5dfdbc18f4452ba7dca18fc5e11738d7b27a75593b38664e3b6c920aab83a760\n",
         "stdout": ""
       },
       "id": "contract-lint"
@@ -349,7 +349,7 @@
       ],
       "expected": {
         "exit_code": 0,
-        "stderr": "\u041a\u043e\u043d\u0442\u0440\u0430\u043a\u0442 kn.system.governance 1.0.0 d11eb70b855741d6901677151d2b8bb048cf41b0aa074feae24f0db370c51d06\n\u041a\u043e\u043d\u0442\u0440\u0430\u043a\u0442 kn.space.satcom 1.0.0 498e717814a2eb29e44756f256fd3dab4277b069812f4b54e2bb42a496d2ec10\n\u041a\u043e\u043d\u0442\u0440\u0430\u043a\u0442 kn.core.semantic 1.0.0 24931173efca9a0e47d10c75d0e00fb325bfc608207a32e7db8c17126f5fb58d\n",
+        "stderr": "\u041a\u043e\u043d\u0442\u0440\u0430\u043a\u0442 kn.system.governance 1.0.0 d11eb70b855741d6901677151d2b8bb048cf41b0aa074feae24f0db370c51d06\n\u041a\u043e\u043d\u0442\u0440\u0430\u043a\u0442 kn.space.satcom 1.0.0 498e717814a2eb29e44756f256fd3dab4277b069812f4b54e2bb42a496d2ec10\n\u041a\u043e\u043d\u0442\u0440\u0430\u043a\u0442 kn.core.semantic 1.0.0 5dfdbc18f4452ba7dca18fc5e11738d7b27a75593b38664e3b6c920aab83a760\n",
         "stdout": ""
       },
       "id": "contract-check"

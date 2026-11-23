@@ -78,12 +78,11 @@ def _import_node(
         parent=node.parent_code,
     )
     _publication_provenance(builder, identifier, review, evidence_id)
-    for locale in ("en", "uk"):
-        if node.label != node.source_label:
-            builder.add(
-                "alternative_labels",
-                {"term_id": identifier, "locale": locale, "label": node.source_label},
-            )
+    if node.label != node.source_label:
+        builder.add(
+            "alternative_labels",
+            {"term_id": identifier, "locale": "en", "label": node.source_label},
+        )
     return identifier
 
 
@@ -116,7 +115,7 @@ def _publication_fields(review: FigureReview, evidence_id: str) -> dict[str, str
         publication_locator=review.locator,
         review_file="domains/microelectronics/seeds/" + REFERENCE_FILE,
         review_evidence_id=evidence_id,
-        label_policy="review-derived display label; source Others retained as alternatives; uk source fallback",
+        label_policy="review-derived en display label; source Others retained as en alternatives; uk translation pending review",
     )
 
 
@@ -184,24 +183,21 @@ def _validate_nodes(snapshot: Snapshot, nodes: list[FigureNode]) -> None:
     }
     if actual != expected:
         raise ValueError("OECD nodes or primary parents differ from Figure 9 review")
-    expected_labels = {
-        (OECD_PREFIX + row.code, locale, row.label) for row in nodes for locale in ("en", "uk")
-    }
+    expected_labels = {(OECD_PREFIX + row.code, "en", row.label) for row in nodes}
     actual_labels = {
         (row["term_id"], row["locale"], row["label"])
         for row in snapshot.get("labels", [])
-        if row["term_id"] in expected
+        if row["term_id"] in expected and row["locale"] == "en"
     }
     expected_alternatives = {
-        (OECD_PREFIX + row.code, locale, row.source_label)
+        (OECD_PREFIX + row.code, "en", row.source_label)
         for row in nodes
         if row.label != row.source_label
-        for locale in ("en", "uk")
     }
     actual_alternatives = {
         (row["term_id"], row["locale"], row["label"])
         for row in snapshot.get("alternative_labels", [])
-        if row["term_id"] in expected
+        if row["term_id"] in expected and row["locale"] == "en"
     }
     if actual_labels != expected_labels or actual_alternatives != expected_alternatives:
         raise ValueError("OECD source labels or explicit display disambiguation differ from review")

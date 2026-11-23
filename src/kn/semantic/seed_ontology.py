@@ -3,7 +3,7 @@
 from itertools import product
 
 from kn.semantic.proposals import Proposal
-from kn.semantic.seed_model import SeedBuilder, native_code, required_text
+from kn.semantic.seed_model import SeedBuilder, native_code, proposal_source, required_text
 
 CLASS_SHEETS = {
     "space": "01_entity_ontology",
@@ -155,7 +155,7 @@ def import_relation(builder: SeedBuilder, row: Proposal) -> tuple[list[str], str
         code = canonical + "." + source.rsplit(".", 1)[1] + "." + target.rsplit(".", 1)[1]
         identifier = builder.domain + ".relations." + code
         if identifier in existing:
-            builder.lineage[identifier].append({**row.provenance, "origin": "kb_normalized"})
+            builder.lineage[identifier].append(proposal_source(row, "kb_normalized"))
             result.append(identifier)
             continue
         result.append(

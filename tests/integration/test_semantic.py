@@ -10,10 +10,22 @@ import sqlalchemy as sa
 from sqlalchemy.exc import IntegrityError
 
 from kn.contracts.sqlalchemy import metadata
-from kn.semantic import validate_model
+from kn.semantic import Snapshot, validate_model
 from kn.semantic.structure import semantic_contract
 from tests.integration.harness import IntegrationDatabase, ScratchSchemas
 from tests.semantic.conftest import REFERENCES
+
+
+def _text_fixture() -> Snapshot:
+    snapshot = json.loads((Path(__file__).parents[1] / "semantic/fixtures/model.json").read_text())
+    next(row for row in snapshot["terms"] if row["id"] == "space.demo.001")["definition"] = None
+    reviewed_label = next(
+        row
+        for row in snapshot["labels"]
+        if row["term_id"] == "space.demo.001" and row["locale"] == "uk"
+    )
+    reviewed_label["review_reference"] = "fixture:reviewed-translation"
+    return snapshot
 
 
 def test_semantic_round_trip_and_database_constraints(
@@ -22,7 +34,7 @@ def test_semantic_round_trip_and_database_constraints(
     schema = scratch_schemas.schema("semantic")
     contract = semantic_contract()
     model = metadata(contract, schema)
-    snapshot = json.loads((Path(__file__).parents[1] / "semantic/fixtures/model.json").read_text())
+    snapshot = _text_fixture()
     validate_model(snapshot, REFERENCES)
     engine = sa.create_engine("postgresql+psycopg://", creator=integration_database.connect)
     try:
@@ -44,6 +56,21 @@ def test_semantic_round_trip_and_database_constraints(
             criteria = model.tables[f"{schema}.rubric_criteria"]
             assert connection.scalar(sa.select(criteria.c.weight)) == Decimal("1.25")
             terms = model.tables[f"{schema}.terms"]
+            assert (
+                connection.scalar(
+                    sa.select(terms.c.definition).where(terms.c.id == "space.demo.001")
+                )
+                is None
+            )
+            term_labels = model.tables[f"{schema}.labels"]
+            assert (
+                connection.scalar(
+                    sa.select(term_labels.c.review_reference).where(
+                        term_labels.c.locale == "uk", term_labels.c.term_id == "space.demo.001"
+                    )
+                )
+                == "fixture:reviewed-translation"
+            )
             assert (
                 connection.scalar(sa.select(terms.c.code).where(terms.c.id == "space.demo.001"))
                 == "001"

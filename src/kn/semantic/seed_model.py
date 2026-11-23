@@ -31,6 +31,18 @@ def encoded(value: object) -> bytes:
     return (json.dumps(value, ensure_ascii=True, sort_keys=True, indent=2) + "\n").encode("ascii")
 
 
+def proposal_source(proposal: Proposal, origin: str) -> dict[str, Any]:
+    """Keep the original columns as provenance, never as a synthetic definition."""
+    return {
+        **proposal.provenance,
+        "origin": origin,
+        "source_language": "en",
+        "label_policy": "source text in en; uk translation pending review",
+        "values": proposal.values,
+        "formulas_not_evaluated": proposal.formulas,
+    }
+
+
 @dataclass
 class SeedBuilder:
     domain: str
@@ -53,11 +65,9 @@ class SeedBuilder:
                 "definition": "Proposal-derived seed namespace; terminology review pending.",
             },
         )
-        for locale in ("en", "uk"):
-            self.add(
-                "namespace_labels",
-                {"namespace_id": identifier, "locale": locale, "label": identifier},
-            )
+        self.add(
+            "namespace_labels", {"namespace_id": identifier, "locale": "en", "label": identifier}
+        )
         return identifier
 
     def term(
@@ -66,7 +76,7 @@ class SeedBuilder:
         code: str,
         kind: str,
         label: str,
-        definition: str,
+        definition: str | None,
         proposal: Proposal,
         *,
         origin: str,
@@ -86,21 +96,14 @@ class SeedBuilder:
             },
         )
         if kind not in UNLABELED_KINDS:
-            for locale in ("en", "uk"):
-                row = {"term_id": identifier, "locale": locale, "label": label}
-                if inverse:
-                    row["inverse_label"] = inverse
-                self.add("labels", row)
+            row = {"term_id": identifier, "locale": "en", "label": label}
+            if inverse:
+                row["inverse_label"] = inverse
+            self.add("labels", row)
         if kind == "concept_scheme":
             fields["origin"] = origin
         self.add(DATASETS[kind], {"id": identifier, **fields})
-        self.lineage.setdefault(identifier, []).append(
-            {
-                **proposal.provenance,
-                "origin": origin,
-                "label_policy": "source spelling; uk review pending",
-            }
-        )
+        self.lineage.setdefault(identifier, []).append(proposal_source(proposal, origin))
         return identifier
 
     def scheme(self, namespace: str, proposal: Proposal, origin: str) -> str:
@@ -137,7 +140,7 @@ class SeedBuilder:
             code,
             "concept",
             label,
-            encoded(proposal.values).decode().strip(),
+            proposal.values.get("definition"),
             proposal,
             origin=origin,
             scheme_id=scheme,

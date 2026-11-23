@@ -5,8 +5,9 @@
 Its publication URI and SHA-256 are recorded in the [publication review](verification.md).
 Figure 9 on page 30 and the packaging boundary on page 31 were checked against the supplied PDF.
 
-The existing `microelectronics.product_v1.scheme` retains all 76 concepts, original IDs, labels,
-definitions, parents and normalized origin. It remains unverified as an official dictionary.
+The existing `microelectronics.product_v1.scheme` retains all 76 concepts, original IDs, English
+labels, parents and normalized origin. The [text cleanup](text.md) removed copied Ukrainian labels
+and replaced proposal-column JSON definitions with null. It remains unverified as an official dictionary.
 The official scheme is additive; existing product references do not move or get renumbered.
 
 ## Source labels and identifiers
@@ -18,8 +19,8 @@ verification of the source categories and their relationships.
 Figure 9 uses `Others` for both a root and a residual child. Their distinct preferred display
 labels are `Others (O)` and `Others (O.OTHER)` to meet the meta-model's uniqueness rule; both
 retain the exact original `Others` as an alternative label. Other preferred labels match the
-source spelling. English source text fills both locale slots; Ukrainian terminology remains
-unreviewed. Verification does not activate draft terms or certify translations.
+source spelling under `en`. Ukrainian terminology remains unreviewed; display selects English
+and reports the fallback. Verification does not activate draft terms or certify translations.
 
 ## Explicit mapping decisions
 

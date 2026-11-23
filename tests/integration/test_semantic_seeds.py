@@ -26,6 +26,11 @@ def stored_snapshot(connection: Connection) -> dict[str, list[dict]]:
     }
 
 
+def _assert_source_text(snapshot: dict[str, list[dict]]) -> None:
+    assert {row["locale"] for row in snapshot["labels"]} == {"en"}
+    assert all(row["definition"] is None for row in snapshot["terms"] if row["kind"] == "concept")
+
+
 def test_reviewed_seeds_rebuild_twice_idempotency_and_conflict(
     rebuild_connection: Connection,
 ) -> None:
@@ -35,6 +40,7 @@ def test_reviewed_seeds_rebuild_twice_idempotency_and_conflict(
     expected = reviewed_snapshot()
     assert len(first["terms"]) == 825
     assert len(first["concept_mappings"]) == 69
+    _assert_source_text(first)
     assert sum(row["verification_state"] == "verified" for row in first["concept_schemes"]) == 4
     for name, rows in expected.items():
         assert len(first[name]) == len(rows)

@@ -72,17 +72,23 @@ def test_cross_scheme_mappings_include_incoming_without_promoting_extensions(
 def test_ascii_escaping_round_trips_unicode(
     tmp_path: Path, monkeypatch: pytest.MonkeyPatch
 ) -> None:
-    # Reviewed uk labels currently use source fallback; exercise actual Unicode serialization too.
+    # Plant a reviewed translation; the packaged seeds deliberately contain no uk copies.
     from kn.semantic import skos
 
     original = skos.reviewed_snapshot
     snapshot = original()
-    label = next(
+    english = next(
         row
         for row in snapshot["labels"]
-        if row["term_id"] == "gdelt.services.S01" and row["locale"] == "uk"
+        if row["term_id"] == "gdelt.services.S01" and row["locale"] == "en"
     )
-    label["label"] = 'caf\u00e9 \u041a\u0438\u0457\u0432 "quoted" \\ \n\U0001f680'
+    label = {
+        **english,
+        "locale": "uk",
+        "label": 'caf\u00e9 \u041a\u0438\u0457\u0432 "quoted" \\ \n\U0001f680',
+        "review_reference": "fixture:translation-review",
+    }
+    snapshot["labels"].append(label)
     monkeypatch.setattr(skos, "reviewed_snapshot", lambda: snapshot)
     result = export_scheme("gdelt.services.scheme", tmp_path)
     path = Path(str(result["path"]))

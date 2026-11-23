@@ -27,6 +27,8 @@ bytes. Each envelope contains a format version, domain, contracted `snapshot`, a
 keyed by term ID. Every term has source JSON filename and SHA-256, original workbook filename and
 SHA-256, sheet, original spreadsheet row, and origin. These checksums identify the supplied
 proposal conversion, not an independently verified official publication.
+Provenance also retains `source_language`, original `values`, and `formulas_not_evaluated`;
+proposal columns are never used as definitions. See [text integrity](text.md).
 
 `kn.semantic.proposals` checks the manifest's sheet set, digests, row counts, source identity, and
 unique row locators. `seed_ontology` and `seed_vocabulary` contain the explicit import decisions;
@@ -93,9 +95,9 @@ observation, or entity tag is created from an example.
 
 All 16 schemes have [publication or local-vocabulary reviews](verification.md): four schemes or
 scoped subsets are `verified` and twelve schemes are `unverified` with reasons. All terms remain `draft`.
-Both locale slots currently retain source spelling;
-provenance explicitly marks Ukrainian terminology review as pending. This is a documented fallback,
-not evidence of reviewed Ukrainian translations.
+Only English source labels are stored. Ukrainian terminology review remains pending; missing
+translations use the shared selector and are reported as fallback, without manufacturing `uk`
+rows. The [text reference](text.md) describes nullable definitions and translation review fields.
 
 ## Unmapped rows and ownership
 

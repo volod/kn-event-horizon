@@ -27,8 +27,10 @@ The shared environment resolves relative `DATA_DIR` from the project root; an ex
 relative `--data-dir` follows the invoking working directory, as for proposal import.
 
 Both `--locale en` and `--locale uk` report the scheme, selected concept count, origin, verification
-state, and path. Add `--json` for stable keys `status`, `format`, `scheme_id`, `concepts`, `origin`,
-`verification_state`, and `path`. Operator results use the existing logging stream, stderr; the
+state, path, and label fallback counts for `en` and `uk`. Add `--json` for stable keys `status`,
+`format`, `scheme_id`, `concepts`, `origin`, `verification_state`, `path`, `fallbacks_en`, and
+`fallbacks_uk`. Counts include all described labels, including mapped counterparts.
+Operator results use the existing logging stream, stderr; the
 Turtle is in the reported file. Invalid arguments return 2 with `E_ARGUMENTS`; an unknown scheme or
 unwritable destination returns 1 with `E_INPUT`. Invalid semantic content retains the existing
 `E_CONTRACT` diagnostic. Unknown schemes fail before creating an export directory.
@@ -49,7 +51,7 @@ assigning publisher identities to local codes.
 | Scheme and concept | `skos:ConceptScheme`, `skos:Concept`, `skos:inScheme` |
 | Preferred and alternative labels | `skos:prefLabel`, `skos:altLabel`, retaining language tags and exact text |
 | Original string code | `skos:notation`, preserving leading zeroes; this can be a local KN notation |
-| Definition | Untagged `skos:definition` plus available localized definitions with language tags |
+| Definition | `skos:definition` only when present, plus available localized definitions with language tags |
 | Primary parent | Child `skos:broader` and parent `skos:narrower` |
 | Root | `skos:topConceptOf` and scheme `skos:hasTopConcept` |
 | Qualified ID and status | `dcterms:identifier`, `kn:status` |
@@ -60,6 +62,8 @@ assigning publisher identities to local codes.
 | Scheme publication | `dcterms:publisher`, `dcterms:source`, `kn:edition`, `kn:sourceSha256` when present |
 | Scheme origin and verification | `kn:origin`, `kn:verificationState`, `kn:verificationReason` |
 | Reviewed boundary | `skos:scopeNote` for verification reason and review scope; `kn:comparison`, `kn:contentSha256` |
+| Display choice | `kn:labelSelection` links to a named `kn:LabelSelection` resource for each of `en` and `uk` |
+| Selected text | Selection `rdfs:label` with its actual language, `kn:requestedLanguage`, `kn:selectedLanguage`, `kn:provenance`, `kn:isOriginal`, and `kn:fallback` |
 
 Every selected concept is included, including draft and deprecated terms. Mappings touching the
 selected scheme are included in their stored direction, including incoming mappings. Counterpart
@@ -70,8 +74,12 @@ as official or claiming that the counterpart's whole vocabulary was exported.
 
 All schemes use the standard `ConceptScheme` type; origin is explicit metadata. Official origin
 does not imply verified status or complete dictionary coverage. Local extensions keep their own
-scheme membership. The export retains source-text fallback in `uk` and proposal-derived
-definitions; it does not certify translations or turn proposal text into official definitions.
+scheme membership. The [text integrity rules](text.md) retain only real language-tagged labels and
+prose definitions. Missing Ukrainian text selects English with explicit language and fallback
+metadata. There are currently no reviewed `uk` labels or concept definitions; proposal columns
+remain in provenance. Label selection resources use
+`urn:kn:label-selection:<qualified-id>:<requested-language>`. Each file contains both display
+choices, independently of interface locale.
 
 The file is ASCII using Turtle `\u` and `\U` escapes for Unicode. Parsed labels retain accents,
 Ukrainian text, quotes, backslashes, newlines, and characters outside the basic multilingual plane.

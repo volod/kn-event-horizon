@@ -41,6 +41,8 @@ def test_skos_cli(
         "concepts": 13,
         "origin": "service_extension",
         "verification_state": "unverified",
+        "fallbacks_en": 0,
+        "fallbacks_uk": 14,
     }
     if machine:
         assert json.loads(caplog.records[-1].message) == expected

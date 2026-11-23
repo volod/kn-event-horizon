@@ -2,7 +2,7 @@
 
 Version: 1.0.0
 
-Digest: `24931173efca9a0e47d10c75d0e00fb325bfc608207a32e7db8c17126f5fb58d`
+Digest: `5dfdbc18f4452ba7dca18fc5e11738d7b27a75593b38664e3b6c920aab83a760`
 
 Storage schema: `semantic`
 
@@ -15,6 +15,8 @@ Additional original-language labels; never replace preferred labels.
 | term_id | semantic.alternative_labels.term_id | string | True | True | Reference to terms |
 | locale | semantic.alternative_labels.locale | string | True | True | BCP 47 language tag |
 | label | semantic.alternative_labels.label | string | True | True | Alternative label |
+| review_reference | semantic.alternative_labels.review_reference | string | False | False | Durable terminology review reference for derived text |
+| reviewed_identical | semantic.alternative_labels.reviewed_identical | boolean | False | False | Review explicitly confirms identical English and Ukrainian text |
 
 ## attribute_definitions
 
@@ -131,6 +133,8 @@ One preferred label per term and locale, with localized definition and inverse r
 | label | semantic.labels.label | string | True | False | Preferred label |
 | definition | semantic.labels.definition | string | False | False | Localized definition |
 | inverse_label | semantic.labels.inverse_label | string | False | False | Inverse relation label |
+| review_reference | semantic.labels.review_reference | string | False | False | Durable terminology review reference for derived text |
+| reviewed_identical | semantic.labels.reviewed_identical | boolean | False | False | Review explicitly confirms identical English and Ukrainian text |
 
 ## namespace_labels
 
@@ -141,6 +145,8 @@ Localized namespace names.
 | namespace_id | semantic.namespace_labels.namespace_id | string | True | True | Reference to namespaces |
 | locale | semantic.namespace_labels.locale | string | True | True | BCP 47 language tag |
 | label | semantic.namespace_labels.label | string | True | False | Preferred namespace label |
+| review_reference | semantic.namespace_labels.review_reference | string | False | False | Durable terminology review reference for derived text |
+| reviewed_identical | semantic.namespace_labels.reviewed_identical | boolean | False | False | Review explicitly confirms identical English and Ukrainian text |
 
 ## namespaces
 
@@ -207,7 +213,7 @@ One identifier registry for every semantic kind; IDs never depend on load order.
 | code | semantic.terms.code | string | True | False | Original string code, including leading zeroes |
 | kind | semantic.terms.kind | string | True | False | Semantic dataset kind |
 | status | semantic.terms.status | string | True | False | Lifecycle status; deprecated terms remain resolvable |
-| definition | semantic.terms.definition | string | True | False | Definition in original language |
+| definition | semantic.terms.definition | string | False | False | Prose definition when supplied; proposal metadata belongs in provenance |
 
 ## Contract metadata
 

@@ -101,6 +101,12 @@ raw cells remain lossless. Durable multilingual projections belong to `evidence-
 and `engine-skeleton`; dashboards and exports must apply the same selection policy when built.
 The optional inference task may propose derived translations with provenance.
 
+[Vocabulary text integrity](ontology-taxonomy/text.md) applies this selector to reviewed semantic
+labels and SKOS display choices. Proposal labels retain `en`; missing Ukrainian vocabulary text
+selects English with its real tag, source/review provenance and explicit fallback. Export results
+report fallback counts for both supported display locales. Genuine reviewed translations can be
+selected without changing the original label or weakening interface-catalog coverage.
+
 ## Verification
 
 `make catalog-check`, included in `make ci`, validates both required catalogs, any additional

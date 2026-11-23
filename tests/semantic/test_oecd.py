@@ -9,6 +9,14 @@ PREFIX = "microelectronics.oecd_2024."
 PRODUCT = "microelectronics.product_v1."
 
 
+def _baseline_after_text_cleanup(name: str, rows: list[dict]) -> list[dict]:
+    if name == "labels":
+        return [row for row in rows if row["locale"] == "en"]
+    if name == "terms":
+        return [{**row, "definition": None} for row in rows]
+    return rows
+
+
 def test_official_oecd_scheme_has_only_the_29_publication_nodes() -> None:
     snapshot = reviewed_snapshot()
     scheme = next(row for row in snapshot["concept_schemes"] if row["id"] == PREFIX + "scheme")
@@ -27,13 +35,15 @@ def test_official_oecd_scheme_has_only_the_29_publication_nodes() -> None:
     assert not any(row["id"].startswith(PREFIX + "X") for row in nodes)
 
 
-def test_original_product_concepts_are_unchanged() -> None:
+def test_original_product_identity_and_english_text_are_unchanged() -> None:
     snapshot = reviewed_snapshot()
     baseline = json.loads(
         (Path(__file__).parent / "fixtures/product_v1_baseline.json").read_bytes()
     )
     for name, rows in baseline.items():
         key = "term_id" if name == "labels" else "id"
+        # Keep the archived baseline; only the explicitly authorized text cleanup differs.
+        rows = _baseline_after_text_cleanup(name, rows)
         assert rows == [
             row
             for row in snapshot[name]
@@ -70,12 +80,12 @@ def test_figure9_source_labels_and_parent_edges_match_independent_transcription(
         assert concepts[identifier]["parent_id"] == (
             PREFIX + row["parent_code"] if row["parent_code"] else None
         )
-        for locale in ("en", "uk"):
-            if row["source_label"] == "Others":
-                assert labels[identifier, locale] == "Others (" + row["code"] + ")"
-                assert (identifier, locale, "Others") in alternatives
-            else:
-                assert labels[identifier, locale] == row["source_label"]
+        if row["source_label"] == "Others":
+            assert labels[identifier, "en"] == "Others (" + row["code"] + ")"
+            assert (identifier, "en", "Others") in alternatives
+        else:
+            assert labels[identifier, "en"] == row["source_label"]
+        assert (identifier, "uk") not in labels
 
 
 def test_all_crosswalk_decisions_and_original_row_provenance_are_preserved() -> None:

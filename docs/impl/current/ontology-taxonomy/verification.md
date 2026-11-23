@@ -80,9 +80,13 @@ bytes; obtaining those bytes does not change the local origin of engineering ext
 
 `kn.semantic.verification` validates strict review envelopes, one decision per scheme, unchanged
 origin, and a canonical content digest covering IDs, codes, statuses, parents, replacements and
-all preferred/alternative labels. Row ordering does not affect it. Proposal-row definitions are
-provenance rather than official definitions and are excluded from this comparison digest.
-Publication definitions and Ukrainian translations have not been reviewed.
+all preferred/alternative labels. Row ordering does not affect it. Term definitions are excluded
+from this comparison digest: the reviews compare category labels and structure, not definitions.
+Publication definitions and Ukrainian translations have not been reviewed. The
+[text cleanup](text.md#publication-comparisons-and-verification) removed copied `uk` rows and
+JSON-dump definitions. Every review records its prior digest and unchanged comparison result in
+`text_revision`; its new digest covers the actual English source labels. No publication result,
+finding, checksum or verification state changed.
 
 Verified decisions require official origin, publisher, edition, publication URI and checksum, and
 cannot carry mismatches, access limits or local extensions. Missing leaves are allowed only as

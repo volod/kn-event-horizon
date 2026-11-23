@@ -4,6 +4,7 @@ import re
 import unicodedata
 
 from kn.semantic.structure import Row, Snapshot, acyclic, indexed, refuse
+from kn.semantic.text import validate_text
 
 DATASETS = {
     "entity_class": "entity_classes",
@@ -18,7 +19,6 @@ DATASETS = {
     "rubric": "rubrics",
 }
 UNLABELED_KINDS = {"concept_mapping", "entity_tag"}
-REQUIRED_LOCALES = {"en", "uk"}
 NAMESPACE_CODE = re.compile(r"[a-z][a-z0-9_]*(?:[.-][a-z0-9_]+)*")
 NATIVE_CODE = re.compile(r"[A-Za-z0-9][A-Za-z0-9_.:-]*")
 LOCALE = re.compile(r"[a-z]{2,3}(?:-[A-Za-z0-9]{2,8})*")
@@ -41,6 +41,7 @@ def validate_terms(data: Snapshot) -> None:
     _concepts(data)
     acyclic(indexed(data, "entity_classes"), "parent_id", "entity_classes")
     _labels(data)
+    validate_text(data)
 
 
 def _term_kinds(data: Snapshot, datasets: dict[str, dict[str, Row]]) -> None:
@@ -108,8 +109,8 @@ def _labels(data: Snapshot) -> None:
 
 
 def _required_labels(locales: set[str], dataset: str) -> None:
-    if not locales >= REQUIRED_LOCALES:
-        refuse((dataset,), "locale", "supply preferred labels in both en and uk")
+    if not locales:
+        refuse((dataset,), "locale", "supply at least one preferred label in its source language")
 
 
 def _locale_rows(data: Snapshot) -> None:
