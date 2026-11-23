@@ -86,7 +86,7 @@ The repository foundation includes:
 - shared instructions for Codex, Claude Code, Cursor, and Gemini;
 - a living capability registry and forward-plan/current-state lifecycle.
 
-The product adds, in implementation order: a runtime platform, localization, data contracts, an
+The product includes a runtime platform, localization, data contracts, an
 ontology and taxonomy model, object identity, a raw archive, an evidence model, a part and supply
 model, source management, an ingestion engine, data interchange, InvenTree exchange, and Obsidian
 export (the core engine). Identity, partial-update tracking, interchange, and compatibility are
@@ -333,6 +333,11 @@ These rules bind every capability and every domain.
     provenance reference, and rights. A value the counterpart cannot represent appears in a loss
     report and is never approximated silently. Imported counterpart data is evidence like any other
     source and never overwrites canonical facts directly.
+14. **Human verification is explicit and optional.** Every record and independently reviewable
+    value can expose nullable `human_verified_at`, with its human reviewer and durable decision.
+    It applies only to the exact reviewed content version and scope. Missing verification never
+    blocks ingestion, and automation or source-provided verification labels cannot manufacture
+    human acceptance. See [human verification metadata](#human-verification-metadata).
 
 ## Source safety and data rights
 
@@ -377,12 +382,20 @@ time run on the development host through `make ci-local`. Tool caches follow `DA
 environment helper chooses `UV_LINK_MODE=copy` only when uv's cache and the checkout live on
 different filesystems.
 
-Boundary: the skeleton controls Python dependencies and checks. It does not install system packages,
-provision external services, or guarantee reproducibility for undeclared tools.
+The version manifest `deploy/versions.yaml` declares the host prerequisites, with minimum versions
+where they matter, and the tool archives the project downloads. `make bootstrap` (and its alias
+`make venv`) syncs the locked environment, checks every prerequisite, and installs each declared
+archive under `DATA_DIR/tools/` only when it matches its pinned SHA-512; `make doctor` repeats the
+checks without installing.
 
-Evaluation: a fresh copy reaches `make bootstrap` and `make ci` without manual repair. A negative
-result names the missing command, stale lock, unsupported interpreter, or failing gate rather than
-silently changing the environment contract.
+Boundary: the skeleton controls Python dependencies, declared tool archives, and checks. It does not
+install system packages, provision external services, or guarantee reproducibility for undeclared
+tools.
+
+Evaluation: a fresh copy reaches `make bootstrap` and `make ci` without manual repair once the
+declared host prerequisites exist. A negative result names the missing command, too-old version,
+unverified archive, stale lock, unsupported interpreter, or failing gate rather than silently
+changing the environment contract.
 
 ## Project identity
 
@@ -415,7 +428,7 @@ stays in the plan, available behavior in current pages, and measurements in task
 
 An optional `Requires` field declares open task prerequisites across either lane. Plan summaries
 skip tasks waiting on these prerequisites and rank the remaining tasks by required status, then
-registry and document order. Contributors verify external or manual prerequisites from the task.
+written lane order. Contributors verify external or manual prerequisites from the task.
 
 Boundary. The checks establish structural agreement. Product value, the strength of acceptance
 criteria, completion evidence, and external prerequisites require contributor judgment. The
@@ -529,12 +542,19 @@ KN extension JSON Schemas. No top-level keys are added to ODCS. The extension fa
 | `kn.interchange` | Interchange exposure, field compatibility class (`stable`, `experimental`, `deprecated`), aliases of renamed fields, and counterpart mapping references |
 | `kn.units`, `kn.comparisonProfile` | Original and normalized unit, quantity type, conversion rule, comparison gate |
 | `kn.temporalProfile` | Event, published, observed, valid, and recorded times; as-of behavior; null semantics |
+| `kn.humanVerification` | Planned shared record/field review target, content version, optional human timestamp and projection coverage |
 | `kn.spatialProfile` | Geometry type, SRID 4326, precision and coverage semantics, validity |
 | `kn.evidence`, `kn.licensePolicy` | Evidence requirements, assertion type, rights and export restrictions |
 | `kn.enumRef`, `kn.vocabularyRefs` | Controlled vocabulary and allowed tag schemes |
 | `kn.index`, `kn.partition` | Reviewed physical design intent rendered as generated DDL |
 | `kn.i18nKey` | Stable display key resolved through the message catalogs |
 | `kn.lineageRefs` | Declared datasets and mappings, not observed runtime lineage |
+
+The [contract workflow](../guide/schema-first-development.md) establishes shared keys and
+validates each contract before its writer uses it. Each delivery group tests the registered
+subset and its consumer boundary. The integrated `development-model-baseline` gate compiles
+and rebuilds the complete set with deterministic fixtures before release approval. Changes
+to shared keys, types or meanings require explicit model work and baseline revalidation.
 
 The compiler (`kn contract lint|compile`) validates against a checksum-pinned ODCS schema and
 closed KN extensions. It produces canonical digests, SQLAlchemy metadata and generated DDL,
@@ -615,7 +635,10 @@ How seed content moves:
 - The converted workbooks in `domains/<domain>/seeds/proposals/` are inputs to a reviewed import.
   The import writes reviewed seed files in `domains/<domain>/seeds/` and a reconciliation report
   that classifies every proposal row as `accepted`, `duplicate`, `needs_mapping`, or `rejected`,
-  with a reason.
+  with a reason. The report also lists the term IDs added, changed, and removed relative to the
+  reviewed seeds, so a removed row never drops an ID unnoticed. A changed proposal always stages
+  for review; a scheme whose content changed after its publication review stages `unverified`,
+  with its new content digest, until a new comparison.
 - Every rebuild loads the reviewed seed files with deterministic identifiers.
 - Tagging examples and templates become fixtures. Unknown tags proposed by sources become pending
   suggestions, never automatic additions.
@@ -629,25 +652,40 @@ How seed content moves:
   (STM-277), the NASA 2024 Technology Taxonomy, EUSPA EU Space Market Report 2026 segments, ECS
   SRIA 2026, OECD "Chips, nodes and wafers" Figure 9, and the GDELT CAMEO, GKG theme, and GCAM
   lookups.
+- The OECD Figure 9 categories have a separate official scheme, with internal KN identifiers
+  explicitly distinguished from source notations. The existing mixed product tree keeps its IDs
+  and normalized origin. Reviewed crosswalks cite checksum-pinned publication and mapping-decision
+  artifacts; unsupported equivalence and non-chip matches are never inferred.
 - Analyst extensions are never presented as official. The GDELT and some space schemes in the
   proposals are explicit subsets, never complete dictionaries.
+- Labels follow the [localization](#localization) data rules: each label carries the language of
+  its text. Proposal labels are English; a `uk` label exists only as a reviewed translation, and
+  display and exports fall back from `uk` to `en` and report the fallback. A definition is a
+  definition or absent; proposal columns stay in provenance and the reconciliation.
+- A drift check re-fetches the pinned publications on request and reports any whose bytes no
+  longer match their recorded checksum. A drifted publication keeps its reviewed state, marked
+  as drifted, until a new comparison; nothing is re-verified automatically.
 
 SKOS Turtle export per scheme (`ConceptScheme`, `Concept`, `prefLabel` with language tags,
 `altLabel`, `broader`/`narrower`, `notation`, `definition`, and mappings) is generated for
 interchange. SKOS cannot enforce typed relations, so the meta-model enforces them.
 
-Validation: unique identifiers; one preferred label per language per scheme; no cycles in a
-primary hierarchy; parents exist; mappings don't conflict; relation endpoints exist; deprecated
-concepts stay resolvable. A content change is a reviewed edit to a seed file followed by a rebuild
-(development) or a data migration (release).
+Validation: unique identifiers; one preferred label per language per scheme; no cycles in a primary
+hierarchy; parents exist; mappings don't conflict; relation endpoints exist; deprecated concepts
+stay resolvable. A lifecycle report lists every deprecated or replaced concept that is still in use
+(child concepts, mappings, entity tags, replacement links, and records of other engines such as
+claims) with the end of its replacement chain. A content change is a reviewed edit to a seed file
+followed by a rebuild (development) or a data migration (release).
 
 Boundary: no OWL reasoning, and no taxonomy editing in a UI. The structural rules (see
 Validation) are enforced in code, not by SKOS.
 
 Evaluation:
 
-- Importing all five proposal sets classifies every row.
+- Importing all five proposal sets classifies every row, and a changed proposal reports its added,
+  changed, and removed term IDs.
 - Identifiers are identical across runs.
+- A deprecated or replaced concept in use is reported with each use and its successor.
 - Fixtures with a cycle, a missing parent, a duplicate label, an identifier collision, or an
   unknown relation endpoint are rejected.
 - The SKOS export parses with RDFLib and round-trips its labels.
@@ -837,6 +875,9 @@ links come from the [identity registry](#object-identity), and every claim refer
   projection;
 - review item: candidates, conflicts, and quarantine, with append-only decisions recording
   reviewer, reason, and time.
+- human verification decision: typed record/field target and content version, verification purpose,
+  authenticated human reviewer, performed and recorded times, outcome and reason; a shared nullable
+  timestamp projection over all registered data, independent of source verification labels.
 
 Domain tables extend entity with strictly typed attributes for frequently queried facts. Each
 selected value links to a claim. Condition-dependent metrics use bounded observation tables keyed
@@ -853,6 +894,8 @@ dashboard. The view preserves the dashboard snapshot and shows the selected valu
 selection rule and reason, supporting source and locator, permitted competing claims, and the
 applicable review decision. For unresolved fields it shows the conflict or missing-data reason.
 Both locales read the same rights-filtered analytics projection as the displayed fact.
+Human verification shows its optional time, reviewer, scope/version and decision independently
+of observation dates or source verification labels, including unreviewed and stale states.
 
 Boundary: no automatic truth from repetition or media volume. Cross-domain links between separate
 entities are reviewed candidates, never merges.
@@ -866,9 +909,28 @@ Evaluation:
 - A provenance lookup returns the native locator, origin URI, fetch time, code digest, and contract
   digest.
 - A rerun creates no duplicates, and decisions survive a rebuild.
+- Human verification covers every registered dataset, including semantic and prefetched data,
+  with null defaults, independent record/field scope, version invalidation, reviewer provenance
+  and durable replay. Source assertions and automated checks never create a human timestamp.
 
 Negative result: a field with no defensible selection policy stays conflicted with its reason
 recorded. The model never picks a winner arbitrarily.
+
+#### Human verification metadata
+
+Every piece of data can be checked by a human without becoming mandatory to check. The shared
+read metadata is optional `human_verified_at` (UTC `timestamptz`), `human_verified_by` and
+`human_verification_decision_id`. Active acceptance supplies all three or none, bound to the exact
+record or field content version and verification purpose. Source, publication, terminology and
+factual verification remain distinguishable. A field review never approves its whole record,
+and changed content never silently inherits an old timestamp.
+
+The [human verification design](human-verification.md) defines coverage of current and future
+data, typed targets, append-only history, reviewer authority, time and null semantics, stale and
+revoked decisions, replay, projections and exchange. Original archives and CSV payloads stay
+unchanged; no existing row is automatically marked human-verified. Legacy verification statuses
+without an attributable exact human review time keep a null timestamp. Initial implementation is
+the metadata and replay foundation; queues and other human workflows build on it later.
 
 #### Update policy
 
@@ -925,7 +987,7 @@ derived labels for display and filtering. They are not separate ranking criteria
 | --- | --- |
 | `unreviewed` | Supported by one source and no review decision |
 | `corroborated` | Supported by two or more independent sources; confirmations, syndicated copies, and curated rows citing the same source are not independent |
-| `verified` | Accepted by a review decision; it ranks through the decision's `owner_entered` class |
+| `verified` | Accepted by a human review decision for this claim version; it ranks through the decision's `owner_entered` class |
 | `disputed` | Part of an open conflict |
 | `rejected` | Rejected by a review decision; never eligible |
 
@@ -1205,6 +1267,10 @@ redirects, identifiers with authority level, and identity attributes. It also ca
 by interchange field ID with a value or missing reason, unit, qualifier, condition set, validity,
 provenance reference (claim key, origin URI, fetch time, licence), and record version. Relations
 are records too. Retired and merged objects are exported as state, never as deletions.
+Optional human-verification metadata retains its reviewer, decision, purpose and exact target
+version. Untrusted foreign review metadata remains an attributed external assessment; it never
+creates local human acceptance automatically. A counterpart's inability to carry it is a reported
+loss, governed by the [human verification design](human-verification.md#rebuild-ingestion-and-exchange).
 
 **Package.** `kn interchange export` writes a ZIP with `manifest.json` and one JSON Lines file per
 class in deterministic order. The manifest holds the contract version, producer instance ID, as-of
@@ -1736,23 +1802,24 @@ available implementation. Capabilities that the starter template provides are de
 [contributor guide](../guide/README.md) instead, so the current-state area holds only this
 project's own product behavior. A shipped capability may still have optional extension work.
 
-Row order is the implementation line. Hard dependencies come first, then work that changes another
-capability's evaluation inputs, then required work before capabilities with only optional work, then
-upstream before downstream.
+Registry rows identify capability owners. The agent lane orders delivery groups by their
+prerequisites and the result each group supplies. Each ends with an implementation audit.
+The human lane retains registry grouping. MODEL and DELIVERY classify task evidence. Select
+ready required tasks in written order before optional work.
 
 | # | Capability | Status | How it is evaluated | Implementation |
 | --- | --- | --- | --- | --- |
 | 1 | `reproducible-environment` | shipped | A fresh locked environment reaches the complete CI gate without manual repair | [Development guide](../guide/development.md) |
 | 2 | `project-identity` | shipped | Import, CLI, and distribution-build tests agree on the `kn-event-horizon` identity | [Product core](../impl/current/product-core.md) |
-| 3 | `documentation-integrity` | shipped | Link, registry-plan, task-lane, metadata, ordering, prerequisites, forward-language, and closed-research register checks pass over fixtures and the repository tree | [Documentation checks](../guide/development.md#documentation-checks) |
+| 3 | `documentation-integrity` | shipped | Link, registry-plan, task-lane, delivery-group audit gates, metadata, ordering, prerequisite, forward-language and closed-research checks pass over fixtures and the repository tree | [Documentation checks](../guide/development.md#documentation-checks) |
 | 4 | `runtime-platform` | shipped | Pinned Compose database reaches healthy from empty volumes, keeps data across restart, publishes its port on loopback only, and serves integration tests on the development host | [Runtime platform](../impl/current/runtime-platform.md) |
-| 5 | `data-contracts` | shipped | Contracts compile deterministically, invalid contracts fail, drift fails CI, rebuild creates every schema, loaders cannot run DDL | [Compiler and development rebuild](../impl/current/data-contracts.md) |
-| 6 | `ontology-taxonomy` | planned | Every proposal row is classified, identifiers are stable, invalid hierarchies are rejected, SKOS round-trips | [Semantic meta-model](../impl/current/ontology-taxonomy.md) |
-| 7 | `object-identity` | planned | KN IDs survive rebuilds; lifecycle, matching, partial-update, and lineage fixtures pass; calibrated classes meet the precision gate | - |
-| 8 | `raw-archive` | planned | WARC round trip, atomic write, ledger reindex, redaction, revisit, and corruption checks pass | - |
-| 9 | `evidence-model` | planned | Conflict, time, provenance-lookup, idempotence, confirmation, update-policy, and decision-replay fixtures pass | - |
+| 5 | `data-contracts` | planned | Contracts compile deterministically, invalid contracts fail, drift fails CI, rebuild creates every schema, loaders cannot run DDL; the integrated core/domain baseline passes before release approval | [Compiler and development rebuild](../impl/current/data-contracts.md) |
+| 6 | `ontology-taxonomy` | planned | Every proposal row is classified, identifiers are stable, invalid hierarchies are rejected, SKOS round-trips | [Semantic model, reviewed seeds and SKOS export](../impl/current/ontology-taxonomy.md) |
+| 7 | `evidence-model` | planned | Conflict, time, provenance, update policy and replay pass; optional version-bound human verification covers every registered dataset | [Shared human verification protocol](../impl/current/evidence-model.md) |
+| 8 | `object-identity` | planned | KN IDs survive rebuilds; lifecycle, matching, partial-update, and lineage fixtures pass; calibrated classes meet the precision gate | [Registry contracts and replay](../impl/current/object-identity.md) |
+| 9 | `raw-archive` | planned | WARC round trip, atomic write, ledger reindex, redaction, revisit, and corruption checks pass | - |
 | 10 | `part-supply-model` | planned | Every vendor coverage group maps or records an exclusion; part, variant, offer, price, and substitute fixtures pass | - |
-| 11 | `source-management` | planned | Catalogue import is complete; configuration validation refuses unapproved enablement; error and status mapping fixtures pass | - |
+| 11 | `source-management` | planned | Catalogue import, enablement validation, error mapping and onboarding fixture checks pass; run status matches fixtures | [Catalogue, crawler validation and onboarding](../impl/current/source-management.md) |
 | 12 | `ingestion-engine` | planned | Failure-mode fixtures yield declared statuses without cursor jumps; two rebuilds produce identical canonical tables; a prefetched package gives one snapshot from every location | - |
 | 13 | `data-interchange` | planned | Contract diffs enforce version bumps; packages reproduce and round-trip; upgrade chains and three-way sync fixtures pass | - |
 | 14 | `inventree-exchange` | planned | The target release imports deterministically; approved plans apply idempotently with read-back; schema drift blocks writes; the upgrade check classifies candidate releases; `vl-itree` passes read and write exchange | - |
@@ -1778,7 +1845,8 @@ scope growth. Use this lifecycle in order:
 2. Amend the owning section of this specification, including what the capability does not do.
 3. Declare the measurement, acceptance signal, and valid negative result before implementation.
 4. Add a `planned` registry row with that evaluation.
-5. Put tasks under the capability in the implementation line; every task declares `Serves`.
+5. Place tasks in delivery groups, declare the owning capability in `Serves`, and include the
+   closing audit and consumer prerequisites.
 6. Build and evaluate, document available behavior under current state, remove finished plan scope,
    and change the registry row to `shipped` with its implementation link. Follow the
    [completion workflow](../guide/planning-workflow.md#completion-transition) for the evidence and
@@ -1792,22 +1860,26 @@ instead of creating an implementation workaround that the specification cannot e
 The registry and [implementation plan](../impl/plan.md) are two views of one product. The executable
 contract requires:
 
-- every task serves a registered capability and sits in its capability group;
+- every task serves a registered capability and identifies its delivery group or human-lane capability;
 - every capability declares an evaluation;
 - every planned capability has at least one open task;
 - every shipped capability links to its current-state documentation, or to the contributor guide
   when the template provides it;
-- groups follow registry order in each task lane;
+- human-lane groups follow registry order; each agent delivery group is contiguous;
 - every task declares the required outcome, boundary, execution, and acceptance fields;
 - lane statuses match whether an agent can finish independently or a human action gates acceptance;
-- required tasks precede optional refinements within a capability;
+- required agent tasks precede all optional agent refinements; within the human lane this applies
+  within each capability;
 - explicit task prerequisites identify open tasks, form no cycles, and keep required work
   independent of optional refinements;
+- execution stages are MODEL or DELIVERY (the default);
+- same-lane prerequisites precede dependents, including ancestors reached through another lane;
+- each agent group ends with an audit that requires all members and gates downstream consumers;
 - every closed-research section names a task that is no longer open, carries its four parts in
   order, and names only open tasks as reopening paths.
 
-The check is structural by design. Product priority changes are made by editing the registry order,
-not by adding heuristics to the checker.
+The check is structural by design. Product priority changes use explicit task prerequisites
+and written delivery-group order. Contributors review the product rationale for that order.
 
 ## Success criteria
 

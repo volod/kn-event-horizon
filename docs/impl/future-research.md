@@ -39,4 +39,40 @@ Every `##` section below this header is one closed question and follows these ru
 The [planning workflow](../guide/planning-workflow.md#closed-research) covers adding, reopening,
 and removing sections. `make lint-spec-plan` checks section structure and task references.
 
-No closed questions yet.
+## `verify-official-taxonomies` -- full official status for mixed seeds
+
+### Question
+
+Can every supplied scheme be presented as a verified official taxonomy after publication comparison?
+
+### Answer
+
+No. Four schemes or scoped subsets verify, but twelve schemes stay unverified: three contain label
+mismatches, three mix normalized or local categories, and six are local vocabularies. The OECD
+PDF was subsequently supplied by the user, inspected and checksum-pinned, resolving the initial
+HTTP 403 access limitation. The [separate OECD scheme and crosswalks](current/ontology-taxonomy/oecd.md)
+now provide the official Figure 9 categories; its original mixed product tree still contains local
+codes and extensions and remains normalized.
+GCAM publication examples were checked without importing a scheme.
+The [review decisions](current/ontology-taxonomy/verification.md) and
+[initial task record](records/0022-ontology-taxonomy-verify-official-taxonomies.md) and
+[OECD scheme record](records/0023-ontology-taxonomy-oecd-official-product-scheme.md) preserve evidence.
+The original task's negative-result rule is satisfied; these findings do not block unrelated work.
+
+### Reopening condition
+
+An affected scheme has reviewed codes and labels matching a specific official publication with
+retrievable checksum-pinned bytes, or a publisher issues an authoritative correction resolving its
+recorded discrepancy. The OECD byte-checksum and separate official-subset path are satisfied.
+Other local mixtures require a separately identified official subset before official status can apply.
+
+### Do not re-run
+
+- Promoting an entire mixed GPT, product or application tree because some labels match -- the
+  comparison found explicit local extensions and local codes.
+- Treating an expanded NASA acronym, a differing CAMEO verb or ECS web navigation as the canonical
+  publication heading -- the recorded root labels and PDF chapter heading disagree.
+- Promoting the normalized OECD product tree merely because its PDF checksum is available --
+  Figure 9 has no source code strings and omits the seed engineering extensions.
+- Importing full GDELT dictionaries to settle this review -- publication examples were sufficient;
+  dictionary ingestion belongs to `gdelt-source-dictionaries`.

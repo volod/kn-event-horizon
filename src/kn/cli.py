@@ -21,7 +21,17 @@ from kn.i18n import DEFAULT_LOCALE, Translator
 from kn.i18n.output import render_result
 from kn.i18n.parser import OperatorParser, parse_interface_options
 from kn.metadata import project_info
-from kn.operations import contract_operation, database_operation, satcom_operation
+from kn.operations import (
+    contract_operation,
+    database_operation,
+    satcom_operation,
+    source_list_operation,
+)
+from kn.quality.project_root import discover_project_root
+from kn.semantic.seeds import import_proposals
+from kn.semantic.skos import export_scheme
+from kn.sources.config import source_validate_operation
+from kn.sources.config.schema import CrawlerConfigError
 
 _LOG = logging.getLogger("kn.operator")
 
@@ -50,6 +60,15 @@ def build_parser(
     contracts.add_argument("--check", action="store_true", help=tr.text("cli.check_help"))
     database = subcommands.add_parser("db", help=tr.text("cli.db_help"))
     database.add_argument("action", choices=("upgrade", "verify", "rebuild"))
+    source = subcommands.add_parser("source", help=tr.text("cli.catalogue_help"))
+    source_actions = source.add_subparsers(
+        dest="action", required=True, title=tr.text("cli.commands"), parser_class=parser_class
+    )
+    source_actions.add_parser("list", help=tr.text("cli.source_list_help"))
+    validate_source = source_actions.add_parser(
+        "validate", help=tr.text("cli.source_validate_help")
+    )
+    validate_source.add_argument("source", type=Path, help=tr.text("cli.source_config_help"))
     space = subcommands.add_parser("space", help=tr.text("cli.space_help"))
     datasets = space.add_subparsers(
         dest="dataset", required=True, title=tr.text("cli.commands"), parser_class=parser_class
@@ -63,6 +82,24 @@ def build_parser(
         default=Path(os.environ.get("DATA_DIR", ".data")),
         help=tr.text("cli.data_dir_help"),
     )
+    vocabulary = subcommands.add_parser("vocabulary", help=tr.text("cli.vocabulary_help"))
+    actions = vocabulary.add_subparsers(
+        dest="action", required=True, title=tr.text("cli.commands"), parser_class=parser_class
+    )
+    proposals = actions.add_parser("import-proposals", help=tr.text("cli.seed_import_help"))
+    proposals.add_argument("--check", action="store_true", help=tr.text("cli.seed_check_help"))
+    export = actions.add_parser("export", help=tr.text("cli.skos_export_help"))
+    export.add_argument(
+        "--format", choices=("skos",), required=True, help=tr.text("cli.skos_format_help")
+    )
+    export.add_argument("--scheme", required=True, help=tr.text("cli.skos_scheme_help"))
+    for action in (proposals, export):
+        action.add_argument(
+            "--data-dir",
+            type=Path,
+            default=Path(os.environ.get("DATA_DIR", ".data")),
+            help=tr.text("cli.data_dir_help"),
+        )
     return parser
 
 
@@ -86,6 +123,11 @@ def main(argv: Sequence[str] | None = None) -> int:
         return 1
     except RebuildRefused:
         _report_error(translator.text("cli.rebuild_refused"), "E_INPUT", selected.json)
+        return 1
+    except CrawlerConfigError as error:
+        diagnostic = error.diagnostic()
+        message = translator.text("cli.source_config_diagnostic", **diagnostic)
+        _report_error(message, "E_SOURCE_CONFIG", selected.json, diagnostic)
         return 1
     except ContractError as error:
         diagnostic = error.diagnostic()
@@ -126,6 +168,14 @@ def _run(args: argparse.Namespace) -> dict[str, object]:
         )
     if args.command == "db":
         return database_operation(args.action)
+    if args.command == "source":
+        if args.action == "validate":
+            return source_validate_operation(args.source)
+        return source_list_operation()
+    if args.command == "vocabulary":
+        if args.action == "export":
+            return export_scheme(args.scheme, args.data_dir)
+        return import_proposals(discover_project_root(), args.data_dir, check=args.check)
     return satcom_operation(args.action, args.source, args.data_dir)
 
 

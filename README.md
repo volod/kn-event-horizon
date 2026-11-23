@@ -11,7 +11,8 @@ implementation, and verification.
 
 ## Setup
 
-With Git, Make, and uv installed:
+With Git, Make, uv, Docker Engine with Compose v2, and Java 21 or newer installed (the
+[development guide](docs/guide/development.md#setup) lists them):
 
 ```bash
 git clone https://github.com/volod/kn-event-horizon.git
@@ -37,7 +38,8 @@ make plan-status
 | `make coverage` | Run tests with the coverage gate |
 | `make format` | Apply Ruff formatting |
 | `make ci` | Run required local and CI checks |
-| `make ci-local` | Run `make ci`, then every local-only test (database and heavy tests) |
+| `make ci-local` | Run `make ci`, every local-only test (database and heavy tests), and `make skos-reference-check` |
+| `make skos-reference-check` | Validate every SKOS export with the pinned Apache Jena RIOT |
 | `make quality` | Run CI checks, coverage, Markdown lint, and package build |
 | `make db-up` | Start the local PostgreSQL and PostGIS service on `127.0.0.1:15432` and wait until it is healthy |
 | `make db-down` | Stop the database service and keep its data |

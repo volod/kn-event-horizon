@@ -3,5 +3,5 @@
   "upstream_sha256": "2cb7dd6fe43344d2233e0406438622681dc3ebadcf8f0d606a15b40c8f6752c0",
   "upstream_url": "https://raw.githubusercontent.com/bitol-io/open-data-contract-standard/v3.1.0/schema/odcs-json-schema-v3.1.0.json",
   "normalization": "ASCII JSON escaping only",
-  "kn-extensions.json": "026e822831f7ecf335b08c1ef0d7d67b9d416dd54eee8fb4322e8cce94028b44"
+  "kn-extensions.json": "07d9fefddc924a02d6e8df2e9cf52812ac3507e20bfa105a9733b4e78662c89a"
 }

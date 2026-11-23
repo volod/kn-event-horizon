@@ -1,0 +1,309 @@
+[
+  {
+    "comparison": "Four segment labels agree. Mixed categories include local codes and expanded or shortened official labels, so no official-scheme promotion is allowed. II.E and II.L are representative label differences; III aliases are local codes.",
+    "content_sha256": "c5be7afa70690cfd6cedf1d711642933db9ae89c6e2bbb277c83f4e0aefc6113",
+    "edition": "Issue 1 Revision 1, July 2011",
+    "findings": [
+      {
+        "detail": "Source says On-board SW; seed says On-board software (before its local segment qualifier).",
+        "kind": "mismatch",
+        "locator": "Section 1.3, printed page 4; II/E"
+      },
+      {
+        "detail": "Source specifies RF / Microwave Communication (Platform and Payloads); seed omits the parenthetical scope.",
+        "kind": "mismatch",
+        "locator": "Section 1.3, printed page 5; II/L"
+      },
+      {
+        "detail": "Launch ground support, launch service and cloud categories are local additions, not source GPT system codes.",
+        "kind": "local_extension",
+        "locator": "Proposal 03_ESA_GPT_Classifier; I.GSE, I.SVC, IV.CLOUD"
+      },
+      {
+        "detail": "Equipment, building-block, component and parts leaves below the selected system categories are absent.",
+        "kind": "missing_leaf",
+        "locator": "Product tables, printed pages 7-17"
+      }
+    ],
+    "origin": "kb_normalized",
+    "publisher": "ESA",
+    "scheme_id": "space.esa_gpt_1_1.scheme",
+    "scope": "48 normalized nodes: four segment parents and 44 proposal categories; official system categories compared with pages 4-17. No complete product-leaf import.",
+    "source_sha256": "3415a8e417957c75abed50361c177380dec1adb1f60e913d096fd62a470752e3",
+    "source_uri": "https://esastar-emr.sso.esa.int/Account/DownloadCompetencesFile?fileType=P",
+    "verification_reason": "Unverified normalized mixture: local categories and notations coexist with official systems. GPT Issue 1 Rev 1 was inspected, but this mixed tree is not an official dictionary.",
+    "verification_state": "unverified"
+  },
+  {
+    "comparison": "Compared all 133 codes, labels and primary parents against the independently extracted abbreviated table; zero differences. Full version also inspected for omitted levels. Review does not assert a complete full-version dictionary.",
+    "content_sha256": "af53e4689ef3844171bdf604a325d7fa30bbb2735a5333c0a1c56f8065d62671",
+    "edition": "4.1 (STM-277, 4th edition, 2023)",
+    "findings": [
+      {
+        "detail": "Power Conditioning and Distribution is present in the full table but absent from the publication abbreviated table and this seed.",
+        "kind": "missing_leaf",
+        "locator": "Full version, printed page 17, TD 3 / TS D"
+      },
+      {
+        "detail": "All technology-group leaves are outside this abbreviated seed; for example 1/A/I System Technologies for Payload Data Processing.",
+        "kind": "missing_leaf",
+        "locator": "Full version, printed page 13 onward, TG column"
+      }
+    ],
+    "origin": "official",
+    "publisher": "ESA",
+    "scheme_id": "space.esa_tt_4_1.scheme",
+    "scope": "Abbreviated TD/TS table only: 26 technology domains and 107 subdomains, printed/PDF pages 10-12. English source labels; uk is source-text fallback. TDxx and domain-qualified labels are local encodings.",
+    "source_sha256": "39e0f30189de8be5d37eb38bb33874e6fbb795c888058827dd5bbbc241ce52a7",
+    "source_uri": "https://esamultimedia.esa.int/multimedia/publications/STM-277/STM-277.pdf",
+    "verification_reason": "Verified abbreviated TD/TS subset only; full-version TD03.D and all TG leaves are absent. Local TDxx notation and domain-qualified labels preserve source TD/TS identity; uk terminology is unreviewed.",
+    "verification_state": "verified"
+  },
+  {
+    "comparison": "Compared every segment label with the page 6 enumerated list and contents. All 16 match, including EU Border and Internal Security. Underscored IDs are internal label encodings; no official notation is claimed.",
+    "content_sha256": "d2eb44aa1e72d0b8b0690a9b2507caa076ec4f38d641e7acf0ec433a3adf7d59",
+    "edition": "EU Space Market Report 2026, Issue 1",
+    "findings": [],
+    "origin": "official",
+    "publisher": "EUSPA",
+    "scheme_id": "space.euspa_2026.scheme",
+    "scope": "All 16 downstream market-segment labels in How to read this report, printed/PDF page 6; no application dictionary. Local identifiers are label-derived, not publisher-assigned codes. uk is source-text fallback.",
+    "source_sha256": "1aa11974e3f9749ef3ee5692a9e6df843a1a3ba38f950a1901b1f4059f00b5aa",
+    "source_uri": "https://www.euspa.europa.eu/sites/default/files/documents/EU_Space_Market_Report_2026.pdf",
+    "verification_reason": "Verified 16 market-segment labels only; internal codes are label-derived and uk retains source text. Application/use-case leaves are outside this scheme.",
+    "verification_state": "verified"
+  },
+  {
+    "comparison": "Compared all 17 root codes and labels with contents (PDF page 3) and root chapter headings: 16 labels agree; TX17 differs. No codes or labels were changed.",
+    "content_sha256": "1b1a5876ee6ceb901956759934ee675f0b2b139287d7709d1fcc3cde3b6d7113",
+    "edition": "2024",
+    "findings": [
+      {
+        "detail": "TX17 source label is GN&C; seed label is Guidance, Navigation, and Control (GN&C). An acronym expansion elsewhere is not the root label.",
+        "kind": "mismatch",
+        "locator": "Contents, printed page ii; TX17 chapter, printed page 211"
+      },
+      {
+        "detail": "Only TX01-TX17 roots are seeded; subareas and technologies, such as 1.1 Chemical Space Propulsion, are absent.",
+        "kind": "missing_leaf",
+        "locator": "TX01 chapter, printed page 1 onward"
+      }
+    ],
+    "origin": "official",
+    "publisher": "NASA",
+    "scheme_id": "space.nasa_tx_2024.scheme",
+    "scope": "All 17 TX roots; lower TX levels excluded. English root labels, with source text in uk.",
+    "source_sha256": "24720b3fb8ec8f1b5a523daf464967730af79a7d1eea4e9e843b4014b6df7e52",
+    "source_uri": "https://www.nasa.gov/wp-content/uploads/2024/10/nasa-2024-technology-taxonomy-report-low-resolution-final-20240730-tagged.pdf",
+    "verification_reason": "Unverified: TX17 label expands the official root label GN&C; 16 other root labels match. Lower taxonomy levels are absent.",
+    "verification_state": "unverified"
+  },
+  {
+    "comparison": "Reviewed proposal origin and intended use. These local terms have no official taxonomy to verify against.",
+    "content_sha256": "1c46a9d21c1195f04ad25c3b951f47710c7505df248bb3766e456f73bb22f07f",
+    "edition": null,
+    "findings": [],
+    "origin": "service_extension",
+    "publisher": null,
+    "scheme_id": "space.services.scheme",
+    "scope": "Local analyst or service vocabulary only; no official publication or edition claimed.",
+    "source_sha256": null,
+    "source_uri": null,
+    "verification_reason": "Unverified local vocabulary; no official edition or publication is claimed. Origin remains service_extension.",
+    "verification_state": "unverified"
+  },
+  {
+    "comparison": "Reviewed proposal origin and intended use. These local terms have no official taxonomy to verify against.",
+    "content_sha256": "d4111660adc8f7f391892f2b835ab8c48cf1cc58b4738b9cfe35cf64ff644616",
+    "edition": null,
+    "findings": [],
+    "origin": "kb_extension",
+    "publisher": null,
+    "scheme_id": "gdelt.applications.scheme",
+    "scope": "Local analyst or service vocabulary only; no official publication or edition claimed.",
+    "source_sha256": null,
+    "source_uri": null,
+    "verification_reason": "Unverified local vocabulary; no official edition or publication is claimed. Origin remains kb_extension.",
+    "verification_state": "unverified"
+  },
+  {
+    "comparison": "Compared all 22 string codes and labels against the published event lookup. 21 agree ignoring case; code 20 differs. The source contains 310 distinct numeric codes; 288 are not seeded. Full dictionary import is deferred.",
+    "content_sha256": "0b7e3e936d457463b5b8ac34b312d4dfaebceeadd3d5b037c3f89f18dd4765fd",
+    "edition": "CAMEO lookup for GDELT 1.0/2.0, retrieved 2026-11-22",
+    "findings": [
+      {
+        "detail": "Source USE UNCONVENTIONAL MASS VIOLENCE differs from seed Engage in unconventional mass violence.",
+        "kind": "mismatch",
+        "locator": "CAMEO.eventcodes.txt, numeric code 20"
+      },
+      {
+        "detail": "288 of 310 distinct numeric lookup codes are absent from the 22-code seed. No full dictionary import performed.",
+        "kind": "missing_leaf",
+        "locator": "CAMEO.eventcodes.txt, e.g. 010 and 2042"
+      }
+    ],
+    "origin": "official",
+    "publisher": "The GDELT Project",
+    "scheme_id": "gdelt.cameo_v2.scheme",
+    "scope": "22 proposed event codes (20 roots plus 025 and 0251); retain leading zeroes. Case-insensitive source labels; uk source-text fallback. Not the complete CAMEO dictionary.",
+    "source_sha256": "ccbfa4f59f62028399363dd8a9458b64128b5044d29df591bad718cdeccc145d",
+    "source_uri": "https://www.gdeltproject.org/data/lookups/CAMEO.eventcodes.txt",
+    "verification_reason": "Unverified: CAMEO 20 source label is USE UNCONVENTIONAL MASS VIOLENCE, while the seed says Engage in unconventional mass violence. Other 21 included codes and labels agree ignoring case.",
+    "verification_state": "unverified"
+  },
+  {
+    "comparison": "All 43 code/label strings occur verbatim in the 59,315-code lookup linked by the November 20, 2021 publication. No hierarchy was inferred from underscores. Exact source bytes are checksum-pinned because the URL is mutable.",
+    "content_sha256": "87c3af38a80128288d2b5a558fb50c4de03927b16ec2a3ca0c3e969c1c3a64a0",
+    "edition": "November 2021 theme lookup, announced 2021-11-20",
+    "findings": [
+      {
+        "detail": "59,272 lookup codes are outside the selected 43-code subset. GKG lookup supplies no primary hierarchy.",
+        "kind": "missing_leaf",
+        "locator": "LOOKUP-GKGTHEMES.TXT"
+      }
+    ],
+    "origin": "official",
+    "publisher": "The GDELT Project",
+    "scheme_id": "gdelt.gkg_themes_2021.scheme",
+    "scope": "43 proposed native theme codes only; source lookup is a frequency list, not a parent hierarchy. No dictionary import or frequency ingestion. uk source-code fallback.",
+    "source_sha256": "9cfd25544b1c9ca705dc43633b636bdb092805ab524b45c5739a15f719a999cf",
+    "source_uri": "https://data.gdeltproject.org/api/v2/guides/LOOKUP-GKGTHEMES.TXT",
+    "verification_reason": "Verified 43 native codes only against the November 2021 linked lookup; 59,272 other codes are absent. No full dictionary or Ukrainian terminology verification is claimed.",
+    "verification_state": "verified"
+  },
+  {
+    "comparison": "Reviewed proposal origin and intended use. These local terms have no official taxonomy to verify against.",
+    "content_sha256": "2c69b4c09a681316f32d84aea18af37638ab81ec316c147dd864ffba7f0a2ce0",
+    "edition": null,
+    "findings": [],
+    "origin": "service_extension",
+    "publisher": null,
+    "scheme_id": "gdelt.services.scheme",
+    "scope": "Local analyst or service vocabulary only; no official publication or edition claimed.",
+    "source_sha256": null,
+    "source_uri": null,
+    "verification_reason": "Unverified local vocabulary; no official edition or publication is claimed. Origin remains service_extension.",
+    "verification_state": "unverified"
+  },
+  {
+    "comparison": "Reviewed proposal origin and intended use. These local terms have no official taxonomy to verify against.",
+    "content_sha256": "f3c6e63ccdd2b914908425595bf4609c003c31f51954a48203a589c069d19007",
+    "edition": null,
+    "findings": [],
+    "origin": "kb_extension",
+    "publisher": null,
+    "scheme_id": "gdelt.technology.scheme",
+    "scope": "Local analyst or service vocabulary only; no official publication or edition claimed.",
+    "source_sha256": null,
+    "source_uri": null,
+    "verification_reason": "Unverified local vocabulary; no official edition or publication is claimed. Origin remains kb_extension.",
+    "verification_state": "unverified"
+  },
+  {
+    "comparison": "Compared base application areas with Figure 0.9 (page 42) and chapter 3. The mixed scheme includes six local categories, including edge vision and space electronics, which are not chapter-3 headings.",
+    "content_sha256": "5277bf3983eff525e01a2b8375f4f2c9ddfebe9831efa3ee1b14e3adedb58fe0",
+    "edition": "2026",
+    "findings": [
+      {
+        "detail": "Local categories extend the six chapter-3 areas; do not promote the whole scheme as official.",
+        "kind": "local_extension",
+        "locator": "Seed APP.X1-APP.X6; ECS Figure 0.9 page 42"
+      }
+    ],
+    "origin": "kb_normalized",
+    "publisher": "AENEAS, EPoSS and INSIDE",
+    "scheme_id": "microelectronics.applications.scheme",
+    "scope": "Six chapter-3 application areas plus six local APP.X* extensions; local APP.* codes.",
+    "source_sha256": "38b20285cf15e4bff526f5c92266d3aef9b2b42587a21c7b05eebc7fc175b0d4",
+    "source_uri": "https://ecssria.eu/ECS-SRIA-2026.pdf",
+    "verification_reason": "Unverified normalized mixture: six ECS application areas and six local engineering applications use local APP.* codes. This is not an official ECS chapter dictionary.",
+    "verification_state": "unverified"
+  },
+  {
+    "comparison": "Compared all eight chapter numbers and headings. Seven match ignoring case and line wrapping. The canonical chapter 2.3 heading on PDF/printed page 268 says Methods; seed and publisher web navigation use Method. PDF heading takes precedence; do not silently correct seed.",
+    "content_sha256": "4903427b3efbaea3cdb6b72fb1fad75d6338d3dbc5346c880ec30a01fe4186c2",
+    "edition": "2026",
+    "findings": [
+      {
+        "detail": "Source heading: Architecture and Design: Methods and Tools. Seed heading: Architecture and Design: Method and Tools. A singular cross-reference on page 310 and web navigation do not resolve this discrepancy.",
+        "kind": "mismatch",
+        "locator": "Chapter 2.3, printed/PDF page 268; also Figure 0.9 page 42"
+      },
+      {
+        "detail": "Subsections and major challenges are excluded from this eight-heading seed.",
+        "kind": "missing_leaf",
+        "locator": "Chapters 1-4 and Appendix B"
+      }
+    ],
+    "origin": "official",
+    "publisher": "AENEAS, EPoSS and INSIDE",
+    "scheme_id": "microelectronics.ecs_sria_2026.scheme",
+    "scope": "Eight foundational and cross-sectional chapter headings (1.1-1.4 and 2.1-2.4); local ECS: prefix. No challenges or application chapters imported.",
+    "source_sha256": "38b20285cf15e4bff526f5c92266d3aef9b2b42587a21c7b05eebc7fc175b0d4",
+    "source_uri": "https://ecssria.eu/ECS-SRIA-2026.pdf",
+    "verification_reason": "Unverified: ECS:2.3 uses Method where the publication chapter heading uses Methods. Other seven selected chapter headings match; local ECS: notation and uk source fallback remain explicit.",
+    "verification_state": "unverified"
+  },
+  {
+    "comparison": "Compared every category, source label and connector in the rendered user-supplied PDF Figure 9 (page 30), with the packaging scope on page 31. All 29 nodes and 25 parent edges match the reviewed transcription. Forty local engineering extensions and seven non-chip categories remain outside the official scheme.",
+    "content_sha256": "b5fe45156f693f82ad9effa9a2f4ea5662401baa245e2bc37b7e98ad0627bfdf",
+    "edition": "Chips, nodes and wafers, August 2024, Figure 9",
+    "findings": [],
+    "origin": "official",
+    "publisher": "OECD",
+    "scheme_id": "microelectronics.oecd_2024.scheme",
+    "scope": "Complete Figure 9 category tree only, 29 nodes and four roots. Internal KN codes mirror stable product identifiers. Display disambiguation applies only to the two Others labels; original source labels remain alternatives. Source-text fallback in uk; no reviewed translation.",
+    "source_sha256": "25f7ec43f76d5fc1ddac65d1a16b179262aa8b68371545eef87ccac384d40083",
+    "source_uri": "https://www.oecd.org/content/dam/oecd/en/publications/reports/2024/08/chips-nodes-and-wafers_1189c2a2/f68de895-en.pdf",
+    "verification_reason": "Verified all 29 categories and 25 parent edges of OECD Figure 9, page 30. KN codes are internal; duplicate Others labels are disambiguated for display and preserved verbatim as alternatives. No local extensions are included; uk retains source text.",
+    "verification_state": "verified"
+  },
+  {
+    "comparison": "The supplied PDF title, DOI f68de895-en and August 2024 edition match the referenced OECD publication. Figure 9 on page 30 was rendered and inspected: IC-Logic, IC-Memory, IC-Analog and Others are uncoded categories. Seed codes and deeper engineering specializations are local. The initial direct retrieval returned HTTP 403; the user subsequently supplied the publication bytes, resolving the checksum limitation.",
+    "content_sha256": "9b98a0b79451da1058dcb9b1556d743d3ff9cd0336e7fa46f0333a1b65649d36",
+    "edition": "Chips, nodes and wafers, August 2024, Figure 9",
+    "findings": [
+      {
+        "detail": "AI MCU and energy-harvesting/battery-management refinements and all local code strings are not official Figure 9 notations.",
+        "kind": "local_extension",
+        "locator": "Figure 9, printed page 30; seed L.MCU.AI and A.PM.HARV"
+      }
+    ],
+    "origin": "kb_normalized",
+    "publisher": "OECD",
+    "scheme_id": "microelectronics.product_v1.scheme",
+    "scope": "76 normalized product concepts including local engineering extensions. Figure 9, printed/PDF page 30, inspected in the user-supplied August 2024 publication PDF; original supplied bytes are checksum-pinned.",
+    "source_sha256": "25f7ec43f76d5fc1ddac65d1a16b179262aa8b68371545eef87ccac384d40083",
+    "source_uri": "https://www.oecd.org/content/dam/oecd/en/publications/reports/2024/08/chips-nodes-and-wafers_1189c2a2/f68de895-en.pdf",
+    "verification_reason": "Unverified normalized tree: Figure 9 is uncoded and the seed adds local engineering specializations. The user-supplied OECD publication PDF has been inspected and checksum-pinned; this does not make local codes or extensions official.",
+    "verification_state": "unverified"
+  },
+  {
+    "comparison": "Reviewed proposal origin and intended use. These local terms have no official taxonomy to verify against.",
+    "content_sha256": "38f58c51902ca4afbded957648ff70aec3061a590b9a7d96f6f7eb2f246ab8b4",
+    "edition": null,
+    "findings": [],
+    "origin": "service_extension",
+    "publisher": null,
+    "scheme_id": "microelectronics.services.scheme",
+    "scope": "Local analyst or service vocabulary only; no official publication or edition claimed.",
+    "source_sha256": null,
+    "source_uri": null,
+    "verification_reason": "Unverified local vocabulary; no official edition or publication is claimed. Origin remains service_extension.",
+    "verification_state": "unverified"
+  },
+  {
+    "comparison": "Reviewed proposal origin and intended use. These local terms have no official taxonomy to verify against.",
+    "content_sha256": "8dc1319430b3c98de076c7e8a5de29d9ff0280f1eac3bdc2c7b6f4511481d6cf",
+    "edition": null,
+    "findings": [],
+    "origin": "kb_extension",
+    "publisher": null,
+    "scheme_id": "microelectronics.technology.scheme",
+    "scope": "Local analyst or service vocabulary only; no official publication or edition claimed.",
+    "source_sha256": null,
+    "source_uri": null,
+    "verification_reason": "Unverified local vocabulary; no official edition or publication is claimed. Origin remains kb_extension.",
+    "verification_state": "unverified"
+  }
+]

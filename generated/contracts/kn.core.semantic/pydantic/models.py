@@ -12,6 +12,8 @@ class AlternativeLabels(_kn_pydantic.BaseModel):
     term_id: _kn_builtins.str = _kn_pydantic.Field(alias='term_id', description='Reference to terms', json_schema_extra={'x-kn': {'fieldId': 'semantic.alternative_labels.term_id', 'foreignKey': {'fields': ['term_id'], 'table': 'terms', 'targetFields': ['id']}}})
     locale: _kn_builtins.str = _kn_pydantic.Field(alias='locale', description='BCP 47 language tag', json_schema_extra={'x-kn': {'fieldId': 'semantic.alternative_labels.locale'}})
     label: _kn_builtins.str = _kn_pydantic.Field(alias='label', description='Alternative label', json_schema_extra={'x-kn': {'fieldId': 'semantic.alternative_labels.label'}})
+    review_reference: _kn_builtins.str | None = _kn_pydantic.Field(default=None, alias='review_reference', description='Durable terminology review reference for derived text', json_schema_extra={'x-kn': {'fieldId': 'semantic.alternative_labels.review_reference'}})
+    reviewed_identical: _kn_builtins.bool | None = _kn_pydantic.Field(default=None, alias='reviewed_identical', description='Review explicitly confirms identical English and Ukrainian text', json_schema_extra={'x-kn': {'fieldId': 'semantic.alternative_labels.reviewed_identical'}})
 
 class AttributeDefinitions(_kn_pydantic.BaseModel):
     model_config = _kn_pydantic.ConfigDict(extra='forbid', strict=True)
@@ -88,12 +90,16 @@ class Labels(_kn_pydantic.BaseModel):
     label: _kn_builtins.str = _kn_pydantic.Field(alias='label', description='Preferred label', json_schema_extra={'x-kn': {'fieldId': 'semantic.labels.label'}})
     definition: _kn_builtins.str | None = _kn_pydantic.Field(default=None, alias='definition', description='Localized definition', json_schema_extra={'x-kn': {'fieldId': 'semantic.labels.definition'}})
     inverse_label: _kn_builtins.str | None = _kn_pydantic.Field(default=None, alias='inverse_label', description='Inverse relation label', json_schema_extra={'x-kn': {'fieldId': 'semantic.labels.inverse_label'}})
+    review_reference: _kn_builtins.str | None = _kn_pydantic.Field(default=None, alias='review_reference', description='Durable terminology review reference for derived text', json_schema_extra={'x-kn': {'fieldId': 'semantic.labels.review_reference'}})
+    reviewed_identical: _kn_builtins.bool | None = _kn_pydantic.Field(default=None, alias='reviewed_identical', description='Review explicitly confirms identical English and Ukrainian text', json_schema_extra={'x-kn': {'fieldId': 'semantic.labels.reviewed_identical'}})
 
 class NamespaceLabels(_kn_pydantic.BaseModel):
     model_config = _kn_pydantic.ConfigDict(extra='forbid', strict=True)
     namespace_id: _kn_builtins.str = _kn_pydantic.Field(alias='namespace_id', description='Reference to namespaces', json_schema_extra={'x-kn': {'fieldId': 'semantic.namespace_labels.namespace_id', 'foreignKey': {'fields': ['namespace_id'], 'table': 'namespaces', 'targetFields': ['id']}}})
     locale: _kn_builtins.str = _kn_pydantic.Field(alias='locale', description='BCP 47 language tag', json_schema_extra={'x-kn': {'fieldId': 'semantic.namespace_labels.locale'}})
     label: _kn_builtins.str = _kn_pydantic.Field(alias='label', description='Preferred namespace label', json_schema_extra={'x-kn': {'fieldId': 'semantic.namespace_labels.label'}})
+    review_reference: _kn_builtins.str | None = _kn_pydantic.Field(default=None, alias='review_reference', description='Durable terminology review reference for derived text', json_schema_extra={'x-kn': {'fieldId': 'semantic.namespace_labels.review_reference'}})
+    reviewed_identical: _kn_builtins.bool | None = _kn_pydantic.Field(default=None, alias='reviewed_identical', description='Review explicitly confirms identical English and Ukrainian text', json_schema_extra={'x-kn': {'fieldId': 'semantic.namespace_labels.reviewed_identical'}})
 
 class Namespaces(_kn_pydantic.BaseModel):
     model_config = _kn_pydantic.ConfigDict(extra='forbid', strict=True)
@@ -136,4 +142,4 @@ class Terms(_kn_pydantic.BaseModel):
     code: _kn_builtins.str = _kn_pydantic.Field(alias='code', description='Original string code, including leading zeroes', json_schema_extra={'x-kn': {'fieldId': 'semantic.terms.code'}})
     kind: _kn_typing.Literal['entity_class', 'relation_type', 'concept_scheme', 'concept', 'concept_mapping', 'entity_tag', 'attribute_definition', 'condition_set', 'comparison_profile', 'rubric'] = _kn_pydantic.Field(alias='kind', description='Semantic dataset kind', json_schema_extra={'x-kn': {'enum': ['entity_class', 'relation_type', 'concept_scheme', 'concept', 'concept_mapping', 'entity_tag', 'attribute_definition', 'condition_set', 'comparison_profile', 'rubric'], 'fieldId': 'semantic.terms.kind'}})
     status: _kn_typing.Literal['draft', 'active', 'deprecated', 'replaced'] = _kn_pydantic.Field(alias='status', description='Lifecycle status; deprecated terms remain resolvable', json_schema_extra={'x-kn': {'enum': ['draft', 'active', 'deprecated', 'replaced'], 'fieldId': 'semantic.terms.status'}})
-    definition: _kn_builtins.str = _kn_pydantic.Field(alias='definition', description='Definition in original language', json_schema_extra={'x-kn': {'fieldId': 'semantic.terms.definition'}})
+    definition: _kn_builtins.str | None = _kn_pydantic.Field(default=None, alias='definition', description='Prose definition when supplied; proposal metadata belongs in provenance', json_schema_extra={'x-kn': {'fieldId': 'semantic.terms.definition'}})

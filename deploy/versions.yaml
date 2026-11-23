@@ -1,4 +1,5 @@
-# Version manifest of the runtime platform: every pinned image, schema, and tool.
+# Version manifest of the runtime platform: every pinned image, schema, and tool, and the host
+# prerequisites that make bootstrap and make doctor check.
 #
 # Images are pinned by an exact tag and the digest of the image index that the tag named at pin
 # time. Floating tags such as latest are never used. deploy/compose.yaml must reference each image
@@ -34,7 +35,48 @@ schema_governance:
     purpose: isolated-development-lint-and-export-probe
   platform_policy: src/kn/contracts/resources/platform.json
   space_example_contract: src/kn/contracts/resources/satcom/1.0.0.json
-  development_baseline: "0001_satcom"
+  development_baseline: "0001_baseline"
   development_policy: edit-version-1.0.0-in-place-and-rebuild
   release_policy: freeze-baseline-then-reviewed-versioned-alembic-revisions
   tool_versions: uv.lock
+
+
+# Commands the development host must provide. make bootstrap and make doctor check them and fail
+# with the hint below; they never install system packages. version_command prints a version whose
+# first dotted number is compared with minimum.
+host_prerequisites:
+  - command: git
+    purpose: source control
+    hint: the git package
+  - command: make
+    purpose: the project's entry points
+    hint: the make package
+  - command: uv
+    purpose: the locked Python environment
+    hint: https://docs.astral.sh/uv/getting-started/installation/
+  - command: docker
+    purpose: the local PostGIS service of make db-up and make ci-local
+    hint: Docker Engine with the Compose v2 plugin (docker-ce, docker-compose-plugin)
+    version_command: [docker, compose, version, --short]
+    minimum: "2.0"
+  - command: java
+    purpose: Apache Jena RIOT, which make skos-reference-check runs
+    hint: a Java 21 or newer runtime (openjdk-21-jre-headless)
+    version_command: [java, -version]
+    minimum: "21"
+
+# Tool archives that make bootstrap downloads into DATA_DIR and accepts only at the pinned SHA-512.
+# The signing key is the release manager's key from https://downloads.apache.org/jena/KEYS; it was
+# checked when the version was pinned. To move to a new version, verify the new archive against
+# KEYS and its .sha512 file, then change version, archive, sha512, install_dir and pinned together.
+downloaded_tools:
+  apache_jena:
+    version: "6.3.0"
+    archive: https://archive.apache.org/dist/jena/binaries/apache-jena-6.3.0.tar.gz
+    sha512: 828ac4bc3b377eacbadd888de5558039688a28eb5357fc741c2eb833582447f53455f75857bd1c832114c9d58beb671d581bad84ea5f0f31d3aff74fe805f0ce
+    signing_key: D99038A1731B8B31B71549EF04C95136D236A58F
+    install_dir: tools/apache-jena-6.3.0
+    executable: bin/riot
+    requires: java 21
+    purpose: independent strict Turtle validation of the SKOS exports (make skos-reference-check)
+    pinned: "2026-11-22"

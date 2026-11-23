@@ -1,0 +1,1116 @@
+{
+  "format": "kn.source-catalogue.candidates.v1",
+  "domain": "microelectronics",
+  "proposal": {
+    "file_name": "microelectronics_data_sources_v1.xlsx",
+    "sha256": "ab7837e18fc1907a2b977def23d03de78e608787d3125011ab3b38bda2536fba",
+    "sheet_name": "01_Data_Sources"
+  },
+  "records": [
+    {
+      "source_id": "microelectronics:D01",
+      "source_row": 5,
+      "values": {
+        "id": "D01",
+        "family": "Roadmap",
+        "resource": "ECS SRIA 2026",
+        "geography": "EU",
+        "data_focus": "Technology targets, milestones, applications",
+        "machine_format": "HTML chapters",
+        "access_conditions": "Open web",
+        "priority": "P0",
+        "cadence": "Quarterly / release",
+        "url_docs": "https://ecssria.eu/2026",
+        "limit_rule": "Official chapter tags; target \u2260 achieved"
+      }
+    },
+    {
+      "source_id": "microelectronics:D02",
+      "source_row": 6,
+      "values": {
+        "id": "D02",
+        "family": "Roadmap",
+        "resource": "IEEE IRDS",
+        "geography": "Global",
+        "data_focus": "Process, beyond CMOS, memory, system roadmap",
+        "machine_format": "Web/PDF",
+        "access_conditions": "Open publication; terms vary",
+        "priority": "P0",
+        "cadence": "Release",
+        "url_docs": "https://roadmaps.ieee.org/roadmaps/",
+        "limit_rule": "Forecast, not product availability"
+      }
+    },
+    {
+      "source_id": "microelectronics:D03",
+      "source_row": 7,
+      "values": {
+        "id": "D03",
+        "family": "R&D calls",
+        "resource": "Chips JU open calls",
+        "geography": "EU",
+        "data_focus": "Future funded directions, pilot lines, AI chips, power",
+        "machine_format": "Web notices",
+        "access_conditions": "Public; no API verified",
+        "priority": "P0",
+        "cadence": "Weekly",
+        "url_docs": "https://www.chips-ju.europa.eu/Open-and-Upcoming-Calls/",
+        "limit_rule": "Call \u2260 award"
+      }
+    },
+    {
+      "source_id": "microelectronics:D04",
+      "source_row": 8,
+      "values": {
+        "id": "D04",
+        "family": "R&D awards",
+        "resource": "CORDIS projects",
+        "geography": "EU",
+        "data_focus": "Projects, participants, grants, deliverables",
+        "machine_format": "Bulk open datasets / web",
+        "access_conditions": "Public",
+        "priority": "P0",
+        "cadence": "Weekly/monthly",
+        "url_docs": "https://cordis.europa.eu/projects/en",
+        "limit_rule": "Project maturity/outputs separately"
+      }
+    },
+    {
+      "source_id": "microelectronics:D05",
+      "source_row": 9,
+      "values": {
+        "id": "D05",
+        "family": "R&D awards",
+        "resource": "FABrIC awarded projects",
+        "geography": "CA",
+        "data_focus": "Canadian chip/MEMS/photonics/edge AI funded development",
+        "machine_format": "HTML directory",
+        "access_conditions": "Public; no API verified",
+        "priority": "P0",
+        "cadence": "Weekly",
+        "url_docs": "https://fabricinnovation.ca/recipients/",
+        "limit_rule": "Awarded project \u2260 shipping product"
+      }
+    },
+    {
+      "source_id": "microelectronics:D06",
+      "source_row": 10,
+      "values": {
+        "id": "D06",
+        "family": "R&D roadmap",
+        "resource": "CMC technology/R&D pipeline",
+        "geography": "CA",
+        "data_focus": "MPW, MEMS, photonics, microelectronics, edge AI",
+        "machine_format": "Web",
+        "access_conditions": "Public view; access services gated",
+        "priority": "P0",
+        "cadence": "Monthly",
+        "url_docs": "https://www.cmc.ca/lab/technology-rd-pipeline/",
+        "limit_rule": "Track availability and process access"
+      }
+    },
+    {
+      "source_id": "microelectronics:D07",
+      "source_row": 11,
+      "values": {
+        "id": "D07",
+        "family": "R&D grants",
+        "resource": "NSERC Awards Database",
+        "geography": "CA",
+        "data_focus": "University/industry projects and grants",
+        "machine_format": "Web search",
+        "access_conditions": "Public; API not verified",
+        "priority": "P0",
+        "cadence": "Monthly",
+        "url_docs": "https://www.nserc-crsng.gc.ca/ase-oro/index_eng.asp?new=",
+        "limit_rule": "Research output requires separate evidence"
+      }
+    },
+    {
+      "source_id": "microelectronics:D08",
+      "source_row": 12,
+      "values": {
+        "id": "D08",
+        "family": "Research",
+        "resource": "imec",
+        "geography": "EU BE",
+        "data_focus": "Low-power compute, chiplets, process, sensing",
+        "machine_format": "Web publications/news",
+        "access_conditions": "Public subset",
+        "priority": "P0",
+        "cadence": "Weekly",
+        "url_docs": "https://www.imec-int.com/en",
+        "limit_rule": "Research/technical claims; specific papers"
+      }
+    },
+    {
+      "source_id": "microelectronics:D09",
+      "source_row": 13,
+      "values": {
+        "id": "D09",
+        "family": "Research",
+        "resource": "CEA-Leti AI smart sensors",
+        "geography": "EU FR",
+        "data_focus": "Low-resource sensor AI and demonstrators",
+        "machine_format": "Web",
+        "access_conditions": "Public subset",
+        "priority": "P0",
+        "cadence": "Weekly",
+        "url_docs": "https://www.cea.fr/cea-tech/leti/english/Pages/Industrial-Innovation/Demos/ai-smart-sensors.aspx",
+        "limit_rule": "Record silicon vs concept"
+      }
+    },
+    {
+      "source_id": "microelectronics:D10",
+      "source_row": 14,
+      "values": {
+        "id": "D10",
+        "family": "Research",
+        "resource": "Fraunhofer IPMS",
+        "geography": "EU DE",
+        "data_focus": "Intelligent sensors, MEMS, edge AI",
+        "machine_format": "Web",
+        "access_conditions": "Public subset",
+        "priority": "P0",
+        "cadence": "Weekly",
+        "url_docs": "https://www.ipms.fraunhofer.de/en/Integrated-Silicon-Systems.html",
+        "limit_rule": "Transfer route and measurement needed"
+      }
+    },
+    {
+      "source_id": "microelectronics:D11",
+      "source_row": 15,
+      "values": {
+        "id": "D11",
+        "family": "Research",
+        "resource": "Fraunhofer IZM",
+        "geography": "EU DE",
+        "data_focus": "Energy-autarkic nodes and RF/packaging",
+        "machine_format": "Web",
+        "access_conditions": "Public subset",
+        "priority": "P0",
+        "cadence": "Weekly",
+        "url_docs": "https://www.izm.fraunhofer.de/en/abteilungen/rf---smart-sensor-systems.html",
+        "limit_rule": "Track project outcomes"
+      }
+    },
+    {
+      "source_id": "microelectronics:D12",
+      "source_row": 16,
+      "values": {
+        "id": "D12",
+        "family": "Publications",
+        "resource": "OpenAlex API",
+        "geography": "Global",
+        "data_focus": "Publications, institutions, authors, citations",
+        "machine_format": "REST JSON",
+        "access_conditions": "Key/usage limits apply; check docs",
+        "priority": "P0",
+        "cadence": "Weekly",
+        "url_docs": "https://help.openalex.org/api/",
+        "limit_rule": "Bibliographic data; full text not guaranteed"
+      }
+    },
+    {
+      "source_id": "microelectronics:D13",
+      "source_row": 17,
+      "values": {
+        "id": "D13",
+        "family": "Patents",
+        "resource": "EPO OPS",
+        "geography": "Global/EU",
+        "data_focus": "Families, legal status, assignees, IPC/CPC",
+        "machine_format": "REST XML; OAuth",
+        "access_conditions": "Quota/account",
+        "priority": "P0",
+        "cadence": "Weekly",
+        "url_docs": "https://www.epo.org/en/searching-for-patents/data/web-services/ops",
+        "limit_rule": "Patent \u2260 practical performance"
+      }
+    },
+    {
+      "source_id": "microelectronics:D14",
+      "source_row": 18,
+      "values": {
+        "id": "D14",
+        "family": "Research",
+        "resource": "arXiv API",
+        "geography": "Global",
+        "data_focus": "Early papers, edge AI, circuits, algorithms",
+        "machine_format": "API Atom",
+        "access_conditions": "Public; usage policies",
+        "priority": "P1",
+        "cadence": "Weekly",
+        "url_docs": "https://info.arxiv.org/help/api/index.html",
+        "limit_rule": "Preprints not peer reviewed"
+      }
+    },
+    {
+      "source_id": "microelectronics:D15",
+      "source_row": 19,
+      "values": {
+        "id": "D15",
+        "family": "Publications",
+        "resource": "Crossref REST",
+        "geography": "Global",
+        "data_focus": "DOI metadata and funders",
+        "machine_format": "REST JSON",
+        "access_conditions": "Public; limits/terms",
+        "priority": "P1",
+        "cadence": "Weekly",
+        "url_docs": "https://www.crossref.org/documentation/retrieve-metadata/rest-api/",
+        "limit_rule": "Bibliographic not measurements"
+      }
+    },
+    {
+      "source_id": "microelectronics:D16",
+      "source_row": 20,
+      "values": {
+        "id": "D16",
+        "family": "Benchmark",
+        "resource": "MLPerf Tiny",
+        "geography": "Global",
+        "data_focus": "Matched tiny ML inference, optional energy",
+        "machine_format": "Results web/repository",
+        "access_conditions": "Open results",
+        "priority": "P0",
+        "cadence": "Release",
+        "url_docs": "https://mlcommons.org/benchmarks/inference-tiny/",
+        "limit_rule": "Version/division/workload/measurement boundary"
+      }
+    },
+    {
+      "source_id": "microelectronics:D17",
+      "source_row": 21,
+      "values": {
+        "id": "D17",
+        "family": "Benchmark",
+        "resource": "MLPerf Edge",
+        "geography": "Global",
+        "data_focus": "Edge inference workloads, latency/power",
+        "machine_format": "Results web/repository",
+        "access_conditions": "Open results",
+        "priority": "P0",
+        "cadence": "Release",
+        "url_docs": "https://mlcommons.org/benchmarks/inference-edge/",
+        "limit_rule": "Whole-system power, not chip-only"
+      }
+    },
+    {
+      "source_id": "microelectronics:D18",
+      "source_row": 22,
+      "values": {
+        "id": "D18",
+        "family": "Benchmark",
+        "resource": "EEMBC ULPMark",
+        "geography": "Global",
+        "data_focus": "MCU energy benchmark profiles",
+        "machine_format": "Results / docs",
+        "access_conditions": "Public results; harness terms",
+        "priority": "P0",
+        "cadence": "Release",
+        "url_docs": "https://www.eembc.org/ulpmark/",
+        "limit_rule": "Compare same profile and conditions"
+      }
+    },
+    {
+      "source_id": "microelectronics:D19",
+      "source_row": 23,
+      "values": {
+        "id": "D19",
+        "family": "Benchmark",
+        "resource": "EEMBC EnergyRunner",
+        "geography": "Global",
+        "data_focus": "Calibrated measurement harness",
+        "machine_format": "Docs/tools",
+        "access_conditions": "Terms apply",
+        "priority": "P0",
+        "cadence": "Release",
+        "url_docs": "https://www.eembc.org/energyrunner/mlperftiny/",
+        "limit_rule": "Measurement protocol"
+      }
+    },
+    {
+      "source_id": "microelectronics:V01",
+      "source_row": 24,
+      "values": {
+        "id": "V01",
+        "family": "Vendor",
+        "resource": "ST product portfolio",
+        "geography": "EU/CH",
+        "data_focus": "MCUs/MPUs, image/audio/MEMS, analog/power",
+        "machine_format": "Parametric web + datasheets",
+        "access_conditions": "Public; API not verified",
+        "priority": "P0",
+        "cadence": "Weekly",
+        "url_docs": "https://www.st.com/content/st_com/en/browse/product-portfolio.html",
+        "limit_rule": "Exact MPN docs, errata and ordering table"
+      }
+    },
+    {
+      "source_id": "microelectronics:V02",
+      "source_row": 25,
+      "values": {
+        "id": "V02",
+        "family": "Vendor tools",
+        "resource": "STM32Cube packages",
+        "geography": "EU/CH",
+        "data_focus": "SDK, supported families, drivers",
+        "machine_format": "Web/software repository",
+        "access_conditions": "Public subset; licences",
+        "priority": "P0",
+        "cadence": "Weekly",
+        "url_docs": "https://www.st.com/en/embedded-software/stm32cube-mcu-mpu-packages/products.html",
+        "limit_rule": "Version device compatibility"
+      }
+    },
+    {
+      "source_id": "microelectronics:V03",
+      "source_row": 26,
+      "values": {
+        "id": "V03",
+        "family": "Vendor",
+        "resource": "NXP Product Finders",
+        "geography": "EU NL",
+        "data_focus": "MCX, i.MX, sensors, RF, PMIC, safety",
+        "machine_format": "Parametric web + docs",
+        "access_conditions": "Public; API not verified",
+        "priority": "P0",
+        "cadence": "Weekly",
+        "url_docs": "https://www.nxp.com/products/product-finders:PRODUCT-FINDERS",
+        "limit_rule": "MPN and lifecycle confirmation"
+      }
+    },
+    {
+      "source_id": "microelectronics:V04",
+      "source_row": 27,
+      "values": {
+        "id": "V04",
+        "family": "Vendor tools",
+        "resource": "NXP eIQ / AI",
+        "geography": "EU NL",
+        "data_focus": "NPU, compiler, tools, model support",
+        "machine_format": "Web/software",
+        "access_conditions": "Public subset; licences",
+        "priority": "P0",
+        "cadence": "Weekly",
+        "url_docs": "https://www.nxp.com/applications/technologies/ai-and-machine-learning:MACHINE-LEARNING",
+        "limit_rule": "Record model/operator support and versions"
+      }
+    },
+    {
+      "source_id": "microelectronics:V05",
+      "source_row": 28,
+      "values": {
+        "id": "V05",
+        "family": "Vendor",
+        "resource": "Infineon product portfolio",
+        "geography": "EU DE",
+        "data_focus": "PSoC Edge/6, XENSIV, power, SiC/GaN",
+        "machine_format": "Parametric web + docs",
+        "access_conditions": "Public; API not verified",
+        "priority": "P0",
+        "cadence": "Weekly",
+        "url_docs": "https://www.infineon.com/products",
+        "limit_rule": "Exact MPN and package"
+      }
+    },
+    {
+      "source_id": "microelectronics:V06",
+      "source_row": 29,
+      "values": {
+        "id": "V06",
+        "family": "Vendor",
+        "resource": "Infineon technology",
+        "geography": "EU DE",
+        "data_focus": "New power, sensing, AI, WBG",
+        "machine_format": "Web/news",
+        "access_conditions": "Public",
+        "priority": "P0",
+        "cadence": "Weekly",
+        "url_docs": "https://www.infineon.com/technology",
+        "limit_rule": "Announcements vs production"
+      }
+    },
+    {
+      "source_id": "microelectronics:V07",
+      "source_row": 30,
+      "values": {
+        "id": "V07",
+        "family": "Vendor",
+        "resource": "Cologne Chip GateMate",
+        "geography": "EU DE",
+        "data_focus": "Low-power FPGA, toolchain, FPGA docs",
+        "machine_format": "Web/docs",
+        "access_conditions": "Public subset",
+        "priority": "P0",
+        "cadence": "Weekly",
+        "url_docs": "https://www.colognechip.com/programmable-logic/gatemate/",
+        "limit_rule": "Native architecture; verify sourcing per part"
+      }
+    },
+    {
+      "source_id": "microelectronics:V08",
+      "source_row": 31,
+      "values": {
+        "id": "V08",
+        "family": "Vendor",
+        "resource": "NanoXplore",
+        "geography": "EU FR",
+        "data_focus": "FPGA/SoC FPGA, radiation-grade and COTS",
+        "machine_format": "Web/docs",
+        "access_conditions": "Public subset",
+        "priority": "P0",
+        "cadence": "Weekly",
+        "url_docs": "https://nanoxplore.com/product/ng-ultra/",
+        "limit_rule": "Variant-level; do not merge COTS/RH"
+      }
+    },
+    {
+      "source_id": "microelectronics:V09",
+      "source_row": 32,
+      "values": {
+        "id": "V09",
+        "family": "Vendor",
+        "resource": "Blumind",
+        "geography": "CA",
+        "data_focus": "Analog inference IP / future AI silicon",
+        "machine_format": "Web/product pages",
+        "access_conditions": "Public subset; technical access by request",
+        "priority": "P0",
+        "cadence": "Weekly",
+        "url_docs": "https://blumind.ai/products/",
+        "limit_rule": "IP vs packaged silicon; claims need measured proof"
+      }
+    },
+    {
+      "source_id": "microelectronics:V10",
+      "source_row": 33,
+      "values": {
+        "id": "V10",
+        "family": "Vendor",
+        "resource": "SPARK Microsystems",
+        "geography": "CA",
+        "data_focus": "LE-UWB transceivers and low-energy links",
+        "machine_format": "Web/technology",
+        "access_conditions": "Public subset",
+        "priority": "P0",
+        "cadence": "Weekly",
+        "url_docs": "https://www.sparkmicro.com/technology/",
+        "limit_rule": "Validate per MPN and actual link test"
+      }
+    },
+    {
+      "source_id": "microelectronics:V11",
+      "source_row": 34,
+      "values": {
+        "id": "V11",
+        "family": "Industry directory",
+        "resource": "Photons Canada",
+        "geography": "CA",
+        "data_focus": "Photonics companies, research, suppliers",
+        "machine_format": "Web directory",
+        "access_conditions": "Public view",
+        "priority": "P1",
+        "cadence": "Monthly",
+        "url_docs": "https://www.photonscanada.ca/en/photonic-community-directory/",
+        "limit_rule": "Discover Canadian optics/semiconductor actors"
+      }
+    },
+    {
+      "source_id": "microelectronics:V12",
+      "source_row": 35,
+      "values": {
+        "id": "V12",
+        "family": "Lifecycle",
+        "resource": "ST product longevity",
+        "geography": "EU/CH",
+        "data_focus": "Longevity and lifecycle terms",
+        "machine_format": "Web",
+        "access_conditions": "Public",
+        "priority": "P0",
+        "cadence": "Monthly",
+        "url_docs": "https://www.st.com/content/st_com/en/about/quality-and-reliability/product-longevity.html",
+        "limit_rule": "Map specific eligible parts, PCN separately"
+      }
+    },
+    {
+      "source_id": "microelectronics:V13",
+      "source_row": 36,
+      "values": {
+        "id": "V13",
+        "family": "Lifecycle",
+        "resource": "NXP product longevity",
+        "geography": "EU NL",
+        "data_focus": "Product longevity programme",
+        "machine_format": "Web",
+        "access_conditions": "Public",
+        "priority": "P0",
+        "cadence": "Monthly",
+        "url_docs": "https://www.nxp.com/products/nxp-product-information/nxp-product-programs/product-longevity:PRDCT_LONGEVITY_HM",
+        "limit_rule": "Eligibility not equivalent to guaranteed indefinite supply"
+      }
+    },
+    {
+      "source_id": "microelectronics:V14",
+      "source_row": 37,
+      "values": {
+        "id": "V14",
+        "family": "Vendor",
+        "resource": "Infineon PSOC MCU",
+        "geography": "EU DE",
+        "data_focus": "PSoC Edge / PSoC 6 / MCU catalogue",
+        "machine_format": "Web/docs",
+        "access_conditions": "Public",
+        "priority": "P0",
+        "cadence": "Weekly",
+        "url_docs": "https://www.infineon.com/products/microcontroller/32-bit-psoc-arm-cortex",
+        "limit_rule": "MCU & AI variants"
+      }
+    },
+    {
+      "source_id": "microelectronics:V15",
+      "source_row": 38,
+      "values": {
+        "id": "V15",
+        "family": "Vendor",
+        "resource": "Infineon XENSIV sensors",
+        "geography": "EU DE",
+        "data_focus": "MEMS microphones, radar, magnetic/current sensors",
+        "machine_format": "Web/docs",
+        "access_conditions": "Public",
+        "priority": "P0",
+        "cadence": "Weekly",
+        "url_docs": "https://www.infineon.com/products/sensor",
+        "limit_rule": "Family and modality; exact MPN"
+      }
+    },
+    {
+      "source_id": "microelectronics:V16",
+      "source_row": 39,
+      "values": {
+        "id": "V16",
+        "family": "Vendor",
+        "resource": "ST ultra-low-power portfolio",
+        "geography": "EU/CH",
+        "data_focus": "STM32 low-power/new series",
+        "machine_format": "Web/docs",
+        "access_conditions": "Public",
+        "priority": "P0",
+        "cadence": "Weekly",
+        "url_docs": "https://www.st.com/en/microcontrollers-microprocessors/stm32-ultra-low-power-mcus.html",
+        "limit_rule": "Track modes and reference designs"
+      }
+    },
+    {
+      "source_id": "microelectronics:C01",
+      "source_row": 40,
+      "values": {
+        "id": "C01",
+        "family": "Catalogue API",
+        "resource": "DigiKey Product Information v4",
+        "geography": "Global",
+        "data_focus": "MPN, parametric data, stock/price",
+        "machine_format": "REST JSON",
+        "access_conditions": "OAuth developer account; terms",
+        "priority": "P1",
+        "cadence": "Daily/weekly",
+        "url_docs": "https://developer.digikey.com/products/product-information-v4/productsearch",
+        "limit_rule": "Distributor specs secondary to datasheet"
+      }
+    },
+    {
+      "source_id": "microelectronics:C02",
+      "source_row": 41,
+      "values": {
+        "id": "C02",
+        "family": "Catalogue API",
+        "resource": "Mouser Search API",
+        "geography": "Global",
+        "data_focus": "MPN, stock, price and metadata",
+        "machine_format": "REST API",
+        "access_conditions": "API key/terms",
+        "priority": "P1",
+        "cadence": "Daily/weekly",
+        "url_docs": "https://my.mouser.com/en/api-search/",
+        "limit_rule": "No inferred fab origin"
+      }
+    },
+    {
+      "source_id": "microelectronics:C03",
+      "source_row": 42,
+      "values": {
+        "id": "C03",
+        "family": "Catalogue API",
+        "resource": "Nexar / Octopart",
+        "geography": "Global",
+        "data_focus": "Part search, specs, stock, price, lifecycle",
+        "machine_format": "GraphQL",
+        "access_conditions": "Account/plan/terms",
+        "priority": "P1",
+        "cadence": "Daily/weekly",
+        "url_docs": "https://nexar.com/api",
+        "limit_rule": "License and cache rules"
+      }
+    },
+    {
+      "source_id": "microelectronics:C04",
+      "source_row": 43,
+      "values": {
+        "id": "C04",
+        "family": "Industry data",
+        "resource": "SEMI",
+        "geography": "Global",
+        "data_focus": "Fab capacity and infrastructure reports",
+        "machine_format": "Commercial datasets",
+        "access_conditions": "Paid/conditional",
+        "priority": "P1",
+        "cadence": "Quarterly",
+        "url_docs": "https://www.semi.org/",
+        "limit_rule": "Site-level capacity; licensing"
+      }
+    },
+    {
+      "source_id": "microelectronics:C05",
+      "source_row": 44,
+      "values": {
+        "id": "C05",
+        "family": "Market data",
+        "resource": "WSTS",
+        "geography": "Global",
+        "data_focus": "Market totals by type, regional forecasts",
+        "machine_format": "Reports",
+        "access_conditions": "Public summaries/commercial detail",
+        "priority": "P2",
+        "cadence": "Quarterly",
+        "url_docs": "https://www.wsts.org/",
+        "limit_rule": "Aggregate stats not SKU"
+      }
+    },
+    {
+      "source_id": "microelectronics:C06",
+      "source_row": 45,
+      "values": {
+        "id": "C06",
+        "family": "Policy",
+        "resource": "OECD chip landscape",
+        "geography": "Global",
+        "data_focus": "Fab and supply chain concentration",
+        "machine_format": "Report",
+        "access_conditions": "Public",
+        "priority": "P1",
+        "cadence": "Release",
+        "url_docs": "https://www.oecd.org/en/publications/the-chip-landscape_02dbd028-en.html",
+        "limit_rule": "Dataset completeness varies"
+      }
+    },
+    {
+      "source_id": "microelectronics:C07",
+      "source_row": 46,
+      "values": {
+        "id": "C07",
+        "family": "Regulatory",
+        "resource": "GLEIF API",
+        "geography": "Global",
+        "data_focus": "Legal entity identifiers, parent relationships where reported",
+        "machine_format": "REST JSON",
+        "access_conditions": "Public; terms",
+        "priority": "P1",
+        "cadence": "Monthly",
+        "url_docs": "https://www.gleif.org/en/lei-data/gleif-api",
+        "limit_rule": "Not full beneficial control or fab proof"
+      }
+    },
+    {
+      "source_id": "microelectronics:C08",
+      "source_row": 47,
+      "values": {
+        "id": "C08",
+        "family": "Procurement",
+        "resource": "TED Search API",
+        "geography": "EU",
+        "data_focus": "Demand, tenders and awards",
+        "machine_format": "Search API/XML",
+        "access_conditions": "Public",
+        "priority": "P1",
+        "cadence": "Weekly",
+        "url_docs": "https://docs.ted.europa.eu/api/latest/search.html",
+        "limit_rule": "Procurement signal only"
+      }
+    },
+    {
+      "source_id": "microelectronics:C09",
+      "source_row": 48,
+      "values": {
+        "id": "C09",
+        "family": "Procurement",
+        "resource": "Canada Open Government",
+        "geography": "CA",
+        "data_focus": "Grants/contracts open datasets",
+        "machine_format": "Portal / dataset downloads",
+        "access_conditions": "Public; endpoint verify per dataset",
+        "priority": "P1",
+        "cadence": "Monthly",
+        "url_docs": "https://open.canada.ca/en/open-data",
+        "limit_rule": "Verify granularity and machine access"
+      }
+    },
+    {
+      "source_id": "microelectronics:C10",
+      "source_row": 49,
+      "values": {
+        "id": "C10",
+        "family": "Taxonomy",
+        "resource": "OECD chips nodes wafers",
+        "geography": "Global",
+        "data_focus": "Product and facility taxonomy",
+        "machine_format": "Report",
+        "access_conditions": "Public",
+        "priority": "P0",
+        "cadence": "On release",
+        "url_docs": "https://www.oecd.org/en/publications/chips-nodes-and-wafers_f68de895-en.html",
+        "limit_rule": "Figure 9; local IDs"
+      }
+    },
+    {
+      "source_id": "microelectronics:C11",
+      "source_row": 50,
+      "values": {
+        "id": "C11",
+        "family": "Standards",
+        "resource": "IEC CDD",
+        "geography": "Global",
+        "data_focus": "Property definitions and classes",
+        "machine_format": "Web dictionary",
+        "access_conditions": "Public access; reuse terms",
+        "priority": "P0",
+        "cadence": "On release",
+        "url_docs": "https://cdd.iec.ch",
+        "limit_rule": "Exact property mapping not yet imported"
+      }
+    },
+    {
+      "source_id": "microelectronics:C12",
+      "source_row": 51,
+      "values": {
+        "id": "C12",
+        "family": "Standards",
+        "resource": "ECLASS data model",
+        "geography": "EU/Global",
+        "data_focus": "Product classification and property concepts",
+        "machine_format": "Web / licensed data",
+        "access_conditions": "Licence may apply",
+        "priority": "P1",
+        "cadence": "On release",
+        "url_docs": "https://eclass.eu/support/technical-specification/data-model/conceptual-data-model",
+        "limit_rule": "Map official IDs only after licensed access"
+      }
+    },
+    {
+      "source_id": "microelectronics:C13",
+      "source_row": 52,
+      "values": {
+        "id": "C13",
+        "family": "Standards",
+        "resource": "JEDEC JEP30 PartModel",
+        "geography": "Global",
+        "data_focus": "Part data exchange and qualification",
+        "machine_format": "Standards documents",
+        "access_conditions": "Access/terms vary",
+        "priority": "P0",
+        "cadence": "On release",
+        "url_docs": "https://www.jedec.org/",
+        "limit_rule": "Use official version; no assumed full access"
+      }
+    },
+    {
+      "source_id": "microelectronics:C14",
+      "source_row": 53,
+      "values": {
+        "id": "C14",
+        "family": "Ecosystem",
+        "resource": "CMC microelectronics access",
+        "geography": "CA",
+        "data_focus": "Foundries, process/MPW access, technology services",
+        "machine_format": "Web catalogue",
+        "access_conditions": "Service access conditional",
+        "priority": "P1",
+        "cadence": "Monthly",
+        "url_docs": "https://www.cmc.ca/microelectronics/",
+        "limit_rule": "Service not itself foundry owner"
+      }
+    },
+    {
+      "source_id": "microelectronics:C15",
+      "source_row": 54,
+      "values": {
+        "id": "C15",
+        "family": "Ecosystem",
+        "resource": "European Chips Act",
+        "geography": "EU",
+        "data_focus": "Competence centres, pilot lines, capacity",
+        "machine_format": "Web / policy",
+        "access_conditions": "Public",
+        "priority": "P1",
+        "cadence": "Monthly",
+        "url_docs": "https://digital-strategy.ec.europa.eu/en/policies/european-chips-act",
+        "limit_rule": "Policy/facility milestones, not current supply"
+      }
+    },
+    {
+      "source_id": "microelectronics:D20",
+      "source_row": 55,
+      "values": {
+        "id": "D20",
+        "family": "Conference",
+        "resource": "ISSCC technical program",
+        "geography": "Global",
+        "data_focus": "Measured IC prototypes; AI, imaging, analog, power, RF",
+        "machine_format": "Web/program; papers separately",
+        "access_conditions": "Program public; full papers may require access",
+        "priority": "P0",
+        "cadence": "Annual + program release",
+        "url_docs": "https://www.isscc.org/program-overview",
+        "limit_rule": "Extract test-chip measurement and comparison conditions"
+      }
+    },
+    {
+      "source_id": "microelectronics:D21",
+      "source_row": 56,
+      "values": {
+        "id": "D21",
+        "family": "Conference",
+        "resource": "IEEE IEDM",
+        "geography": "Global",
+        "data_focus": "Emerging devices, memory, process and compute architectures",
+        "machine_format": "Web/program; papers separately",
+        "access_conditions": "Program public; papers may require access",
+        "priority": "P0",
+        "cadence": "Annual + program release",
+        "url_docs": "https://ieee-iedm.org/about/",
+        "limit_rule": "Device research, not necessarily product"
+      }
+    },
+    {
+      "source_id": "microelectronics:D22",
+      "source_row": 57,
+      "values": {
+        "id": "D22",
+        "family": "Conference",
+        "resource": "VLSI Symposium",
+        "geography": "Global",
+        "data_focus": "Chip prototypes, circuits, process technology",
+        "machine_format": "Web/program; papers separately",
+        "access_conditions": "Program public; papers may require access",
+        "priority": "P0",
+        "cadence": "Annual + program release",
+        "url_docs": "https://www.vlsisymposium.org/",
+        "limit_rule": "Capture measured demonstration, not roadmap only"
+      }
+    },
+    {
+      "source_id": "microelectronics:V17",
+      "source_row": 58,
+      "values": {
+        "id": "V17",
+        "family": "Vendor",
+        "resource": "Bosch Sensortec",
+        "geography": "EU DE",
+        "data_focus": "IMU, MEMS, smart sensors and sensor fusion",
+        "machine_format": "Product web/datasheets",
+        "access_conditions": "Public; API not verified",
+        "priority": "P0",
+        "cadence": "Weekly",
+        "url_docs": "https://www.bosch-sensortec.com/en/products/smart-sensor-systems",
+        "limit_rule": "SiP separate from constituent dies"
+      }
+    },
+    {
+      "source_id": "microelectronics:V18",
+      "source_row": 59,
+      "values": {
+        "id": "V18",
+        "family": "Vendor",
+        "resource": "ams OSRAM",
+        "geography": "EU AT/DE",
+        "data_focus": "Optical sensors, spectral, proximity, CMOS imaging",
+        "machine_format": "Product web/datasheets",
+        "access_conditions": "Public; API not verified",
+        "priority": "P0",
+        "cadence": "Weekly",
+        "url_docs": "https://ams-osram.com/products/sensor-solutions",
+        "limit_rule": "Exact SKU and optical conditions"
+      }
+    },
+    {
+      "source_id": "microelectronics:V19",
+      "source_row": 60,
+      "values": {
+        "id": "V19",
+        "family": "Vendor",
+        "resource": "Melexis",
+        "geography": "EU BE",
+        "data_focus": "Magnetic/current/temperature sensors, drivers",
+        "machine_format": "Product web/datasheets",
+        "access_conditions": "Public; API not verified",
+        "priority": "P0",
+        "cadence": "Weekly",
+        "url_docs": "https://www.melexis.com/en/products",
+        "limit_rule": "Exact MPN conditions"
+      }
+    },
+    {
+      "source_id": "microelectronics:V20",
+      "source_row": 61,
+      "values": {
+        "id": "V20",
+        "family": "Vendor",
+        "resource": "Sensirion",
+        "geography": "CH",
+        "data_focus": "Environmental, gas, flow, humidity sensors",
+        "machine_format": "Product web/datasheets",
+        "access_conditions": "Public; API not verified",
+        "priority": "P0",
+        "cadence": "Weekly",
+        "url_docs": "https://sensirion.com/",
+        "limit_rule": "CH not EU; site and origin check"
+      }
+    },
+    {
+      "source_id": "microelectronics:V21",
+      "source_row": 62,
+      "values": {
+        "id": "V21",
+        "family": "Vendor",
+        "resource": "LYNRED",
+        "geography": "EU FR",
+        "data_focus": "IR/thermal detectors and modules",
+        "machine_format": "Product web",
+        "access_conditions": "Public subset; technical data may be gated",
+        "priority": "P0",
+        "cadence": "Weekly",
+        "url_docs": "https://www.lynred.com/about-lynred",
+        "limit_rule": "Detector vs module, cooling and NETD conditions"
+      }
+    },
+    {
+      "source_id": "microelectronics:V22",
+      "source_row": 63,
+      "values": {
+        "id": "V22",
+        "family": "Vendor",
+        "resource": "Teledyne DALSA",
+        "geography": "CA operations",
+        "data_focus": "Imaging, MEMS and foundry",
+        "machine_format": "Product web",
+        "access_conditions": "Public subset; request specs",
+        "priority": "P0",
+        "cadence": "Weekly",
+        "url_docs": "https://www.teledynedalsa.com/en/products/",
+        "limit_rule": "Foreign-control screening; verify MPN fabrication"
+      }
+    },
+    {
+      "source_id": "microelectronics:V23",
+      "source_row": 64,
+      "values": {
+        "id": "V23",
+        "family": "Vendor",
+        "resource": "Teledyne e2v",
+        "geography": "UK operations",
+        "data_focus": "High-speed CMOS/CCD sensors",
+        "machine_format": "Product web",
+        "access_conditions": "Public subset; request specs",
+        "priority": "P0",
+        "cadence": "Weekly",
+        "url_docs": "https://www.teledyne-e2v.com/en-us/solutions/imaging",
+        "limit_rule": "Foreign-control exception screening; verify ROI timing"
+      }
+    },
+    {
+      "source_id": "microelectronics:V24",
+      "source_row": 65,
+      "values": {
+        "id": "V24",
+        "family": "Vendor / R&D",
+        "resource": "Bor\u00e9as Technologies",
+        "geography": "CA",
+        "data_focus": "Low-power piezo drivers and actuation",
+        "machine_format": "Product/application web",
+        "access_conditions": "Public subset",
+        "priority": "P0",
+        "cadence": "Weekly",
+        "url_docs": "https://www.boreas.ca/pages/applications",
+        "limit_rule": "Assess actuation or cooling system boundary"
+      }
+    },
+    {
+      "source_id": "microelectronics:V25",
+      "source_row": 66,
+      "values": {
+        "id": "V25",
+        "family": "R&D / vendor",
+        "resource": "Bonsai Micro (FABrIC)",
+        "geography": "CA",
+        "data_focus": "Energy-efficient edge controller development",
+        "machine_format": "Award/project page",
+        "access_conditions": "Public",
+        "priority": "P0",
+        "cadence": "Weekly",
+        "url_docs": "https://fabricinnovation.ca/bonsai-micro/",
+        "limit_rule": "Funded development, not shipping product"
+      }
+    },
+    {
+      "source_id": "microelectronics:V26",
+      "source_row": 67,
+      "values": {
+        "id": "V26",
+        "family": "Foundry",
+        "resource": "X-FAB",
+        "geography": "EU/global",
+        "data_focus": "Analog/mixed signal, SOI, MEMS, SiC process platforms",
+        "machine_format": "Web/process catalogue",
+        "access_conditions": "Public subset; PDK contractual",
+        "priority": "P1",
+        "cadence": "Monthly",
+        "url_docs": "https://www.xfab.com/technology/",
+        "limit_rule": "Match exact site and process"
+      }
+    },
+    {
+      "source_id": "microelectronics:V27",
+      "source_row": 68,
+      "values": {
+        "id": "V27",
+        "family": "Pilot / ATP",
+        "resource": "C2MI",
+        "geography": "CA",
+        "data_focus": "MEMS, advanced packaging, test and integration",
+        "machine_format": "Equipment/service web",
+        "access_conditions": "Public subset; services conditional",
+        "priority": "P1",
+        "cadence": "Monthly",
+        "url_docs": "https://www.c2mi.ca/en/services/our-equipments/",
+        "limit_rule": "R&D/scale-up capacity not proof of volume fabrication"
+      }
+    },
+    {
+      "source_id": "microelectronics:V28",
+      "source_row": 69,
+      "values": {
+        "id": "V28",
+        "family": "Industry directory",
+        "resource": "Canada Semiconductor Council",
+        "geography": "CA",
+        "data_focus": "Semiconductor ecosystem map / organization discovery",
+        "machine_format": "Web directory",
+        "access_conditions": "Public subset",
+        "priority": "P1",
+        "cadence": "Monthly",
+        "url_docs": "https://www.canadasemiconductorcouncil.com/",
+        "limit_rule": "Distinguish Canadian operations and ultimate control"
+      }
+    }
+  ]
+}

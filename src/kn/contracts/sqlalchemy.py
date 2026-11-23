@@ -80,7 +80,7 @@ def _add_tables(result: sa.MetaData, contract: Contract, target: str) -> None:
                     primary_key=field.primary_key,
                     autoincrement=False,
                     comment=field.description or None,
-                    info={"field_id": field.field_id},
+                    info={"field_id": field.field_id, "logical_type": field.logical_type},
                 )
                 for field in model.fields
             ],
@@ -100,6 +100,7 @@ def _add_tables(result: sa.MetaData, contract: Contract, target: str) -> None:
                 *(table.c[name] for name in column_names(model, index["fields"])),
                 unique=index["unique"],
                 postgresql_using=index["method"],
+                **_index_options(model, table, index),
             )
         for field in model.fields:
             for kind in check_kinds(field):
@@ -117,6 +118,13 @@ def _add_tables(result: sa.MetaData, contract: Contract, target: str) -> None:
                     initially="DEFERRED",
                 )
             )
+
+
+def _index_options(model: Table, table: sa.Table, index: dict[str, Any]) -> dict[str, Any]:
+    if "whereNull" not in index:
+        return {}
+    name = column_names(model, [index["whereNull"]])[0]
+    return {"postgresql_where": table.c[name].is_(None)}
 
 
 def _table_options(model: Table) -> dict[str, Any]:

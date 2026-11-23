@@ -2,6 +2,8 @@ CREATE TABLE semantic.alternative_labels (
 	term_id TEXT NOT NULL,
 	locale TEXT NOT NULL,
 	label TEXT NOT NULL,
+	review_reference TEXT,
+	reviewed_identical BOOLEAN,
 	CONSTRAINT pk_alternative_labels PRIMARY KEY (term_id, locale, label)
 );
 
@@ -93,6 +95,8 @@ CREATE TABLE semantic.labels (
 	label TEXT NOT NULL,
 	definition TEXT,
 	inverse_label TEXT,
+	review_reference TEXT,
+	reviewed_identical BOOLEAN,
 	CONSTRAINT pk_labels PRIMARY KEY (term_id, locale)
 );
 
@@ -100,6 +104,8 @@ CREATE TABLE semantic.namespace_labels (
 	namespace_id TEXT NOT NULL,
 	locale TEXT NOT NULL,
 	label TEXT NOT NULL,
+	review_reference TEXT,
+	reviewed_identical BOOLEAN,
 	CONSTRAINT pk_namespace_labels PRIMARY KEY (namespace_id, locale)
 );
 
@@ -151,7 +157,7 @@ CREATE TABLE semantic.terms (
 	code TEXT NOT NULL,
 	kind TEXT NOT NULL,
 	status TEXT NOT NULL,
-	definition TEXT NOT NULL,
+	definition TEXT,
 	CONSTRAINT pk_terms PRIMARY KEY (id),
 	CONSTRAINT ck_terms_kind_enum CHECK (kind IN ('entity_class', 'relation_type', 'concept_scheme', 'concept', 'concept_mapping', 'entity_tag', 'attribute_definition', 'condition_set', 'comparison_profile', 'rubric')),
 	CONSTRAINT ck_terms_status_enum CHECK (status IN ('draft', 'active', 'deprecated', 'replaced'))
@@ -166,6 +172,10 @@ COMMENT ON COLUMN semantic.alternative_labels.term_id IS 'Reference to terms';
 COMMENT ON COLUMN semantic.alternative_labels.locale IS 'BCP 47 language tag';
 
 COMMENT ON COLUMN semantic.alternative_labels.label IS 'Alternative label';
+
+COMMENT ON COLUMN semantic.alternative_labels.review_reference IS 'Durable terminology review reference for derived text';
+
+COMMENT ON COLUMN semantic.alternative_labels.reviewed_identical IS 'Review explicitly confirms identical English and Ukrainian text';
 
 ALTER TABLE semantic.attribute_definitions ADD CONSTRAINT fk_attribute_definitions_entity_class_id FOREIGN KEY(entity_class_id) REFERENCES semantic.entity_classes (id) DEFERRABLE INITIALLY DEFERRED;
 
@@ -321,6 +331,10 @@ COMMENT ON COLUMN semantic.labels.definition IS 'Localized definition';
 
 COMMENT ON COLUMN semantic.labels.inverse_label IS 'Inverse relation label';
 
+COMMENT ON COLUMN semantic.labels.review_reference IS 'Durable terminology review reference for derived text';
+
+COMMENT ON COLUMN semantic.labels.reviewed_identical IS 'Review explicitly confirms identical English and Ukrainian text';
+
 ALTER TABLE semantic.namespace_labels ADD CONSTRAINT fk_namespace_labels_namespace_id FOREIGN KEY(namespace_id) REFERENCES semantic.namespaces (id) DEFERRABLE INITIALLY DEFERRED;
 
 COMMENT ON TABLE semantic.namespace_labels IS 'Localized namespace names.';
@@ -330,6 +344,10 @@ COMMENT ON COLUMN semantic.namespace_labels.namespace_id IS 'Reference to namesp
 COMMENT ON COLUMN semantic.namespace_labels.locale IS 'BCP 47 language tag';
 
 COMMENT ON COLUMN semantic.namespace_labels.label IS 'Preferred namespace label';
+
+COMMENT ON COLUMN semantic.namespace_labels.review_reference IS 'Durable terminology review reference for derived text';
+
+COMMENT ON COLUMN semantic.namespace_labels.reviewed_identical IS 'Review explicitly confirms identical English and Ukrainian text';
 
 CREATE UNIQUE INDEX semantic_namespaces_0_uq ON semantic.namespaces USING btree (domain, code);
 
@@ -415,4 +433,4 @@ COMMENT ON COLUMN semantic.terms.kind IS 'Semantic dataset kind';
 
 COMMENT ON COLUMN semantic.terms.status IS 'Lifecycle status; deprecated terms remain resolvable';
 
-COMMENT ON COLUMN semantic.terms.definition IS 'Definition in original language';
+COMMENT ON COLUMN semantic.terms.definition IS 'Prose definition when supplied; proposal metadata belongs in provenance';

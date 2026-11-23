@@ -1,0 +1,121 @@
+{
+  "domain": "gdelt",
+  "format": "kn.semantic.verification.v1",
+  "related_publications": [
+    {
+      "comparison": "Inspected publication only, decoded as Windows-1252: c2.21 is Bodypt, c10.1 is Positive, v10.1 is Positive (Scored Value). wc/nwc are structural fields, not named dictionary dimensions. No GCAM concept scheme is seeded; all 14 GCAM/tone proposal rows retain needs_mapping. Dictionary import stays in gdelt-source-dictionaries.",
+      "edition": "GCAM master codebook, retrieved 2026-11-22",
+      "publisher": "The GDELT Project",
+      "source_sha256": "2020a257f0b9d977d60cbfe076ef35db8b04507393adbc8f50d1024a06b8364f",
+      "source_uri": "https://data.gdeltproject.org/documentation/GCAM-MASTER-CODEBOOK.TXT"
+    }
+  ],
+  "reviewed_on": "2026-11-22",
+  "schemes": [
+    {
+      "comparison": "Reviewed proposal origin and intended use. These local terms have no official taxonomy to verify against.",
+      "content_sha256": "fb98c594fbe73a16c7a23cae97ebd16e83a847ccd5fbec386c42695ad1e81c65",
+      "findings": [],
+      "origin": "kb_extension",
+      "scheme_id": "gdelt.applications.scheme",
+      "scope": "Local analyst or service vocabulary only; no official publication or edition claimed.",
+      "text_revision": {
+        "comparison_unchanged": true,
+        "note": "Removed unreviewed uk label copies and proposal-column JSON definitions. English labels, notations, status, hierarchy, mappings and publication evidence are unchanged; proposal columns remain in provenance. The publication comparison result and verification state are unchanged. Missing uk text now falls back to en with its real language reported.",
+        "previous_content_sha256": "d4111660adc8f7f391892f2b835ab8c48cf1cc58b4738b9cfe35cf64ff644616",
+        "record": "docs/impl/records/0027-ontology-taxonomy-vocabulary-text-integrity.md"
+      },
+      "verification_reason": "Unverified local vocabulary; no official edition or publication is claimed. Origin remains kb_extension.",
+      "verification_state": "unverified"
+    },
+    {
+      "comparison": "Compared all 22 string codes and labels against the published event lookup. 21 agree ignoring case; code 20 differs. The source contains 310 distinct numeric codes; 288 are not seeded. Full dictionary import is deferred.",
+      "content_sha256": "82f0bf4afa72cd9f48040f5928ea149724fd409eba656dabae4fac0fff790b7b",
+      "edition": "CAMEO lookup for GDELT 1.0/2.0, retrieved 2026-11-22",
+      "findings": [
+        {
+          "detail": "Source USE UNCONVENTIONAL MASS VIOLENCE differs from seed Engage in unconventional mass violence.",
+          "kind": "mismatch",
+          "locator": "CAMEO.eventcodes.txt, numeric code 20"
+        },
+        {
+          "detail": "288 of 310 distinct numeric lookup codes are absent from the 22-code seed. No full dictionary import performed.",
+          "kind": "missing_leaf",
+          "locator": "CAMEO.eventcodes.txt, e.g. 010 and 2042"
+        }
+      ],
+      "origin": "official",
+      "publisher": "The GDELT Project",
+      "scheme_id": "gdelt.cameo_v2.scheme",
+      "scope": "22 proposed event codes (20 roots plus 025 and 0251); retain leading zeroes. Case-insensitive source labels; uk source-text fallback. Not the complete CAMEO dictionary.",
+      "source_sha256": "ccbfa4f59f62028399363dd8a9458b64128b5044d29df591bad718cdeccc145d",
+      "source_uri": "https://www.gdeltproject.org/data/lookups/CAMEO.eventcodes.txt",
+      "text_revision": {
+        "comparison_unchanged": true,
+        "note": "Removed unreviewed uk label copies and proposal-column JSON definitions. English labels, notations, status, hierarchy, mappings and publication evidence are unchanged; proposal columns remain in provenance. The publication comparison result and verification state are unchanged. Missing uk text now falls back to en with its real language reported.",
+        "previous_content_sha256": "0b7e3e936d457463b5b8ac34b312d4dfaebceeadd3d5b037c3f89f18dd4765fd",
+        "record": "docs/impl/records/0027-ontology-taxonomy-vocabulary-text-integrity.md"
+      },
+      "verification_reason": "Unverified: CAMEO 20 source label is USE UNCONVENTIONAL MASS VIOLENCE, while the seed says Engage in unconventional mass violence. Other 21 included codes and labels agree ignoring case.",
+      "verification_state": "unverified"
+    },
+    {
+      "comparison": "All 43 code/label strings occur verbatim in the 59,315-code lookup linked by the November 20, 2021 publication. No hierarchy was inferred from underscores. Exact source bytes are checksum-pinned because the URL is mutable.",
+      "content_sha256": "1b49ae209207124debf74753402321394e6f820154be88349e97af8d5a8b865e",
+      "edition": "November 2021 theme lookup, announced 2021-11-20",
+      "findings": [
+        {
+          "detail": "59,272 lookup codes are outside the selected 43-code subset. GKG lookup supplies no primary hierarchy.",
+          "kind": "missing_leaf",
+          "locator": "LOOKUP-GKGTHEMES.TXT"
+        }
+      ],
+      "origin": "official",
+      "publisher": "The GDELT Project",
+      "scheme_id": "gdelt.gkg_themes_2021.scheme",
+      "scope": "43 proposed native theme codes only; source lookup is a frequency list, not a parent hierarchy. No dictionary import or frequency ingestion. uk source-code fallback.",
+      "source_sha256": "9cfd25544b1c9ca705dc43633b636bdb092805ab524b45c5739a15f719a999cf",
+      "source_uri": "https://data.gdeltproject.org/api/v2/guides/LOOKUP-GKGTHEMES.TXT",
+      "text_revision": {
+        "comparison_unchanged": true,
+        "note": "Removed unreviewed uk label copies and proposal-column JSON definitions. English labels, notations, status, hierarchy, mappings and publication evidence are unchanged; proposal columns remain in provenance. The publication comparison result and verification state are unchanged. Missing uk text now falls back to en with its real language reported.",
+        "previous_content_sha256": "87c3af38a80128288d2b5a558fb50c4de03927b16ec2a3ca0c3e969c1c3a64a0",
+        "record": "docs/impl/records/0027-ontology-taxonomy-vocabulary-text-integrity.md"
+      },
+      "verification_reason": "Verified 43 native codes only against the November 2021 linked lookup; 59,272 other codes are absent. No full dictionary or Ukrainian terminology verification is claimed.",
+      "verification_state": "verified"
+    },
+    {
+      "comparison": "Reviewed proposal origin and intended use. These local terms have no official taxonomy to verify against.",
+      "content_sha256": "2497443a3a3b84548a7a0652b92442ba3b05a600960e28326876fa45e143c671",
+      "findings": [],
+      "origin": "service_extension",
+      "scheme_id": "gdelt.services.scheme",
+      "scope": "Local analyst or service vocabulary only; no official publication or edition claimed.",
+      "text_revision": {
+        "comparison_unchanged": true,
+        "note": "Removed unreviewed uk label copies and proposal-column JSON definitions. English labels, notations, status, hierarchy, mappings and publication evidence are unchanged; proposal columns remain in provenance. The publication comparison result and verification state are unchanged. Missing uk text now falls back to en with its real language reported.",
+        "previous_content_sha256": "2c69b4c09a681316f32d84aea18af37638ab81ec316c147dd864ffba7f0a2ce0",
+        "record": "docs/impl/records/0027-ontology-taxonomy-vocabulary-text-integrity.md"
+      },
+      "verification_reason": "Unverified local vocabulary; no official edition or publication is claimed. Origin remains service_extension.",
+      "verification_state": "unverified"
+    },
+    {
+      "comparison": "Reviewed proposal origin and intended use. These local terms have no official taxonomy to verify against.",
+      "content_sha256": "2491e462327d998e2b587ab96840fc83ca6481549b0468ec8eeaca9ff60a53f7",
+      "findings": [],
+      "origin": "kb_extension",
+      "scheme_id": "gdelt.technology.scheme",
+      "scope": "Local analyst or service vocabulary only; no official publication or edition claimed.",
+      "text_revision": {
+        "comparison_unchanged": true,
+        "note": "Removed unreviewed uk label copies and proposal-column JSON definitions. English labels, notations, status, hierarchy, mappings and publication evidence are unchanged; proposal columns remain in provenance. The publication comparison result and verification state are unchanged. Missing uk text now falls back to en with its real language reported.",
+        "previous_content_sha256": "f3c6e63ccdd2b914908425595bf4609c003c31f51954a48203a589c069d19007",
+        "record": "docs/impl/records/0027-ontology-taxonomy-vocabulary-text-integrity.md"
+      },
+      "verification_reason": "Unverified local vocabulary; no official edition or publication is claimed. Origin remains kb_extension.",
+      "verification_state": "unverified"
+    }
+  ]
+}

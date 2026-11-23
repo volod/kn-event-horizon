@@ -1,0 +1,178 @@
+{
+  "apiVersion": "v3.1.0",
+  "kind": "DataContract",
+  "id": "kn.core.human_verification",
+  "name": "KN human verification decisions",
+  "version": "1.0.0",
+  "status": "draft",
+  "customProperties": [
+    {
+      "property": "kn.storageSchema",
+      "value": "evidence"
+    }
+  ],
+  "schema": [
+    {
+      "name": "human_verification_decisions",
+      "logicalType": "object",
+      "physicalType": "table",
+      "description": "Append-only SQL projection of the trusted durable human decision journal.",
+      "customProperties": [
+        {
+          "property": "kn.humanVerification",
+          "value": {
+            "strategy": "decision-log",
+            "resolver": "contract-v1",
+            "recordFields": [
+              "evidence.human_verification_decisions.decision_id",
+              "evidence.human_verification_decisions.target_id",
+              "evidence.human_verification_decisions.request_key",
+              "evidence.human_verification_decisions.reviewer",
+              "evidence.human_verification_decisions.performed_at",
+              "evidence.human_verification_decisions.recorded_at",
+              "evidence.human_verification_decisions.outcome",
+              "evidence.human_verification_decisions.event_json"
+            ],
+            "fieldContexts": {}
+          }
+        },
+        {
+          "property": "kn.index",
+          "value": [
+            {
+              "name": "human_verification_target_idx",
+              "fields": [
+                "target_id"
+              ],
+              "method": "btree",
+              "unique": false
+            },
+            {
+              "name": "human_verification_request_idx",
+              "fields": [
+                "request_key"
+              ],
+              "method": "btree",
+              "unique": true
+            }
+          ]
+        }
+      ],
+      "properties": [
+        {
+          "name": "decision_id",
+          "logicalType": "string",
+          "required": true,
+          "primaryKey": true,
+          "description": "Deterministic SHA-256 of the canonical typed event",
+          "customProperties": [
+            {
+              "property": "kn.fieldId",
+              "value": "evidence.human_verification_decisions.decision_id"
+            }
+          ]
+        },
+        {
+          "name": "target_id",
+          "logicalType": "string",
+          "required": true,
+          "primaryKey": false,
+          "description": "SHA-256 of the exact typed target including scope, version and purpose",
+          "customProperties": [
+            {
+              "property": "kn.fieldId",
+              "value": "evidence.human_verification_decisions.target_id"
+            }
+          ]
+        },
+        {
+          "name": "request_key",
+          "logicalType": "string",
+          "required": true,
+          "primaryKey": false,
+          "description": "SHA-256 of authenticated reviewer and client request ID",
+          "customProperties": [
+            {
+              "property": "kn.fieldId",
+              "value": "evidence.human_verification_decisions.request_key"
+            }
+          ]
+        },
+        {
+          "name": "reviewer",
+          "logicalType": "string",
+          "required": true,
+          "primaryKey": false,
+          "description": "Authenticated authorized human principal reference",
+          "customProperties": [
+            {
+              "property": "kn.fieldId",
+              "value": "evidence.human_verification_decisions.reviewer"
+            }
+          ]
+        },
+        {
+          "name": "performed_at",
+          "logicalType": "timestamp",
+          "required": true,
+          "primaryKey": false,
+          "description": "Actual UTC instant of the human decision",
+          "customProperties": [
+            {
+              "property": "kn.fieldId",
+              "value": "evidence.human_verification_decisions.performed_at"
+            }
+          ]
+        },
+        {
+          "name": "recorded_at",
+          "logicalType": "timestamp",
+          "required": true,
+          "primaryKey": false,
+          "description": "Separate trusted UTC journal recording time",
+          "customProperties": [
+            {
+              "property": "kn.fieldId",
+              "value": "evidence.human_verification_decisions.recorded_at"
+            }
+          ]
+        },
+        {
+          "name": "outcome",
+          "logicalType": "string",
+          "required": true,
+          "primaryKey": false,
+          "description": "Append-only acceptance, rejection, revocation or supersession",
+          "customProperties": [
+            {
+              "property": "kn.fieldId",
+              "value": "evidence.human_verification_decisions.outcome"
+            },
+            {
+              "property": "kn.enum",
+              "value": [
+                "accept",
+                "reject",
+                "revoke",
+                "supersede"
+              ]
+            }
+          ]
+        },
+        {
+          "name": "event_json",
+          "logicalType": "string",
+          "required": true,
+          "primaryKey": false,
+          "description": "Canonical human-verification v1 event; authoritative replay payload",
+          "customProperties": [
+            {
+              "property": "kn.fieldId",
+              "value": "evidence.human_verification_decisions.event_json"
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

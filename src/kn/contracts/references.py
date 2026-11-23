@@ -69,6 +69,7 @@ def resolve_extensions(data: dict[str, Any], catalog: dict[str, Any]) -> None:
             if item["property"] == "kn.fieldId"
         }
         path: Location = ("schema", index)
+        _verification_coverage(table, path)
         _node(table, path, fields, catalog)
         for number, field in enumerate(table["properties"]):
             _node(field, (*path, "properties", number), fields, catalog)
@@ -107,6 +108,27 @@ def _node(node: dict[str, Any], path: Location, fields: set[str], catalog: dict[
             for entry in value:
                 _symbol("vocabulary", entry, catalog, location)
         _special(name, value, fields, catalog, location)
+
+
+def _verification_coverage(node: dict[str, Any], path: Location) -> None:
+    for index, item in enumerate(node.get("customProperties", [])):
+        if item["property"] == "kn.humanVerification":
+            _verification(node, item["value"], (*path, "customProperties", index, "value"))
+
+
+def _verification(node: dict[str, Any], value: dict[str, Any], path: Location) -> None:
+    stable = {
+        extension["value"]
+        for field in node["properties"]
+        for extension in field.get("customProperties", [])
+        if extension["property"] == "kn.fieldId"
+    }
+    refs = set(value["recordFields"]) | set(value["fieldContexts"])
+    refs.update(ref for context in value["fieldContexts"].values() for ref in context)
+    if not refs <= stable:
+        raise ContractError(path, "reference", "use stable field IDs in verification coverage")
+    if any(field not in context for field, context in value["fieldContexts"].items()):
+        raise ContractError(path, "reference", "include each reviewed field in its content context")
 
 
 def _special(

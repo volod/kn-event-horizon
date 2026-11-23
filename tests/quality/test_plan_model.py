@@ -13,7 +13,8 @@ def test_registry_and_task_metadata_are_parsed(tmp_path: Path) -> None:
     assert [capability.identifier for capability in registry] == ["foundation", "feature"]
     assert registry[0].status == "shipped"
     assert [(task.identifier, task.serves, task.agent_status) for task in tasks] == [
-        ("build-feature", "feature", "CLEAR")
+        ("build-feature", "feature", "CLEAR"),
+        ("feature-implementation-audit", "feature", "CLEAR"),
     ]
 
 
@@ -21,7 +22,10 @@ def test_fenced_task_examples_are_not_parsed(tmp_path: Path) -> None:
     plan = plan_with(task_block()) + "\n```markdown\n#### example-task\n```\n"
     root = write_project(tmp_path, plan=plan)
 
-    assert [task.identifier for task in read_tasks(root / "docs/impl/plan.md")] == ["build-feature"]
+    assert [task.identifier for task in read_tasks(root / "docs/impl/plan.md")] == [
+        "build-feature",
+        "feature-implementation-audit",
+    ]
 
 
 def test_only_the_capability_registry_table_is_parsed(tmp_path: Path) -> None:
@@ -47,5 +51,5 @@ def test_only_the_capability_registry_table_is_parsed(tmp_path: Path) -> None:
 def test_wrapped_prerequisites_are_preserved(tmp_path: Path) -> None:
     block = task_block() + "\n- Requires: `first-task`,\n  `second-task`\n"
     root = write_project(tmp_path, plan=plan_with(block))
-    (task,) = read_tasks(root / "docs/impl/plan.md")
+    task, _ = read_tasks(root / "docs/impl/plan.md")
     assert task.fields["requires"] == "`first-task`, `second-task`"

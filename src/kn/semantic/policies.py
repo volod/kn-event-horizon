@@ -9,6 +9,8 @@ from urllib.parse import urlsplit
 from kn.semantic.structure import Snapshot, indexed, refuse
 
 SHA256 = re.compile(r"[0-9a-f]{64}")
+# RFC 3987 excludes these from an IRI; RDF serializations cannot write them in an IRI reference.
+IRI_EXCLUDED = re.compile(r'[\x00-\x20<>"{}|\\^`\x7f]')
 
 
 @dataclass(frozen=True)
@@ -47,7 +49,8 @@ def _publication_uri(uri: str) -> bool:
     try:
         parsed = urlsplit(uri)
         return (
-            parsed.scheme in {"http", "https"}
+            not IRI_EXCLUDED.search(uri)
+            and parsed.scheme in {"http", "https"}
             and bool(parsed.hostname)
             and parsed.username is None
             and parsed.password is None

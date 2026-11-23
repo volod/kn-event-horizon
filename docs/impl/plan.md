@@ -5,14 +5,17 @@ in [current-state documentation](current.md). Product behavior and evaluation be
 [specification](../design/spec.md). Research questions that stopped, with what would reopen them,
 belong in the [closed-research register](future-research.md).
 
-Every task serves a capability from the
-[capability registry](../design/spec.md#capability-registry). Capability groups follow registry
-order in both lanes. Prefer required work whose start prerequisites are satisfied.
+The agent lane groups tasks by the result a consumer can use. Each delivery group ends with
+its implementation audit. `Serves` identifies the specification owner of each task. Open
+`Requires` entries gate work across both lanes. Choose the first ready required task in written
+order, checking its external dependencies, then optional extensions when required work waits.
+Human approvals stay in their own lane and apply only to the scope described there.
 
-Task fields, statuses, ordering, and the capability-gap lifecycle are defined in the
-[planning workflow](../guide/planning-workflow.md). Run `make plan-status` to view lane counts and
-the highest-priority candidate in each lane after filtering open task prerequisites. Check its
-external and manual dependencies before starting.
+Follow the [contract and fixture checks](../guide/schema-first-development.md) for each group.
+The integrated model and backfill audit gates release approval. A consumer can start as soon as
+its own producers pass their audits. Run `make plan-status` for lane counts and next candidates.
+Record findings during implementation and at each handoff under the
+[planning workflow](../guide/planning-workflow.md#implementation-audits).
 
 The project uses ODCS storage contract version `1.0.0` and a single editable Python
 SQLAlchemy/Alembic baseline during development. Rebuild and backfill replace development revision
@@ -20,151 +23,14 @@ chains. First release freezes this baseline and enables subsequent versioned mig
 The external interchange contract and counterpart adapters remain
 independently versioned. Object identity, partial-update tracking, interchange, and InvenTree
 compatibility are core work and come before the domain pipelines.
-Source tasks follow the [onboarding workflow](../design/spec.md#source-management) and the
+Source tasks follow the [onboarding workflow](../guide/source-onboarding.md) and the
 [TDD growth rule](../design/spec.md#ingestion-engine). Each source adds failing fixtures first, then
 general engine changes, and reruns every earlier source suite plus a rebuild from the fixture
 archive.
 
-Each agent group ends with an optional `<group>-implementation-audit` task. It follows the
-[implementation audit](../guide/planning-workflow.md#implementation-audits) checks once the group's
-required `CLEAR` tasks leave the plan, and turns every finding into a fix, a scheduled task, or a
-recorded decision before later groups build on the group.
-
 ## Agent Implementation Tasks
 
-### Ontology and taxonomy -- `ontology-taxonomy`
-
-#### seed-vocabulary-import
-
-The converted workbook proposals must become reviewed seed data with a row-by-row reconciliation.
-
-- Serves: `ontology-taxonomy` -- [Ontology and taxonomy](../design/spec.md#ontology-and-taxonomy)
-- Agent status: CLEAR
-- Dependencies: The [semantic meta-model](current/ontology-taxonomy.md), the
-  [reviewed seed hook](current/data-contracts/rebuild.md#reviewed-seed-hook) and
-  the proposal JSON under `domains/<domain>/seeds/proposals/`, documented in
-  [domains/README.md](../../domains/README.md).
-- User-visible outcome: Every rebuild loads reviewed space, GDELT, and microelectronics ontology and
-  taxonomy seeds with deterministic identifiers. A reconciliation report classifies every proposal
-  row.
-- Scope boundary: Namespacing (including the `S*` and `APP.*` collisions), relation-direction
-  normalization with inverse labels, and structural parents for the ESA GPT nodes. The pilot's
-  missing space classes are added as `kb_extension`. Examples and templates become fixtures. All
-  schemes stay unverified. The source catalogue comes in `source-catalogue-import`.
-- Data and artifact paths: `domains/<domain>/seeds/`, `src/kn/semantic/seeds.py`,
-  `$DATA_DIR/seed-import/<run-id>/` for the reconciliation report, `tests/semantic/`.
-- Execution path: Write a deterministic import from the proposals into reviewed seed files, and
-  have a maintainer review the diff of those files. The rebuild hook then loads the reviewed files.
-- Acceptance gates: Every proposal row is `accepted`, `duplicate`, `needs_mapping`, or `rejected`
-  with a reason. Identifiers are identical across two runs. No example row becomes an entity. Every
-  file records its provenance (file, SHA-256, sheet, row).
-- Documentation target: `current/ontology-taxonomy.md` listed in the
-  [areas index](current.md#areas).
-
-#### verify-official-taxonomies
-
-Concepts that name an official standard cannot be shown as official until checked against the
-publication.
-
-- Serves: `ontology-taxonomy` -- [Ontology and taxonomy](../design/spec.md#ontology-and-taxonomy)
-- Agent status: CLEAR
-- Research: yes
-- Requires: `seed-vocabulary-import`
-- Dependencies: Public access to the ESA GPT, ESA Technology Tree v4.1 (STM-277), NASA 2024
-  Technology Taxonomy, EUSPA EU Space Market Report 2026, ECS SRIA 2026, OECD "Chips, nodes and
-  wafers", and GDELT lookup publications.
-- User-visible outcome: Each scheme records a verified edition, URI, and checksum, or stays
-  `unverified` with a stated reason, and interfaces label it accordingly.
-- Scope boundary: Documentation reading and comparison only. No full-dictionary import for GDELT,
-  which is source work in `gdelt-source-dictionaries`.
-- Data and artifact paths: `domains/<domain>/seeds/verification.json`, `tests/semantic/`, and the
-  task record.
-- Execution path: Compare codes and labels with each official document, and record mismatches and
-  missing leaves.
-- Acceptance gates: Every scheme has a verification state with evidence. A mismatch keeps the
-  concept unverified rather than changing it silently. A negative result (publication
-  inaccessible) is valid when recorded.
-- Documentation target: `current/ontology-taxonomy.md` listed in the
-  [areas index](current.md#areas).
-
-#### skos-export
-
-Vocabularies need a standard interchange format.
-
-- Serves: `ontology-taxonomy` -- [Ontology and taxonomy](../design/spec.md#ontology-and-taxonomy)
-- Agent status: CLEAR
-- Requires: `seed-vocabulary-import`
-- Dependencies: RDFLib as the justified dependency.
-- User-visible outcome: `kn vocabulary export --format skos --scheme <id>` writes Turtle with `en`
-  and `uk` labels, hierarchy, notations, definitions, and mappings.
-- Scope boundary: Export only. SKOS never becomes the source of truth.
-- Data and artifact paths: `src/kn/semantic/skos.py`, `$DATA_DIR/skos/<run-id>/`,
-  `tests/semantic/`.
-- Execution path: Map the meta-model to SKOS terms, and keep analyst crosswalks as distinct
-  mapping properties.
-- Acceptance gates: The export parses with RDFLib, labels round-trip, and an analyst extension is
-  never typed as an official scheme.
-- Documentation target: `current/ontology-taxonomy.md` listed in the
-  [areas index](current.md#areas).
-
-#### ontology-taxonomy-implementation-audit (optional)
-
-Concept IDs, schemes, and crosswalks become references in claims, exports, and dashboards, so
-changing them later breaks stored data and links.
-
-- Serves: `ontology-taxonomy` -- [Ontology and taxonomy](../design/spec.md#ontology-and-taxonomy)
-- Agent status: CLEAR
-- Requires: `seed-vocabulary-import`, `verify-official-taxonomies`,
-  `skos-export`
-- Dependencies: The accepted task records of the group and the [implementation
-  audit](../guide/planning-workflow.md#implementation-audits) checks.
-- User-visible outcome: Claims and exports reference stable, verified concepts. The audit record
-  gives every check a result and every finding a disposition. The current-state page lists known
-  limitations, and each scheduled finding is a plan task.
-- Scope boundary: Focus: stability of concept IDs and URIs across rebuilds; deprecation and
-  replacement of concepts in use; hierarchy cycles and multiple parents; label parity in `en` and
-  `uk`; seed reconciliation of added, changed, and removed rows; official editions and checksum
-  drift; the SKOS round trip; a new domain scheme or edition without renumbering. Fixes only; new
-  behavior becomes plan tasks.
-- Data and artifact paths: `contracts/core/semantic/`, `src/kn/semantic/`,
-  `domains/<domain>/seeds/`, `tests/semantic/`, `docs/impl/plan.md`, and the task record.
-- Execution path: Rerun the group's acceptance commands, then work through the audit checks. Rebuild
-  twice and compare concept IDs, plant a cycle and a duplicate label, deprecate a concept that a
-  claim uses, and parse the SKOS export with an independent parser.
-- Acceptance gates: Concept IDs are identical across rebuilds. A cycle, a duplicate label, and a
-  deprecated concept in use are reported. The SKOS export parses with an independent tool. Every
-  finding has a severity, evidence, and a disposition, no `blocker` is accepted, and every fix
-  starts from a failing regression test. `make ci` passes with the scheduled tasks in the plan.
-- Documentation target: `current/ontology-taxonomy.md` listed in the [areas
-  index](current.md#areas).
-
-### Object identity -- `object-identity`
-
-#### identity-registry-contracts
-
-Every later capability needs one durable KN ID per object before any claim refers to it.
-
-- Serves: `object-identity` -- [Object identity](../design/spec.md#object-identity)
-- Agent status: CLEAR
-- Dependencies: The [semantic meta-model](current/ontology-taxonomy.md).
-- User-visible outcome: The `identity` schema holds objects, identifiers with authority levels,
-  identity attributes, source records with versions, links, match records, lifecycle events, and
-  redirects. `kn db rebuild` replays the append-only identity event log in `$DATA_DIR/identity/`
-  before any raw record, so every KN ID survives a rebuild.
-- Scope boundary: Contracts with the `kn.identity` extension, including source record keys;
-  constraints (no reused KN ID, one active link per source record, identifiers unique per
-  namespace within their validity, links only to active objects); the event log format and its
-  replay; UUIDv7 minting keyed by the anchoring record. Lifecycle commands, matching, and change
-  sets come in later tasks.
-- Data and artifact paths: `contracts/core/identity/`, `src/kn/identity/`, `$DATA_DIR/identity/`,
-  `tests/identity/`.
-- Execution path: Write the contracts and the log schema, compile, and test replay against the
-  integration database. Fixture logs cover every event type and every invalid transition.
-- Acceptance gates: Replaying one log twice gives identical tables. Dropping the database and
-  rebuilding keeps every KN ID. A reused ID, a link to a retired object, and a merge into a merged
-  object are rejected. A merged ID resolves to its survivor. `make ci` passes.
-- Documentation target: A new `current/object-identity.md` page listed in the
-  [areas index](current.md#areas).
+### Identity lifecycle and matching -- `identity-resolution`
 
 #### object-lifecycle-operations
 
@@ -172,8 +38,8 @@ Merges, splits, and retirements must be explicit, reviewed, and kept as reversib
 
 - Serves: `object-identity` -- [Object identity](../design/spec.md#object-identity)
 - Agent status: CLEAR
-- Requires: `identity-registry-contracts`
-- Dependencies: none.
+- Dependencies: The [registry replay APIs](current/object-identity.md#replay-and-integrity) and
+  [shared trusted review protocol](current/evidence-model.md#trusted-decision-application).
 - User-visible outcome: `kn identity show|resolve|history|merge|split|retire|restore` work in `en`
   and `uk`. Each state change writes a review decision and the identity event that cites it. It
   moves links, so claims follow their source records, and old IDs stay resolvable.
@@ -183,8 +49,8 @@ Merges, splits, and retirements must be explicit, reviewed, and kept as reversib
   for match candidates come in `review-queue-cli`.
 - Data and artifact paths: `src/kn/identity/lifecycle.py`, `src/kn/cli.py`, `$DATA_DIR/decisions/`,
   `tests/identity/`.
-- Execution path: Write fixture-first tests for each transition in the specification table, then
-  the state machine and the CLI with localized messages.
+- Execution path: Extend the registry replay validators with fixture-first operation and review
+  tests, then implement the lifecycle workflow and CLI with localized messages.
 - Acceptance gates: A merge followed by a split restores links deterministically with full history.
   A cross-class merge is refused. A redirect chain resolves in one step. A lookup by a split ID
   returns its successors. Golden outputs exist in both locales.
@@ -204,7 +70,9 @@ decisions.
   source-qualified links, scored matching over declared identity attributes, and alias candidates,
   in that order. Each decision writes a match record with features, comparator outcomes, weights,
   score, probability, profile digest, and the outcome: auto-link, review, or new object.
-- Scope boundary: The match profile format and its validation, which rejects name-only link paths.
+- Scope boundary: Matching behavior and validation against the
+  [early profile schema](../../contracts/core/identity/match-profile.schema.json), including
+  rejection of name-only link paths.
   Normalizers for MPNs, organization names, web domains, and identifiers. Blocking, comparators,
   Fellegi-Sunter weights, thresholds and margin, the `calibrated` flag that keeps uncalibrated
   profiles review-only, and deterministic tie-breaking. Profiles for organization, manufacturer
@@ -219,6 +87,59 @@ decisions.
   score and probability. A profile whose link threshold names alone can reach fails validation.
 - Documentation target: `current/object-identity.md` listed in the [areas index](current.md#areas).
 
+#### identity-resolution-implementation-audit
+
+Verify the identity lifecycle and matching handoff against its specification and the next consumer.
+
+- Serves: `object-identity` -- [Object identity](../design/spec.md#object-identity)
+- Agent status: CLEAR
+- Requires: `object-lifecycle-operations`, `identity-match-engine`
+- Dependencies: Group acceptance records and the
+  [audit procedure](../guide/planning-workflow.md#implementation-audits).
+- User-visible outcome: The group has reproducible acceptance evidence and owned follow-up work.
+- Scope boundary: Verify this group's outputs, failure paths and downstream compatibility.
+- Data and artifact paths: Group fixtures, the numbered audit record and the forward plan.
+- Execution path: Replay a merge followed by a split and submit a name-only match. Compare IDs and
+  decisions across rebuilds and check the review boundary.
+- Acceptance gates: Reproduce the member gates, run the six audit checks and record each finding
+  with evidence, severity and disposition. Fix blockers before handoff and run `make ci`.
+- Documentation target: `current/object-identity.md` listed in the [areas index](current.md#areas).
+
+### Claims, change tracking and lineage -- `object-identity`
+
+#### evidence-claim-contracts
+
+Claims, evidence, and canonical facts need contracts that carry every provenance field.
+
+- Serves: `evidence-model` -- [Evidence model](../design/spec.md#evidence-model)
+- Agent status: CLEAR
+- Execution stage: MODEL
+- Dependencies: The [qualified catalogue IDs](current/source-management.md#reviewed-inputs-and-identifiers).
+- User-visible outcome: The `evidence` schema holds alias, claim, claim confirmation, evidence,
+  relation assertion, canonical fact, and review item datasets with value-or-missing-reason
+  constraints. Every claim refers to a KN ID and to its source record version.
+- Scope boundary: Contracts, constraints, deterministic claim keys, and as-of views. Objects and
+  identifiers come from the identity registry. Selection policies come in
+  `canonical-fact-selection`. Claims and canonical fact projections reuse the shared optional,
+  version-bound human verification model instead of defining another timestamp convention.
+  Include the review-item/decision shapes, claim confirmations, field-change lineage, selection
+  outcome/history and source-rank/update-policy formats needed by later writers. Those tasks
+  implement behavior over this model rather than adding another core state layout.
+- Data and artifact paths: `contracts/core/evidence/`, `src/kn/evidence/`, `tests/evidence/`.
+- Execution path: Write the contracts with `kn.temporalProfile` and `kn.evidence` extensions, and
+  compile and test the constraints against the integration database.
+- Acceptance gates: A claim without an origin URI, a fetch time, or a value-or-missing-reason is
+  rejected. Re-inserting the same claim key is a no-op. As-of views are deterministic on fixtures.
+  A claim that cites a deprecated or replaced concept appears in the
+  [lifecycle report](current/ontology-taxonomy.md#lifecycle-report) as an external use, with the
+  concept's successor.
+  Multilingual text projections preserve originals, language tags, and translation provenance under
+  the [localization policy](../design/spec.md#localization), without duplicating facts per locale.
+  A changed claim version has no inherited human verification; an unreviewed claim keeps null
+  metadata, regardless of its imported source verification label.
+- Documentation target: A new `current/evidence-model.md` page listed in the
+  [areas index](current.md#areas).
+
 #### partial-update-tracking
 
 Sources send partial records and declare nothing about completeness. Every change must still be
@@ -226,7 +147,7 @@ detected per field and traced back to its record version.
 
 - Serves: `object-identity` -- [Object identity](../design/spec.md#object-identity)
 - Agent status: CLEAR
-- Requires: `identity-match-engine`, `evidence-claim-contracts`
+- Requires: `identity-resolution-implementation-audit`, `evidence-claim-contracts`
 - Dependencies: none.
 - User-visible outcome: For each mapped record, the engine computes a field-level change set
   (added, changed, unchanged, emptied, or not stated) against the record's previous version. Only
@@ -239,6 +160,8 @@ detected per field and traced back to its record version.
   and change-set lineage (record version, fetch ID, archive record ID, code digest). How a claim
   changes the object belongs to `canonical-fact-selection`. Engine wiring comes in
   `mapping-and-quality-rules`.
+  Consume registered source/version/change-set and confirmation contracts; no parallel
+  tracker-owned definition of these records is introduced.
 - Data and artifact paths: `src/kn/identity/tracking/`, `contracts/core/identity/`,
   `contracts/core/evidence/`, `tests/identity/`.
 - Execution path: Write one fixture per row of the specification's change table, plus a record
@@ -249,6 +172,46 @@ detected per field and traced back to its record version.
   identical re-delivery adds a confirmation and no claim. An older version that arrives late does
   not become current.
 - Documentation target: `current/object-identity.md` listed in the [areas index](current.md#areas).
+
+#### canonical-fact-selection
+
+Sources declare nothing, so KN must decide by explicit rules how each new claim fills, replaces, or
+leaves an object's value. Arrival order must never decide.
+
+- Serves: `evidence-model` -- [Evidence model](../design/spec.md#evidence-model)
+- Agent status: CLEAR
+- Requires: `evidence-claim-contracts`, `identity-resolution-implementation-audit`
+- Dependencies: The [reviewed source rank override format and catalogue IDs](current/source-management.md#reviewed-inputs-and-identifiers).
+- User-visible outcome: The engine projects each field's canonical value through its update
+  policy. The modes are `priority`, `latest_observed`, `accumulate`, and `fixed`. A candidate value
+  ranks by its best supporting claim: source rank, then evidence class, then data time within one
+  source. Every change is explained as filled, replaced, ignored, corroborated, or conflict, with
+  the deciding criterion. Selection flags owner overrides of first-party values for review.
+  Identity redirects are followed. Conflicts, and high-impact facts
+  without primary evidence, go to review.
+- Scope boundary: The `kn.updatePolicy` semantics; the reviewed source rank table
+  `contracts/core/policies/source-ranks.yaml`, with `owner_entered` as the highest class and review
+  decisions ranked through it; evidence classes; verification states derived from support and
+  review; eligibility (minimum rank and evidence class, rights, conditions); empty-claim handling;
+  freshness and `stale` labels; audience-specific selection from eligible evidence. Identity
+  resolution belongs to `identity-match-engine`. Domain policies come with domain contracts.
+  Only the matching accepted human decision can supply human-verification metadata for the
+  selected claim; timestamps alone never bypass eligibility or resolve a conflict.
+- Data and artifact paths: `src/kn/evidence/`, `contracts/core/policies/`, `tests/evidence/`.
+- Execution path: Write fixture-first tests for each outcome, mode, and verification state in the
+  specification, then the selector.
+- Acceptance gates: An empty field is filled by the first eligible claim. A higher-ranked value
+  replaces it, and a lower-ranked value is ignored and stays visible. An owner-entered value
+  outranks a manufacturer value and is flagged `owner_override`. A value that a higher-ranked
+  source also supports wins, while repeated claims or confirmations from one source add no rank.
+  A newer datasheet revision from the same source replaces the older one. Different values from
+  two sources of equal rank and evidence class conflict. Under `latest_observed`, a newer price
+  wins, and an old winner shows as `stale`. A different value on a `fixed` field opens review, and
+  an outranking empty claim opens review without clearing. Every permutation of arrival order
+  gives identical canonical values. Fixtures keep organization, model, spacecraft, constellation,
+  program, and service distinct, and a contradictory ownership claim stays conflicted. Claims
+  about a merged object are selected under its survivor. Signals never fill canonical fields.
+- Documentation target: `current/evidence-model.md` listed in the [areas index](current.md#areas).
 
 #### object-lineage-lookup
 
@@ -271,40 +234,15 @@ Operators must be able to trace any object or field back to every record and dec
   Golden outputs exist in both locales.
 - Documentation target: `current/object-identity.md` listed in the [areas index](current.md#areas).
 
-#### identity-match-calibration
-
-Match probabilities mean something only after they are measured on real records.
-
-- Serves: `object-identity` -- [Object identity](../design/spec.md#object-identity)
-- Agent status: RUN NEEDED
-- Research: yes
-- Requires: `vl-itree-read-acceptance`, `object-lineage-lookup`
-- Dependencies: Archived authorized samples that carry authoritative identifiers, starting with the
-  `vl-itree` read import and the first vendor sources. Owner-labeled pairs are optional.
-- User-visible outcome: A calibration report per class gives precision and recall at both
-  thresholds and the calibration error per probability band. Profiles that meet the gate are marked
-  `calibrated` and may auto-link.
-- Scope boundary: Ground truth comes from pairs proven by authoritative identifiers, with those
-  identifiers masked, plus reviewer decisions. Weights and thresholds change only through reviewed
-  profile edits. No learned matcher.
-- Data and artifact paths: `contracts/core/identity/match-profiles/`,
-  `$DATA_DIR/identity-eval/<run-id>/`, `tests/identity/`, and the task record.
-- Execution path: Replay the archived samples, build masked pair sets, and fit and evaluate weights
-  on held-out folds.
-- Acceptance gates: Each calibrated class reaches at least 0.99 precision at the link threshold on
-  at least 200 held-out positive pairs. A class that misses the gate stays review-only. That is a
-  valid negative result, recorded in the closed-research register.
-- Documentation target: `current/object-identity.md` listed in the [areas index](current.md#areas).
-
-#### object-identity-implementation-audit (optional)
+#### object-identity-implementation-audit
 
 Identity is the core model, and KN IDs are stored in counterparts and exports, so a flaw in minting,
 lifecycle, or matching is the most expensive kind to fix later.
 
 - Serves: `object-identity` -- [Object identity](../design/spec.md#object-identity)
 - Agent status: CLEAR
-- Requires: `identity-registry-contracts`, `object-lifecycle-operations`, `identity-match-engine`,
-  `partial-update-tracking`, `object-lineage-lookup`
+- Requires: `evidence-claim-contracts`, `partial-update-tracking`, `canonical-fact-selection`,
+  `object-lineage-lookup`
 - Dependencies: The accepted task records of the group and the [implementation
   audit](../guide/planning-workflow.md#implementation-audits) checks. `identity-match-calibration`
   stays open and is reviewed for the readiness of its inputs.
@@ -320,17 +258,115 @@ lifecycle, or matching is the most expensive kind to fix later.
 - Data and artifact paths: `contracts/core/identity/`, `src/kn/identity/`, `$DATA_DIR/identity/`,
   `tests/identity/`, `docs/impl/plan.md`, and the task record.
 - Execution path: Rerun the group's acceptance commands, then work through the audit checks. Rebuild
-  twice from durable inputs and compare every KN ID and match record, replay a merge and split
-  sequence in shuffled order, and plant near-duplicates that differ only in a discriminating
-  attribute.
+  twice from the ordered journal and compare KN IDs, links and match records. Reject reordered
+  events. Shuffle source fixture order separately and compare resolution decisions. Trace a late
+  update and an omitted field through claims, confirmations and the selected fact.
 - Acceptance gates: Rebuilds reproduce every KN ID and lifecycle state. A merge followed by a split
   leaves every ID resolvable. Objects that differ in a discriminating attribute never link
-  automatically. Every canonical value traces to a raw record. Every finding has a severity,
+  automatically. A late or omitted field preserves history. Every canonical value traces to its
+  source record and evidence locator. Every finding has a severity,
   evidence, and a disposition, no `blocker` is accepted, and every fix starts from a failing
   regression test. `make ci` passes with the scheduled tasks in the plan.
 - Documentation target: `current/object-identity.md` listed in the [areas index](current.md#areas).
 
-### Raw archive -- `raw-archive`
+### Verification and review -- `evidence-model`
+
+#### human-verification-projections
+
+All existing datasets and later domains need the same queryable human verification metadata;
+adding a column to one domain would leave labels, links and other facts uncovered.
+
+- Serves: `evidence-model` -- [Human verification metadata](../design/spec.md#human-verification-metadata)
+- Agent status: CLEAR
+- Execution stage: MODEL
+- Requires: `object-identity-implementation-audit`
+- Dependencies: The [50-table coverage inventory](records/0028-adhoc-human-verification-model-review.md)
+  and [design](../design/human-verification.md), reviewed semantic snapshots and SATCOM fixtures.
+- User-visible outcome: Every current record and addressable field has optional human verification
+  metadata through its KN read projection, including semantic labels/mappings and snapshot-qualified
+  SATCOM data. Unchecked or changed content exposes null; prior human decisions remain available.
+- Scope boundary: Coverage declarations for all current tables, shared projections and target
+  resolvers, content-version invalidation, durable replay and pending/orphan reports, rights
+  filtering, and registration checks for future contracts. Keep source CSV headers, archive bytes
+  and imported verification labels unchanged. Do not auto-approve existing data or add a workflow UI.
+  Apply coverage to the current registry. Require every subsequent domain and exchange contract
+  to supply coverage and replay fixtures at registration. Fixture replay is sufficient;
+  a running engine, review CLI or live source is not a prerequisite.
+- Data and artifact paths: `src/kn/review/`, `src/kn/semantic/`, `src/kn/domains/space/satcom/`,
+  `src/kn/db/`, `src/kn/contracts/resources/`, `tests/review/`, `tests/integration/`,
+  `$DATA_DIR/decisions/` and `$DATA_DIR/human-verification/<run-id>/`.
+- Execution path: Enumerate the deployed registry, apply the common metadata to each projection,
+  and review fixture rows and individual fields. Rebuild twice from seed/source fixtures and the
+  durable log, then re-import unchanged and edited data. Exercise a missing target and denied read.
+- Acceptance gates: All registered tables, including the 50-table review baseline, have coverage;
+  registration without a declared strategy is refused. Each unreviewed row/value returns null.
+  A label/locale, unit/condition, value or
+  target-version change never inherits an unrelated stamp; a field review never approves the row.
+  Unchanged re-delivery preserves matching approval. Two rebuilds preserve exact times, actors
+  and decision IDs; unresolved targets remain pending or reported rather than silently verified.
+  All SATCOM raw cells and files remain exact, legacy verification states create no human dates,
+  and restricted reviewers/evidence do not leak. `make ci` and `make ci-local` pass.
+- Documentation target: `current/evidence-model.md` listed in the [areas index](current.md#areas).
+
+#### review-queue-cli
+
+Human decisions on conflicts and candidates need a bilingual workflow that survives rebuilds.
+
+- Serves: `evidence-model` -- [Evidence model](../design/spec.md#evidence-model)
+- Agent status: CLEAR
+- Requires: `object-identity-implementation-audit`, `identity-resolution-implementation-audit`,
+  `human-verification-projections`
+- Dependencies: none.
+- User-visible outcome: `kn review list` and `kn review decide` work in `en` and `uk` for fact
+  conflicts, identity match candidates, and identity drift. Decisions are appended to
+  `$DATA_DIR/decisions/<domain>/` and applied to review items.
+- Scope boundary: The CLI, the decision log format, and re-attachment by deterministic keys with an
+  orphan report. Item types are registered, so later capabilities such as exchange conflicts reuse
+  the queue. Rebuild-time replay comes in `rebuild-from-raw`.
+  Record/field verification items reuse the shared log and target/version protocol. Resolve the
+  authorized human reviewer at the operator boundary, show the reviewed scope/version, and expose
+  acceptance, rejection and revocation without accepting actor identity from source data.
+- Data and artifact paths: `src/kn/review/`, `src/kn/cli.py`, `$DATA_DIR/decisions/`,
+  `tests/review/`.
+- Execution path: Write an append-only JSON Lines log with the reviewer, reason, and time, and
+  localized messages.
+- Acceptance gates: Decisions apply idempotently. A decision whose claim key disappears is
+  reported as orphaned. Verification timestamps appear only for accepted human decisions on the
+  matching scope/version; rejecting or revoking clears the active stamp and keeps history.
+  `kn review list --overrides` lists the flagged owner overrides. Golden outputs cover both locales.
+- Documentation target: `current/evidence-model.md` listed in the [areas index](current.md#areas).
+
+#### evidence-model-implementation-audit
+
+Claims and canonical selection decide what KN states as true, so an order-dependent or ambiguous
+rule would surface only after many sources depend on it.
+
+- Serves: `evidence-model` -- [Evidence model](../design/spec.md#evidence-model)
+- Agent status: CLEAR
+- Requires: `human-verification-projections`, `review-queue-cli`
+- Dependencies: The accepted task records of the group and the [implementation
+  audit](../guide/planning-workflow.md#implementation-audits) checks.
+- User-visible outcome: Canonical values are shown to be order-independent and explainable. The
+  audit record gives every check a result and every finding a disposition. The current-state page
+  lists known limitations, and each scheduled finding is a plan task.
+- Scope boundary: Focus: the rank-first update policy as a total order over claims, independent of
+  arrival order; each mode (`priority`, `latest_observed`, `accumulate`, `fixed`); equal-rank
+  conflicts; `owner_override` flags; derived verification states; data time used only within one
+  source; conditions and units that make claims incomparable; review decisions as `owner_entered`
+  claims and their replay; repetition that adds no rank; retraction and correction of a claim. Fixes
+  only; new behavior becomes plan tasks.
+- Data and artifact paths: `contracts/core/evidence/`, `contracts/core/policies/`,
+  `src/kn/evidence/`, `src/kn/review/`, `tests/evidence/`, `docs/impl/plan.md`, and the task record.
+- Execution path: Rerun the group's acceptance commands, then work through the audit checks. Select
+  over every permutation of a planted claim set, replay review decisions after a rebuild, and plant
+  equal-rank disagreement, a unit mismatch, and a retracted claim.
+- Acceptance gates: Every permutation gives the same canonical values and conflicts. Review
+  decisions survive a rebuild. Incomparable conditions never resolve silently. Every finding has a
+  severity, evidence, and a disposition, no `blocker` is accepted, and every fix starts from a
+  failing regression test. `make ci` passes with the scheduled tasks in the plan.
+- Documentation target: `current/evidence-model.md` listed in the [areas index](current.md#areas).
+
+### Durable raw archive -- `raw-archive`
 
 #### warc-raw-store
 
@@ -338,6 +374,7 @@ Fetch once, transform many requires a durable, self-describing archive of origin
 
 - Serves: `raw-archive` -- [Raw archive](../design/spec.md#raw-archive)
 - Agent status: CLEAR
+- Execution stage: MODEL
 - Dependencies: `warcio` and `pyarrow` as the justified dependencies.
 - User-visible outcome: The engine writes WARC 1.1 files per source run with `WARC-Target-URI` and
   `WARC-Date`, and `kn raw reindex` and `kn raw verify` maintain the Parquet ledger.
@@ -354,7 +391,7 @@ Fetch once, transform many requires a durable, self-describing archive of origin
 - Documentation target: A new `current/raw-archive.md` page listed in the
   [areas index](current.md#areas).
 
-#### raw-archive-implementation-audit (optional)
+#### raw-archive-implementation-audit
 
 The archive is the durable input that every rebuild replays, so a format or integrity defect would
 force a re-fetch that a source may no longer allow.
@@ -383,278 +420,67 @@ force a re-fetch that a source may no longer allow.
   failing regression test. `make ci` passes with the scheduled tasks in the plan.
 - Documentation target: `current/raw-archive.md` listed in the [areas index](current.md#areas).
 
-### Evidence model -- `evidence-model`
+### Source runs and health -- `source-management`
 
-#### evidence-claim-contracts
+#### ingestion-state-contracts
 
-Claims, evidence, and canonical facts need contracts that carry every provenance field.
+Run status, checkpoints and source health need stable storage definitions before the engine and
+monitoring workflows begin writing them.
 
-- Serves: `evidence-model` -- [Evidence model](../design/spec.md#evidence-model)
+- Serves: `ingestion-engine` -- [Ingestion engine](../design/spec.md#ingestion-engine)
 - Agent status: CLEAR
-- Requires: `identity-registry-contracts`
-- Dependencies: none.
-- User-visible outcome: The `evidence` schema holds alias, claim, claim confirmation, evidence,
-  relation assertion, canonical fact, and review item datasets with value-or-missing-reason
-  constraints. Every claim refers to a KN ID and to its source record version.
-- Scope boundary: Contracts, constraints, deterministic claim keys, and as-of views. Objects and
-  identifiers come from the identity registry. Selection policies come in
-  `canonical-fact-selection`.
-- Data and artifact paths: `contracts/core/evidence/`, `src/kn/evidence/`, `tests/evidence/`.
-- Execution path: Write the contracts with `kn.temporalProfile` and `kn.evidence` extensions, and
-  compile and test the constraints against the integration database.
-- Acceptance gates: A claim without an origin URI, a fetch time, or a value-or-missing-reason is
-  rejected. Re-inserting the same claim key is a no-op. As-of views are deterministic on fixtures.
-  Multilingual text projections preserve originals, language tags, and translation provenance under
-  the [localization policy](../design/spec.md#localization), without duplicating facts per locale.
-- Documentation target: A new `current/evidence-model.md` page listed in the
+- Execution stage: MODEL
+- Requires: `object-identity-implementation-audit`,
+  `raw-archive-implementation-audit`
+- Dependencies: The run, cursor, archive and monitoring fields in the specification and the
+  [standard source error codes](current/source-management.md#error-codes-and-pagination).
+  Fixtures can supply source IDs, archive IDs and claim keys without executing a crawler.
+- User-visible outcome: Registered contracts define run attempts/status/error history, source
+  checkpoints, committed batch/archive references, configuration/code versions and health metrics.
+- Scope boundary: Schemas, keys, enums, time semantics, human-verification coverage and
+  transactional checkpoint constraints. Runtime fetching, scheduling and status CLI stay later.
+- Data and artifact paths: `contracts/core/system/`, `src/kn/contracts/resources/`,
+  `src/kn/engine/`, `tests/engine/`, `tests/integration/`.
+- Execution path: Compile the contracts and load interrupted, retried and committed fixture runs;
+  test transaction rollback and checkpoint references without HTTP or an engine implementation.
+- Acceptance gates: Duplicate attempt/batch keys are refused or idempotent as declared. A failed
+  transaction cannot advance a checkpoint. Status/error/time fields needed by source monitoring
+  are present, preserve history and share the approved error vocabulary. Rebuild reproduces the
+  fixture state. `make ci` and integration checks pass.
+- Documentation target: A new `current/ingestion-engine.md` page listed in the
   [areas index](current.md#areas).
 
-#### canonical-fact-selection
+#### engine-skeleton
 
-Sources declare nothing, so KN must decide by explicit rules how each new claim fills, replaces, or
-leaves an object's value. Arrival order must never decide.
+The core engine must run end to end on a synthetic source before any real source.
 
-- Serves: `evidence-model` -- [Evidence model](../design/spec.md#evidence-model)
+- Serves: `ingestion-engine` -- [Ingestion engine](../design/spec.md#ingestion-engine)
 - Agent status: CLEAR
-- Requires: `evidence-claim-contracts`, `identity-match-engine`
-- Dependencies: none.
-- User-visible outcome: The engine projects each field's canonical value through its update
-  policy. The modes are `priority`, `latest_observed`, `accumulate`, and `fixed`. A candidate value
-  ranks by its best supporting claim: source rank, then evidence class, then data time within one
-  source. Every change is explained as filled, replaced, ignored, corroborated, or conflict, with
-  the deciding criterion. Owner overrides of first-party values are flagged and listed by
-  `kn review list --overrides`. Identity redirects are followed. Conflicts, and high-impact facts
-  without primary evidence, go to review.
-- Scope boundary: The `kn.updatePolicy` semantics; the reviewed source rank table
-  `contracts/core/policies/source-ranks.yaml`, with `owner_entered` as the highest class and review
-  decisions ranked through it; evidence classes; verification states derived from support and
-  review; eligibility (minimum rank and evidence class, rights, conditions); empty-claim handling;
-  freshness and `stale` labels; audience-specific selection from eligible evidence. Identity
-  resolution belongs to `identity-match-engine`. Domain policies come with domain contracts.
-- Data and artifact paths: `src/kn/evidence/`, `contracts/core/policies/`, `tests/evidence/`.
-- Execution path: Write fixture-first tests for each outcome, mode, and verification state in the
-  specification, then the selector.
-- Acceptance gates: An empty field is filled by the first eligible claim. A higher-ranked value
-  replaces it, and a lower-ranked value is ignored and stays visible. An owner-entered value
-  outranks a manufacturer value and is flagged `owner_override`. A value that a higher-ranked
-  source also supports wins, while repeated claims or confirmations from one source add no rank.
-  A newer datasheet revision from the same source replaces the older one. Different values from
-  two sources of equal rank and evidence class conflict. Under `latest_observed`, a newer price
-  wins, and an old winner shows as `stale`. A different value on a `fixed` field opens review, and
-  an outranking empty claim opens review without clearing. Every permutation of arrival order
-  gives identical canonical values. Fixtures keep organization, model, spacecraft, constellation,
-  program, and service distinct, and a contradictory ownership claim stays conflicted. Claims
-  about a merged object are selected under its survivor. Signals never fill canonical fields.
-- Documentation target: `current/evidence-model.md` listed in the [areas index](current.md#areas).
-
-#### review-queue-cli
-
-Human decisions on conflicts and candidates need a bilingual workflow that survives rebuilds.
-
-- Serves: `evidence-model` -- [Evidence model](../design/spec.md#evidence-model)
-- Agent status: CLEAR
-- Requires: `canonical-fact-selection`, `object-lifecycle-operations`
-- Dependencies: none.
-- User-visible outcome: `kn review list` and `kn review decide` work in `en` and `uk` for fact
-  conflicts, identity match candidates, and identity drift. Decisions are appended to
-  `$DATA_DIR/decisions/<domain>/` and applied to review items.
-- Scope boundary: The CLI, the decision log format, and re-attachment by deterministic keys with an
-  orphan report. Item types are registered, so later capabilities such as exchange conflicts reuse
-  the queue. Rebuild-time replay comes in `rebuild-from-raw`.
-- Data and artifact paths: `src/kn/review/`, `src/kn/cli.py`, `$DATA_DIR/decisions/`,
-  `tests/review/`.
-- Execution path: Write an append-only JSON Lines log with the reviewer, reason, and time, and
-  localized messages.
-- Acceptance gates: Decisions apply idempotently. A decision whose claim key disappears is
-  reported as orphaned. Golden outputs exist in both locales.
-- Documentation target: `current/evidence-model.md` listed in the [areas index](current.md#areas).
-
-#### evidence-model-implementation-audit (optional)
-
-Claims and canonical selection decide what KN states as true, so an order-dependent or ambiguous
-rule would surface only after many sources depend on it.
-
-- Serves: `evidence-model` -- [Evidence model](../design/spec.md#evidence-model)
-- Agent status: CLEAR
-- Requires: `evidence-claim-contracts`, `canonical-fact-selection`, `review-queue-cli`
-- Dependencies: The accepted task records of the group and the [implementation
-  audit](../guide/planning-workflow.md#implementation-audits) checks.
-- User-visible outcome: Canonical values are shown to be order-independent and explainable. The
-  audit record gives every check a result and every finding a disposition. The current-state page
-  lists known limitations, and each scheduled finding is a plan task.
-- Scope boundary: Focus: the rank-first update policy as a total order over claims, independent of
-  arrival order; each mode (`priority`, `latest_observed`, `accumulate`, `fixed`); equal-rank
-  conflicts; `owner_override` flags; derived verification states; data time used only within one
-  source; conditions and units that make claims incomparable; review decisions as `owner_entered`
-  claims and their replay; repetition that adds no rank; retraction and correction of a claim. Fixes
-  only; new behavior becomes plan tasks.
-- Data and artifact paths: `contracts/core/evidence/`, `contracts/core/policies/`,
-  `src/kn/evidence/`, `src/kn/review/`, `tests/evidence/`, `docs/impl/plan.md`, and the task record.
-- Execution path: Rerun the group's acceptance commands, then work through the audit checks. Select
-  over every permutation of a planted claim set, replay review decisions after a rebuild, and plant
-  equal-rank disagreement, a unit mismatch, and a retracted claim.
-- Acceptance gates: Every permutation gives the same canonical values and conflicts. Review
-  decisions survive a rebuild. Incomparable conditions never resolve silently. Every finding has a
-  severity, evidence, and a disposition, no `blocker` is accepted, and every fix starts from a
-  failing regression test. `make ci` passes with the scheduled tasks in the plan.
-- Documentation target: `current/evidence-model.md` listed in the [areas index](current.md#areas).
-
-### Part and supply model -- `part-supply-model`
-
-#### vendor-information-coverage
-
-The knowledge base must hold everything vendors publish about a part, so the target field set has
-to be known before the contracts are fixed.
-
-- Serves: `part-supply-model` -- [Part and supply model](../design/spec.md#part-and-supply-model)
-- Agent status: CLEAR
-- Research: yes
-- Dependencies: Public documentation of representative vendor channels: manufacturer product pages
-  and datasheets for the watchlist families, distributor API documentation for the catalogue rows
-  C01-C03, and the InvenTree API schema. The microelectronics attribute dictionary proposal.
-- User-visible outcome: The coverage matrix `contracts/core/supply/coverage.yaml` maps every
-  information group in the specification to field IDs or an exclusion. It lists each studied
-  channel's documented fields with a classification and licence notes on caching and
-  redistribution.
-- Scope boundary: Documentation reading only; no data endpoints are called. Field IDs are proposed
-  here and fixed in `supply-model-contracts`.
-- Data and artifact paths: `contracts/core/supply/coverage.yaml`, `tests/supply/`, and the task
-  record.
-- Execution path: Read each channel's public field documentation and classify every field. Add a
-  test that fails on an unclassified group or field.
-- Acceptance gates: Every group has field IDs or an exclusion reason. Every documented channel field
-  is mapped, raw-only, or excluded with a reason. A channel whose documentation is inaccessible is
-  recorded as a blocker, which is a valid negative result.
-- Documentation target: A new `current/part-supply-model.md` page listed in the
-  [areas index](current.md#areas).
-
-#### supply-model-contracts
-
-Parts, orderable variants, and supplier offers need typed, identity-aware contracts that every
-domain and counterpart shares.
-
-- Serves: `part-supply-model` -- [Part and supply model](../design/spec.md#part-and-supply-model)
-- Agent status: CLEAR
-- Requires: `vendor-information-coverage`, `evidence-claim-contracts`, `identity-match-engine`,
-  `seed-vocabulary-import`
-- Dependencies: none.
-- User-visible outcome: The `supply` schema holds organization roles, product families and models,
-  manufacturer parts, orderable variants, and supplier offers. It also holds price, stock, and
-  lead-time observations, declared lifecycle, compliance and trade claims, physical and packaging
-  attributes, document references, and substitute relations. Each identity class has a match
-  profile.
-- Scope boundary: Contracts, constraints, selection policies for supply fields, and fixtures.
-  Parameters reuse the attribute dictionary and observation model. No source parsers.
-- Data and artifact paths: `contracts/core/supply/`, `src/kn/supply/`, `tests/supply/`.
-- Execution path: Write the contracts from the coverage matrix, compile, and rebuild. Add
-  fixture-first tests for the specification's rules.
-- Acceptance gates: One MPN from two manufacturers is two parts. Packaging variants give one
-  manufacturer part, two orderable variants, two offers, and one part count. A price break without
-  quantity, currency, or observed time is rejected. Stock observations form a time series with
-  stale labels. A substitute never merges identities. Origin is never inferred from headquarters.
-- Documentation target: `current/part-supply-model.md` listed in the
-  [areas index](current.md#areas).
-
-#### part-supply-model-implementation-audit (optional)
-
-The supply model is shared by the microelectronics domain and the InvenTree exchange, so a missing
-field or a wrong key would spread into both.
-
-- Serves: `part-supply-model` -- [Part and supply model](../design/spec.md#part-and-supply-model)
-- Agent status: CLEAR
-- Requires: `vendor-information-coverage`, `supply-model-contracts`
-- Dependencies: The accepted task records of the group and the [implementation
-  audit](../guide/planning-workflow.md#implementation-audits) checks.
-- User-visible outcome: The domain and exchange groups extend a verified supply model. The audit
-  record gives every check a result and every finding a disposition. The current-state page lists
-  known limitations, and each scheduled finding is a plan task.
-- Scope boundary: Focus: coverage matrix completeness, with every vendor field mapped, raw-only, or
-  excluded with a reason; MPN normalization and manufacturer aliases; supplier SKU, packaging, and
-  pack quantity; price breaks with currency and observation time; lifecycle and availability states;
-  parameter units and qualifiers; extension by a domain without redefinition; mapping to the
-  interchange contract and InvenTree resources. Fixes only; new behavior becomes plan tasks.
-- Data and artifact paths: `contracts/core/supply/`, `src/kn/supply/`, `tests/supply/`,
-  `docs/impl/plan.md`, and the task record.
-- Execution path: Rerun the group's acceptance commands, then work through the audit checks. Load
-  MPNs that differ only in case, punctuation, or a packaging suffix, a price break in a second
-  currency, and a vendor field missing from the coverage matrix.
-- Acceptance gates: The coverage test fails on any unlisted vendor field. MPN variants resolve as
-  the identity rules require. A domain contract that redefines a supply field is refused. Every
-  finding has a severity, evidence, and a disposition, no `blocker` is accepted, and every fix
-  starts from a failing regression test. `make ci` passes with the scheduled tasks in the plan.
-- Documentation target: `current/part-supply-model.md` listed in the [areas
-  index](current.md#areas).
-
-### Source management -- `source-management`
-
-#### source-catalogue-import
-
-Every candidate source must be visible and disabled before any crawler exists.
-
-- Serves: `source-management` -- [Source management](../design/spec.md#source-management)
-- Agent status: CLEAR
-- Dependencies: The [reviewed seed hook](current/data-contracts/rebuild.md#reviewed-seed-hook), the
-  [deployment set](current/data-contracts.md#deployment-set) that registers the catalogue contract
-  beside the governance contract in `system`, and the data-source proposal JSON for space,
-  microelectronics, and GDELT.
-- User-visible outcome: Every rebuild loads `system.source_catalogue` with 37 space, 65
-  microelectronics, and 17 GDELT candidates. `kn source list` shows them in both locales.
-- Scope boundary: The catalogue contract, original IDs, lifecycle states, and access notes marked
-  unverified. Source rank overrides are validated against catalogue IDs. No crawler
-  configuration and no enablement.
-- Data and artifact paths: `contracts/core/system/`, `domains/<domain>/seeds/sources.json`,
-  `src/kn/sources/`, `tests/sources/`.
-- Execution path: Write reviewed seed files from the proposals and add a catalogue loader to the
-  rebuild hook.
-- Acceptance gates: Every proposal row is loaded or rejected with a reason. Every row is
-  `candidate`. Nothing is schedulable from the catalogue.
-- Documentation target: A new `current/source-management.md` page listed in the
-  [areas index](current.md#areas).
-
-#### crawler-config-schema
-
-Crawler behavior, including ontology mapping, error mapping, and monitoring, must be declared and
-validated.
-
-- Serves: `source-management` -- [Source management](../design/spec.md#source-management)
-- Agent status: CLEAR
-- Requires: `source-catalogue-import`
-- Dependencies: none.
-- User-visible outcome: `kn source validate` checks a crawler YAML against its schema and refuses
-  enablement without a rights review, an approval reference, fixtures, and passing tests.
-- Scope boundary: The JSON Schema for every block in the specification, including source record
-  keys and the `adapter_api` method, and the standard error-code table. Record whether the dlt
-  REST client and paginators are adopted for HTTP pagination, given the raw-archive constraint. No
-  runtime execution.
-- Data and artifact paths: `src/kn/sources/config/`, `domains/<domain>/sources/`,
-  `tests/sources/`.
-- Execution path: Use a schema-first design with valid and invalid fixture configurations, plus an
-  error-code mapping test per code.
-- Acceptance gates: Invalid fixtures fail with path-specific diagnostics. An enabled configuration
-  without approval fails. The dlt decision is recorded with its reason.
-- Documentation target: `current/source-management.md` listed in the
-  [areas index](current.md#areas).
-
-#### source-onboarding-workflow
-
-Coding-agent source investigation needs a fixed, safe procedure before the first real source.
-
-- Serves: `source-management` -- [Source management](../design/spec.md#source-management)
-- Agent status: CLEAR
-- Requires: `crawler-config-schema`
-- Dependencies: none.
-- User-visible outcome: Contributors follow a documented workflow with templates for the terms
-  dossier, investigation report, fixture sanitization, and review checklist. `AGENTS.md` states the
-  untrusted-content rule for agents reading source material.
-- Scope boundary: Documentation and templates only, plus a fixture-sanitization check that rejects
-  credentials and personal data in fixtures.
-- Data and artifact paths: `docs/guide/source-onboarding.md`, `docs/guide/templates/`,
-  `AGENTS.md`, `tests/fixtures/`, `tests/quality/`.
-- Execution path: Write the guide from the specification's steps, and add the sanitization check to
-  `make ci`.
-- Acceptance gates: The guide links resolve. The sanitization check fails on a planted secret
-  fixture. `make ci` passes.
-- Documentation target: `current/source-management.md` listed in the
+- Requires: `raw-archive-implementation-audit`,
+  `object-identity-implementation-audit`, `identity-resolution-implementation-audit`,
+  `ingestion-state-contracts`
+- Dependencies: The [crawler validator and enablement evidence](current/source-management.md#enablement-evidence).
+- User-visible outcome: `kn source run` and `kn source replay` process a synthetic fixture source
+  served locally. They write WARC records, identity events, claims with evidence linked to KN IDs,
+  a checkpoint, and a run summary with a declared status.
+- Scope boundary: Lock, run registration, fetch to archive, parse, a minimal mapping, validation,
+  load, checkpoint, and status. Fetch safety, full mapping, curated input, and rebuild replay come
+  in the next tasks.
+  Run/checkpoint storage consumes `ingestion-state-contracts`; runtime implementation does not
+  introduce those tables for the first time.
+- Data and artifact paths: `src/kn/engine/`, `domains/fixture/` (test-only),
+  `tests/engine/`, `tests/fixtures/fixture/`.
+- Execution path: Fixture-first. A test HTTP server serves the synthetic payloads, the adapter
+  interface returns records and claims, and the loader is the only writer.
+- Acceptance gates: A catalogue candidate and a profile missing its rights decision each
+  produce zero requests at the fixture server. A second enabled run is idempotent. An interrupted
+  run resumes from the committed checkpoint. A crash after archive finalization and before SQL
+  commit reuses the archived batch.
+  Replay without network yields the same claims. Russian, Chinese, and unknown-language source
+  fixtures ingest without English or Ukrainian translations, retain originals and provenance, and
+  use the [shared text selector](current/localization.md#source-data-and-translations) for display.
+  `make ci` passes.
+- Documentation target: A new `current/ingestion-engine.md` page listed in the
   [areas index](current.md#areas).
 
 #### source-status-monitoring
@@ -668,6 +494,7 @@ Operators need per-source health and freshness without opening Kestra.
 - User-visible outcome: `kn source status` shows, in both locales, the last success and attempt,
   state, stale flag, counts, bytes, budget use, cursor lag, and last error code, and feeds the
   operations mart.
+  Read the early ingestion-state contracts; monitoring must not create another run/cursor schema.
 - Scope boundary: Status computation from run records and the CLI. Dashboards come in
   `space-dashboard-bundles`.
 - Data and artifact paths: `src/kn/sources/status.py`, `tests/sources/`.
@@ -677,15 +504,14 @@ Operators need per-source health and freshness without opening Kestra.
 - Documentation target: `current/source-management.md` listed in the
   [areas index](current.md#areas).
 
-#### source-management-implementation-audit (optional)
+#### source-management-implementation-audit
 
 Every source enters through the catalogue, the crawler schema, and the onboarding workflow, so a gap
 there repeats in every source that follows.
 
 - Serves: `source-management` -- [Source management](../design/spec.md#source-management)
 - Agent status: CLEAR
-- Requires: `source-catalogue-import`, `crawler-config-schema`, `source-onboarding-workflow`,
-  `source-status-monitoring`
+- Requires: `ingestion-state-contracts`, `engine-skeleton`, `source-status-monitoring`
 - Dependencies: The accepted task records of the group and the [implementation
   audit](../guide/planning-workflow.md#implementation-audits) checks.
 - User-visible outcome: Every later source is onboarded through verified, enforced declarations. The
@@ -701,7 +527,8 @@ there repeats in every source that follows.
   and the task record.
 - Execution path: Rerun the group's acceptance commands, then work through the audit checks.
   Validate a crawler file with an unknown key, one without a licence, and a disabled source with a
-  schedule, and onboard one fixture source from the templates alone.
+  schedule, and onboard one fixture source from the templates alone. Interrupt a fixture run before its
+  checkpoint, retry it and compare status, history and cursor with an uninterrupted run.
 - Acceptance gates: Each invalid crawler file is refused with a stable error code in both locales. A
   disabled source cannot run. The templates cover every field the schema requires. Every finding has
   a severity, evidence, and a disposition, no `blocker` is accepted, and every fix starts from a
@@ -709,35 +536,7 @@ there repeats in every source that follows.
 - Documentation target: `current/source-management.md` listed in the [areas
   index](current.md#areas).
 
-### Ingestion engine -- `ingestion-engine`
-
-#### engine-skeleton
-
-The core engine must run end to end on a synthetic source before any real source.
-
-- Serves: `ingestion-engine` -- [Ingestion engine](../design/spec.md#ingestion-engine)
-- Agent status: CLEAR
-- Requires: `warc-raw-store`, `crawler-config-schema`, `evidence-claim-contracts`,
-  `identity-match-engine`
-- Dependencies: none.
-- User-visible outcome: `kn source run` and `kn source replay` process a synthetic fixture source
-  served locally. They write WARC records, identity events, claims with evidence linked to KN IDs,
-  a checkpoint, and a run summary with a declared status.
-- Scope boundary: Lock, run registration, fetch to archive, parse, a minimal mapping, validation,
-  load, checkpoint, and status. Fetch safety, full mapping, curated input, and rebuild replay come
-  in the next tasks.
-- Data and artifact paths: `src/kn/engine/`, `domains/fixture/` (test-only),
-  `tests/engine/`, `tests/fixtures/fixture/`.
-- Execution path: Fixture-first. A test HTTP server serves the synthetic payloads, the adapter
-  interface returns records and claims, and the loader is the only writer.
-- Acceptance gates: A second run is idempotent. An interrupted run resumes from the committed
-  checkpoint. A crash after archive finalization and before SQL commit reuses the archived batch.
-  Replay without network yields the same claims. Russian, Chinese, and unknown-language source
-  fixtures ingest without English or Ukrainian translations, retain originals and provenance, and
-  use the [shared text selector](current/localization.md#source-data-and-translations) for display.
-  `make ci` passes.
-- Documentation target: A new `current/ingestion-engine.md` page listed in the
-  [areas index](current.md#areas).
+### Acquisition, mapping and replay -- `ingestion-engine`
 
 #### http-fetch-safety
 
@@ -745,7 +544,7 @@ Every fetch must be safe and polite by construction.
 
 - Serves: `ingestion-engine` -- [Ingestion engine](../design/spec.md#ingestion-engine)
 - Agent status: CLEAR
-- Requires: `engine-skeleton`
+- Requires: `source-management-implementation-audit`
 - Dependencies: HTTPX as the justified dependency.
 - User-visible outcome: The engine fetches only allowlisted hosts and redirects over verified TLS,
   within byte and request budgets. It uses conditional requests, honors `robots.txt`, `429`, and
@@ -766,7 +565,7 @@ Most source-specific behavior must live in configuration, not code.
 
 - Serves: `ingestion-engine` -- [Ingestion engine](../design/spec.md#ingestion-engine)
 - Agent status: CLEAR
-- Requires: `http-fetch-safety`, `seed-vocabulary-import`, `partial-update-tracking`
+- Requires: `http-fetch-safety`, `object-identity-implementation-audit`
 - Dependencies: none.
 - User-visible outcome: Crawler configurations map native fields to contract field IDs. They also
   map units with logged conversions, native codes to concepts with mapping types, classes and
@@ -788,7 +587,7 @@ Facts without a permitted machine-readable source need a disciplined manual path
 
 - Serves: `ingestion-engine` -- [Ingestion engine](../design/spec.md#ingestion-engine)
 - Agent status: CLEAR
-- Requires: `mapping-and-quality-rules`
+- Requires: `mapping-and-quality-rules`, `evidence-model-implementation-audit`
 - Dependencies: none.
 - User-visible outcome: Analysts add rows to `domains/<domain>/curation/` files, each with the cited
   URI, capture time, and curator. `kn source run` loads them through the same mapping and
@@ -841,7 +640,8 @@ its integration is dataset-specific code beside the engine.
 
 - Serves: `ingestion-engine` -- [Ingestion engine](../design/spec.md#ingestion-engine)
 - Agent status: CLEAR
-- Requires: `warc-raw-store`, `mapping-and-quality-rules`, `dataset-package-locations`
+- Requires: `raw-archive-implementation-audit`, `mapping-and-quality-rules`,
+  `dataset-package-locations`
 - Dependencies: Finding DC-16 of the [data contracts audit](records/0017-data-contracts-data-contracts-implementation-audit.md#findings),
   the current [SATCOM import](current/data-contracts.md#source-preservation-and-import) as the first
   dataset, and the `bulk_file` access method of the
@@ -876,7 +676,8 @@ Schema changes during development must cost a rebuild, never a re-fetch or a los
 
 - Serves: `ingestion-engine` -- [Ingestion engine](../design/spec.md#ingestion-engine)
 - Agent status: CLEAR
-- Requires: `curated-source-method`, `prefetched-dataset-method`, `review-queue-cli`
+- Requires: `curated-source-method`, `prefetched-dataset-method`,
+  `evidence-model-implementation-audit`
 - Dependencies: none.
 - User-visible outcome: `kn db rebuild` replays the raw ledger, curated files, prefetched datasets,
   and decision logs through current code, and reports orphaned decisions.
@@ -886,19 +687,21 @@ Schema changes during development must cost a rebuild, never a re-fetch or a los
 - Execution path: Rebuild the fixture archive twice and compare row hashes of all canonical tables.
 - Acceptance gates: Two rebuilds are identical. A network call during rebuild fails the test.
   A tombstoned input stays suppressed after reindex and replay. Decisions re-attach or are reported.
+  Human-verification times, reviewers and decision IDs survive replay exactly. A changed or missing
+  target remains stale, pending or orphaned, and never receives a newly fabricated verification.
   `make ci-local` runs the rebuild on every change, and `make ci` stays green without a database.
 - Documentation target: `current/ingestion-engine.md` listed in the
   [areas index](current.md#areas).
 
-#### ingestion-engine-implementation-audit (optional)
+#### ingestion-engine-implementation-audit
 
 Every source runs through the engine, so a defect in fetch safety, mapping, or replay would recur in
 every source suite and every rebuild.
 
 - Serves: `ingestion-engine` -- [Ingestion engine](../design/spec.md#ingestion-engine)
 - Agent status: CLEAR
-- Requires: `engine-skeleton`, `http-fetch-safety`, `mapping-and-quality-rules`,
-  `curated-source-method`, `rebuild-from-raw`
+- Requires: `http-fetch-safety`, `mapping-and-quality-rules`, `curated-source-method`,
+  `dataset-package-locations`, `prefetched-dataset-method`, `rebuild-from-raw`
 - Dependencies: The accepted task records of the group and the [implementation
   audit](../guide/planning-workflow.md#implementation-audits) checks.
 - User-visible outcome: Every source runs on a verified, source-neutral engine. The audit record
@@ -921,7 +724,99 @@ every source suite and every rebuild.
   failing regression test. `make ci` passes with the scheduled tasks in the plan.
 - Documentation target: `current/ingestion-engine.md` listed in the [areas index](current.md#areas).
 
-### Data interchange -- `data-interchange`
+### Parts and measurements -- `part-supply-model`
+
+#### vendor-information-coverage
+
+The knowledge base must hold everything vendors publish about a part, so the target field set has
+to be known before the contracts are fixed.
+
+- Serves: `part-supply-model` -- [Part and supply model](../design/spec.md#part-and-supply-model)
+- Agent status: CLEAR
+- Execution stage: MODEL
+- Research: yes
+- Dependencies: Public documentation of representative vendor channels: manufacturer product pages
+  and datasheets for the watchlist families, distributor API documentation for the catalogue rows
+  C01-C03, and the InvenTree API schema. The 195 pending microelectronics attribute dictionary rows
+  in the
+  [seed reconciliation](current/ontology-taxonomy/seeds.md#unmapped-rows-and-ownership).
+- User-visible outcome: The coverage matrix `contracts/core/supply/coverage.yaml` maps every
+  information group in the specification to field IDs or an exclusion. It lists each studied
+  channel's documented fields with a classification and licence notes on caching and
+  redistribution.
+- Scope boundary: Documentation reading only; no data endpoints are called. Field IDs are proposed
+  here and fixed in `supply-model-contracts`.
+- Data and artifact paths: `contracts/core/supply/coverage.yaml`, `tests/supply/`, and the task
+  record.
+- Execution path: Read each channel's public field documentation and classify every field. Add a
+  test that fails on an unclassified group or field.
+- Acceptance gates: Every group has field IDs or an exclusion reason. Every documented channel field
+  is mapped, raw-only, or excluded with a reason. A channel whose documentation is inaccessible is
+  recorded as a blocker, which is a valid negative result.
+- Documentation target: A new `current/part-supply-model.md` page listed in the
+  [areas index](current.md#areas).
+
+#### supply-model-contracts
+
+Parts, orderable variants, and supplier offers need typed, identity-aware contracts that every
+domain and counterpart shares.
+
+- Serves: `part-supply-model` -- [Part and supply model](../design/spec.md#part-and-supply-model)
+- Agent status: CLEAR
+- Execution stage: MODEL
+- Requires: `vendor-information-coverage`, `object-identity-implementation-audit`
+- Dependencies: none.
+- User-visible outcome: The `supply` schema holds organization roles, product families and models,
+  manufacturer parts, orderable variants, and supplier offers. It also holds price, stock, and
+  lead-time observations, declared lifecycle, compliance and trade claims, physical and packaging
+  attributes, document references, and substitute relations. Each identity class has a match
+  profile.
+- Scope boundary: Contracts, constraints, selection policies for supply fields, and fixtures.
+  Own the shared attribute dictionary, typed measurement/observation shapes, unit/condition rules
+  and comparison-profile interfaces from the vendor coverage work. Domains extend these definitions
+  instead of supplying a competing base later. Author match profiles against the early identity
+  profile schema; no scored matcher or source parser is needed to validate the model.
+- Data and artifact paths: `contracts/core/supply/`, `src/kn/supply/`, `tests/supply/`.
+- Execution path: Write the contracts from the coverage matrix, compile, and rebuild. Add
+  fixture-first tests for the specification's rules.
+- Acceptance gates: One MPN from two manufacturers is two parts. Packaging variants give one
+  manufacturer part, two orderable variants, two offers, and one part count. A price break without
+  quantity, currency, or observed time is rejected. Stock observations form a time series with
+  stale labels. A substitute never merges identities. Origin is never inferred from headquarters.
+- Documentation target: `current/part-supply-model.md` listed in the
+  [areas index](current.md#areas).
+
+#### part-supply-model-implementation-audit
+
+The supply model is shared by the microelectronics domain and the InvenTree exchange, so a missing
+field or a wrong key would spread into both.
+
+- Serves: `part-supply-model` -- [Part and supply model](../design/spec.md#part-and-supply-model)
+- Agent status: CLEAR
+- Requires: `vendor-information-coverage`, `supply-model-contracts`
+- Dependencies: The accepted task records of the group and the [implementation
+  audit](../guide/planning-workflow.md#implementation-audits) checks.
+- User-visible outcome: The domain and exchange groups extend a verified supply model. The audit
+  record gives every check a result and every finding a disposition. The current-state page lists
+  known limitations, and each scheduled finding is a plan task.
+- Scope boundary: Focus: coverage matrix completeness, with every vendor field mapped, raw-only, or
+  excluded with a reason; MPN normalization and manufacturer aliases; supplier SKU, packaging, and
+  pack quantity; price breaks with currency and observation time; lifecycle and availability states;
+  parameter units and qualifiers; extension by a domain without redefinition; mapping to the
+  interchange contract and InvenTree resources. Fixes only; new behavior becomes plan tasks.
+- Data and artifact paths: `contracts/core/supply/`, `src/kn/supply/`, `tests/supply/`,
+  `docs/impl/plan.md`, and the task record.
+- Execution path: Rerun the group's acceptance commands, then work through the audit checks. Load
+  MPNs that differ only in case, punctuation, or a packaging suffix, a price break in a second
+  currency, and a vendor field missing from the coverage matrix.
+- Acceptance gates: The coverage test fails on any unlisted vendor field. MPN variants resolve as
+  the identity rules require. A domain contract that redefines a supply field is refused. Every
+  finding has a severity, evidence, and a disposition, no `blocker` is accepted, and every fix
+  starts from a failing regression test. `make ci` passes with the scheduled tasks in the plan.
+- Documentation target: `current/part-supply-model.md` listed in the [areas
+  index](current.md#areas).
+
+### Versioned exchange and synchronization -- `data-interchange`
 
 #### interchange-contract
 
@@ -929,23 +824,22 @@ Exchange with any counterpart needs one versioned, documented shape for KN objec
 
 - Serves: `data-interchange` -- [Data interchange](../design/spec.md#data-interchange)
 - Agent status: CLEAR
-- Requires: `supply-model-contracts`, `partial-update-tracking`
+- Execution stage: MODEL
+- Requires: `part-supply-model-implementation-audit`, `object-identity-implementation-audit`
 - Dependencies: none.
-- User-visible outcome: The interchange contract `0.1.0` in `contracts/interchange/` compiles to
-  JSON Schema. `kn interchange export` writes a verified, deterministic ZIP package with its
-  manifest from one snapshot. `kn interchange validate` checks a package against its declared
-  version.
-- Scope boundary: Object, identifier, field, relation, and provenance-reference records for the
-  supply classes and their organizations; full and delta packages; rights filtering with excluded
-  counts; atomic writes. Version diffs come in `interchange-schema-evolution`, and import comes in
-  `interchange-package-import`.
-- Data and artifact paths: `contracts/interchange/`, `src/kn/interchange/`,
-  `$DATA_DIR/interchange/<run-id>/`, `tests/interchange/`.
-- Execution path: Work fixture-first from a rebuilt fixture domain that has supply objects, a
-  merged object, a retired object, and restricted evidence.
-- Acceptance gates: Two exports of one snapshot are byte-identical. Every manifest hash verifies.
-  Restricted fields are absent and counted. Merged and retired objects are exported as state with
-  redirects. A delta holds only records changed since its watermark.
+- User-visible outcome: The versioned interchange record and package-manifest schemas at `0.1.0`
+  compile to JSON Schema before a runtime exporter exists. Stable object, field and verification
+  records give every adapter one early compatibility boundary.
+- Scope boundary: Object, identifier, field, relation, missingness, provenance, human verification,
+  lifecycle, full/delta manifest and loss-report definitions. Snapshot queries, ZIP writing and
+  CLI behavior belong to `interchange-package-export`.
+- Data and artifact paths: `contracts/interchange/`, `src/kn/interchange/`, `tests/interchange/`.
+- Execution path: Compile the record and manifest definitions; validate synthetic examples for
+  each supply class, composite key, lifecycle state, field change and optional verification scope.
+- Acceptance gates: Valid fixtures round-trip exactly; invalid references, missing reasons,
+  versions and verification metadata fail with diagnostics. Full/delta and rights/loss metadata
+  have fixed schemas. No runtime tracker, human projection, raw replay or counterpart is needed.
+  `make ci` passes.
 - Documentation target: A new `current/data-interchange.md` page listed in the
   [areas index](current.md#areas).
 
@@ -956,6 +850,7 @@ before it can break an exchange.
 
 - Serves: `data-interchange` -- [Data interchange](../design/spec.md#data-interchange)
 - Agent status: CLEAR
+- Execution stage: MODEL
 - Requires: `interchange-contract`
 - Dependencies: none.
 - User-visible outcome: `kn interchange diff` classifies contract changes as compatible, additive,
@@ -972,11 +867,62 @@ before it can break an exchange.
 - Execution path: Write diff fixtures for every row of the specification's change table and every
   external change type, then the classifier and the upgrade runner.
 - Acceptance gates: Each fixture change gets its declared class. An undersized bump fails the check.
-  A `0.1.0` fixture package read through the chain equals a direct export at the fixture version.
+  A `0.1.0` fixture package read through the chain equals direct fixture serialization at that version.
   Unknown newer-minor fields round-trip byte-identically, and a newer major is refused. An
   older-version export with an unmappable field is refused with a loss report.
 - Documentation target: `current/data-interchange.md` listed in the
   [areas index](current.md#areas).
+
+#### exchange-ledger-contracts
+
+Bindings, plans and receipts must have stable storage before synchronization algorithms or a live
+counterpart begin creating durable references.
+
+- Serves: `data-interchange` -- [Data interchange](../design/spec.md#data-interchange)
+- Agent status: CLEAR
+- Execution stage: MODEL
+- Requires: `interchange-contract`
+- Dependencies: The ledger and synchronization states in the specification, using synthetic
+  counterpart IDs and authored object/version fixtures rather than a live service.
+- User-visible outcome: Registered contracts define counterpart bindings, field ownership,
+  three-way versions/hashes, plans, approvals, receipts, conflicts and resumable operation keys.
+- Scope boundary: Schema, deterministic keys, uniqueness and version constraints, provenance,
+  rights and verification references, and model-only replay. Counterpart calls, sync decisions,
+  crash recovery and merge handling remain in `exchange-binding-ledger`.
+- Data and artifact paths: `contracts/core/interchange/`, `src/kn/contracts/resources/`,
+  `src/kn/interchange/ledger/`, `tests/interchange/`, `tests/integration/`.
+- Execution path: Compile and rebuild the ledger with synthetic rows covering every state and
+  every later receipt field; plant duplicate bindings, mismatched versions and incomplete keys.
+- Acceptance gates: The compiled model preserves all three comparison versions and idempotency
+  keys, rejects duplicate active bindings, and round-trips approvals/receipts with provenance.
+  Fixture replay is deterministic without lineage CLI, a sync engine or a counterpart endpoint.
+  `make ci` and integration checks pass.
+- Documentation target: A new `current/data-interchange.md` page listed in the
+  [areas index](current.md#areas).
+
+#### interchange-package-export
+
+The early interchange schema needs a runtime exporter once canonical selection and change
+tracking are available.
+
+- Serves: `data-interchange` -- [Data interchange](../design/spec.md#data-interchange)
+- Agent status: CLEAR
+- Requires: `interchange-contract`, `object-identity-implementation-audit`,
+  `evidence-model-implementation-audit`
+- Dependencies: The accepted interchange schema and manifest definitions.
+- User-visible outcome: `kn interchange export` writes an atomic, verified deterministic ZIP
+  from one snapshot; `kn interchange validate` checks a package against its declared version.
+- Scope boundary: Runtime snapshot queries, full/delta selection, rights filtering and excluded
+  counts, packaging and validation. Consume the early contracts without redefining their fields.
+- Data and artifact paths: `src/kn/interchange/`, `$DATA_DIR/interchange/<run-id>/`,
+  `tests/interchange/`.
+- Execution path: Export rebuilt fixture objects, including a merged/retired object, changed
+  fields, human review metadata and restricted evidence; verify the manifest and every file.
+- Acceptance gates: Two exports are byte-identical and every hash verifies. Restricted data is
+  absent and counted. Lifecycle redirects and delta watermarks remain correct. Optional human
+  metadata preserves nulls, purpose and target version; unsupported fields appear in the loss
+  report. A partial package never becomes visible. `make ci` passes.
+- Documentation target: `current/data-interchange.md` listed in the [areas index](current.md#areas).
 
 #### exchange-binding-ledger
 
@@ -985,7 +931,7 @@ overwritten unseen.
 
 - Serves: `data-interchange` -- [Data interchange](../design/spec.md#data-interchange)
 - Agent status: CLEAR
-- Requires: `interchange-contract`, `object-lineage-lookup`
+- Requires: `exchange-ledger-contracts`, `object-identity-implementation-audit`
 - Dependencies: none.
 - User-visible outcome: The append-only exchange ledger in `$DATA_DIR/exchange/<counterpart>/`
   records bindings, per-field sync state, plans, and receipts, and rebuild replays it into the
@@ -994,6 +940,8 @@ overwritten unseen.
   wrote, the three-way comparison, redirect handling for bindings of merged objects,
   duplicate-binding detection, and crash recovery that reads counterpart state instead of resending.
   No counterpart adapter.
+  Consume the early exchange-ledger contract for every binding, version, plan and receipt; this
+  task owns synchronization behavior rather than a second schema definition.
 - Data and artifact paths: `contracts/core/interchange/`, `src/kn/interchange/ledger/`,
   `$DATA_DIR/exchange/`, `tests/interchange/`.
 - Execution path: Use fixture ledgers and a fake counterpart that records calls. Cover every sync
@@ -1011,7 +959,8 @@ A package must come back into KN as evidence, with its identity and provenance i
 
 - Serves: `data-interchange` -- [Data interchange](../design/spec.md#data-interchange)
 - Agent status: CLEAR
-- Requires: `interchange-schema-evolution`, `mapping-and-quality-rules`
+- Requires: `interchange-schema-evolution`, `interchange-package-export`,
+  `ingestion-engine-implementation-audit`
 - Dependencies: none.
 - User-visible outcome: `kn interchange import <package>` archives the package as a WARC resource
   record and loads it through the engine. KN IDs resolve directly for the same producer, and
@@ -1030,15 +979,15 @@ A package must come back into KN as evidence, with its identity and provenance i
 - Documentation target: `current/data-interchange.md` listed in the
   [areas index](current.md#areas).
 
-#### data-interchange-implementation-audit (optional)
+#### data-interchange-implementation-audit
 
 The interchange contract is the versioned external boundary, so a design flaw found after
 counterparts depend on it costs a major contract version.
 
 - Serves: `data-interchange` -- [Data interchange](../design/spec.md#data-interchange)
 - Agent status: CLEAR
-- Requires: `interchange-contract`, `interchange-schema-evolution`, `exchange-binding-ledger`,
-  `interchange-package-import`
+- Requires: `interchange-contract`, `interchange-schema-evolution`, `exchange-ledger-contracts`,
+  `interchange-package-export`, `exchange-binding-ledger`, `interchange-package-import`
 - Dependencies: The accepted task records of the group and the [implementation
   audit](../guide/planning-workflow.md#implementation-audits) checks.
 - User-visible outcome: Counterpart adapters build on a verified, versioned boundary. The audit
@@ -1062,7 +1011,7 @@ counterparts depend on it costs a major contract version.
   tasks in the plan.
 - Documentation target: `current/data-interchange.md` listed in the [areas index](current.md#areas).
 
-### InvenTree exchange -- `inventree-exchange`
+### InvenTree adapter and upgrade -- `inventree-exchange`
 
 #### inventree-test-service
 
@@ -1102,7 +1051,8 @@ matching the reviewed target.
 
 - Serves: `inventree-exchange` -- [InvenTree exchange](../design/spec.md#inventree-exchange)
 - Agent status: CLEAR
-- Requires: `inventree-test-service`, `interchange-schema-evolution`, `http-fetch-safety`
+- Requires: `inventree-test-service`, `data-interchange-implementation-audit`,
+  `ingestion-engine-implementation-audit`
 - Dependencies: The pinned test service.
 - User-visible outcome: `kn inventree probe --instance <id>` reports the software version, API
   version, schema digest, and selected profile. `kn inventree schema capture` archives the API
@@ -1132,7 +1082,7 @@ instances that drift from it.
 
 - Serves: `inventree-exchange` -- [InvenTree exchange](../design/spec.md#inventree-exchange)
 - Agent status: CLEAR
-- Requires: `inventree-schema-registry`, `supply-model-contracts`
+- Requires: `inventree-schema-registry`, `part-supply-model-implementation-audit`
 - Dependencies: The [resource mapping](../design/integrations/inventree.md#resource-mapping).
 - User-visible outcome: The target profile in `interchange/inventree/profiles/` maps each resource
   in the design page to interchange field IDs. It records endpoints, filters, cursors, the binding
@@ -1157,7 +1107,8 @@ the update policies.
 
 - Serves: `inventree-exchange` -- [InvenTree exchange](../design/spec.md#inventree-exchange)
 - Agent status: CLEAR
-- Requires: `inventree-adapter-profiles`, `exchange-binding-ledger`, `rebuild-from-raw`
+- Requires: `inventree-adapter-profiles`, `data-interchange-implementation-audit`,
+  `ingestion-engine-implementation-audit`
 - Dependencies: The pinned test service. No owner instance is used here.
 - User-visible outcome: An InvenTree instance profile runs as an `adapter_api` source through
   `kn source run` and `kn source replay`. Allowlisted resources are archived, mapped through the
@@ -1237,69 +1188,7 @@ or the joint target moves to it.
 - Documentation target: `current/inventree-exchange.md` listed in the
   [areas index](current.md#areas).
 
-#### vl-itree-read-acceptance
-
-The owner's instance must import correctly on the target release before any write is proposed.
-
-- Serves: `inventree-exchange` -- [InvenTree exchange](../design/spec.md#inventree-exchange)
-- Agent status: RUN NEEDED
-- Requires: `inventree-read-import`, `provide-inventree-instance-access`, `align-vl-itree-release`
-- Dependencies: Read access to `vl-itree` on the target release over HTTPS, its CA certificate if
-  it uses the proxy's internal CA, and network access to it from the run host.
-- User-visible outcome: An archived schema capture and a read-only import of `vl-itree`, with the
-  reviewed instance profile, and a report of losses, unmapped resources, identity matches, and
-  update-policy outcomes.
-- Scope boundary: Read-only capture and import within a request budget. No writes.
-- Data and artifact paths: `interchange/inventree/instances/vl-itree.yaml`, `$DATA_DIR/raw/`,
-  `$DATA_DIR/exchange/vl-itree/<run-id>/`, and the task record.
-- Execution path: Probe, confirm the target digest, capture, and import. Then replay the import
-  without network.
-- Acceptance gates: The probe matches the target snapshot digest over verified TLS. The replay gives
-  identical KN objects. Every unmapped native field is listed with a reason. The request count stays
-  within the budget.
-- Documentation target: `current/inventree-exchange.md` listed in the
-  [areas index](current.md#areas).
-
-#### vl-itree-write-acceptance
-
-The first write into the owner's inventory must apply exactly as approved and verify itself.
-
-- Serves: `inventree-exchange` -- [InvenTree exchange](../design/spec.md#inventree-exchange)
-- Agent status: RUN NEEDED
-- Requires: `approve-inventree-write-exchange`, `inventree-write-export`
-- Dependencies: The write approval, and a write-capable token for the `kn-exchange` user in the
-  environment.
-- User-visible outcome: The approved first plan is applied to `vl-itree` with receipts and
-  read-back. A re-import shows the written values bound to unchanged KN IDs.
-- Scope boundary: The approved plan only. Later exchanges use the same commands.
-- Data and artifact paths: `$DATA_DIR/exchange/vl-itree/`, and the task record.
-- Execution path: Re-plan, confirm the plan equals the approved one, apply, re-import, and compare.
-- Acceptance gates: Every read-back is equal. A second apply is a no-op. KN IDs and bindings are
-  unchanged after the re-import. Any read-only or lost field is in the report.
-- Documentation target: `current/inventree-exchange.md` listed in the
-  [areas index](current.md#areas).
-
-#### inventree-change-feed (optional)
-
-Listing every resource is wasteful once the instance can report its own changes.
-
-- Serves: `inventree-exchange` -- [InvenTree exchange](../design/spec.md#inventree-exchange)
-- Agent status: CLEAR
-- Requires: `vl-itree-read-acceptance`
-- Dependencies: Access to `/api/audit/` for the exchange user on the target release.
-- User-visible outcome: Incremental imports read the InvenTree audit log as a change feed and fetch
-  only the changed objects. A periodic full listing catches missed events.
-- Scope boundary: A cursor over audit events per resource and a profile capability flag. No
-  webhooks or plugins.
-- Data and artifact paths: `src/kn/interchange/inventree/`, `tests/interchange/inventree/`.
-- Execution path: Use fixture audit pages from the target release, then compare live with a full
-  listing.
-- Acceptance gates: On the test service, a change-feed import followed by a full listing finds no
-  difference. An audit gap triggers a full listing.
-- Documentation target: `current/inventree-exchange.md` listed in the
-  [areas index](current.md#areas).
-
-#### inventree-exchange-implementation-audit (optional)
+#### inventree-exchange-implementation-audit
 
 InvenTree is an uncontrolled third party, so drift, permission, and partial-failure handling must
 hold before the owner's inventory depends on the adapter.
@@ -1335,79 +1224,96 @@ hold before the owner's inventory depends on the adapter.
 - Documentation target: `current/inventree-exchange.md` listed in the [areas
   index](current.md#areas).
 
-### Obsidian export -- `obsidian-export`
+### Owner instance exchange and calibration -- `counterpart-acceptance`
 
-#### obsidian-export-core
+#### vl-itree-read-acceptance
 
-Users need a safe, read-only Obsidian subset of the knowledge base.
+The owner's instance must import correctly on the target release before any write is proposed.
 
-- Serves: `obsidian-export` -- [Obsidian export](../design/spec.md#obsidian-export)
-- Agent status: CLEAR
-- Requires: `canonical-fact-selection`
-- Dependencies: none.
-- User-visible outcome: `kn export obsidian --profile <id> --locale en|uk` writes a verified vault
-  ZIP and manifest from one snapshot.
-- Scope boundary: Profiles, the snapshot read, deterministic notes and links, rights filtering,
-  limits, safe paths, the manifest, and the atomic ZIP. No scheduling and no writeback.
-- Data and artifact paths: `src/kn/export/obsidian/`, `domains/fixture/exports/`,
-  `$DATA_DIR/exports/`, `tests/export/`.
-- Execution path: Fixture-domain tests for link closure, explicit references, escaping, traversal
-  names, oversized selections, and restricted rights.
-- Acceptance gates: Manifest hashes verify. Every internal link resolves or is an explicit
-  reference. A repeated export is identical. Restricted content and secrets are absent. An
-  oversized selection is refused.
-- Documentation target: A new `current/obsidian-export.md` page listed in the
+- Serves: `inventree-exchange` -- [InvenTree exchange](../design/spec.md#inventree-exchange)
+- Agent status: RUN NEEDED
+- Requires: `inventree-exchange-implementation-audit`, `provide-inventree-instance-access`,
+  `align-vl-itree-release`
+- Dependencies: Read access to `vl-itree` on the target release over HTTPS, its CA certificate if
+  it uses the proxy's internal CA, and network access to it from the run host.
+- User-visible outcome: An archived schema capture and a read-only import of `vl-itree`, with the
+  reviewed instance profile, and a report of losses, unmapped resources, identity matches, and
+  update-policy outcomes.
+- Scope boundary: Read-only capture and import within a request budget. No writes.
+- Data and artifact paths: `interchange/inventree/instances/vl-itree.yaml`, `$DATA_DIR/raw/`,
+  `$DATA_DIR/exchange/vl-itree/<run-id>/`, and the task record.
+- Execution path: Probe, confirm the target digest, capture, and import. Then replay the import
+  without network.
+- Acceptance gates: The probe matches the target snapshot digest over verified TLS. The replay gives
+  identical KN objects. Every unmapped native field is listed with a reason. The request count stays
+  within the budget.
+- Documentation target: `current/inventree-exchange.md` listed in the
   [areas index](current.md#areas).
 
-#### obsidian-space-profile
+#### identity-match-calibration
 
-The SATCOM knowledge needs a reviewed export profile on real data.
+Match probabilities mean something only after they are measured on real records.
 
-- Serves: `obsidian-export` -- [Obsidian export](../design/spec.md#obsidian-export)
-- Agent status: CLEAR
-- Requires: `space-elt-integration-gate`, `obsidian-export-core`
-- Dependencies: Rights flags recorded by the space sources.
-- User-visible outcome: A `satcom_public` profile exports constellations, services, launchers,
-  organizations, concepts, sources, and evidence, with separate `en` and `uk` vaults.
-- Scope boundary: Profile definition and verification on space data. No new export features.
-- Data and artifact paths: `domains/space/exports/`, `tests/export/`.
-- Execution path: Export from a rebuilt fixture archive and open the vault structure in tests.
-- Acceptance gates: Both vaults verify. Excluded-rights counts match the source flags. The size
-  stays within limits.
-- Documentation target: `current/obsidian-export.md` listed in the
+- Serves: `object-identity` -- [Object identity](../design/spec.md#object-identity)
+- Agent status: RUN NEEDED
+- Research: yes
+- Requires: `vl-itree-read-acceptance`, `object-identity-implementation-audit`
+- Dependencies: Archived authorized samples that carry authoritative identifiers, starting with the
+  `vl-itree` read import and the first vendor sources. Owner-labeled pairs are optional.
+- User-visible outcome: A calibration report per class gives precision and recall at both
+  thresholds and the calibration error per probability band. Profiles that meet the gate are marked
+  `calibrated` and may auto-link.
+- Scope boundary: Ground truth comes from pairs proven by authoritative identifiers, with those
+  identifiers masked, plus reviewer decisions. Weights and thresholds change only through reviewed
+  profile edits. No learned matcher.
+- Data and artifact paths: `contracts/core/identity/match-profiles/`,
+  `$DATA_DIR/identity-eval/<run-id>/`, `tests/identity/`, and the task record.
+- Execution path: Replay the archived samples, build masked pair sets, and fit and evaluate weights
+  on held-out folds.
+- Acceptance gates: Each calibrated class reaches at least 0.99 precision at the link threshold on
+  at least 200 held-out positive pairs. A class that misses the gate stays review-only. That is a
+  valid negative result, recorded in the closed-research register.
+- Documentation target: `current/object-identity.md` listed in the [areas index](current.md#areas).
+
+#### vl-itree-write-acceptance
+
+The first write into the owner's inventory must apply exactly as approved and verify itself.
+
+- Serves: `inventree-exchange` -- [InvenTree exchange](../design/spec.md#inventree-exchange)
+- Agent status: RUN NEEDED
+- Requires: `approve-inventree-write-exchange`, `inventree-exchange-implementation-audit`
+- Dependencies: The write approval, and a write-capable token for the `kn-exchange` user in the
+  environment.
+- User-visible outcome: The approved first plan is applied to `vl-itree` with receipts and
+  read-back. A re-import shows the written values bound to unchanged KN IDs.
+- Scope boundary: The approved plan only. Later exchanges use the same commands.
+- Data and artifact paths: `$DATA_DIR/exchange/vl-itree/`, and the task record.
+- Execution path: Re-plan, confirm the plan equals the approved one, apply, re-import, and compare.
+- Acceptance gates: Every read-back is equal. A second apply is a no-op. KN IDs and bindings are
+  unchanged after the re-import. Any read-only or lost field is in the report.
+- Documentation target: `current/inventree-exchange.md` listed in the
   [areas index](current.md#areas).
 
-#### obsidian-export-implementation-audit (optional)
+#### counterpart-acceptance-implementation-audit
 
-Exported vaults leave KN's control, so a rights, link, or determinism defect cannot be withdrawn
-once a vault is shared.
+Verify the owner instance exchange and calibration handoff against its specification and the next consumer.
 
-- Serves: `obsidian-export` -- [Obsidian export](../design/spec.md#obsidian-export)
-- Agent status: CLEAR
-- Requires: `obsidian-export-core`, `obsidian-space-profile`
-- Dependencies: The accepted task records of the group and the [implementation
-  audit](../guide/planning-workflow.md#implementation-audits) checks.
-- User-visible outcome: Shared vaults come from a verified, deterministic export. The audit record
-  gives every check a result and every finding a disposition. The current-state page lists known
-  limitations, and each scheduled finding is a plan task.
-- Scope boundary: Focus: rights and licence filtering across notes, attachments, and front matter;
-  deterministic names and content; stable links when objects merge, split, or retire; file-name
-  safety across operating systems, including reserved names, length, case collisions, and Cyrillic;
-  locale parity; vault verification; export after the knowledge base changes; further domain
-  profiles. Fixes only; new behavior becomes plan tasks.
-- Data and artifact paths: `src/kn/export/obsidian/`, `domains/<domain>/exports/`, `tests/export/`,
-  `docs/impl/plan.md`, and the task record.
-- Execution path: Rerun the group's acceptance commands, then work through the audit checks. Export
-  twice and compare bytes, export after a merge and a retire, and plant a restricted value, names
-  that differ only in case, and a reserved file name.
-- Acceptance gates: Two exports give identical bytes. No restricted value appears in the vault.
-  Links to merged or retired objects resolve to successors. File names are valid on Linux, macOS,
-  and Windows. Every finding has a severity, evidence, and a disposition, no `blocker` is accepted,
-  and every fix starts from a failing regression test. `make ci` passes with the scheduled tasks in
-  the plan.
-- Documentation target: `current/obsidian-export.md` listed in the [areas index](current.md#areas).
+- Serves: `inventree-exchange` -- [InvenTree exchange](../design/spec.md#inventree-exchange)
+- Agent status: RUN NEEDED
+- Requires: `vl-itree-read-acceptance`, `identity-match-calibration`, `vl-itree-write-acceptance`
+- Dependencies: Group acceptance records and the
+  [audit procedure](../guide/planning-workflow.md#implementation-audits).
+- User-visible outcome: The group has reproducible acceptance evidence and owned follow-up work.
+- Scope boundary: Verify this group's outputs, failure paths and downstream compatibility.
+- Data and artifact paths: Group fixtures, the numbered audit record and the forward plan.
+- Execution path: Reconcile the authorized read and write receipts against the owner-approved
+  fields. Recompute held-out precision with authoritative identifiers masked and
+  verify the calibration decision.
+- Acceptance gates: Reproduce the member gates, run the six audit checks and record each finding
+  with evidence, severity and disposition. Fix blockers before handoff and run `make ci`.
+- Documentation target: [Current-state areas](current.md#areas).
 
-### Space ELT -- `space-elt`
+### Space collection and replay -- `space-elt`
 
 #### space-domain-contracts
 
@@ -1415,16 +1321,24 @@ Canonical space tables must represent the preserved source examples without conf
 
 - Serves: `space-elt` -- [Space ELT](../design/spec.md#space-elt)
 - Agent status: CLEAR
-- Requires: `seed-vocabulary-import`, `evidence-claim-contracts`
+- Execution stage: MODEL
+- Requires: `object-identity-implementation-audit`
 - Dependencies: [Space domain model](../design/domains/space.md#domain-model) and the initial
   [space example dataset](current/data-contracts.md#source-preservation-and-import).
 - User-visible outcome: The `space` schema holds every pilot table, with claim links,
   coverage-kind and availability vocabularies, and space selection policies.
 - Scope boundary: Contracts, domain policies, and fixtures. No source parsers.
+  Adopt common identity, evidence and verification traits and declare extension points for source
+  mappings. SQL/fixture rebuilds validate this task without a running ingestion pipeline.
+  Resolve the physical/field-ID boundary between existing SATCOM snapshot projections and
+  canonical space tables now. Never register two contracts over the same table or reinterpret
+  imported rows as canonical facts. Any required internal rename has an explicit adapter/backfill
+  mapping that preserves all source files, cells and snapshot identifiers.
 - Data and artifact paths: `domains/space/contracts/`, `src/kn/domains/space/`,
   `tests/domains/space/`.
 - Execution path: Write the contracts from the design page, add the missing ontology classes as
-  reviewed seed rows, compile, and rebuild.
+  reviewed seed rows as needed, compile, and rebuild. Resolve the two pending seed relations
+  (regulatory Activity and EUSPA concept endpoints) without conflating classes and concepts.
 - Acceptance gates: Every table compiles and rebuilds. Fixtures prove that planned and actual
   launches, cataloged and operational status, and recurring and one-time tariff amounts cannot be
   stored in the same field. Reuse the real SATCOM mixture to preserve model versus individual
@@ -1439,7 +1353,6 @@ Space sources need documented terms and limits before any sample is fetched.
 - Serves: `space-elt` -- [Space ELT](../design/spec.md#space-elt)
 - Agent status: CLEAR
 - Research: yes
-- Requires: `source-onboarding-workflow`
 - Dependencies: Public documentation for CelesTrak, Launch Library 2, Natural Earth, and the four
   candidate operators' terms of use.
 - User-visible outcome: A terms dossier per pilot source (licence, rate limits, permitted access,
@@ -1458,7 +1371,8 @@ Catalog identity and constellation snapshots start from CelesTrak GP data.
 
 - Serves: `space-elt` -- [Space ELT](../design/spec.md#space-elt)
 - Agent status: CLEAR
-- Requires: `authorize-space-source-sampling`, `space-domain-contracts`, `rebuild-from-raw`
+- Requires: `authorize-space-source-sampling`, `space-domain-contracts`,
+  `ingestion-engine-implementation-audit`
 - Dependencies: Sampling authorization with a request budget. The CelesTrak usage policy.
 - User-visible outcome: Selected constellation groups load as orbital element sets, spacecraft
   identities (NORAD and COSPAR as separate identifiers), and membership candidates with snapshot
@@ -1522,7 +1436,7 @@ Service, tariff, and coverage facts need cited operator evidence.
 
 - Serves: `space-elt` -- [Space ELT](../design/spec.md#space-elt)
 - Agent status: CLEAR
-- Requires: `space-source-natural-earth`, `curated-source-method`
+- Requires: `space-source-natural-earth`, `ingestion-engine-implementation-audit`
 - Dependencies: Sampling authorization covering cited-page capture. A curator for at least two
   providers.
 - User-visible outcome: Curated observations for at least two of the four candidate providers load
@@ -1545,7 +1459,8 @@ The space domain must prove its acceptance criteria on archived samples before d
 
 - Serves: `space-elt` -- [Space ELT](../design/spec.md#space-elt)
 - Agent status: CLEAR
-- Requires: `space-source-operator-disclosures`, `review-queue-cli`, `source-status-monitoring`
+- Requires: `space-source-operator-disclosures`, `evidence-model-implementation-audit`,
+  `source-management-implementation-audit`
 - Dependencies: Archived authorized samples from every pilot source.
 - User-visible outcome: One command rebuilds the space domain from the archive and runs the
   identity, time, provenance, and conflation checks.
@@ -1557,44 +1472,7 @@ The space domain must prove its acceptance criteria on archived samples before d
   twice.
 - Documentation target: `current/space-domain.md` listed in the [areas index](current.md#areas).
 
-#### space-source-space-track (optional)
-
-Space-Track would corroborate catalog identity and status.
-
-- Serves: `space-elt` -- [Space ELT](../design/spec.md#space-elt)
-- Agent status: CLEAR
-- Requires: `space-elt-integration-gate`
-- Dependencies: An owner-provided Space-Track account and approval of its terms. Credentials stay
-  in the environment only.
-- User-visible outcome: Catalog status corroboration claims linked by NORAD ID, kept separate from
-  GP data.
-- Scope boundary: Authenticated API use within the documented limits. No redistribution beyond
-  the terms.
-- Data and artifact paths: `domains/space/sources/space_track.yaml`,
-  `tests/fixtures/space/space_track/`.
-- Execution path: Follow the onboarding workflow with credentials redacted from every record.
-- Acceptance gates: Corroboration claims link without merging sources. Redaction tests pass. All
-  earlier suites pass.
-- Documentation target: `current/space-domain.md` listed in the [areas index](current.md#areas).
-
-#### space-source-regulatory-registers (optional)
-
-UNOOSA registration and ITU filing evidence would add registration and intent facts.
-
-- Serves: `space-elt` -- [Space ELT](../design/spec.md#space-elt)
-- Agent status: CLEAR
-- Requires: `space-elt-integration-gate`
-- Dependencies: A terms review and sampling authorization for UNOOSA and ITU Space Explorer.
-- User-visible outcome: Registration and filing records load as `regulatory_record` claims, never
-  as deployment or ownership.
-- Scope boundary: Permitted exports or pages only. Filing, licence, and deployment stay distinct.
-- Data and artifact paths: `domains/space/sources/`, `tests/fixtures/space/`.
-- Execution path: Follow the onboarding workflow, with document extraction last in parser order.
-- Acceptance gates: No filing creates a constellation count or availability. All earlier suites
-  pass.
-- Documentation target: `current/space-domain.md` listed in the [areas index](current.md#areas).
-
-#### space-elt-implementation-audit (optional)
+#### space-elt-implementation-audit
 
 The space domain is the first real pilot, so the patterns its sources set are copied by every later
 domain.
@@ -1602,8 +1480,8 @@ domain.
 - Serves: `space-elt` -- [Space ELT](../design/spec.md#space-elt)
 - Agent status: CLEAR
 - Requires: `space-domain-contracts`, `space-source-terms-review`, `space-source-celestrak-gp`,
-  `space-source-launch-library`, `space-source-natural-earth`, `space-source-operator-disclosures`,
-  `space-elt-integration-gate`
+  `space-source-launch-library`, `space-source-natural-earth`,
+  `space-source-operator-disclosures`, `space-elt-integration-gate`
 - Dependencies: The accepted task records of the group and the [implementation
   audit](../guide/planning-workflow.md#implementation-audits) checks.
 - User-visible outcome: Later domains copy verified source patterns. The audit record gives every
@@ -1625,7 +1503,79 @@ domain.
   starts from a failing regression test. `make ci` passes with the scheduled tasks in the plan.
 - Documentation target: `current/space-domain.md` listed in the [areas index](current.md#areas).
 
-### Orchestration -- `orchestration`
+### Evidence vault export -- `obsidian-export`
+
+#### obsidian-export-core
+
+Users need a safe, read-only Obsidian subset of the knowledge base.
+
+- Serves: `obsidian-export` -- [Obsidian export](../design/spec.md#obsidian-export)
+- Agent status: CLEAR
+- Requires: `object-identity-implementation-audit`
+- Dependencies: none.
+- User-visible outcome: `kn export obsidian --profile <id> --locale en|uk` writes a verified vault
+  ZIP and manifest from one snapshot.
+- Scope boundary: Profiles, the snapshot read, deterministic notes and links, rights filtering,
+  limits, safe paths, the manifest, and the atomic ZIP. No scheduling and no writeback.
+- Data and artifact paths: `src/kn/export/obsidian/`, `domains/fixture/exports/`,
+  `$DATA_DIR/exports/`, `tests/export/`.
+- Execution path: Fixture-domain tests for link closure, explicit references, escaping, traversal
+  names, oversized selections, and restricted rights.
+- Acceptance gates: Manifest hashes verify. Every internal link resolves or is an explicit
+  reference. A repeated export is identical. Restricted content and secrets are absent. An
+  oversized selection is refused.
+- Documentation target: A new `current/obsidian-export.md` page listed in the
+  [areas index](current.md#areas).
+
+#### obsidian-space-profile
+
+The SATCOM knowledge needs a reviewed export profile on real data.
+
+- Serves: `obsidian-export` -- [Obsidian export](../design/spec.md#obsidian-export)
+- Agent status: CLEAR
+- Requires: `space-elt-implementation-audit`, `obsidian-export-core`
+- Dependencies: Rights flags recorded by the space sources.
+- User-visible outcome: A `satcom_public` profile exports constellations, services, launchers,
+  organizations, concepts, sources, and evidence, with separate `en` and `uk` vaults.
+- Scope boundary: Profile definition and verification on space data. No new export features.
+- Data and artifact paths: `domains/space/exports/`, `tests/export/`.
+- Execution path: Export from a rebuilt fixture archive and open the vault structure in tests.
+- Acceptance gates: Both vaults verify. Excluded-rights counts match the source flags. The size
+  stays within limits.
+- Documentation target: `current/obsidian-export.md` listed in the
+  [areas index](current.md#areas).
+
+#### obsidian-export-implementation-audit
+
+Exported vaults leave KN's control, so a rights, link, or determinism defect cannot be withdrawn
+once a vault is shared.
+
+- Serves: `obsidian-export` -- [Obsidian export](../design/spec.md#obsidian-export)
+- Agent status: CLEAR
+- Requires: `obsidian-export-core`, `obsidian-space-profile`
+- Dependencies: The accepted task records of the group and the [implementation
+  audit](../guide/planning-workflow.md#implementation-audits) checks.
+- User-visible outcome: Shared vaults come from a verified, deterministic export. The audit record
+  gives every check a result and every finding a disposition. The current-state page lists known
+  limitations, and each scheduled finding is a plan task.
+- Scope boundary: Focus: rights and licence filtering across notes, attachments, and front matter;
+  deterministic names and content; stable links when objects merge, split, or retire; file-name
+  safety across operating systems, including reserved names, length, case collisions, and Cyrillic;
+  locale parity; vault verification; export after the knowledge base changes; further domain
+  profiles. Fixes only; new behavior becomes plan tasks.
+- Data and artifact paths: `src/kn/export/obsidian/`, `domains/<domain>/exports/`, `tests/export/`,
+  `docs/impl/plan.md`, and the task record.
+- Execution path: Rerun the group's acceptance commands, then work through the audit checks. Export
+  twice and compare bytes, export after a merge and a retire, and plant a restricted value, names
+  that differ only in case, and a reserved file name.
+- Acceptance gates: Two exports give identical bytes. No restricted value appears in the vault.
+  Links to merged or retired objects resolve to successors. File names are valid on Linux, macOS,
+  and Windows. Every finding has a severity, evidence, and a disposition, no `blocker` is accepted,
+  and every fix starts from a failing regression test. `make ci` passes with the scheduled tasks in
+  the plan.
+- Documentation target: `current/obsidian-export.md` listed in the [areas index](current.md#areas).
+
+### Scheduled space ingestion -- `orchestration`
 
 #### kestra-service
 
@@ -1652,7 +1602,7 @@ Schedules must follow reviewed crawler configurations, not hand-edited flows.
 
 - Serves: `orchestration` -- [Orchestration](../design/spec.md#orchestration)
 - Agent status: CLEAR
-- Requires: `kestra-service`, `source-status-monitoring`
+- Requires: `kestra-service`, `source-management-implementation-audit`
 - Dependencies: Scoped Kestra API credentials in the environment.
 - User-visible outcome: `kn flows generate` and `kn flows deploy` produce one flow per enabled
   source (namespace `kn.<domain>`, cron in UTC, concurrency 1, transient-only retries) and detect
@@ -1672,7 +1622,8 @@ Approved space sources must run unattended within their budgets.
 
 - Serves: `orchestration` -- [Orchestration](../design/spec.md#orchestration)
 - Agent status: RUN NEEDED
-- Requires: `kestra-flow-generation`, `approve-space-source-enablement`
+- Requires: `kestra-flow-generation`, `approve-space-source-enablement`,
+  `space-elt-implementation-audit`
 - Dependencies: Enablement approval and a declared run window (default 72 hours) on a host with
   network access.
 - User-visible outcome: Approved space sources run on schedule with recorded statuses, budgets, and
@@ -1685,17 +1636,17 @@ Approved space sources must run unattended within their budgets.
   within budgets. The killed run retries without duplicates. Checkpoints survive the restart.
 - Documentation target: `current/orchestration.md` listed in the [areas index](current.md#areas).
 
-#### orchestration-implementation-audit (optional)
+#### orchestration-implementation-audit
 
 Generated flows run unattended, so scheduling, secrets, and failure handling must hold before real
 sources run on them.
 
 - Serves: `orchestration` -- [Orchestration](../design/spec.md#orchestration)
-- Agent status: CLEAR
-- Requires: `kestra-service`, `kestra-flow-generation`
+- Agent status: RUN NEEDED
+- Requires: `kestra-service`, `kestra-flow-generation`, `scheduled-space-ingestion`
 - Dependencies: The accepted task records of the group and the [implementation
-  audit](../guide/planning-workflow.md#implementation-audits) checks. `scheduled-space-ingestion`
-  stays open and is reviewed for the readiness of its inputs.
+  audit](../guide/planning-workflow.md#implementation-audits) checks. Review the scheduled run
+  and its recorded source budgets.
 - User-visible outcome: Unattended runs start from verified, generated flows. The audit record gives
   every check a result and every finding a disposition. The current-state page lists known
   limitations, and each scheduled finding is a plan task.
@@ -1715,7 +1666,7 @@ sources run on them.
   failing regression test. `make ci` passes with the scheduled tasks in the plan.
 - Documentation target: `current/orchestration.md` listed in the [areas index](current.md#areas).
 
-### Space dashboards -- `space-dashboards`
+### Space analytics and dashboards -- `space-dashboards`
 
 #### superset-service
 
@@ -1742,7 +1693,7 @@ Dashboards may read only reviewed, tested marts.
 
 - Serves: `space-dashboards` -- [Space dashboards](../design/spec.md#space-dashboards)
 - Agent status: CLEAR
-- Requires: `space-elt-integration-gate`
+- Requires: `space-elt-implementation-audit`
 - Dependencies: dbt Core and dbt-postgres in an isolated, pinned tool environment.
 - User-visible outcome: The `analytics` schema holds every space mart in the
   [design](../design/domains/space.md#analytical-marts), with localized label joins and freshness
@@ -1781,8 +1732,8 @@ Dashboards must deploy reproducibly from one definition in both locales.
 
 - Serves: `space-dashboards` -- [Space dashboards](../design/spec.md#space-dashboards)
 - Agent status: CLEAR
-- Requires: `space-analytics-marts`, `dashboards-as-code`, `review-queue-cli`,
-  `object-lineage-lookup`
+- Requires: `space-analytics-marts`, `dashboards-as-code`, `evidence-model-implementation-audit`,
+  `object-identity-implementation-audit`
 - Dependencies: none.
 - User-visible outcome: An analyst can open "Why this fact?" on a selected value and see why
   it won, the evidence, permitted alternatives, and any applicable review decision.
@@ -1793,6 +1744,8 @@ Dashboards must deploy reproducibly from one definition in both locales.
 - Acceptance gates: From a fixture dashboard in each locale, verify the displayed winner, unit,
   rule, source locator, competing value, and review reason at two as-of dates. An unresolved
   conflict shows its reason. Restricted evidence leaves no value, locator, or count in the view.
+  Human verification shows its optional time, reviewer, scope/version and decision, or an explicit
+  unreviewed/stale state, independently of source verification labels and data observation dates.
 - Documentation target: `current/space-dashboards.md` listed in the [areas index](current.md#areas).
 
 #### space-dashboard-bundles
@@ -1816,7 +1769,7 @@ Operators need the SATCOM dashboards and map in both languages.
 - Documentation target: `current/space-dashboards.md` listed in the
   [areas index](current.md#areas).
 
-#### space-dashboards-implementation-audit (optional)
+#### space-dashboards-implementation-audit
 
 Dashboards are what analysts trust, so mart tests, bilingual builds, and fact explanation must be
 right before other domains reuse the pattern.
@@ -1846,7 +1799,30 @@ right before other domains reuse the pattern.
   failing regression test. `make ci` passes with the scheduled tasks in the plan.
 - Documentation target: `current/space-dashboards.md` listed in the [areas index](current.md#areas).
 
-### GDELT ELT -- `gdelt-elt`
+### GDELT collection and correlation -- `gdelt-elt`
+
+#### gdelt-domain-contracts
+
+GDELT signals need their own schema that never writes canonical domain facts.
+
+- Serves: `gdelt-elt` -- [GDELT ELT](../design/spec.md#gdelt-elt)
+- Agent status: CLEAR
+- Execution stage: MODEL
+- Requires: `object-identity-implementation-audit`, `source-management-implementation-audit`
+- Dependencies: [GDELT design](../design/domains/gdelt.md).
+- User-visible outcome: The `gdelt` schema holds watches, query runs, article metadata, native
+  dictionaries, story clusters, signals, and candidate links.
+- Scope boundary: Contracts and policies. The native Event and Mention tables are reserved until
+  the optional stream import. No loader writes to space or microelectronics tables.
+  Use the early evidence, verification and run-state interfaces. Offline compile/rebuild and role
+  fixtures validate the schema; full archive/decision replay is a later integration gate.
+- Data and artifact paths: `domains/gdelt/contracts/`, `src/kn/domains/gdelt/`,
+  `tests/domains/gdelt/`.
+- Execution path: Write the contracts from the design page, then compile and rebuild. Reconcile
+  the pending field-mapping and ingestion-order proposals; defer native-only rows with reasons.
+- Acceptance gates: The contracts compile. A role test proves the GDELT loader cannot write other
+  domain schemas.
+- Documentation target: `current/gdelt-domain.md` listed in the [areas index](current.md#areas).
 
 #### gdelt-source-terms-review
 
@@ -1855,7 +1831,6 @@ GDELT access paths need verified limits and dictionary editions before collectio
 - Serves: `gdelt-elt` -- [GDELT ELT](../design/spec.md#gdelt-elt)
 - Agent status: CLEAR
 - Research: yes
-- Requires: `source-onboarding-workflow`
 - Dependencies: Public GDELT documentation, codebooks, and lookup indexes.
 - User-visible outcome: A dossier covering current DOC 2.0 API limits, terms, codebook editions,
   and dictionary locations, plus catalogue state `investigating`.
@@ -1867,33 +1842,16 @@ GDELT access paths need verified limits and dictionary editions before collectio
 - Documentation target: A new `current/gdelt-domain.md` page listed in the
   [areas index](current.md#areas).
 
-#### gdelt-domain-contracts
-
-GDELT signals need their own schema that never writes canonical domain facts.
-
-- Serves: `gdelt-elt` -- [GDELT ELT](../design/spec.md#gdelt-elt)
-- Agent status: CLEAR
-- Requires: `rebuild-from-raw`
-- Dependencies: [GDELT design](../design/domains/gdelt.md).
-- User-visible outcome: The `gdelt` schema holds watches, query runs, article metadata, native
-  dictionaries, story clusters, signals, and candidate links.
-- Scope boundary: Contracts and policies. The native Event and Mention tables are reserved until
-  the optional stream import. No loader writes to space or microelectronics tables.
-- Data and artifact paths: `domains/gdelt/contracts/`, `src/kn/domains/gdelt/`,
-  `tests/domains/gdelt/`.
-- Execution path: Write the contracts from the design page, then compile and rebuild.
-- Acceptance gates: The contracts compile. A role test proves the GDELT loader cannot write other
-  domain schemas.
-- Documentation target: `current/gdelt-domain.md` listed in the [areas index](current.md#areas).
-
 #### gdelt-source-dictionaries
 
 Native codes must resolve against full official dictionaries, not workbook subsets.
 
 - Serves: `gdelt-elt` -- [GDELT ELT](../design/spec.md#gdelt-elt)
 - Agent status: CLEAR
-- Requires: `gdelt-domain-contracts`, `authorize-gdelt-collection`
-- Dependencies: Collection authorization covering the lookup files.
+- Requires: `gdelt-domain-contracts`, `authorize-gdelt-collection`,
+  `ingestion-engine-implementation-audit`
+- Dependencies: Collection authorization covering the lookup files and the
+  [pending actor/geography and GCAM rows](current/ontology-taxonomy/seeds.md#unmapped-rows-and-ownership).
 - User-visible outcome: CAMEO event codes, actor types, countries, known groups, GKG themes, and
   the GCAM codebook load as native schemes with edition and checksum.
 - Scope boundary: Dictionary files only. Leading zeros are preserved. Sensitive actor attributes
@@ -1931,7 +1889,7 @@ Media signals should point reviewers at domain entities without changing them.
 
 - Serves: `gdelt-elt` -- [GDELT ELT](../design/spec.md#gdelt-elt)
 - Agent status: CLEAR
-- Requires: `gdelt-source-doc-watches`, `space-elt-integration-gate`
+- Requires: `gdelt-source-doc-watches`, `space-elt-implementation-audit`
 - Dependencies: none.
 - User-visible outcome: Candidate links from GDELT documents to space entities appear in the review
   queue with evidence.
@@ -1942,34 +1900,14 @@ Media signals should point reviewers at domain entities without changing them.
   candidate, never a canonical fact change.
 - Documentation target: `current/gdelt-domain.md` listed in the [areas index](current.md#areas).
 
-#### gdelt-selective-native-streams (optional)
-
-Selected GKG, Events, and Mentions rows would add native context to watches.
-
-- Serves: `gdelt-elt` -- [GDELT ELT](../design/spec.md#gdelt-elt)
-- Agent status: CLEAR
-- Requires: `gdelt-source-doc-watches`
-- Dependencies: Collection authorization for the 15-minute files. BigQuery only with an approved
-  budget.
-- User-visible outcome: Rows that match the watch criteria load with native grain and joins.
-  Unselected files are discarded after filtering.
-- Scope boundary: Bounded windows only; no archive mirror.
-- Data and artifact paths: `domains/gdelt/sources/native_streams.yaml`,
-  `tests/fixtures/gdelt/native/`.
-- Execution path: A streaming filter over the manifest files, recording checksums and selected
-  counts.
-- Acceptance gates: Joins follow the documented keys. Coverage statistics name the missing
-  intervals. The byte budget holds.
-- Documentation target: `current/gdelt-domain.md` listed in the [areas index](current.md#areas).
-
-#### gdelt-elt-implementation-audit (optional)
+#### gdelt-elt-implementation-audit
 
 Media signals must never become canonical facts, and GDELT limits change outside KN, so boundary and
 window defects would corrupt the domain silently.
 
 - Serves: `gdelt-elt` -- [GDELT ELT](../design/spec.md#gdelt-elt)
 - Agent status: CLEAR
-- Requires: `gdelt-source-terms-review`, `gdelt-domain-contracts`, `gdelt-source-dictionaries`,
+- Requires: `gdelt-domain-contracts`, `gdelt-source-terms-review`, `gdelt-source-dictionaries`,
   `gdelt-source-doc-watches`, `gdelt-cross-domain-candidates`
 - Dependencies: The accepted task records of the group and the [implementation
   audit](../guide/planning-workflow.md#implementation-audits) checks.
@@ -1991,7 +1929,7 @@ window defects would corrupt the domain silently.
   regression test. `make ci` passes with the scheduled tasks in the plan.
 - Documentation target: `current/gdelt-domain.md` listed in the [areas index](current.md#areas).
 
-### GDELT dashboards -- `gdelt-dashboards`
+### GDELT watch dashboard -- `gdelt-dashboards`
 
 #### gdelt-watch-dashboard
 
@@ -1999,7 +1937,7 @@ Operators need the technology watch view with honest denominators.
 
 - Serves: `gdelt-dashboards` -- [GDELT dashboards](../design/spec.md#gdelt-dashboards)
 - Agent status: CLEAR
-- Requires: `gdelt-cross-domain-candidates`, `space-dashboard-bundles`
+- Requires: `gdelt-elt-implementation-audit`, `space-dashboards-implementation-audit`
 - Dependencies: none.
 - User-visible outcome: The `technology_signal_daily` mart and the watch section of the acquisition
   dashboard deploy in `en` and `uk`.
@@ -2013,7 +1951,7 @@ Operators need the technology watch view with honest denominators.
 - Documentation target: A new `current/gdelt-dashboards.md` page listed in the
   [areas index](current.md#areas).
 
-#### gdelt-dashboards-implementation-audit (optional)
+#### gdelt-dashboards-implementation-audit
 
 The watch dashboard reports signal volume, so a denominator or window error would mislead without
 any visible failure.
@@ -2038,7 +1976,35 @@ any visible failure.
   starts from a failing regression test. `make ci` passes with the scheduled tasks in the plan.
 - Documentation target: `current/gdelt-dashboards.md` listed in the [areas index](current.md#areas).
 
-### Microelectronics ELT -- `microelectronics-elt`
+### Microelectronics sources and observations -- `microelectronics-elt`
+
+#### microelectronics-domain-contracts
+
+Product identity and condition-bound observations need typed contracts.
+
+- Serves: `microelectronics-elt` -- [Microelectronics ELT](../design/spec.md#microelectronics-elt)
+- Agent status: CLEAR
+- Execution stage: MODEL
+- Requires: `object-identity-implementation-audit`, `part-supply-model-implementation-audit`
+- Dependencies: [Microelectronics design](../design/domains/microelectronics.md) and the
+  [pending seed policies](current/ontology-taxonomy/seeds.md#unmapped-rows-and-ownership).
+- User-visible outcome: The `microelectronics` schema holds families, models, MPNs, dies, IP
+  blocks, kits, facilities, projects, benchmark runs, and observations with condition sets and
+  comparison groups.
+- Scope boundary: Contracts and policies that extend the shared part and supply classes rather
+  than redefining them. Origin facts are stored but never gate anything until the owner policy
+  exists.
+  Reuse the shared measurement/attribute/condition definitions from `supply-model-contracts` and
+  the common verification trait. Compile/rebuild fixtures validate these shapes before engines,
+  raw replay, model matching or source permissions are available.
+- Data and artifact paths: `domains/microelectronics/contracts/`, `src/kn/domains/microelectronics/`,
+  `tests/domains/microelectronics/`.
+- Execution path: Write the contracts from the design page and the reviewed attribute dictionary,
+  then compile and rebuild. Resolve all 31 pending observation-schema, comparison-profile and
+  rubric proposal rows to typed policies or explicit exclusions.
+- Acceptance gates: MPN identity requires the legal manufacturer and the exact MPN. Typical and
+  guaranteed values cannot share a field. Unit conversions are logged.
+- Documentation target: `current/microelectronics-domain.md` listed in the [areas index](current.md#areas).
 
 #### microelectronics-source-terms-review
 
@@ -2047,7 +2013,6 @@ Microelectronics sources need documented terms before sampling.
 - Serves: `microelectronics-elt` -- [Microelectronics ELT](../design/spec.md#microelectronics-elt)
 - Agent status: CLEAR
 - Research: yes
-- Requires: `source-onboarding-workflow`
 - Dependencies: Public documentation for MLPerf Tiny results, CORDIS datasets, and the watchlist
   vendors' datasheet terms, plus official trade-policy publications for target markets.
 - User-visible outcome: A dossier per first-wave source and catalogue state `investigating`.
@@ -2059,35 +2024,14 @@ Microelectronics sources need documented terms before sampling.
 - Documentation target: A new `current/microelectronics-domain.md` page listed in the
   [areas index](current.md#areas).
 
-#### microelectronics-domain-contracts
-
-Product identity and condition-bound observations need typed contracts.
-
-- Serves: `microelectronics-elt` -- [Microelectronics ELT](../design/spec.md#microelectronics-elt)
-- Agent status: CLEAR
-- Requires: `rebuild-from-raw`, `supply-model-contracts`
-- Dependencies: [Microelectronics design](../design/domains/microelectronics.md).
-- User-visible outcome: The `microelectronics` schema holds families, models, MPNs, dies, IP
-  blocks, kits, facilities, projects, benchmark runs, and observations with condition sets and
-  comparison groups.
-- Scope boundary: Contracts and policies that extend the shared part and supply classes rather
-  than redefining them. Origin facts are stored but never gate anything until the owner policy
-  exists.
-- Data and artifact paths: `domains/microelectronics/contracts/`, `src/kn/domains/microelectronics/`,
-  `tests/domains/microelectronics/`.
-- Execution path: Write the contracts from the design page and the reviewed attribute dictionary,
-  then compile and rebuild.
-- Acceptance gates: MPN identity requires the legal manufacturer and the exact MPN. Typical and
-  guaranteed values cannot share a field. Unit conversions are logged.
-- Documentation target: `current/microelectronics-domain.md` listed in the [areas index](current.md#areas).
-
 #### microelectronics-source-mlperf-tiny
 
 The benchmark layer starts from published MLPerf Tiny results.
 
 - Serves: `microelectronics-elt` -- [Microelectronics ELT](../design/spec.md#microelectronics-elt)
 - Agent status: CLEAR
-- Requires: `microelectronics-domain-contracts`, `authorize-microelectronics-sources`
+- Requires: `microelectronics-domain-contracts`, `authorize-microelectronics-sources`,
+  `ingestion-engine-implementation-audit`
 - Dependencies: Sampling authorization covering MLPerf Tiny results.
 - User-visible outcome: Benchmark runs load with version, division, workload, boundary, and
   energy where reported, linked to systems and MPNs only through evidenced identity.
@@ -2126,7 +2070,7 @@ Product baselines need exact datasheet observations for the watchlist families.
 
 - Serves: `microelectronics-elt` -- [Microelectronics ELT](../design/spec.md#microelectronics-elt)
 - Agent status: CLEAR
-- Requires: `microelectronics-source-cordis`, `curated-source-method`
+- Requires: `microelectronics-source-cordis`, `ingestion-engine-implementation-audit`
 - Dependencies: A curator and permitted datasheet access for the selected families.
 - User-visible outcome: Curated observations for selected MPNs load with datasheet revision, page,
   table, conditions, and qualifier.
@@ -2157,14 +2101,14 @@ Product baselines need exact datasheet observations for the watchlist families.
 - Documentation target: `current/microelectronics-domain.md` listed in the [areas
   index](current.md#areas).
 
-#### microelectronics-elt-implementation-audit (optional)
+#### microelectronics-elt-implementation-audit
 
 Product identity and condition-bound observations are the hardest part of the domain to change once
 comparisons depend on them.
 
 - Serves: `microelectronics-elt` -- [Microelectronics ELT](../design/spec.md#microelectronics-elt)
 - Agent status: CLEAR
-- Requires: `microelectronics-source-terms-review`, `microelectronics-domain-contracts`,
+- Requires: `microelectronics-domain-contracts`, `microelectronics-source-terms-review`,
   `microelectronics-source-mlperf-tiny`, `microelectronics-source-cordis`,
   `microelectronics-curated-datasheets`, `target-market-policy-observations`
 - Dependencies: The accepted task records of the group and the [implementation
@@ -2189,7 +2133,7 @@ comparisons depend on them.
 - Documentation target: `current/microelectronics-domain.md` listed in the [areas
   index](current.md#areas).
 
-### Microelectronics dashboards -- `microelectronics-dashboards`
+### Microelectronics comparison dashboards -- `microelectronics-dashboards`
 
 #### microelectronics-comparison-marts
 
@@ -2198,7 +2142,7 @@ Comparisons need marts that only ever group matched condition sets.
 - Serves: `microelectronics-dashboards`
   -- [Microelectronics dashboards](../design/spec.md#microelectronics-dashboards)
 - Agent status: CLEAR
-- Requires: `microelectronics-curated-datasheets`, `space-analytics-marts`
+- Requires: `microelectronics-elt-implementation-audit`, `space-dashboards-implementation-audit`
 - Dependencies: none.
 - User-visible outcome: The `analytics` schema holds one comparison mart per profile, a technology
   scouting mart with rubric inputs and missing-evidence flags, and a watch mart.
@@ -2218,8 +2162,8 @@ Analysts need matched-condition comparisons and the scouting view in both langua
 - Serves: `microelectronics-dashboards`
   -- [Microelectronics dashboards](../design/spec.md#microelectronics-dashboards)
 - Agent status: CLEAR
-- Requires: `microelectronics-comparison-marts`, `gdelt-watch-dashboard`,
-  `target-market-policy-observations`
+- Requires: `microelectronics-comparison-marts`, `gdelt-dashboards-implementation-audit`,
+  `microelectronics-elt-implementation-audit`
 - Dependencies: none.
 - User-visible outcome: Comparison dashboards per profile, a technology scouting view that shows
   the rubric as editable policy, and a watch view, all in `en` and `uk`.
@@ -2235,7 +2179,7 @@ Analysts need matched-condition comparisons and the scouting view in both langua
 - Documentation target: `current/microelectronics-dashboards.md` listed in the
   [areas index](current.md#areas).
 
-#### microelectronics-dashboards-implementation-audit (optional)
+#### microelectronics-dashboards-implementation-audit
 
 Comparison dashboards must group only matched conditions, so a grouping error would produce
 plausible but wrong rankings.
@@ -2264,7 +2208,69 @@ plausible but wrong rankings.
 - Documentation target: `current/microelectronics-dashboards.md` listed in the [areas
   index](current.md#areas).
 
-### Localization -- `localization`
+### Integrated model and backfill -- `model-baseline`
+
+#### development-model-baseline
+
+Release evaluation needs one integrated rebuild and backfill across the complete registry.
+
+- Serves: `data-contracts` -- [Data contracts](../design/spec.md#data-contracts)
+- Agent status: CLEAR
+- Execution stage: MODEL
+- Requires: `evidence-model-implementation-audit`, `data-interchange-implementation-audit`,
+  `space-elt-implementation-audit`, `gdelt-elt-implementation-audit`,
+  `microelectronics-elt-implementation-audit`, `source-management-implementation-audit`
+- Dependencies: The [contract workflow](../guide/schema-first-development.md), registered
+  core/domain contracts, reviewed seeds and deterministic fixture data. No live source is needed.
+  [Record 0030](records/0030-data-contracts-development-model-baseline.md) prepares the
+  [registered-subset check](current/data-contracts/model-baseline.md); the complete checkpoint
+  also needs fixtures from every registered owner.
+- User-visible outcome: One compiled development baseline contains the identity, evidence, human
+  verification, supply/measurement, source/run, exchange and three domain models together.
+  Runtime tasks can use these definitions without introducing another interpretation of a key,
+  timestamp, unit, missing reason or review scope.
+- Scope boundary: Cross-contract compatibility, common traits and field IDs, constraints, seed
+  references, permissions, rebuild/backfill and fixture round trips. This is a development
+  checkpoint, not the release freeze or a promise that no future additive fields will be needed.
+- Data and artifact paths: `contracts/`, `src/kn/contracts/resources/`, `generated/contracts/`,
+  `src/kn/db/`, `tests/integration/`, `$DATA_DIR/model-baseline/<run-id>/`.
+- Execution path: Compile the complete registry, load representative fixtures for every model,
+  rebuild twice, and compare identifiers, values, review metadata and all contract markers.
+  Extend `make model-baseline` and its fixture-owner coverage as prerequisite models register;
+  the registered-subset run alone does not satisfy this checkpoint.
+- Acceptance gates: Every registered contract compiles and rebuilds as one set. IDs and references,
+  typed measurements, multilingual text, verification targets, cursors and exchange keys agree
+  across owners. The real SATCOM fixture remains lossless. Two rebuilds preserve deterministic
+  model data and human decision provenance; no live fetch or runtime engine is required. Review
+  the generated diff as one baseline. Record recovery inputs, the development database backfill
+  and post-rebuild verification in the checkpoint record. `make ci` and `make ci-local` pass.
+  Existing snapshot-shaped SATCOM tables and new canonical tables have explicit ownership and
+  non-colliding names/field IDs; original source fields are not silently reinterpreted.
+- Documentation target: [Data contracts](current/data-contracts.md).
+
+#### model-baseline-implementation-audit
+
+Later engines and counterpart adapters will depend on the shared model boundaries and keys.
+
+- Serves: `data-contracts` -- [Data contracts](../design/spec.md#data-contracts)
+- Agent status: CLEAR
+- Requires: `development-model-baseline`
+- Dependencies: The model task records and [implementation audit](../guide/planning-workflow.md#implementation-audits)
+  checks. No live pipeline or owner access is needed.
+- User-visible outcome: The integrated model has a documented result for every audit check and
+  a disposition for every finding before release migration work.
+- Scope boundary: Keys and versions, cross-model references, shared verification and measurement
+  traits, source/run and exchange state, source preservation, extension points and rebuild replay.
+  Fix in-scope defects; new capabilities follow the planning workflow.
+- Data and artifact paths: `contracts/`, `src/kn/`, `tests/integration/`, and the task record.
+- Execution path: Rerun model acceptance fixtures, plant mismatched references/traits, a changed
+  review target, a missing unit/condition and a replay interruption, then complete the six checks.
+- Acceptance gates: Every finding has severity, evidence and disposition. No blocker is accepted;
+  fixes start with a failing regression. Extensions cannot silently redefine stable field IDs.
+  `make ci` and the applicable integration checks pass.
+- Documentation target: [Data contracts](current/data-contracts.md).
+
+### Bilingual operator acceptance -- `localization`
 
 #### bilingual-acceptance-suite
 
@@ -2272,8 +2278,8 @@ Release needs one end-to-end proof that every operator path works in both locale
 
 - Serves: `localization` -- [Localization](../design/spec.md#localization)
 - Agent status: CLEAR
-- Requires: `obsidian-space-profile`, `microelectronics-comparison-dashboards`,
-  `inventree-write-export`
+- Requires: `obsidian-export-implementation-audit`,
+  `microelectronics-dashboards-implementation-audit`, `inventree-exchange-implementation-audit`
 - Dependencies: A browser automation tool justified as a development dependency when product browser
   surfaces exist. The available CLI and multilingual data checks are documented in
   [current acceptance coverage](current/localization.md#bilingual-acceptance); the open
@@ -2296,7 +2302,7 @@ Release needs one end-to-end proof that every operator path works in both locale
   English-only operator screen is listed as a release blocker.
 - Documentation target: `current/localization.md` listed in the [areas index](current.md#areas).
 
-#### localization-implementation-audit (optional)
+#### localization-implementation-audit
 
 Message keys, plural rules, and locale fallback serve every operator surface, so a gap found late
 would touch every group.
@@ -2327,7 +2333,7 @@ would touch every group.
   plan.
 - Documentation target: `current/localization.md` listed in the [areas index](current.md#areas).
 
-### Operations hardening -- `operations-hardening`
+### Security, recovery and performance -- `operations-hardening`
 
 #### reverse-proxy-auth
 
@@ -2335,7 +2341,7 @@ Superset and Kestra must not be reachable without TLS and authentication.
 
 - Serves: `operations-hardening` -- [Operations hardening](../design/spec.md#operations-hardening)
 - Agent status: CLEAR
-- Requires: `superset-service`, `kestra-service`
+- Requires: `space-dashboards-implementation-audit`, `orchestration-implementation-audit`
 - Dependencies: The owner's choice of authentication backend; the default is proxy basic or OIDC
   authentication on a private network.
 - User-visible outcome: Caddy fronts Superset and Kestra with TLS and authentication. Superset
@@ -2354,8 +2360,8 @@ Security properties need one consolidated, repeatable proof.
 
 - Serves: `operations-hardening` -- [Operations hardening](../design/spec.md#operations-hardening)
 - Agent status: CLEAR
-- Requires: `reverse-proxy-auth`, `obsidian-export-core`, `http-fetch-safety`,
-  `inventree-write-export`
+- Requires: `reverse-proxy-auth`, `obsidian-export-implementation-audit`,
+  `ingestion-engine-implementation-audit`, `inventree-exchange-implementation-audit`
 - Dependencies: none.
 - User-visible outcome: `make security` runs the checks for schema isolation, loader DDL denial,
   restricted-fact denial, unauthorized users, secrets in logs and ZIPs, SSRF, archive traversal,
@@ -2396,7 +2402,7 @@ The target host must handle the declared load within the memory budget.
 
 - Serves: `operations-hardening` -- [Operations hardening](../design/spec.md#operations-hardening)
 - Agent status: RUN NEEDED
-- Requires: `backup-restore-drill`, `gdelt-watch-dashboard`
+- Requires: `backup-restore-drill`, `gdelt-dashboards-implementation-audit`
 - Dependencies: Access to the target server.
 - User-visible outcome: A measured report covering synthetic load, dashboard and map p95, ingestion
   memory, and disk growth, with tuned budgets.
@@ -2409,17 +2415,18 @@ The target host must handle the declared load within the memory budget.
   deviation is recorded with measurements.
 - Documentation target: `current/operations.md` listed in the [areas index](current.md#areas).
 
-#### operations-hardening-implementation-audit (optional)
+#### operations-hardening-implementation-audit
 
 Authentication, isolation, and recovery protect every service, so a gap found after deployment
 exposes the whole host.
 
 - Serves: `operations-hardening` -- [Operations hardening](../design/spec.md#operations-hardening)
-- Agent status: CLEAR
-- Requires: `reverse-proxy-auth`, `security-test-suite`
+- Agent status: RUN NEEDED
+- Requires: `reverse-proxy-auth`, `security-test-suite`, `backup-restore-drill`,
+  `performance-gate`
 - Dependencies: The accepted task records of the group and the [implementation
-  audit](../guide/planning-workflow.md#implementation-audits) checks. `backup-restore-drill` and
-  `performance-gate` stay open and are reviewed for the readiness of their inputs.
+  audit](../guide/planning-workflow.md#implementation-audits) checks. Inspect the measured
+  restore and performance reports.
 - User-visible outcome: The host runs on verified security controls. The audit record gives every
   check a result and every finding a disposition. The current-state page lists known limitations,
   and each scheduled finding is a plan task.
@@ -2440,7 +2447,46 @@ exposes the whole host.
   regression test. `make ci` passes with the scheduled tasks in the plan.
 - Documentation target: `current/operations.md` listed in the [areas index](current.md#areas).
 
-### Release readiness -- `release-readiness`
+### Vocabulary publication namespace -- `vocabulary-namespace`
+
+#### vocabulary-namespace-implementation-audit
+
+Verify the owner's decision and its effect on the published interface.
+
+- Serves: `ontology-taxonomy` -- [Ontology and taxonomy](../design/spec.md#ontology-and-taxonomy)
+- Agent status: CLEAR
+- Requires: `decide-vocabulary-uri-namespace`
+- Dependencies: The accepted human task record and its retained evidence.
+- User-visible outcome: Exports reflect the approved namespace and preserve internal keys.
+- Scope boundary: The approved public URI base, exports and stable internal term IDs.
+- Data and artifact paths: The owner task record, its artifacts and the numbered audit record.
+- Execution path: Re-export multilingual SKOS fixtures and compare term identities across parses.
+- Acceptance gates: Check the group's evidence and downstream compatibility under the
+  [audit procedure](../guide/planning-workflow.md#implementation-audits). Fix or gate blockers,
+  assign every finding and run `make ci`.
+- Documentation target: [Ontology and taxonomy](current/ontology-taxonomy.md).
+
+### Published SATCOM package -- `satcom-publication`
+
+#### satcom-publication-implementation-audit
+
+Verify the owner's decision and its effect on the published interface.
+
+- Serves: `ingestion-engine` -- [Specification](../design/spec.md#ingestion-engine)
+- Agent status: CLEAR
+- Requires: `publish-satcom-drive-package`, `ingestion-engine-implementation-audit`
+- Dependencies: The accepted human task record and its retained evidence.
+- User-visible outcome: Re-import behavior agrees with the recorded access decision.
+- Scope boundary: The authorized Drive access outcome, cache behavior and evidence handling.
+- Data and artifact paths: The owner task record, its artifacts and the numbered audit record.
+- Execution path: Check permitted run receipts or the documented refusal and local fallback.
+  Repeat cache and credential-redaction fixtures without issuing a new live request.
+- Acceptance gates: Check the group's evidence and downstream compatibility under the
+  [audit procedure](../guide/planning-workflow.md#implementation-audits). Fix or gate blockers,
+  assign every finding and run `make ci`.
+- Documentation target: [Data contracts](current/data-contracts.md).
+
+### Release migration -- `release-readiness`
 
 #### release-migration-mode
 
@@ -2464,7 +2510,7 @@ After release approval, schema change must preserve data instead of rebuilding.
 - Documentation target: A new `current/release.md` page listed in the
   [areas index](current.md#areas).
 
-#### release-readiness-implementation-audit (optional)
+#### release-readiness-implementation-audit
 
 Release migration mode ends rebuild-based development, so it must preserve every durable input and
 decision before the first versioned migration ships.
@@ -2492,7 +2538,189 @@ decision before the first versioned migration ships.
   ci` passes with the scheduled tasks in the plan.
 - Documentation target: `current/release.md` listed in the [areas index](current.md#areas).
 
-### AI extraction -- `ai-extraction`
+### Vocabulary drift monitoring -- `vocabulary-drift`
+
+#### official-publication-drift-check (optional)
+
+The publication reviews pin checksums of mutable URLs, but nothing notices when a publisher
+replaces the bytes behind a reviewed edition.
+
+- Serves: `ontology-taxonomy` -- [Ontology and taxonomy](../design/spec.md#ontology-and-taxonomy)
+- Agent status: RUN NEEDED
+- Dependencies: Network access to the publishers listed in the
+  [publication reviews](current/ontology-taxonomy/verification.md#primary-publications). The ESA
+  GPT and OECD downloads may need the owner's browser, as in record 0022 and record 0023.
+- User-visible outcome: `kn vocabulary drift-check` re-fetches each pinned publication within a
+  request budget and reports `unchanged`, `drifted`, or `unreachable` per scheme, with the new
+  checksum. A drifted publication keeps its reviewed state, marked as drifted, until a new
+  comparison.
+- Scope boundary: Fetch, checksum, and report only, through the source-safety rules: allowlisted
+  hosts, size limits, no credentials. No automatic re-verification and no seed change.
+- Data and artifact paths: `src/kn/semantic/`, `$DATA_DIR/taxonomy-verification/drift-<run-id>/`,
+  `tests/semantic/`.
+- Execution path: Unit tests use a local stub server for unchanged, drifted, redirected, oversized
+  and unreachable publications; the declared run checks the real publishers once.
+- Acceptance gates: Every stub case gives its status without network access. The declared run
+  reports a status for every pinned publication and is retained under `DATA_DIR`. `make ci` passes.
+- Documentation target: `current/ontology-taxonomy.md` listed in the
+  [areas index](current.md#areas).
+
+#### vocabulary-drift-implementation-audit (optional)
+
+Verify the vocabulary drift monitoring handoff against its specification and the next consumer.
+
+- Serves: `ontology-taxonomy` -- [Ontology and taxonomy](../design/spec.md#ontology-and-taxonomy)
+- Agent status: RUN NEEDED
+- Requires: `official-publication-drift-check`
+- Dependencies: Group acceptance records and the
+  [audit procedure](../guide/planning-workflow.md#implementation-audits).
+- User-visible outcome: The group has reproducible acceptance evidence and owned follow-up work.
+- Scope boundary: Verify this group's outputs, failure paths and downstream compatibility.
+- Data and artifact paths: Group fixtures, the numbered audit record and the forward plan.
+- Execution path: Compare an unchanged publication with a changed edition. Check that drift
+  preserves reviewed terms and opens an actionable review.
+- Acceptance gates: Reproduce the member gates, run the six audit checks and record each finding
+  with evidence, severity and disposition. Fix blockers before handoff and run `make ci`.
+- Documentation target: [Current-state areas](current.md#areas).
+
+### Incremental InvenTree updates -- `inventree-feed`
+
+#### inventree-change-feed (optional)
+
+Listing every resource is wasteful once the instance can report its own changes.
+
+- Serves: `inventree-exchange` -- [InvenTree exchange](../design/spec.md#inventree-exchange)
+- Agent status: CLEAR
+- Requires: `counterpart-acceptance-implementation-audit`
+- Dependencies: Access to `/api/audit/` for the exchange user on the target release.
+- User-visible outcome: Incremental imports read the InvenTree audit log as a change feed and fetch
+  only the changed objects. A periodic full listing catches missed events.
+- Scope boundary: A cursor over audit events per resource and a profile capability flag. No
+  webhooks or plugins.
+- Data and artifact paths: `src/kn/interchange/inventree/`, `tests/interchange/inventree/`.
+- Execution path: Use fixture audit pages from the target release, then compare live with a full
+  listing.
+- Acceptance gates: On the test service, a change-feed import followed by a full listing finds no
+  difference. An audit gap triggers a full listing.
+- Documentation target: `current/inventree-exchange.md` listed in the
+  [areas index](current.md#areas).
+
+#### inventree-feed-implementation-audit (optional)
+
+Verify the incremental inventree updates handoff against its specification and the next consumer.
+
+- Serves: `inventree-exchange` -- [InvenTree exchange](../design/spec.md#inventree-exchange)
+- Agent status: CLEAR
+- Requires: `inventree-change-feed`
+- Dependencies: Group acceptance records and the
+  [audit procedure](../guide/planning-workflow.md#implementation-audits).
+- User-visible outcome: The group has reproducible acceptance evidence and owned follow-up work.
+- Scope boundary: Verify this group's outputs, failure paths and downstream compatibility.
+- Data and artifact paths: Group fixtures, the numbered audit record and the forward plan.
+- Execution path: Replay a gap and a duplicate audit page. Compare the result with a full listing
+  and verify the recorded cursor.
+- Acceptance gates: Reproduce the member gates, run the six audit checks and record each finding
+  with evidence, severity and disposition. Fix blockers before handoff and run `make ci`.
+- Documentation target: [Current-state areas](current.md#areas).
+
+### Additional space sources -- `space-extensions`
+
+#### space-source-space-track (optional)
+
+Space-Track would corroborate catalog identity and status.
+
+- Serves: `space-elt` -- [Space ELT](../design/spec.md#space-elt)
+- Agent status: CLEAR
+- Requires: `space-elt-implementation-audit`
+- Dependencies: An owner-provided Space-Track account and approval of its terms. Credentials stay
+  in the environment only.
+- User-visible outcome: Catalog status corroboration claims linked by NORAD ID, kept separate from
+  GP data.
+- Scope boundary: Authenticated API use within the documented limits. No redistribution beyond
+  the terms.
+- Data and artifact paths: `domains/space/sources/space_track.yaml`,
+  `tests/fixtures/space/space_track/`.
+- Execution path: Follow the onboarding workflow with credentials redacted from every record.
+- Acceptance gates: Corroboration claims link without merging sources. Redaction tests pass. All
+  earlier suites pass.
+- Documentation target: `current/space-domain.md` listed in the [areas index](current.md#areas).
+
+#### space-source-regulatory-registers (optional)
+
+UNOOSA registration and ITU filing evidence would add registration and intent facts.
+
+- Serves: `space-elt` -- [Space ELT](../design/spec.md#space-elt)
+- Agent status: CLEAR
+- Requires: `space-elt-implementation-audit`
+- Dependencies: A terms review and sampling authorization for UNOOSA and ITU Space Explorer.
+- User-visible outcome: Registration and filing records load as `regulatory_record` claims, never
+  as deployment or ownership.
+- Scope boundary: Permitted exports or pages only. Filing, licence, and deployment stay distinct.
+- Data and artifact paths: `domains/space/sources/`, `tests/fixtures/space/`.
+- Execution path: Follow the onboarding workflow, with document extraction last in parser order.
+- Acceptance gates: No filing creates a constellation count or availability. All earlier suites
+  pass.
+- Documentation target: `current/space-domain.md` listed in the [areas index](current.md#areas).
+
+#### space-extensions-implementation-audit (optional)
+
+Verify the additional space sources handoff against its specification and the next consumer.
+
+- Serves: `space-elt` -- [Space ELT](../design/spec.md#space-elt)
+- Agent status: CLEAR
+- Requires: `space-source-space-track`, `space-source-regulatory-registers`
+- Dependencies: Group acceptance records and the
+  [audit procedure](../guide/planning-workflow.md#implementation-audits).
+- User-visible outcome: The group has reproducible acceptance evidence and owned follow-up work.
+- Scope boundary: Verify this group's outputs, failure paths and downstream compatibility.
+- Data and artifact paths: Group fixtures, the numbered audit record and the forward plan.
+- Execution path: Recheck each source authorization, quota and redistribution rule. Replay each
+  permitted fixture and check refusal paths for denied access.
+- Acceptance gates: Reproduce the member gates, run the six audit checks and record each finding
+  with evidence, severity and disposition. Fix blockers before handoff and run `make ci`.
+- Documentation target: `current/space-domain.md` listed in the [areas index](current.md#areas).
+
+### GDELT native stream sampling -- `gdelt-native`
+
+#### gdelt-selective-native-streams (optional)
+
+Selected GKG, Events, and Mentions rows would add native context to watches.
+
+- Serves: `gdelt-elt` -- [GDELT ELT](../design/spec.md#gdelt-elt)
+- Agent status: CLEAR
+- Requires: `gdelt-elt-implementation-audit`
+- Dependencies: Collection authorization for the 15-minute files. BigQuery only with an approved
+  budget.
+- User-visible outcome: Rows that match the watch criteria load with native grain and joins.
+  Unselected files are discarded after filtering.
+- Scope boundary: Bounded windows only; no archive mirror.
+- Data and artifact paths: `domains/gdelt/sources/native_streams.yaml`,
+  `tests/fixtures/gdelt/native/`.
+- Execution path: A streaming filter over the manifest files, recording checksums and selected
+  counts.
+- Acceptance gates: Joins follow the documented keys. Coverage statistics name the missing
+  intervals. The byte budget holds.
+- Documentation target: `current/gdelt-domain.md` listed in the [areas index](current.md#areas).
+
+#### gdelt-native-implementation-audit (optional)
+
+Verify the gdelt native stream sampling handoff against its specification and the next consumer.
+
+- Serves: `gdelt-elt` -- [GDELT ELT](../design/spec.md#gdelt-elt)
+- Agent status: CLEAR
+- Requires: `gdelt-selective-native-streams`
+- Dependencies: Group acceptance records and the
+  [audit procedure](../guide/planning-workflow.md#implementation-audits).
+- User-visible outcome: The group has reproducible acceptance evidence and owned follow-up work.
+- Scope boundary: Verify this group's outputs, failure paths and downstream compatibility.
+- Data and artifact paths: Group fixtures, the numbered audit record and the forward plan.
+- Execution path: Replay a bounded interval with missing joins. Verify coverage counts, edition
+  keys and the authorized byte budget.
+- Acceptance gates: Reproduce the member gates, run the six audit checks and record each finding
+  with evidence, severity and disposition. Fix blockers before handoff and run `make ci`.
+- Documentation target: `current/gdelt-domain.md` listed in the [areas index](current.md#areas).
+
+### Local extraction evaluation -- `ai-extraction`
 
 #### local-llm-candidate-extraction (optional)
 
@@ -2500,7 +2728,7 @@ Local inference could propose candidate claims and translations from permitted t
 
 - Serves: `ai-extraction` -- [AI extraction](../design/spec.md#ai-extraction)
 - Agent status: RUN NEEDED
-- Requires: `space-elt-integration-gate`
+- Requires: `space-elt-implementation-audit`
 - Dependencies: The NVIDIA driver and Container Toolkit on the target host, and a model whose
   licence permits this use.
 - User-visible outcome: An optional `gpu` profile serves a benchmarked model. Candidate claims
@@ -2546,6 +2774,32 @@ prompts would be costly to unwind.
 - Documentation target: `current/ai-extraction.md` listed in the [areas index](current.md#areas).
 
 ## Human-Assisted Tasks
+
+### Ontology and taxonomy -- `ontology-taxonomy`
+
+#### decide-vocabulary-uri-namespace
+
+Exported vocabulary terms use `urn:kn:term:<id>`, but `kn` is not a registered URN namespace, and
+the URIs become references in other systems once an export is shared.
+
+- Serves: `ontology-taxonomy` -- [Ontology and taxonomy](../design/spec.md#ontology-and-taxonomy)
+- Agent status: HUMAN-GATED
+- Execution stage: MODEL
+- Dependencies: The owner chooses a base that the owner controls: an HTTPS path on a domain the
+  owner holds, or a `tag:` URI (RFC 4151) with an authority the owner holds. An agent prepares the
+  options with their consequences, as described in finding ON-09 of the
+  [ontology audit](records/0025-ontology-taxonomy-ontology-taxonomy-implementation-audit.md#findings).
+- User-visible outcome: A recorded URI base, applied by the agent to the SKOS export while no
+  consumer stores the old URIs.
+- Scope boundary: The decision and the export change only. Qualified term IDs stay unchanged; no
+  web service is published.
+- Data and artifact paths: `src/kn/semantic/skos.py`, `tests/semantic/`, and the task record.
+- Execution path: The owner picks the base. The agent changes the URI function and its tests and
+  re-exports every scheme.
+- Acceptance gates: Every exported term URI uses the recorded base, the IDs inside them are
+  unchanged, and the export still parses and round-trips its labels.
+- Documentation target: `current/ontology-taxonomy.md` listed in the
+  [areas index](current.md#areas).
 
 ### Ingestion engine -- `ingestion-engine`
 
@@ -2679,7 +2933,7 @@ Scheduled collection of space sources needs maintainer approval after review.
 
 - Serves: `space-elt` -- [Space ELT](../design/spec.md#space-elt)
 - Agent status: HUMAN-GATED
-- Requires: `space-elt-integration-gate`
+- Requires: `space-elt-implementation-audit`
 - Dependencies: The investigation reports, passing fixtures, and the crawler configurations. An
   agent prepares the approval checklist.
 - User-visible outcome: Approval references recorded in each crawler configuration, and catalogue
@@ -2700,7 +2954,7 @@ Whether the SATCOM dashboards answer the operator's questions is the owner's jud
 
 - Serves: `space-dashboards` -- [Space dashboards](../design/spec.md#space-dashboards)
 - Agent status: HUMAN-GATED
-- Requires: `space-dashboard-bundles`, `scheduled-space-ingestion`
+- Requires: `space-dashboards-implementation-audit`, `orchestration-implementation-audit`
 - Dependencies: The deployed bundles on scheduled live data. An agent prepares a review guide with
   screenshots in both locales.
 - User-visible outcome: Owner acceptance, or a list of changes attached to the owning tasks.
@@ -2757,9 +3011,10 @@ Core Ukrainian terminology needs review by a Ukrainian technical speaker.
 
 - Serves: `localization` -- [Localization](../design/spec.md#localization)
 - Agent status: HUMAN-GATED
-- Requires: `bilingual-acceptance-suite`
+- Requires: `localization-implementation-audit`
 - Dependencies: A Ukrainian technical speaker named by the owner. An agent prepares a glossary
-  export of every `uk` UI string and vocabulary label with context.
+  export of every `uk` UI string and every vocabulary label that still falls back to English, with
+  context and the [translation review fields](current/ontology-taxonomy/text.md#label-and-review-rules).
 - User-visible outcome: Reviewed Ukrainian terminology for the UI, the vocabularies, and the
   operator quickstart.
 - Scope boundary: Review and corrections of catalogs and labels.
@@ -2797,9 +3052,10 @@ Leaving the development phase is the owner's decision.
 
 - Serves: `release-readiness` -- [Release readiness](../design/spec.md#release-readiness)
 - Agent status: HUMAN-GATED
-- Requires: `review-ukrainian-terminology`, `review-space-dashboards`, `performance-gate`,
-  `verify-official-taxonomies`, `skos-export`, `vl-itree-write-acceptance`,
-  `inventree-upgrade-check`, `identity-match-calibration`
+- Requires: `review-ukrainian-terminology`, `review-space-dashboards`,
+  `counterpart-acceptance-implementation-audit`, `model-baseline-implementation-audit`,
+  `localization-implementation-audit`, `operations-hardening-implementation-audit`,
+  `vocabulary-namespace-implementation-audit`, `satcom-publication-implementation-audit`
 - Dependencies: The evidence of every capability evaluation, compiled by an agent into a release
   checklist. Through their own prerequisites, these gates cover the bilingual suite, all three
   domains' dashboards, scheduled ingestion, security, the restore drill, InvenTree exchange with

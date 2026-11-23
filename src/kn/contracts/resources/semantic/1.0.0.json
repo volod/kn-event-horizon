@@ -144,6 +144,32 @@
               "value": "semantic.namespace_labels.label"
             }
           ]
+        },
+        {
+          "name": "review_reference",
+          "logicalType": "string",
+          "required": false,
+          "primaryKey": false,
+          "description": "Durable terminology review reference for derived text",
+          "customProperties": [
+            {
+              "property": "kn.fieldId",
+              "value": "semantic.namespace_labels.review_reference"
+            }
+          ]
+        },
+        {
+          "name": "reviewed_identical",
+          "logicalType": "boolean",
+          "required": false,
+          "primaryKey": false,
+          "description": "Review explicitly confirms identical English and Ukrainian text",
+          "customProperties": [
+            {
+              "property": "kn.fieldId",
+              "value": "semantic.namespace_labels.reviewed_identical"
+            }
+          ]
         }
       ]
     },
@@ -257,9 +283,9 @@
         {
           "name": "definition",
           "logicalType": "string",
-          "required": true,
+          "required": false,
           "primaryKey": false,
-          "description": "Definition in original language",
+          "description": "Prose definition when supplied; proposal metadata belongs in provenance",
           "customProperties": [
             {
               "property": "kn.fieldId",
@@ -367,6 +393,32 @@
               "value": "semantic.labels.inverse_label"
             }
           ]
+        },
+        {
+          "name": "review_reference",
+          "logicalType": "string",
+          "required": false,
+          "primaryKey": false,
+          "description": "Durable terminology review reference for derived text",
+          "customProperties": [
+            {
+              "property": "kn.fieldId",
+              "value": "semantic.labels.review_reference"
+            }
+          ]
+        },
+        {
+          "name": "reviewed_identical",
+          "logicalType": "boolean",
+          "required": false,
+          "primaryKey": false,
+          "description": "Review explicitly confirms identical English and Ukrainian text",
+          "customProperties": [
+            {
+              "property": "kn.fieldId",
+              "value": "semantic.labels.reviewed_identical"
+            }
+          ]
         }
       ]
     },
@@ -424,6 +476,32 @@
             {
               "property": "kn.fieldId",
               "value": "semantic.alternative_labels.label"
+            }
+          ]
+        },
+        {
+          "name": "review_reference",
+          "logicalType": "string",
+          "required": false,
+          "primaryKey": false,
+          "description": "Durable terminology review reference for derived text",
+          "customProperties": [
+            {
+              "property": "kn.fieldId",
+              "value": "semantic.alternative_labels.review_reference"
+            }
+          ]
+        },
+        {
+          "name": "reviewed_identical",
+          "logicalType": "boolean",
+          "required": false,
+          "primaryKey": false,
+          "description": "Review explicitly confirms identical English and Ukrainian text",
+          "customProperties": [
+            {
+              "property": "kn.fieldId",
+              "value": "semantic.alternative_labels.reviewed_identical"
             }
           ]
         }

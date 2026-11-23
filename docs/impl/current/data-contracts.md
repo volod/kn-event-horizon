@@ -6,7 +6,7 @@ through a shared path (`prefetched-dataset-method` in the [plan](../plan.md)); t
 SATCOM-specific. SATCOM is a subset of space, not a domain, service, or PostgreSQL schema of its
 own. This implementation supplies the first bounded profile
 of the [data contracts capability](../../design/spec.md#data-contracts). The remaining ontology content,
-identity, interchange and raw replay work stays in the [plan](../plan.md).
+matching, interchange and raw replay work stays in the [plan](../plan.md).
 
 ## One definition for each model
 
@@ -24,16 +24,21 @@ deployment order, with paths relative to the registry and an optional reference 
 {
   "contracts": [
     {"path": "system/1.0.0.json"},
+    {"path": "system/source-catalogue/1.0.0.json"},
     {"path": "satcom/1.0.0.json"},
-    {"path": "semantic/1.0.0.json"}
+    {"path": "semantic/1.0.0.json"},
+    {"path": "evidence/1.0.0.json"},
+    {"path": "identity/1.0.0.json", "references": "identity/references.json"}
   ]
 }
 ```
 
+The identity entry deploys the [identity registry and replay model](object-identity.md).
 The semantic entry deploys the [ontology meta-model](ontology-taxonomy.md), with no content import.
 The first entry is the governance contract `kn.system.governance`. Its table
 `system.installed_contracts` is the installed-contract marker: one row per registered contract with
-version, digest, storage schema and table names. `kn.contracts.registry.registered_contracts()`
+version, digest, storage schema and table names. The next entry deploys the
+[source catalogue](source-management.md) beside it. `kn.contracts.registry.registered_contracts()`
 loads and validates every entry without touching a database. It refuses a file outside the registry
 directory, a registry that does not start with the governance contract, a repeated contract ID, a
 field ID used by two contracts, and a table, primary key or index name used twice in one schema.
@@ -85,7 +90,26 @@ Normal upgrades and the explicit development rebuild both run the Alembic baseli
 contracts' SQLAlchemy metadata. No SQL text reaches the database:
 schema objects come from SQLAlchemy metadata, and the platform policy from typed statements.
 
+## Human verification metadata
+
+The [shared human verification protocol](evidence-model.md) adds a registered decision-log contract
+and typed record/field targets, UTC/null semantics, authenticated reviewer context, durable history
+and transactional application. The registry now defines 62 tables and 558 fields. Dataset-wide
+coverage and read projections remain open in `human-verification-projections` in the
+[plan](../plan.md).
+
+SATCOM `verification_status` is imported source data; semantic `verification_state`, publication
+`reviewed_on` dates and label `review_reference` values retain their specialized meanings. None
+sets a universal human verification time. Existing data is not backfilled as human-verified from
+those values. The [model review](../records/0028-adhoc-human-verification-model-review.md) records
+why authority, exact time and version binding are required.
+
 ## Development baseline and release evolution
+
+The [contract workflow](../../guide/schema-first-development.md) pairs each contract with its
+first consumer. `make model-baseline` checks the registered subset and preserves evidence.
+The [baseline reference](data-contracts/model-baseline.md) describes its current coverage.
+The full integrated check and its audit remain release prerequisites.
 
 Development keeps contract version `1.0.0` and one Python Alembic baseline, `0001_baseline`,
 editable in place; it creates every registered contract. A contract edit changes its digest. Refresh
@@ -209,6 +233,9 @@ Known limitations, with what would reopen them:
   additive release-style evolution, concurrent platform bootstrap and existing role isolation.
 - `make db-verify`: Alembic head, installed contract digest, structural drift, role attributes,
   schema isolation, table/sequence default privileges and PostGIS. Probe tables are rolled back.
+- `make model-baseline`: compile all registered contracts, rebuild and replay combined fixtures
+  twice, and compare every stored value and complete marker. This covers the registered subset;
+  the remaining shared/domain models and dataset-wide review projections remain open acceptance work.
 - `tests/domains/space/satcom/real_sample.json`: 168 reference-closed rows selected from the owner
   package. Tests mix snapshots and plant missing references, duplicate keys, bad dates, enums and
   numeric values.

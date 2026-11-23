@@ -17,7 +17,8 @@ All tables inside KN schemas are disposable, including obsolete tables absent fr
 contract. This replaces the earlier SATCOM-only rebuild that kept unmanaged tables inside `space`.
 Separate databases, schemas outside the KN list, PostGIS in `public`, and files under `DATA_DIR`
 are preserved. A rebuild clears imported SATCOM rows; restore them explicitly with the import
-command. Raw archive replay, identity event replay and decision replay remain planned.
+command. Identity events replay automatically before seeds; raw archive replay and all-target human decision
+replay remain planned.
 
 ## Execution and transaction boundary
 
@@ -28,8 +29,10 @@ command. Raw archive replay, identity event replay and decision replay remain pl
 owner, in registry order, and records one row per contract in `system.installed_contracts`. A
 rebuild and an upgrade of an empty database therefore use one mechanism. No SQL text is executed;
 the generated `postgresql/schema.sql` is a review artifact only, and an archived source
-`schema.sql` is evidence that nothing reads. The current set holds the governance table in
-`system` and 31 SATCOM tables in `space`; the other eight schemas have no contracted datasets yet.
+`schema.sql` is evidence that nothing reads. The current set holds governance and source catalogue
+tables in `system`, 31 SATCOM tables in `space`, 18 semantic tables in `semantic`, the human
+decision table in `evidence`, and ten [identity tables](../object-identity.md). The other five
+schemas have no contracted datasets.
 `rebuild()` and `upgrade()` accept another validated set, which the integration tests use for
 fixture contracts in `space` and `semantic`.
 
@@ -37,8 +40,8 @@ The caller owns the transaction. A nested transaction groups all KN schemas, bec
 references and the migration marker must stay consistent. The shared platform advisory lock
 serializes bootstrap, upgrade and rebuild. Rebuild reflects only KN tables without following
 foreign keys outside them, drops the tables without cascade, then drops the empty schemas with
-SQLAlchemy `DropSchema`, which PostgreSQL applies as `RESTRICT`. It then loads reviewed seeds and
-verifies the database before returning.
+SQLAlchemy `DropSchema`, which PostgreSQL applies as `RESTRICT`. It then replays the durable
+identity journal, loads reviewed seeds and verifies the database before returning.
 
 External dependencies refuse instead of being cascaded away. Non-table schema objects that the
 compiler does not manage, such as views, functions or standalone sequences, also refuse if they
@@ -59,15 +62,18 @@ that schema's loader role (`SET LOCAL ROLE`), with DML privileges only, and then
 Loaders must use the supplied transaction and must not commit independently. An exception aborts the
 rebuild.
 
-The registry is currently empty: ontology vocabulary and source catalogue review are separate plan
-tasks. Proposals are never loaded automatically, and SATCOM source imports are not seed data. Those
-tasks will register loaders for their reviewed files; this task supplies and tests the hook.
+The registry loads the [reviewed source catalogue](../source-management.md) as the system
+loader and the [reviewed semantic vocabulary](../ontology-taxonomy/seeds.md) as the semantic
+loader. Both use packaged files. Proposal workbooks remain offline inputs. Restore SATCOM
+source data with the separate import command.
 
 ## Verification
 
 After the rebuild, the existing governance checks verify Alembic head, contract digest, table and
 column types, nullability, foreign keys, indexes, role attributes, schema isolation and table and
-sequence grants. `verify_compiled_catalog` additionally checks the exact compiled table set,
+sequence grants. Marker verification compares every stored field: contract ID, version, digest,
+storage schema and the exact managed-table list, using the same definition as marker creation.
+`verify_compiled_catalog` additionally checks the exact compiled table set,
 primary key names and columns, check constraint and foreign key names, and table and column
 comments. Structural verification also compares PostGIS geometry types and SRIDs, which Alembic
 reflects as an unknown type. It does not
@@ -85,6 +91,9 @@ views. It also records every SQL string the rebuild sends and finds no `CREATE T
 schemas and checks that the catalog, a sentinel row and verification are unchanged. Destructive
 probes roll back and leave the original database in place. Run `make test-integration` against local
 PostGIS, or `make ci-local` for both the required CI gate and local-only tests.
+The [combined fixture check](model-baseline.md) rebuilds the complete registered set twice with
+the source catalogue, real SATCOM, semantic rows, identity history and human decision fixtures; its
+full-model checkpoint remains open.
 
 [Task record 0016](../../records/0016-data-contracts-development-rebuild-mode.md) preserves acceptance
 evidence and the plan transition, and the group audit in

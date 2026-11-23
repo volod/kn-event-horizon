@@ -8,6 +8,9 @@ REGISTRY_HEADING = "## Capability Registry"
 AGENT_SECTION = "Agent Implementation Tasks"
 HUMAN_SECTION = "Human-Assisted Tasks"
 PLAN_SECTIONS = (AGENT_SECTION, HUMAN_SECTION)
+MODEL_STAGE = "MODEL"
+DELIVERY_STAGE = "DELIVERY"
+EXECUTION_STAGES = (MODEL_STAGE, DELIVERY_STAGE)
 
 _ROW = re.compile(r"^\|(?P<cells>.+)\|\s*$")
 _CAPABILITY = re.compile(r"^`(?P<id>[a-z0-9-]+)`$")
@@ -50,6 +53,11 @@ class Task:
         """Return the normalized execution status when present."""
         value = self.fields.get("agent status")
         return value.strip().upper() if value else None
+
+    @property
+    def execution_stage(self) -> str:
+        """Describe the type of work independently of its scheduling priority."""
+        return self.fields.get("execution stage", DELIVERY_STAGE).strip().upper()
 
 
 def _cells(line: str) -> list[str] | None:

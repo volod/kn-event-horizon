@@ -106,14 +106,22 @@ def indexed(data: Snapshot, table: str) -> dict[str, Row]:
 
 
 def acyclic(rows: dict[str, Row], column: str, table: str) -> None:
-    """Iterative linear walk supports hierarchies deeper than Python's recursion limit."""
+    """Iterative linear walk supports hierarchies deeper than Python's recursion limit.
+
+    The diagnostic names the link of a row on the cycle; rows keep their snapshot order.
+    """
+    positions = {key: index for index, key in enumerate(rows)}
     finished: set[str] = set()
     for start in rows:
         visiting: set[str] = set()
         current: str | None = start
         while current and current not in finished:
             if current in visiting:
-                refuse((table,), "cycle", "keep hierarchies and replacement chains acyclic")
+                refuse(
+                    (table, positions[current], column),
+                    "cycle",
+                    "keep hierarchies and replacement chains acyclic",
+                )
             visiting.add(current)
             current = rows[current].get(column)
         finished.update(visiting)

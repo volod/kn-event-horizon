@@ -188,9 +188,31 @@ def _verify_compiled_table(inspector: Inspector, table: sa.Table) -> None:
         str(item.name) for item in table.foreign_key_constraints
     }:
         raise ValueError(f"compiled foreign key mismatch: {table.fullname}")
+    _verify_index_predicates(inspector, table)
     comment = inspector.get_table_comment(table.name, schema=table.schema)["text"]
     columns = inspector.get_columns(table.name, schema=table.schema)
     if comment != table.comment or any(
         column.get("comment") != table.c[column["name"]].comment for column in columns
     ):
         raise ValueError(f"compiled comment mismatch: {table.fullname}")
+
+
+def _verify_index_predicates(inspector: Inspector, table: sa.Table) -> None:
+    actual = {
+        item["name"]: item.get("dialect_options", {}).get("postgresql_where")
+        for item in inspector.get_indexes(table.name, schema=table.schema)
+    }
+    for index in table.indexes:
+        predicate = index.dialect_options["postgresql"].get("where")
+        expected = (
+            ""
+            if predicate is None
+            else str(
+                predicate.compile(
+                    dialect=inspector.bind.dialect,
+                    compile_kwargs={"literal_binds": True, "include_table": False},
+                )
+            )
+        )
+        if str(actual.get(str(index.name)) or "").strip("() ") != expected:
+            raise ValueError(f"compiled index predicate mismatch: {table.fullname}")

@@ -29,18 +29,19 @@ export MYPY_CACHE_DIR := $(DATA_ROOT)/cache/mypy
 .DEFAULT_GOAL := help
 
 .PHONY: help bootstrap venv lock run doctor format format-check lint typecheck test coverage \
-	test-integration ci-local \
-	complexity-gate shell-lint-gate lint-md lint-doc-links lint-spec-plan plan-status \
+	test-integration ci-local skos-reference-check \
+	complexity-gate shell-lint-gate fixture-check lint-md lint-doc-links lint-spec-plan plan-status \
 	ci-checks ci ci-github build quality code-quality quality-report \
 	db-up db-down db-reset db-verify
 
 help: ## List available targets
 	@awk 'BEGIN {FS = ":.*## "; print "Usage: make <target>\n"} /^[a-zA-Z0-9_.-]+:.*## / {printf "  %-20s %s\n", $$1, $$2}' $(MAKEFILE_LIST)
 
-bootstrap: ## Create/update .venv from uv.lock with development tools
+bootstrap: ## Create/update .venv from uv.lock, check host prerequisites, install pinned tools
 	@command -v uv >/dev/null 2>&1 || { echo "ERROR: uv is required"; exit 1; }
 	@source "$(PROJECT_ROOT)/scripts/shared/common.sh"; kn_load_env; \
 		uv sync --locked --extra dev --python "$(PYTHON_VERSION)"
+	@"$(PY)" -m kn.quality.prerequisites --root "$(PROJECT_ROOT)" --data-dir "$(DATA_ROOT)" --install
 
 venv: bootstrap ## Alias for bootstrap
 
@@ -58,6 +59,7 @@ doctor: ## Verify required tools, files, and the installed package
 	@test -f pyproject.toml -a -f uv.lock -a -f AGENTS.md
 	@test -x "$(PY)" || { echo "ERROR: run 'make bootstrap' first"; exit 1; }
 	@"$(PY)" -c 'import kn; print(kn.project_info().distribution)'
+	@"$(PY)" -m kn.quality.prerequisites --root "$(PROJECT_ROOT)" --data-dir "$(DATA_ROOT)"
 
 format: ## Format production code and tests with Ruff
 	@"$(VENV)/bin/ruff" format src tests
@@ -80,6 +82,14 @@ coverage: ## Run the lightweight unit tests and enforce the coverage floor
 
 test-integration: ## Run the database integration tests locally against make db-up
 	@$(LOCAL_PYTEST) -m integration
+
+.PHONY: model-baseline
+model-baseline: ## Check registered-model fixture rebuilds and retain evidence (make db-up first)
+	@source "$(PROJECT_ROOT)/scripts/shared/common.sh"; kn_load_env; kn_db_test_env || exit 1; \
+		mkdir -p "$$DATA_DIR/model-baseline"; \
+		artifact_dir=$$(mktemp -d "$$DATA_DIR/model-baseline/check-XXXXXXXX") || exit 1; \
+		"$(PY)" -m pytest $(PYTEST_CACHE) tests/integration/test_model_baseline.py \
+		--basetemp "$$artifact_dir/fixtures" --junitxml "$$artifact_dir/results.xml"
 
 complexity-gate: ## Fail on Radon D-or-worse or cognitive complexity above 15
 	@output="$$($(VENV)/bin/radon cc src tests -s -n D)"; \
@@ -109,14 +119,22 @@ lint-spec-plan: ## Check capability registry, plan tasks, and the closed-researc
 plan-status: ## Count tasks by lane/status and show declared priority
 	@"$(PY)" -m kn.quality.plan_summary --root "$(PROJECT_ROOT)"
 
-ci-checks: catalog-check contract-check format-check lint typecheck complexity-gate shell-lint-gate lint-doc-links lint-spec-plan
+fixture-check: ## Check test fixture files for credentials and personal data
+	@"$(PY)" -m kn.quality.fixture_sanitization --root "$(PROJECT_ROOT)"
+
+ci-checks: catalog-check contract-check format-check lint typecheck complexity-gate shell-lint-gate fixture-check lint-doc-links lint-spec-plan
 
 ci: ci-checks test ## Run the required gate: checks and lightweight unit tests
 
 ci-github: ci ## GitHub Actions entrypoint, the same gate as make ci
 
-ci-local: ci ## Run make ci, then every local-only test: database and heavy (make db-up first)
+ci-local: ci ## Run make ci, every local-only test (make db-up first) and the Jena SKOS check
 	@$(LOCAL_PYTEST) -m "$(LOCAL_TESTS)"
+	@$(MAKE) --no-print-directory skos-reference-check
+
+skos-reference-check: ## Validate every SKOS export with the pinned Apache Jena RIOT (local only)
+	@test -x "$(PY)" || { echo "ERROR: run 'make bootstrap' first"; exit 1; }
+	@"$(PY)" -m kn.quality.skos_reference --root "$(PROJECT_ROOT)" --data-dir "$(DATA_ROOT)"
 
 build: ## Build source and wheel distributions
 	@source "$(PROJECT_ROOT)/scripts/shared/common.sh"; kn_load_env; uv build
@@ -188,3 +206,12 @@ test-bilingual: ## Check available bilingual paths and save evidence under DATA_
 
 bilingual-acceptance: ## Require full bilingual release acceptance; fail on open paths
 	@$(BILINGUAL_PYTEST) --require-bilingual-release
+
+.PHONY: seed-import seed-check
+seed-import: ## Stage deterministic vocabulary seeds, fixtures, and row reconciliation for review
+	@source "$(PROJECT_ROOT)/scripts/shared/common.sh"; kn_load_env; \
+		"$(VENV)/bin/kn" vocabulary import-proposals --data-dir "$(DATA_ROOT)"
+
+seed-check: ## Reconcile proposals and compare staged outputs with checked-in reviewed content
+	@source "$(PROJECT_ROOT)/scripts/shared/common.sh"; kn_load_env; \
+		"$(VENV)/bin/kn" vocabulary import-proposals --check --data-dir "$(DATA_ROOT)"

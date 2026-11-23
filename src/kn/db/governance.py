@@ -115,14 +115,9 @@ def verify_contracts(connection: Connection, contracts: Sequence[Contract] | Non
             "contract baseline changed; use an explicit development rebuild and backfill"
         )
     installed = {
-        row.contract_id: (row.version, row.digest)
-        for row in connection.execute(
-            sa.select(marker.c.contract_id, marker.c.version, marker.c.digest)
-        )
+        row["contract_id"]: dict(row) for row in connection.execute(sa.select(marker)).mappings()
     }
-    if installed != {
-        contract.contract_id: (contract.version, contract.digest) for contract in deployed
-    }:
+    if installed != {contract.contract_id: _contract_marker(contract) for contract in deployed}:
         raise ValueError(
             "contract digest drift; rebuild development data or apply a release migration"
         )
@@ -137,14 +132,15 @@ def record_installed(
     marker = marker_table(marker_schema)
     connection.execute(
         marker.insert(),
-        [
-            {
-                "contract_id": contract.contract_id,
-                "version": contract.version,
-                "digest": contract.digest,
-                "storage_schema": contract.schema,
-                "managed_tables_json": canonical([table.name for table in contract.tables]),
-            }
-            for contract in contracts
-        ],
+        [_contract_marker(contract) for contract in contracts],
     )
+
+
+def _contract_marker(contract: Contract) -> dict[str, str]:
+    return {
+        "contract_id": contract.contract_id,
+        "version": contract.version,
+        "digest": contract.digest,
+        "storage_schema": contract.schema,
+        "managed_tables_json": canonical([table.name for table in contract.tables]),
+    }

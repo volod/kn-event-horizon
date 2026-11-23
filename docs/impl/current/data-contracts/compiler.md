@@ -137,8 +137,10 @@ the final authority for access-method/type compatibility and extension-specific 
 
 `kn.partition` emits a range, list or hash partitioned parent. Primary keys and unique indexes
 must include partition columns. Child partitions and their bounds are not inferred: they require
-reviewed migrations before inserting data. Arbitrary SQL checks, predicates and operator classes
-are outside this profile.
+reviewed migrations before inserting data. `kn.index` also accepts `whereNull`, naming an existing
+nullable field for a bounded `IS NULL` predicate. The compiler emits a SQLAlchemy expression and
+retains it in PostgreSQL metadata; compiled-catalog verification detects predicate drift. Arbitrary
+SQL checks, predicates and operator classes are outside this profile.
 
 Pydantic models forbid extra fields and coercion, preserve exact `Decimal`, require aware
 UTC-capable timestamps, bound integers to the `BIGINT` range, and retain nullable versus required

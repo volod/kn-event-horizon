@@ -68,6 +68,9 @@ def semantic_fixture(tmp_path: Path, name: str) -> tuple[Path, Path]:
         }
     if name == "kn.evidence":
         value["referenceFields"] = ["space.example.id"]
+    if name == "kn.humanVerification":
+        value["recordFields"] = ["space.example.id"]
+        value["fieldContexts"] = {"space.example.id": ["space.example.id"]}
     if name == "kn.i18nKey":
         value = "cli.contract_help"
     _, registry = pinned_schemas()

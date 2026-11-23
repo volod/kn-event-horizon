@@ -105,6 +105,10 @@ def _index(table: Table, index: dict[str, Any], names: dict[str, Location], path
         raise ContractError(path, "index", "unique indexes require btree")
     if index["method"] in {"hash", "spgist"} and len(columns) != 1:
         raise ContractError(path, "index", "hash and spgist indexes require one column")
+    if "whereNull" in index:
+        name = column_names(table, [index["whereNull"]], path)[0]
+        if next(field for field in table.fields if field.name == name).required:
+            raise ContractError(path, "index", "partial index predicate requires a nullable field")
     partition = extensions(table).get("partition")
     if (
         partition

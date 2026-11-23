@@ -1,0 +1,602 @@
+[
+  {
+    "formulas_not_evaluated": {},
+    "provenance": {
+      "file": "domains/space/seeds/proposals/ontology_and_tags_v1/08_tagging_examples.json",
+      "row": 4,
+      "sha256": "2b4d5a461b3f618e91b6536cbb779244b690451a9023e69a81d80d284e82bc38",
+      "sheet": "08_Tagging_Examples",
+      "workbook_file": "space_sector_ontology_and_tags_v1.xlsx",
+      "workbook_sha256": "26e7468ee372e9c606ff08910756b2066ef30ac9fea7524e646b52d8529eec28"
+    },
+    "values": {
+      "entity_class": "Launch Vehicle",
+      "esa_gpt_primary_path": "I Launchers \u2192 complete vehicle + subsystem paths",
+      "esa_technology_tags": "TD19; TD20; TD01; TD05; TD08; TD25",
+      "euspa_application_tags": null,
+      "example_record": "LEO launch vehicle",
+      "key_relations": "manufactured_by; operated_by; uses_component",
+      "nasa_tx_tags": "TX01; TX02; TX12; TX15; TX17",
+      "service_type": "S01 if sold as service",
+      "why_this_is_useful": "Separates vehicle product from launch service and supplier chain"
+    }
+  },
+  {
+    "formulas_not_evaluated": {},
+    "provenance": {
+      "file": "domains/space/seeds/proposals/ontology_and_tags_v1/08_tagging_examples.json",
+      "row": 5,
+      "sha256": "2b4d5a461b3f618e91b6536cbb779244b690451a9023e69a81d80d284e82bc38",
+      "sheet": "08_Tagging_Examples",
+      "workbook_file": "space_sector_ontology_and_tags_v1.xlsx",
+      "workbook_sha256": "26e7468ee372e9c606ff08910756b2066ef30ac9fea7524e646b52d8529eec28"
+    },
+    "values": {
+      "entity_class": "Spacecraft",
+      "esa_gpt_primary_path": "II Satellites & Probes \u2192 II.I Payloads + platform systems",
+      "esa_technology_tags": "TD06; TD07; TD16/17 as applicable; TD01; TD03; TD05",
+      "euspa_application_tags": "Agriculture; Energy and Raw Materials; EU Border and Internal Security; Space",
+      "example_record": "SAR satellite",
+      "key_relations": "carries_payload; operated_by; produces_dataset",
+      "nasa_tx_tags": "TX08; TX02; TX03; TX05; TX17",
+      "service_type": "S09 / S10 via related provider",
+      "why_this_is_useful": "One spacecraft can serve many markets without changing product class"
+    }
+  },
+  {
+    "formulas_not_evaluated": {},
+    "provenance": {
+      "file": "domains/space/seeds/proposals/ontology_and_tags_v1/08_tagging_examples.json",
+      "row": 6,
+      "sha256": "2b4d5a461b3f618e91b6536cbb779244b690451a9023e69a81d80d284e82bc38",
+      "sheet": "08_Tagging_Examples",
+      "workbook_file": "space_sector_ontology_and_tags_v1.xlsx",
+      "workbook_sha256": "26e7468ee372e9c606ff08910756b2066ef30ac9fea7524e646b52d8529eec28"
+    },
+    "values": {
+      "entity_class": "Terminal / User Equipment",
+      "esa_gpt_primary_path": "IV Ground Segment \u2192 IV.TERM KB extension",
+      "esa_technology_tags": "TD06; TD07; TD12; TD23",
+      "euspa_application_tags": "Infrastructure; Emergency Management; Maritime; Aviation and Drones",
+      "example_record": "LEO user terminal",
+      "key_relations": "manufactured_by; accesses_network; compatible_with",
+      "nasa_tx_tags": "TX05; TX02",
+      "service_type": "S08",
+      "why_this_is_useful": "Captures strategically important terminal industry missing from orbital catalogs"
+    }
+  },
+  {
+    "formulas_not_evaluated": {},
+    "provenance": {
+      "file": "domains/space/seeds/proposals/ontology_and_tags_v1/08_tagging_examples.json",
+      "row": 7,
+      "sha256": "2b4d5a461b3f618e91b6536cbb779244b690451a9023e69a81d80d284e82bc38",
+      "sheet": "08_Tagging_Examples",
+      "workbook_file": "space_sector_ontology_and_tags_v1.xlsx",
+      "workbook_sha256": "26e7468ee372e9c606ff08910756b2066ef30ac9fea7524e646b52d8529eec28"
+    },
+    "values": {
+      "entity_class": "Service",
+      "esa_gpt_primary_path": "No GPT product path; link to enabling IV cloud/ground products",
+      "esa_technology_tags": "TD02-D; TD02-E",
+      "euspa_application_tags": "Agriculture; Forestry; Infrastructure; Climate, Environment and Biodiversity",
+      "example_record": "EO analytics platform",
+      "key_relations": "provided_by; consumes_dataset; serves_application",
+      "nasa_tx_tags": "TX11; TX08",
+      "service_type": "S10",
+      "why_this_is_useful": "Prevents downstream software from being forced into a hardware product tree"
+    }
+  },
+  {
+    "formulas_not_evaluated": {},
+    "provenance": {
+      "file": "domains/space/seeds/proposals/ontology_and_tags_v1/08_tagging_examples.json",
+      "row": 8,
+      "sha256": "2b4d5a461b3f618e91b6536cbb779244b690451a9023e69a81d80d284e82bc38",
+      "sheet": "08_Tagging_Examples",
+      "workbook_file": "space_sector_ontology_and_tags_v1.xlsx",
+      "workbook_sha256": "26e7468ee372e9c606ff08910756b2066ef30ac9fea7524e646b52d8529eec28"
+    },
+    "values": {
+      "entity_class": "Component / Subsystem",
+      "esa_gpt_primary_path": "II.K Propulsion or III propulsion",
+      "esa_technology_tags": "TD19-B; TD23/24 as relevant",
+      "euspa_application_tags": "Space",
+      "example_record": "Electric propulsion thruster",
+      "key_relations": "manufactured_by; integrated_into; implements_technology",
+      "nasa_tx_tags": "TX01",
+      "service_type": "S15 if sold as engineering/manufacturing service",
+      "why_this_is_useful": "Allows technology scouting across many spacecraft programmes"
+    }
+  },
+  {
+    "formulas_not_evaluated": {},
+    "provenance": {
+      "file": "domains/space/seeds/proposals/ontology_and_tags_v1/08_tagging_examples.json",
+      "row": 9,
+      "sha256": "2b4d5a461b3f618e91b6536cbb779244b690451a9023e69a81d80d284e82bc38",
+      "sheet": "08_Tagging_Examples",
+      "workbook_file": "space_sector_ontology_and_tags_v1.xlsx",
+      "workbook_sha256": "26e7468ee372e9c606ff08910756b2066ef30ac9fea7524e646b52d8529eec28"
+    },
+    "values": {
+      "entity_class": "Ground Station / Service",
+      "esa_gpt_primary_path": "IV.B Ground Station + IV.C Ground Segment Network",
+      "esa_technology_tags": "TD12; TD09",
+      "euspa_application_tags": "Space",
+      "example_record": "Ground station network",
+      "key_relations": "operated_by; communicates_with; provides_service",
+      "nasa_tx_tags": "TX05; TX13",
+      "service_type": "S07",
+      "why_this_is_useful": "Separates physical nodes from network/service layer"
+    }
+  },
+  {
+    "formulas_not_evaluated": {},
+    "provenance": {
+      "file": "domains/gdelt/seeds/proposals/ontology_and_tags_v1/10_tagging_examples.json",
+      "row": 5,
+      "sha256": "8c4e27b07e883aca9e3ffd96f54d0ad9d5ecf86a4483a8011c657785ea51c416",
+      "sheet": "10_Tagging_Examples",
+      "workbook_file": "gdelt_ontology_and_tags_v1.xlsx",
+      "workbook_sha256": "c31bba2aad40336c620044c6df5332744aebdce70b415e56bc121096845881a2"
+    },
+    "values": {
+      "cameo_handling": "No forced CAMEO; only populate if actual event row exists",
+      "candidate_native_themes": "SCIENCE; WB_133_INFORMATION_AND_COMMUNICATION_TECHNOLOGIES (candidate)",
+      "entities": "Document; Claim; ActorEntity",
+      "evidence_caveat": "Prototype/announcement; verify vendor release, paper and measurement conditions",
+      "kb_application_tags": "APP.SCOUT; APP.SEMI",
+      "kb_technology_tags": "TECH.SEMI.AI; TECH.SEMI.ULP",
+      "scenario": "Hypothetical: European chip vendor announces an ultra-low-power NPU research prototype",
+      "service_ids": "S04; S08; S09; S12"
+    }
+  },
+  {
+    "formulas_not_evaluated": {},
+    "provenance": {
+      "file": "domains/gdelt/seeds/proposals/ontology_and_tags_v1/10_tagging_examples.json",
+      "row": 6,
+      "sha256": "8c4e27b07e883aca9e3ffd96f54d0ad9d5ecf86a4483a8011c657785ea51c416",
+      "sheet": "10_Tagging_Examples",
+      "workbook_file": "gdelt_ontology_and_tags_v1.xlsx",
+      "workbook_sha256": "c31bba2aad40336c620044c6df5332744aebdce70b415e56bc121096845881a2"
+    },
+    "values": {
+      "cameo_handling": "07 root only if GDELT actually emits aid event; do not infer",
+      "candidate_native_themes": "SCIENCE; WB_346_COMPETITIVE_INDUSTRIES (candidate)",
+      "entities": "Document; Claim; ActorEntity",
+      "evidence_caveat": "Grant award notice; distinguish grant from purchase and research from marketed part",
+      "kb_application_tags": "APP.SCOUT; APP.INVEST",
+      "kb_technology_tags": "TECH.SEMI.SENSOR; TECH.SEMI.ULP",
+      "scenario": "Hypothetical: Canadian laboratory receives a public research grant for MEMS sensors",
+      "service_ids": "S04; S09"
+    }
+  },
+  {
+    "formulas_not_evaluated": {},
+    "provenance": {
+      "file": "domains/gdelt/seeds/proposals/ontology_and_tags_v1/10_tagging_examples.json",
+      "row": 7,
+      "sha256": "8c4e27b07e883aca9e3ffd96f54d0ad9d5ecf86a4483a8011c657785ea51c416",
+      "sheet": "10_Tagging_Examples",
+      "workbook_file": "gdelt_ontology_and_tags_v1.xlsx",
+      "workbook_sha256": "c31bba2aad40336c620044c6df5332744aebdce70b415e56bc121096845881a2"
+    },
+    "values": {
+      "cameo_handling": "03/05 candidates only if source coding supports; no synthetic EventCode",
+      "candidate_native_themes": "WB_346_COMPETITIVE_INDUSTRIES; SCIENCE (candidate)",
+      "entities": "Document; Claim; ActorEntity",
+      "evidence_caveat": "Company statements; MoU vs binding contract",
+      "kb_application_tags": "APP.SPACE; APP.SUPPLY",
+      "kb_technology_tags": "TECH.SPACE.LAUNCH",
+      "scenario": "Hypothetical: two civilian aerospace firms announce a launch-service partnership",
+      "service_ids": "S04; S09; S13"
+    }
+  },
+  {
+    "formulas_not_evaluated": {},
+    "provenance": {
+      "file": "domains/gdelt/seeds/proposals/ontology_and_tags_v1/10_tagging_examples.json",
+      "row": 8,
+      "sha256": "8c4e27b07e883aca9e3ffd96f54d0ad9d5ecf86a4483a8011c657785ea51c416",
+      "sheet": "10_Tagging_Examples",
+      "workbook_file": "gdelt_ontology_and_tags_v1.xlsx",
+      "workbook_sha256": "c31bba2aad40336c620044c6df5332744aebdce70b415e56bc121096845881a2"
+    },
+    "values": {
+      "cameo_handling": "Not required",
+      "candidate_native_themes": "WB_435_AGRICULTURE_AND_FOOD_SECURITY; SCIENCE (candidate)",
+      "entities": "Document; Claim; ActorEntity",
+      "evidence_caveat": "Confirm product availability and API/license; no inference of owned satellites",
+      "kb_application_tags": "APP.AGRI; APP.SPACE; APP.MARKET",
+      "kb_technology_tags": "TECH.SPACE.EOSVC",
+      "scenario": "Hypothetical: EO provider releases agricultural monitoring product",
+      "service_ids": "S08; S09; S13"
+    }
+  },
+  {
+    "formulas_not_evaluated": {},
+    "provenance": {
+      "file": "domains/gdelt/seeds/proposals/ontology_and_tags_v1/10_tagging_examples.json",
+      "row": 9,
+      "sha256": "8c4e27b07e883aca9e3ffd96f54d0ad9d5ecf86a4483a8011c657785ea51c416",
+      "sheet": "10_Tagging_Examples",
+      "workbook_file": "gdelt_ontology_and_tags_v1.xlsx",
+      "workbook_sha256": "c31bba2aad40336c620044c6df5332744aebdce70b415e56bc121096845881a2"
+    },
+    "values": {
+      "cameo_handling": "01/03 candidate only, use observed code",
+      "candidate_native_themes": "LEGISLATION; EPU_CATS_REGULATION (candidate)",
+      "entities": "Document; Claim",
+      "evidence_caveat": "Proposal vs enacted law; check official legal text",
+      "kb_application_tags": "APP.REG; APP.SUPPLY",
+      "kb_technology_tags": "TECH.SEMI",
+      "scenario": "Hypothetical: government proposes new semiconductor export rules",
+      "service_ids": "S04; S09"
+    }
+  },
+  {
+    "formulas_not_evaluated": {},
+    "provenance": {
+      "file": "domains/gdelt/seeds/proposals/ontology_and_tags_v1/10_tagging_examples.json",
+      "row": 10,
+      "sha256": "8c4e27b07e883aca9e3ffd96f54d0ad9d5ecf86a4483a8011c657785ea51c416",
+      "sheet": "10_Tagging_Examples",
+      "workbook_file": "gdelt_ontology_and_tags_v1.xlsx",
+      "workbook_sha256": "c31bba2aad40336c620044c6df5332744aebdce70b415e56bc121096845881a2"
+    },
+    "values": {
+      "cameo_handling": "No forced CAMEO: disaster itself may be outside action taxonomy",
+      "candidate_native_themes": "NATURAL_DISASTER; WB_507_ENERGY_AND_EXTRACTIVES (candidate)",
+      "entities": "EventRecord if present; Document; Claim",
+      "evidence_caveat": "Location role and time; verify quantities independently",
+      "kb_application_tags": "APP.CRISIS; APP.ENERGY",
+      "kb_technology_tags": "TECH.ENERGY",
+      "scenario": "Hypothetical: flood reports disrupt electricity supply",
+      "service_ids": "S02; S05; S09"
+    }
+  },
+  {
+    "formulas_not_evaluated": {},
+    "provenance": {
+      "file": "domains/gdelt/seeds/proposals/ontology_and_tags_v1/10_tagging_examples.json",
+      "row": 11,
+      "sha256": "8c4e27b07e883aca9e3ffd96f54d0ad9d5ecf86a4483a8011c657785ea51c416",
+      "sheet": "10_Tagging_Examples",
+      "workbook_file": "gdelt_ontology_and_tags_v1.xlsx",
+      "workbook_sha256": "c31bba2aad40336c620044c6df5332744aebdce70b415e56bc121096845881a2"
+    },
+    "values": {
+      "cameo_handling": "Not required",
+      "candidate_native_themes": "SCIENCE; WB_133_INFORMATION_AND_COMMUNICATION_TECHNOLOGIES (candidate)",
+      "entities": "Document; Claim",
+      "evidence_caveat": "Datasheet and measured energy per workload; tag not a performance observation",
+      "kb_application_tags": "APP.SCOUT; APP.CIV_AUTONOMY",
+      "kb_technology_tags": "TECH.SEMI.FPGA; TECH.SEMI.ULP; TECH.AUTONOMY",
+      "scenario": "Hypothetical: article describes a new low-power FPGA for industrial sensing",
+      "service_ids": "S04; S08; S12"
+    }
+  },
+  {
+    "formulas_not_evaluated": {},
+    "provenance": {
+      "file": "domains/gdelt/seeds/proposals/ontology_and_tags_v1/10_tagging_examples.json",
+      "row": 12,
+      "sha256": "8c4e27b07e883aca9e3ffd96f54d0ad9d5ecf86a4483a8011c657785ea51c416",
+      "sheet": "10_Tagging_Examples",
+      "workbook_file": "gdelt_ontology_and_tags_v1.xlsx",
+      "workbook_sha256": "c31bba2aad40336c620044c6df5332744aebdce70b415e56bc121096845881a2"
+    },
+    "values": {
+      "cameo_handling": "Any observed event; do not multiply unique events",
+      "candidate_native_themes": "Observed native themes only",
+      "entities": "Document; StoryCluster; Signal",
+      "evidence_caveat": "30 documents may reflect one syndicated story; no invented independent corroboration",
+      "kb_application_tags": "APP.MEDIA",
+      "kb_technology_tags": "As supported by text",
+      "scenario": "Hypothetical: repeated press release across 30 news sites",
+      "service_ids": "S10; S11"
+    }
+  },
+  {
+    "formulas_not_evaluated": {},
+    "provenance": {
+      "file": "domains/microelectronics/seeds/proposals/ontology_and_tags_v1/11_tagging_examples.json",
+      "row": 5,
+      "sha256": "69cffaa08c38184cb0e3ee75c5e2ed2c1debf8e950937b892c3a592b11f0f076",
+      "sheet": "11_Tagging_Examples",
+      "workbook_file": "microelectronics_ontology_and_tags_v1.xlsx",
+      "workbook_sha256": "7166aa06791998c692cc6a2ac377692a6687f15e3353ffa70a1c159f2e63c34f"
+    },
+    "values": {
+      "actor": "ST",
+      "app_tags": "APP.35; APP.X2",
+      "caution": "Family only; MPN, actual mode, link benchmark needed",
+      "entity_class": "ProductFamily",
+      "primary_class": "L.MCU.RF",
+      "profile": "C01",
+      "record": "STM32WL",
+      "source": "https://www.st.com/en/microcontrollers-microprocessors/stm32wl-series.html",
+      "technology_tags": "T.ULP; T.MCU; T.LPWAN"
+    }
+  },
+  {
+    "formulas_not_evaluated": {},
+    "provenance": {
+      "file": "domains/microelectronics/seeds/proposals/ontology_and_tags_v1/11_tagging_examples.json",
+      "row": 6,
+      "sha256": "69cffaa08c38184cb0e3ee75c5e2ed2c1debf8e950937b892c3a592b11f0f076",
+      "sheet": "11_Tagging_Examples",
+      "workbook_file": "microelectronics_ontology_and_tags_v1.xlsx",
+      "workbook_sha256": "7166aa06791998c692cc6a2ac377692a6687f15e3353ffa70a1c159f2e63c34f"
+    },
+    "values": {
+      "actor": "ST",
+      "app_tags": "APP.33; APP.X2",
+      "caution": "Family tag; external radio separate",
+      "entity_class": "ProductFamily",
+      "primary_class": "L.MCU.ULP",
+      "profile": "C01",
+      "record": "STM32U5",
+      "source": "https://www.st.com/en/microcontrollers-microprocessors/stm32u5-series.html",
+      "technology_tags": "T.ULP; T.MCU"
+    }
+  },
+  {
+    "formulas_not_evaluated": {},
+    "provenance": {
+      "file": "domains/microelectronics/seeds/proposals/ontology_and_tags_v1/11_tagging_examples.json",
+      "row": 7,
+      "sha256": "69cffaa08c38184cb0e3ee75c5e2ed2c1debf8e950937b892c3a592b11f0f076",
+      "sheet": "11_Tagging_Examples",
+      "workbook_file": "microelectronics_ontology_and_tags_v1.xlsx",
+      "workbook_sha256": "7166aa06791998c692cc6a2ac377692a6687f15e3353ffa70a1c159f2e63c34f"
+    },
+    "values": {
+      "actor": "ST",
+      "app_tags": "APP.X3; APP.X6",
+      "caution": "NPU-equipped variant only; benchmark not inferred",
+      "entity_class": "ProductFamily",
+      "primary_class": "L.MCU.AI",
+      "profile": "C02",
+      "record": "STM32N6",
+      "source": "https://www.st.com/content/st_com/en/browse/product-portfolio.html",
+      "technology_tags": "T.NPU; T.MCU; T.VISION"
+    }
+  },
+  {
+    "formulas_not_evaluated": {},
+    "provenance": {
+      "file": "domains/microelectronics/seeds/proposals/ontology_and_tags_v1/11_tagging_examples.json",
+      "row": 8,
+      "sha256": "69cffaa08c38184cb0e3ee75c5e2ed2c1debf8e950937b892c3a592b11f0f076",
+      "sheet": "11_Tagging_Examples",
+      "workbook_file": "microelectronics_ontology_and_tags_v1.xlsx",
+      "workbook_sha256": "7166aa06791998c692cc6a2ac377692a6687f15e3353ffa70a1c159f2e63c34f"
+    },
+    "values": {
+      "actor": "NXP",
+      "app_tags": "APP.33; APP.X6",
+      "caution": "Confirm exact variant with NPU",
+      "entity_class": "ProductFamily",
+      "primary_class": "L.MCU.AI",
+      "profile": "C02",
+      "record": "MCX N",
+      "source": "https://www.nxp.com/applications/technologies/ai-and-machine-learning:MACHINE-LEARNING",
+      "technology_tags": "T.MCU; T.NPU"
+    }
+  },
+  {
+    "formulas_not_evaluated": {},
+    "provenance": {
+      "file": "domains/microelectronics/seeds/proposals/ontology_and_tags_v1/11_tagging_examples.json",
+      "row": 9,
+      "sha256": "69cffaa08c38184cb0e3ee75c5e2ed2c1debf8e950937b892c3a592b11f0f076",
+      "sheet": "11_Tagging_Examples",
+      "workbook_file": "microelectronics_ontology_and_tags_v1.xlsx",
+      "workbook_sha256": "7166aa06791998c692cc6a2ac377692a6687f15e3353ffa70a1c159f2e63c34f"
+    },
+    "values": {
+      "actor": "NXP",
+      "app_tags": "APP.31; APP.X3",
+      "caution": "Family; external RAM/PMIC accounted separately",
+      "entity_class": "ProductFamily",
+      "primary_class": "L.MPU.EDGE",
+      "profile": "C03",
+      "record": "i.MX 95",
+      "source": "https://www.nxp.com/products/i.MX95",
+      "technology_tags": "T.MPU; T.NPU; T.VISION"
+    }
+  },
+  {
+    "formulas_not_evaluated": {},
+    "provenance": {
+      "file": "domains/microelectronics/seeds/proposals/ontology_and_tags_v1/11_tagging_examples.json",
+      "row": 10,
+      "sha256": "69cffaa08c38184cb0e3ee75c5e2ed2c1debf8e950937b892c3a592b11f0f076",
+      "sheet": "11_Tagging_Examples",
+      "workbook_file": "microelectronics_ontology_and_tags_v1.xlsx",
+      "workbook_sha256": "7166aa06791998c692cc6a2ac377692a6687f15e3353ffa70a1c159f2e63c34f"
+    },
+    "values": {
+      "actor": "Infineon",
+      "app_tags": "APP.33; APP.X6",
+      "caution": "Verify specific accelerator and power mode",
+      "entity_class": "ProductFamily",
+      "primary_class": "L.MCU.AI",
+      "profile": "C02",
+      "record": "PSoC Edge",
+      "source": "https://www.infineon.com/products/microcontroller/32-bit-psoc-arm-cortex",
+      "technology_tags": "T.MCU; T.NPU; T.ULP"
+    }
+  },
+  {
+    "formulas_not_evaluated": {},
+    "provenance": {
+      "file": "domains/microelectronics/seeds/proposals/ontology_and_tags_v1/11_tagging_examples.json",
+      "row": 11,
+      "sha256": "69cffaa08c38184cb0e3ee75c5e2ed2c1debf8e950937b892c3a592b11f0f076",
+      "sheet": "11_Tagging_Examples",
+      "workbook_file": "microelectronics_ontology_and_tags_v1.xlsx",
+      "workbook_sha256": "7166aa06791998c692cc6a2ac377692a6687f15e3353ffa70a1c159f2e63c34f"
+    },
+    "values": {
+      "actor": "Infineon",
+      "app_tags": "APP.33; APP.X2",
+      "caution": "Portfolio cannot be compared as single part",
+      "entity_class": "Product portfolio",
+      "primary_class": "O.SENS (map by modality)",
+      "profile": "C01/C05",
+      "record": "XENSIV",
+      "source": "https://www.infineon.com/products/sensor",
+      "technology_tags": "T.MEMS; T.RAD (conditional)"
+    }
+  },
+  {
+    "formulas_not_evaluated": {},
+    "provenance": {
+      "file": "domains/microelectronics/seeds/proposals/ontology_and_tags_v1/11_tagging_examples.json",
+      "row": 12,
+      "sha256": "69cffaa08c38184cb0e3ee75c5e2ed2c1debf8e950937b892c3a592b11f0f076",
+      "sheet": "11_Tagging_Examples",
+      "workbook_file": "microelectronics_ontology_and_tags_v1.xlsx",
+      "workbook_sha256": "7166aa06791998c692cc6a2ac377692a6687f15e3353ffa70a1c159f2e63c34f"
+    },
+    "values": {
+      "actor": "Cologne Chip",
+      "app_tags": "APP.33; APP.X3",
+      "caution": "Native resource and post-route comparison",
+      "entity_class": "ProductFamily",
+      "primary_class": "L.PLD.FPGA.SMALL",
+      "profile": "C04",
+      "record": "GateMate",
+      "source": "https://www.colognechip.com/programmable-logic/gatemate/",
+      "technology_tags": "T.FPGA; T.RTL"
+    }
+  },
+  {
+    "formulas_not_evaluated": {},
+    "provenance": {
+      "file": "domains/microelectronics/seeds/proposals/ontology_and_tags_v1/11_tagging_examples.json",
+      "row": 13,
+      "sha256": "69cffaa08c38184cb0e3ee75c5e2ed2c1debf8e950937b892c3a592b11f0f076",
+      "sheet": "11_Tagging_Examples",
+      "workbook_file": "microelectronics_ontology_and_tags_v1.xlsx",
+      "workbook_sha256": "7166aa06791998c692cc6a2ac377692a6687f15e3353ffa70a1c159f2e63c34f"
+    },
+    "values": {
+      "actor": "NanoXplore",
+      "app_tags": "APP.X5; APP.X3",
+      "caution": "COTS/RH variants and documentation differ; resolve exact part",
+      "entity_class": "ProductFamily",
+      "primary_class": "L.PLD.FPGA.SOC",
+      "profile": "C04",
+      "record": "NG-ULTRA",
+      "source": "https://nanoxplore.com/product/ng-ultra/",
+      "technology_tags": "T.FPGA; T.RTL"
+    }
+  },
+  {
+    "formulas_not_evaluated": {},
+    "provenance": {
+      "file": "domains/microelectronics/seeds/proposals/ontology_and_tags_v1/11_tagging_examples.json",
+      "row": 14,
+      "sha256": "69cffaa08c38184cb0e3ee75c5e2ed2c1debf8e950937b892c3a592b11f0f076",
+      "sheet": "11_Tagging_Examples",
+      "workbook_file": "microelectronics_ontology_and_tags_v1.xlsx",
+      "workbook_sha256": "7166aa06791998c692cc6a2ac377692a6687f15e3353ffa70a1c159f2e63c34f"
+    },
+    "values": {
+      "actor": "Blumind (Canada)",
+      "app_tags": "APP.X2; APP.X6",
+      "caution": "IP offering, not assumed orderable packaged IC",
+      "entity_class": "IPBlock",
+      "primary_class": "X.IP",
+      "profile": "C07",
+      "record": "AMPL",
+      "source": "https://blumind.ai/products/",
+      "technology_tags": "T.AIMC; T.NPU"
+    }
+  },
+  {
+    "formulas_not_evaluated": {},
+    "provenance": {
+      "file": "domains/microelectronics/seeds/proposals/ontology_and_tags_v1/11_tagging_examples.json",
+      "row": 15,
+      "sha256": "69cffaa08c38184cb0e3ee75c5e2ed2c1debf8e950937b892c3a592b11f0f076",
+      "sheet": "11_Tagging_Examples",
+      "workbook_file": "microelectronics_ontology_and_tags_v1.xlsx",
+      "workbook_sha256": "7166aa06791998c692cc6a2ac377692a6687f15e3353ffa70a1c159f2e63c34f"
+    },
+    "values": {
+      "actor": "SPARK Microsystems (Canada)",
+      "app_tags": "APP.X2; APP.X4",
+      "caution": "Technology; create distinct transceiver MPN record after catalogue check",
+      "entity_class": "Technology",
+      "primary_class": "\u2014",
+      "profile": "C01",
+      "record": "LE-UWB",
+      "source": "https://www.sparkmicro.com/technology/",
+      "technology_tags": "T.UWB; T.ULP"
+    }
+  },
+  {
+    "formulas_not_evaluated": {
+      "energy_j_day": "IF(COUNT(B5:G5)<6,\"\",IF(D5+E5<>86400,\"\",(B5*D5+C5*E5)/1000+F5*G5/1000000))",
+      "gate": "IF(COUNT(B5:G5)<6,\"MISSING\",IF(OR(D5+E5<>86400,MIN(B5:G5)<0),\"CHECK INPUT\",\"CHECK WORKLOAD\"))",
+      "runtime_days": "IFERROR(IF(OR(H5=\"\",I5=\"\",H5<=0),\"\",I5*3600/H5),\"\")"
+    },
+    "provenance": {
+      "file": "domains/microelectronics/seeds/proposals/ontology_and_tags_v1/13_energy_template.json",
+      "row": 5,
+      "sha256": "6cf19d36d1ae1244f194c104e9bb7aece79f8f0ee370eb07a99a97e82b76a44c",
+      "sheet": "13_Energy_Template",
+      "workbook_file": "microelectronics_ontology_and_tags_v1.xlsx",
+      "workbook_sha256": "7166aa06791998c692cc6a2ac377692a6687f15e3353ffa70a1c159f2e63c34f"
+    },
+    "values": {
+      "active_mw": 20,
+      "active_seconds_day": 864,
+      "candidate": "Illustration A",
+      "energy_j_day": 21.5578,
+      "gate": "CHECK WORKLOAD",
+      "idle_mw": 0.05,
+      "idle_seconds_day": 85536,
+      "notes": "Synthetic values. Wake energy incremental; active/idle intervals exclude separate wake duration or include it with no double count.",
+      "runtime_days": 1669.9292135561143,
+      "usable_battery_wh": 10,
+      "wake_count_day": 100,
+      "wake_uj_event": 10
+    }
+  },
+  {
+    "formulas_not_evaluated": {
+      "energy_j_day": "IF(COUNT(B6:G6)<6,\"\",IF(D6+E6<>86400,\"\",(B6*D6+C6*E6)/1000+F6*G6/1000000))",
+      "gate": "IF(COUNT(B6:G6)<6,\"MISSING\",IF(OR(D6+E6<>86400,MIN(B6:G6)<0),\"CHECK INPUT\",\"CHECK WORKLOAD\"))",
+      "runtime_days": "IFERROR(IF(OR(H6=\"\",I6=\"\",H6<=0),\"\",I6*3600/H6),\"\")"
+    },
+    "provenance": {
+      "file": "domains/microelectronics/seeds/proposals/ontology_and_tags_v1/13_energy_template.json",
+      "row": 6,
+      "sha256": "6cf19d36d1ae1244f194c104e9bb7aece79f8f0ee370eb07a99a97e82b76a44c",
+      "sheet": "13_Energy_Template",
+      "workbook_file": "microelectronics_ontology_and_tags_v1.xlsx",
+      "workbook_sha256": "7166aa06791998c692cc6a2ac377692a6687f15e3353ffa70a1c159f2e63c34f"
+    },
+    "values": {
+      "active_mw": 10,
+      "active_seconds_day": 864,
+      "candidate": "Illustration B",
+      "energy_j_day": 17.1946,
+      "gate": "CHECK WORKLOAD",
+      "idle_mw": 0.1,
+      "idle_seconds_day": 85536,
+      "notes": "Synthetic values. Battery usable energy at defined boundary; no harvesting.",
+      "runtime_days": 2093.6805741337394,
+      "usable_battery_wh": 10,
+      "wake_count_day": 100,
+      "wake_uj_event": 10
+    }
+  }
+]

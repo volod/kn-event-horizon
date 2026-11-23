@@ -2,7 +2,7 @@
 
 Each directory under `domains/` is a knowledge domain package: `space`, `gdelt`, and
 `microelectronics`. The [specification](../docs/design/spec.md#repository-layout) defines the full
-package layout. For now each package holds seed proposals only.
+package layout. Each package holds proposals, a reviewed semantic seed file, and a reviewed source catalogue seed file.
 
 ## Seed proposals
 
@@ -25,7 +25,7 @@ the JSON. The conversion is recorded in
 
 ## Status of the data
 
-Every file has `"status": "unreviewed_proposal"`. These are inputs to the seed import, not facts
+Every proposal file has `"status": "unreviewed_proposal"`. These are inputs to the seed import, not facts
 and not official taxonomies:
 
 - Tagging examples, templates, and hypothetical rows are test fixtures only.
@@ -42,3 +42,21 @@ become reviewed seed data.
 The repository test suite checks each proposal directory against its manifest, including the set
 of sheet files, SHA-256 digests, proposal status, and row counts. This check covers the converted
 JSON. Verification against an official vocabulary remains a separate review.
+
+## Reviewed semantic content
+
+`<domain>/seeds/semantic.json` links to the packaged reviewed snapshot and term provenance.
+`make seed-import` stages a new conversion and all-row reconciliation under
+`$DATA_DIR/seed-import/<run-id>/`; `make seed-check` compares it with the reviewed files and example
+fixture. Rebuilds load only these reviewed files. Each `<domain>/seeds/verification.json` records
+publication evidence or a local-vocabulary decision. Four schemes or scoped subsets verify; twelve schemes
+remain unverified with reasons. Examples remain fixtures only.
+See the [seed reference](../docs/impl/current/ontology-taxonomy/seeds.md) for review,
+identifiers, unmapped rows and verification.
+
+## Reviewed source catalogue
+
+`<domain>/seeds/sources.json` links to the packaged reviewed source snapshot. The three
+source sheets contribute 119 unverified candidates to the
+[source catalogue](../docs/impl/current/source-management.md) on rebuild. Each seed preserves
+the original worksheet row and cell values.

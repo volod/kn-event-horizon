@@ -1,0 +1,47 @@
+{
+  "additionalProperties": false,
+  "properties": {
+    "human_verified_at": {
+      "anyOf": [
+        {
+          "format": "date-time",
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Human Verified At"
+    },
+    "human_verified_by": {
+      "anyOf": [
+        {
+          "minLength": 1,
+          "pattern": "\\S",
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Human Verified By"
+    },
+    "human_verification_decision_id": {
+      "anyOf": [
+        {
+          "pattern": "^[0-9a-f]{64}$",
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Human Verification Decision Id"
+    }
+  },
+  "title": "Stamp",
+  "type": "object"
+}

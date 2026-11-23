@@ -142,5 +142,17 @@
   ],
   "kn.partialDate": true,
   "kn.precision": 38,
-  "kn.scale": 18
+  "kn.scale": 18,
+  "kn.humanVerification": {
+    "strategy": "external",
+    "resolver": "contract-v1",
+    "recordFields": [
+      "space.satellite.id"
+    ],
+    "fieldContexts": {
+      "space.satellite.id": [
+        "space.satellite.id"
+      ]
+    }
+  }
 }

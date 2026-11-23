@@ -1,0 +1,143 @@
+{
+  "domain": "microelectronics",
+  "format": "kn.semantic.verification.v1",
+  "related_publications": [],
+  "reviewed_on": "2026-11-22",
+  "schemes": [
+    {
+      "comparison": "Compared base application areas with Figure 0.9 (page 42) and chapter 3. The mixed scheme includes six local categories, including edge vision and space electronics, which are not chapter-3 headings.",
+      "content_sha256": "4eee7b8ae9a977c1e381bfe67eebb0d4a620e6b9e67c8d95be9a9e7989cf0664",
+      "edition": "2026",
+      "findings": [
+        {
+          "detail": "Local categories extend the six chapter-3 areas; do not promote the whole scheme as official.",
+          "kind": "local_extension",
+          "locator": "Seed APP.X1-APP.X6; ECS Figure 0.9 page 42"
+        }
+      ],
+      "origin": "kb_normalized",
+      "publisher": "AENEAS, EPoSS and INSIDE",
+      "scheme_id": "microelectronics.applications.scheme",
+      "scope": "Six chapter-3 application areas plus six local APP.X* extensions; local APP.* codes.",
+      "source_sha256": "38b20285cf15e4bff526f5c92266d3aef9b2b42587a21c7b05eebc7fc175b0d4",
+      "source_uri": "https://ecssria.eu/ECS-SRIA-2026.pdf",
+      "text_revision": {
+        "comparison_unchanged": true,
+        "note": "Removed unreviewed uk label copies and proposal-column JSON definitions. English labels, notations, status, hierarchy, mappings and publication evidence are unchanged; proposal columns remain in provenance. The publication comparison result and verification state are unchanged. Missing uk text now falls back to en with its real language reported.",
+        "previous_content_sha256": "5277bf3983eff525e01a2b8375f4f2c9ddfebe9831efa3ee1b14e3adedb58fe0",
+        "record": "docs/impl/records/0027-ontology-taxonomy-vocabulary-text-integrity.md"
+      },
+      "verification_reason": "Unverified normalized mixture: six ECS application areas and six local engineering applications use local APP.* codes. This is not an official ECS chapter dictionary.",
+      "verification_state": "unverified"
+    },
+    {
+      "comparison": "Compared all eight chapter numbers and headings. Seven match ignoring case and line wrapping. The canonical chapter 2.3 heading on PDF/printed page 268 says Methods; seed and publisher web navigation use Method. PDF heading takes precedence; do not silently correct seed.",
+      "content_sha256": "7c04b8b7f3b99ec3a861b9541e8f70bb9c1d59fe21c44fdcd143c9743eadefe1",
+      "edition": "2026",
+      "findings": [
+        {
+          "detail": "Source heading: Architecture and Design: Methods and Tools. Seed heading: Architecture and Design: Method and Tools. A singular cross-reference on page 310 and web navigation do not resolve this discrepancy.",
+          "kind": "mismatch",
+          "locator": "Chapter 2.3, printed/PDF page 268; also Figure 0.9 page 42"
+        },
+        {
+          "detail": "Subsections and major challenges are excluded from this eight-heading seed.",
+          "kind": "missing_leaf",
+          "locator": "Chapters 1-4 and Appendix B"
+        }
+      ],
+      "origin": "official",
+      "publisher": "AENEAS, EPoSS and INSIDE",
+      "scheme_id": "microelectronics.ecs_sria_2026.scheme",
+      "scope": "Eight foundational and cross-sectional chapter headings (1.1-1.4 and 2.1-2.4); local ECS: prefix. No challenges or application chapters imported.",
+      "source_sha256": "38b20285cf15e4bff526f5c92266d3aef9b2b42587a21c7b05eebc7fc175b0d4",
+      "source_uri": "https://ecssria.eu/ECS-SRIA-2026.pdf",
+      "text_revision": {
+        "comparison_unchanged": true,
+        "note": "Removed unreviewed uk label copies and proposal-column JSON definitions. English labels, notations, status, hierarchy, mappings and publication evidence are unchanged; proposal columns remain in provenance. The publication comparison result and verification state are unchanged. Missing uk text now falls back to en with its real language reported.",
+        "previous_content_sha256": "4903427b3efbaea3cdb6b72fb1fad75d6338d3dbc5346c880ec30a01fe4186c2",
+        "record": "docs/impl/records/0027-ontology-taxonomy-vocabulary-text-integrity.md"
+      },
+      "verification_reason": "Unverified: ECS:2.3 uses Method where the publication chapter heading uses Methods. Other seven selected chapter headings match; local ECS: notation and uk source fallback remain explicit.",
+      "verification_state": "unverified"
+    },
+    {
+      "comparison": "Compared every category, source label and connector in the rendered user-supplied PDF Figure 9 (page 30), with the packaging scope on page 31. All 29 nodes and 25 parent edges match the reviewed transcription. Forty local engineering extensions and seven non-chip categories remain outside the official scheme.",
+      "content_sha256": "8338a9a9f6d6faacf3e85d6cba4e8912ccdffd7bc1590b3b854edddbf1801b0d",
+      "edition": "Chips, nodes and wafers, August 2024, Figure 9",
+      "findings": [],
+      "origin": "official",
+      "publisher": "OECD",
+      "scheme_id": "microelectronics.oecd_2024.scheme",
+      "scope": "Complete Figure 9 category tree only, 29 nodes and four roots. Internal KN codes mirror stable product identifiers. Display disambiguation applies only to the two Others labels; original source labels remain alternatives. Source-text fallback in uk; no reviewed translation.",
+      "source_sha256": "25f7ec43f76d5fc1ddac65d1a16b179262aa8b68371545eef87ccac384d40083",
+      "source_uri": "https://www.oecd.org/content/dam/oecd/en/publications/reports/2024/08/chips-nodes-and-wafers_1189c2a2/f68de895-en.pdf",
+      "text_revision": {
+        "comparison_unchanged": true,
+        "note": "Removed unreviewed uk label copies and proposal-column JSON definitions. English labels, notations, status, hierarchy, mappings and publication evidence are unchanged; proposal columns remain in provenance. The publication comparison result and verification state are unchanged. Missing uk text now falls back to en with its real language reported.",
+        "previous_content_sha256": "b5fe45156f693f82ad9effa9a2f4ea5662401baa245e2bc37b7e98ad0627bfdf",
+        "record": "docs/impl/records/0027-ontology-taxonomy-vocabulary-text-integrity.md"
+      },
+      "verification_reason": "Verified all 29 categories and 25 parent edges of OECD Figure 9, page 30. KN codes are internal; duplicate Others labels are disambiguated for display and preserved verbatim as alternatives. No local extensions are included; uk retains source text.",
+      "verification_state": "verified"
+    },
+    {
+      "comparison": "The supplied PDF title, DOI f68de895-en and August 2024 edition match the referenced OECD publication. Figure 9 on page 30 was rendered and inspected: IC-Logic, IC-Memory, IC-Analog and Others are uncoded categories. Seed codes and deeper engineering specializations are local. The initial direct retrieval returned HTTP 403; the user subsequently supplied the publication bytes, resolving the checksum limitation.",
+      "content_sha256": "3b821f52f20f09ab8ac99d3ec3932dfae7dfd8feb35c837274bd54739289d455",
+      "edition": "Chips, nodes and wafers, August 2024, Figure 9",
+      "findings": [
+        {
+          "detail": "AI MCU and energy-harvesting/battery-management refinements and all local code strings are not official Figure 9 notations.",
+          "kind": "local_extension",
+          "locator": "Figure 9, printed page 30; seed L.MCU.AI and A.PM.HARV"
+        }
+      ],
+      "origin": "kb_normalized",
+      "publisher": "OECD",
+      "scheme_id": "microelectronics.product_v1.scheme",
+      "scope": "76 normalized product concepts including local engineering extensions. Figure 9, printed/PDF page 30, inspected in the user-supplied August 2024 publication PDF; original supplied bytes are checksum-pinned.",
+      "source_sha256": "25f7ec43f76d5fc1ddac65d1a16b179262aa8b68371545eef87ccac384d40083",
+      "source_uri": "https://www.oecd.org/content/dam/oecd/en/publications/reports/2024/08/chips-nodes-and-wafers_1189c2a2/f68de895-en.pdf",
+      "text_revision": {
+        "comparison_unchanged": true,
+        "note": "Removed unreviewed uk label copies and proposal-column JSON definitions. English labels, notations, status, hierarchy, mappings and publication evidence are unchanged; proposal columns remain in provenance. The publication comparison result and verification state are unchanged. Missing uk text now falls back to en with its real language reported.",
+        "previous_content_sha256": "9b98a0b79451da1058dcb9b1556d743d3ff9cd0336e7fa46f0333a1b65649d36",
+        "record": "docs/impl/records/0027-ontology-taxonomy-vocabulary-text-integrity.md"
+      },
+      "verification_reason": "Unverified normalized tree: Figure 9 is uncoded and the seed adds local engineering specializations. The user-supplied OECD publication PDF has been inspected and checksum-pinned; this does not make local codes or extensions official.",
+      "verification_state": "unverified"
+    },
+    {
+      "comparison": "Reviewed proposal origin and intended use. These local terms have no official taxonomy to verify against.",
+      "content_sha256": "d5b4cc36bb9adf0f1e616d7655d3f28f431ed1abf3fca51ab2a6e520876d185d",
+      "findings": [],
+      "origin": "service_extension",
+      "scheme_id": "microelectronics.services.scheme",
+      "scope": "Local analyst or service vocabulary only; no official publication or edition claimed.",
+      "text_revision": {
+        "comparison_unchanged": true,
+        "note": "Removed unreviewed uk label copies and proposal-column JSON definitions. English labels, notations, status, hierarchy, mappings and publication evidence are unchanged; proposal columns remain in provenance. The publication comparison result and verification state are unchanged. Missing uk text now falls back to en with its real language reported.",
+        "previous_content_sha256": "38f58c51902ca4afbded957648ff70aec3061a590b9a7d96f6f7eb2f246ab8b4",
+        "record": "docs/impl/records/0027-ontology-taxonomy-vocabulary-text-integrity.md"
+      },
+      "verification_reason": "Unverified local vocabulary; no official edition or publication is claimed. Origin remains service_extension.",
+      "verification_state": "unverified"
+    },
+    {
+      "comparison": "Reviewed proposal origin and intended use. These local terms have no official taxonomy to verify against.",
+      "content_sha256": "1af13f2d3150137857ebf0ccc2dca689437d3ba01822d83501d6af7192899db2",
+      "findings": [],
+      "origin": "kb_extension",
+      "scheme_id": "microelectronics.technology.scheme",
+      "scope": "Local analyst or service vocabulary only; no official publication or edition claimed.",
+      "text_revision": {
+        "comparison_unchanged": true,
+        "note": "Removed unreviewed uk label copies and proposal-column JSON definitions. English labels, notations, status, hierarchy, mappings and publication evidence are unchanged; proposal columns remain in provenance. The publication comparison result and verification state are unchanged. Missing uk text now falls back to en with its real language reported.",
+        "previous_content_sha256": "8dc1319430b3c98de076c7e8a5de29d9ff0280f1eac3bdc2c7b6f4511481d6cf",
+        "record": "docs/impl/records/0027-ontology-taxonomy-vocabulary-text-integrity.md"
+      },
+      "verification_reason": "Unverified local vocabulary; no official edition or publication is claimed. Origin remains kb_extension.",
+      "verification_state": "unverified"
+    }
+  ]
+}

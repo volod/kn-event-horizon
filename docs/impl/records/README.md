@@ -35,5 +35,23 @@ decision. A record can name a plan task by ID because plan headings disappear on
 | 0018 | `adhoc` prefetched dataset locations | [0018-adhoc-prefetched-dataset-locations.md](0018-adhoc-prefetched-dataset-locations.md) |
 | 0019 | `storage-contract-registry` | [0019-data-contracts-storage-contract-registry.md](0019-data-contracts-storage-contract-registry.md) |
 | 0020 | `semantic-model-contracts` | [0020-ontology-taxonomy-semantic-model-contracts.md](0020-ontology-taxonomy-semantic-model-contracts.md) |
+| 0021 | `seed-vocabulary-import` | [0021-ontology-taxonomy-seed-vocabulary-import.md](0021-ontology-taxonomy-seed-vocabulary-import.md) |
+| 0022 | `verify-official-taxonomies` | [0022-ontology-taxonomy-verify-official-taxonomies.md](0022-ontology-taxonomy-verify-official-taxonomies.md) |
+| 0023 | `oecd-official-product-scheme` | [0023-ontology-taxonomy-oecd-official-product-scheme.md](0023-ontology-taxonomy-oecd-official-product-scheme.md) |
+| 0024 | `skos-export` | [0024-ontology-taxonomy-skos-export.md](0024-ontology-taxonomy-skos-export.md) |
+| 0025 | `ontology-taxonomy-implementation-audit` | [0025-ontology-taxonomy-ontology-taxonomy-implementation-audit.md](0025-ontology-taxonomy-ontology-taxonomy-implementation-audit.md) |
+| 0026 | `adhoc` independent RDF parsers and host prerequisites | [0026-adhoc-independent-rdf-parsers-and-host-prerequisites.md](0026-adhoc-independent-rdf-parsers-and-host-prerequisites.md) |
+| 0027 | `vocabulary-text-integrity` | [0027-ontology-taxonomy-vocabulary-text-integrity.md](0027-ontology-taxonomy-vocabulary-text-integrity.md) |
+| 0028 | `adhoc` human verification model review | [0028-adhoc-human-verification-model-review.md](0028-adhoc-human-verification-model-review.md) |
+| 0029 | `adhoc` schema-first plan priorities | [0029-adhoc-schema-first-plan-priorities.md](0029-adhoc-schema-first-plan-priorities.md) |
+| 0030 | `development-model-baseline` (open) | [0030-data-contracts-development-model-baseline.md](0030-data-contracts-development-model-baseline.md) |
+| 0031 | `adhoc` dependency-ordered plan | [0031-adhoc-dependency-ordered-plan.md](0031-adhoc-dependency-ordered-plan.md) |
+| 0032 | `human-verification-contracts` | [0032-evidence-model-human-verification-contracts.md](0032-evidence-model-human-verification-contracts.md) |
+| 0033 | `identity-registry-contracts` | [0033-object-identity-identity-registry-contracts.md](0033-object-identity-identity-registry-contracts.md) |
+| 0034 | Delivery-group plan audit | [0034-adhoc-delivery-group-audit.md](0034-adhoc-delivery-group-audit.md) |
+| 0035 | `source-catalogue-import` | [Source catalogue import](0035-source-management-source-catalogue-import.md) |
+| 0036 | `crawler-config-schema` | [Crawler configuration schema](0036-source-management-crawler-config-schema.md) |
+| 0037 | `source-onboarding-workflow` | [Source onboarding workflow](0037-source-management-source-onboarding-workflow.md) |
+| 0038 | `source-admission-implementation-audit` | [Source admission implementation audit](0038-source-management-source-admission-implementation-audit.md) |
 
-Next unused sequence is `0021`.
+Next unused sequence is `0039`.

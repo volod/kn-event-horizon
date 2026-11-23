@@ -1,0 +1,147 @@
+{
+  "domain": "space",
+  "format": "kn.semantic.verification.v1",
+  "related_publications": [],
+  "reviewed_on": "2026-11-22",
+  "schemes": [
+    {
+      "comparison": "Four segment labels agree. Mixed categories include local codes and expanded or shortened official labels, so no official-scheme promotion is allowed. II.E and II.L are representative label differences; III aliases are local codes.",
+      "content_sha256": "9ae638bc779bf4cf74568c3e682ed26f2277c90731efde253fe30bd9d64adfe7",
+      "edition": "Issue 1 Revision 1, July 2011",
+      "findings": [
+        {
+          "detail": "Source says On-board SW; seed says On-board software (before its local segment qualifier).",
+          "kind": "mismatch",
+          "locator": "Section 1.3, printed page 4; II/E"
+        },
+        {
+          "detail": "Source specifies RF / Microwave Communication (Platform and Payloads); seed omits the parenthetical scope.",
+          "kind": "mismatch",
+          "locator": "Section 1.3, printed page 5; II/L"
+        },
+        {
+          "detail": "Launch ground support, launch service and cloud categories are local additions, not source GPT system codes.",
+          "kind": "local_extension",
+          "locator": "Proposal 03_ESA_GPT_Classifier; I.GSE, I.SVC, IV.CLOUD"
+        },
+        {
+          "detail": "Equipment, building-block, component and parts leaves below the selected system categories are absent.",
+          "kind": "missing_leaf",
+          "locator": "Product tables, printed pages 7-17"
+        }
+      ],
+      "origin": "kb_normalized",
+      "publisher": "ESA",
+      "scheme_id": "space.esa_gpt_1_1.scheme",
+      "scope": "48 normalized nodes: four segment parents and 44 proposal categories; official system categories compared with pages 4-17. No complete product-leaf import.",
+      "source_sha256": "3415a8e417957c75abed50361c177380dec1adb1f60e913d096fd62a470752e3",
+      "source_uri": "https://esastar-emr.sso.esa.int/Account/DownloadCompetencesFile?fileType=P",
+      "text_revision": {
+        "comparison_unchanged": true,
+        "note": "Removed unreviewed uk label copies and proposal-column JSON definitions. English labels, notations, status, hierarchy, mappings and publication evidence are unchanged; proposal columns remain in provenance. The publication comparison result and verification state are unchanged. Missing uk text now falls back to en with its real language reported.",
+        "previous_content_sha256": "c5be7afa70690cfd6cedf1d711642933db9ae89c6e2bbb277c83f4e0aefc6113",
+        "record": "docs/impl/records/0027-ontology-taxonomy-vocabulary-text-integrity.md"
+      },
+      "verification_reason": "Unverified normalized mixture: local categories and notations coexist with official systems. GPT Issue 1 Rev 1 was inspected, but this mixed tree is not an official dictionary.",
+      "verification_state": "unverified"
+    },
+    {
+      "comparison": "Compared all 133 codes, labels and primary parents against the independently extracted abbreviated table; zero differences. Full version also inspected for omitted levels. Review does not assert a complete full-version dictionary.",
+      "content_sha256": "b8af4df76caddbd99ce5ff777047ea9794ca4e18832f172f081aaaf8676ede55",
+      "edition": "4.1 (STM-277, 4th edition, 2023)",
+      "findings": [
+        {
+          "detail": "Power Conditioning and Distribution is present in the full table but absent from the publication abbreviated table and this seed.",
+          "kind": "missing_leaf",
+          "locator": "Full version, printed page 17, TD 3 / TS D"
+        },
+        {
+          "detail": "All technology-group leaves are outside this abbreviated seed; for example 1/A/I System Technologies for Payload Data Processing.",
+          "kind": "missing_leaf",
+          "locator": "Full version, printed page 13 onward, TG column"
+        }
+      ],
+      "origin": "official",
+      "publisher": "ESA",
+      "scheme_id": "space.esa_tt_4_1.scheme",
+      "scope": "Abbreviated TD/TS table only: 26 technology domains and 107 subdomains, printed/PDF pages 10-12. English source labels; uk is source-text fallback. TDxx and domain-qualified labels are local encodings.",
+      "source_sha256": "39e0f30189de8be5d37eb38bb33874e6fbb795c888058827dd5bbbc241ce52a7",
+      "source_uri": "https://esamultimedia.esa.int/multimedia/publications/STM-277/STM-277.pdf",
+      "text_revision": {
+        "comparison_unchanged": true,
+        "note": "Removed unreviewed uk label copies and proposal-column JSON definitions. English labels, notations, status, hierarchy, mappings and publication evidence are unchanged; proposal columns remain in provenance. The publication comparison result and verification state are unchanged. Missing uk text now falls back to en with its real language reported.",
+        "previous_content_sha256": "af53e4689ef3844171bdf604a325d7fa30bbb2735a5333c0a1c56f8065d62671",
+        "record": "docs/impl/records/0027-ontology-taxonomy-vocabulary-text-integrity.md"
+      },
+      "verification_reason": "Verified abbreviated TD/TS subset only; full-version TD03.D and all TG leaves are absent. Local TDxx notation and domain-qualified labels preserve source TD/TS identity; uk terminology is unreviewed.",
+      "verification_state": "verified"
+    },
+    {
+      "comparison": "Compared every segment label with the page 6 enumerated list and contents. All 16 match, including EU Border and Internal Security. Underscored IDs are internal label encodings; no official notation is claimed.",
+      "content_sha256": "50ec5f8f696d1be8906056a92eb1a2b4b0ae171f5c63a328c176b5c32a98e209",
+      "edition": "EU Space Market Report 2026, Issue 1",
+      "findings": [],
+      "origin": "official",
+      "publisher": "EUSPA",
+      "scheme_id": "space.euspa_2026.scheme",
+      "scope": "All 16 downstream market-segment labels in How to read this report, printed/PDF page 6; no application dictionary. Local identifiers are label-derived, not publisher-assigned codes. uk is source-text fallback.",
+      "source_sha256": "1aa11974e3f9749ef3ee5692a9e6df843a1a3ba38f950a1901b1f4059f00b5aa",
+      "source_uri": "https://www.euspa.europa.eu/sites/default/files/documents/EU_Space_Market_Report_2026.pdf",
+      "text_revision": {
+        "comparison_unchanged": true,
+        "note": "Removed unreviewed uk label copies and proposal-column JSON definitions. English labels, notations, status, hierarchy, mappings and publication evidence are unchanged; proposal columns remain in provenance. The publication comparison result and verification state are unchanged. Missing uk text now falls back to en with its real language reported.",
+        "previous_content_sha256": "d2eb44aa1e72d0b8b0690a9b2507caa076ec4f38d641e7acf0ec433a3adf7d59",
+        "record": "docs/impl/records/0027-ontology-taxonomy-vocabulary-text-integrity.md"
+      },
+      "verification_reason": "Verified 16 market-segment labels only; internal codes are label-derived and uk retains source text. Application/use-case leaves are outside this scheme.",
+      "verification_state": "verified"
+    },
+    {
+      "comparison": "Compared all 17 root codes and labels with contents (PDF page 3) and root chapter headings: 16 labels agree; TX17 differs. No codes or labels were changed.",
+      "content_sha256": "b5ded044ffcfc8a14d2a4430f94f461c3544a7086e937db95f82e984a85b3bf2",
+      "edition": "2024",
+      "findings": [
+        {
+          "detail": "TX17 source label is GN&C; seed label is Guidance, Navigation, and Control (GN&C). An acronym expansion elsewhere is not the root label.",
+          "kind": "mismatch",
+          "locator": "Contents, printed page ii; TX17 chapter, printed page 211"
+        },
+        {
+          "detail": "Only TX01-TX17 roots are seeded; subareas and technologies, such as 1.1 Chemical Space Propulsion, are absent.",
+          "kind": "missing_leaf",
+          "locator": "TX01 chapter, printed page 1 onward"
+        }
+      ],
+      "origin": "official",
+      "publisher": "NASA",
+      "scheme_id": "space.nasa_tx_2024.scheme",
+      "scope": "All 17 TX roots; lower TX levels excluded. English root labels, with source text in uk.",
+      "source_sha256": "24720b3fb8ec8f1b5a523daf464967730af79a7d1eea4e9e843b4014b6df7e52",
+      "source_uri": "https://www.nasa.gov/wp-content/uploads/2024/10/nasa-2024-technology-taxonomy-report-low-resolution-final-20240730-tagged.pdf",
+      "text_revision": {
+        "comparison_unchanged": true,
+        "note": "Removed unreviewed uk label copies and proposal-column JSON definitions. English labels, notations, status, hierarchy, mappings and publication evidence are unchanged; proposal columns remain in provenance. The publication comparison result and verification state are unchanged. Missing uk text now falls back to en with its real language reported.",
+        "previous_content_sha256": "1b1a5876ee6ceb901956759934ee675f0b2b139287d7709d1fcc3cde3b6d7113",
+        "record": "docs/impl/records/0027-ontology-taxonomy-vocabulary-text-integrity.md"
+      },
+      "verification_reason": "Unverified: TX17 label expands the official root label GN&C; 16 other root labels match. Lower taxonomy levels are absent.",
+      "verification_state": "unverified"
+    },
+    {
+      "comparison": "Reviewed proposal origin and intended use. These local terms have no official taxonomy to verify against.",
+      "content_sha256": "81f5c4f6b06a19cd22efcf24a165bf861bd633f9868f036183cef54d2ee6557d",
+      "findings": [],
+      "origin": "service_extension",
+      "scheme_id": "space.services.scheme",
+      "scope": "Local analyst or service vocabulary only; no official publication or edition claimed.",
+      "text_revision": {
+        "comparison_unchanged": true,
+        "note": "Removed unreviewed uk label copies and proposal-column JSON definitions. English labels, notations, status, hierarchy, mappings and publication evidence are unchanged; proposal columns remain in provenance. The publication comparison result and verification state are unchanged. Missing uk text now falls back to en with its real language reported.",
+        "previous_content_sha256": "1c46a9d21c1195f04ad25c3b951f47710c7505df248bb3766e456f73bb22f07f",
+        "record": "docs/impl/records/0027-ontology-taxonomy-vocabulary-text-integrity.md"
+      },
+      "verification_reason": "Unverified local vocabulary; no official edition or publication is claimed. Origin remains service_extension.",
+      "verification_state": "unverified"
+    }
+  ]
+}

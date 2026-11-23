@@ -1,0 +1,1756 @@
+{
+  "concepts": [
+    {
+      "id": "microelectronics.product_v1.A",
+      "parent_id": null,
+      "scheme_id": "microelectronics.product_v1.scheme"
+    },
+    {
+      "id": "microelectronics.product_v1.A.AMP",
+      "parent_id": "microelectronics.product_v1.A",
+      "scheme_id": "microelectronics.product_v1.scheme"
+    },
+    {
+      "id": "microelectronics.product_v1.A.AMP.PREC",
+      "parent_id": "microelectronics.product_v1.A.AMP",
+      "scheme_id": "microelectronics.product_v1.scheme"
+    },
+    {
+      "id": "microelectronics.product_v1.A.AMP.RF",
+      "parent_id": "microelectronics.product_v1.A.AMP",
+      "scheme_id": "microelectronics.product_v1.scheme"
+    },
+    {
+      "id": "microelectronics.product_v1.A.PM",
+      "parent_id": "microelectronics.product_v1.A",
+      "scheme_id": "microelectronics.product_v1.scheme"
+    },
+    {
+      "id": "microelectronics.product_v1.A.PM.DRV",
+      "parent_id": "microelectronics.product_v1.A.PM",
+      "scheme_id": "microelectronics.product_v1.scheme"
+    },
+    {
+      "id": "microelectronics.product_v1.A.PM.HARV",
+      "parent_id": "microelectronics.product_v1.A.PM",
+      "scheme_id": "microelectronics.product_v1.scheme"
+    },
+    {
+      "id": "microelectronics.product_v1.A.PM.REG",
+      "parent_id": "microelectronics.product_v1.A.PM",
+      "scheme_id": "microelectronics.product_v1.scheme"
+    },
+    {
+      "id": "microelectronics.product_v1.A.SC",
+      "parent_id": "microelectronics.product_v1.A",
+      "scheme_id": "microelectronics.product_v1.scheme"
+    },
+    {
+      "id": "microelectronics.product_v1.A.SC.ADC",
+      "parent_id": "microelectronics.product_v1.A.SC",
+      "scheme_id": "microelectronics.product_v1.scheme"
+    },
+    {
+      "id": "microelectronics.product_v1.A.SC.DAC",
+      "parent_id": "microelectronics.product_v1.A.SC",
+      "scheme_id": "microelectronics.product_v1.scheme"
+    },
+    {
+      "id": "microelectronics.product_v1.A.SC.RF",
+      "parent_id": "microelectronics.product_v1.A.SC",
+      "scheme_id": "microelectronics.product_v1.scheme"
+    },
+    {
+      "id": "microelectronics.product_v1.L",
+      "parent_id": null,
+      "scheme_id": "microelectronics.product_v1.scheme"
+    },
+    {
+      "id": "microelectronics.product_v1.L.ASIC",
+      "parent_id": "microelectronics.product_v1.L",
+      "scheme_id": "microelectronics.product_v1.scheme"
+    },
+    {
+      "id": "microelectronics.product_v1.L.ASIC.RF",
+      "parent_id": "microelectronics.product_v1.L.ASIC",
+      "scheme_id": "microelectronics.product_v1.scheme"
+    },
+    {
+      "id": "microelectronics.product_v1.L.ASIC.SEC",
+      "parent_id": "microelectronics.product_v1.L.ASIC",
+      "scheme_id": "microelectronics.product_v1.scheme"
+    },
+    {
+      "id": "microelectronics.product_v1.L.CPU",
+      "parent_id": "microelectronics.product_v1.L",
+      "scheme_id": "microelectronics.product_v1.scheme"
+    },
+    {
+      "id": "microelectronics.product_v1.L.DSP",
+      "parent_id": "microelectronics.product_v1.L",
+      "scheme_id": "microelectronics.product_v1.scheme"
+    },
+    {
+      "id": "microelectronics.product_v1.L.GPU",
+      "parent_id": "microelectronics.product_v1.L",
+      "scheme_id": "microelectronics.product_v1.scheme"
+    },
+    {
+      "id": "microelectronics.product_v1.L.GPU.EDGE",
+      "parent_id": "microelectronics.product_v1.L.GPU",
+      "scheme_id": "microelectronics.product_v1.scheme"
+    },
+    {
+      "id": "microelectronics.product_v1.L.IPU",
+      "parent_id": "microelectronics.product_v1.L",
+      "scheme_id": "microelectronics.product_v1.scheme"
+    },
+    {
+      "id": "microelectronics.product_v1.L.IPU.ANALOG",
+      "parent_id": "microelectronics.product_v1.L.IPU",
+      "scheme_id": "microelectronics.product_v1.scheme"
+    },
+    {
+      "id": "microelectronics.product_v1.L.IPU.NEURO",
+      "parent_id": "microelectronics.product_v1.L.IPU",
+      "scheme_id": "microelectronics.product_v1.scheme"
+    },
+    {
+      "id": "microelectronics.product_v1.L.IPU.NPU",
+      "parent_id": "microelectronics.product_v1.L.IPU",
+      "scheme_id": "microelectronics.product_v1.scheme"
+    },
+    {
+      "id": "microelectronics.product_v1.L.MCU",
+      "parent_id": "microelectronics.product_v1.L",
+      "scheme_id": "microelectronics.product_v1.scheme"
+    },
+    {
+      "id": "microelectronics.product_v1.L.MCU.AI",
+      "parent_id": "microelectronics.product_v1.L.MCU",
+      "scheme_id": "microelectronics.product_v1.scheme"
+    },
+    {
+      "id": "microelectronics.product_v1.L.MCU.RF",
+      "parent_id": "microelectronics.product_v1.L.MCU",
+      "scheme_id": "microelectronics.product_v1.scheme"
+    },
+    {
+      "id": "microelectronics.product_v1.L.MCU.RT",
+      "parent_id": "microelectronics.product_v1.L.MCU",
+      "scheme_id": "microelectronics.product_v1.scheme"
+    },
+    {
+      "id": "microelectronics.product_v1.L.MCU.ULP",
+      "parent_id": "microelectronics.product_v1.L.MCU",
+      "scheme_id": "microelectronics.product_v1.scheme"
+    },
+    {
+      "id": "microelectronics.product_v1.L.MPU",
+      "parent_id": "microelectronics.product_v1.L",
+      "scheme_id": "microelectronics.product_v1.scheme"
+    },
+    {
+      "id": "microelectronics.product_v1.L.MPU.EDGE",
+      "parent_id": "microelectronics.product_v1.L.MPU",
+      "scheme_id": "microelectronics.product_v1.scheme"
+    },
+    {
+      "id": "microelectronics.product_v1.L.MPU.VISION",
+      "parent_id": "microelectronics.product_v1.L.MPU",
+      "scheme_id": "microelectronics.product_v1.scheme"
+    },
+    {
+      "id": "microelectronics.product_v1.L.PLD",
+      "parent_id": "microelectronics.product_v1.L",
+      "scheme_id": "microelectronics.product_v1.scheme"
+    },
+    {
+      "id": "microelectronics.product_v1.L.PLD.FPGA",
+      "parent_id": "microelectronics.product_v1.L.PLD",
+      "scheme_id": "microelectronics.product_v1.scheme"
+    },
+    {
+      "id": "microelectronics.product_v1.L.PLD.FPGA.HIGH",
+      "parent_id": "microelectronics.product_v1.L.PLD.FPGA",
+      "scheme_id": "microelectronics.product_v1.scheme"
+    },
+    {
+      "id": "microelectronics.product_v1.L.PLD.FPGA.SMALL",
+      "parent_id": "microelectronics.product_v1.L.PLD.FPGA",
+      "scheme_id": "microelectronics.product_v1.scheme"
+    },
+    {
+      "id": "microelectronics.product_v1.L.PLD.FPGA.SOC",
+      "parent_id": "microelectronics.product_v1.L.PLD.FPGA",
+      "scheme_id": "microelectronics.product_v1.scheme"
+    },
+    {
+      "id": "microelectronics.product_v1.M",
+      "parent_id": null,
+      "scheme_id": "microelectronics.product_v1.scheme"
+    },
+    {
+      "id": "microelectronics.product_v1.M.NV",
+      "parent_id": "microelectronics.product_v1.M",
+      "scheme_id": "microelectronics.product_v1.scheme"
+    },
+    {
+      "id": "microelectronics.product_v1.M.NV.FLASH",
+      "parent_id": "microelectronics.product_v1.M.NV",
+      "scheme_id": "microelectronics.product_v1.scheme"
+    },
+    {
+      "id": "microelectronics.product_v1.M.NV.FLASH.NAND",
+      "parent_id": "microelectronics.product_v1.M.NV.FLASH",
+      "scheme_id": "microelectronics.product_v1.scheme"
+    },
+    {
+      "id": "microelectronics.product_v1.M.NV.FLASH.NOR",
+      "parent_id": "microelectronics.product_v1.M.NV.FLASH",
+      "scheme_id": "microelectronics.product_v1.scheme"
+    },
+    {
+      "id": "microelectronics.product_v1.M.NV.NVRAM",
+      "parent_id": "microelectronics.product_v1.M.NV",
+      "scheme_id": "microelectronics.product_v1.scheme"
+    },
+    {
+      "id": "microelectronics.product_v1.M.NV.NVRAM.MRAM",
+      "parent_id": "microelectronics.product_v1.M.NV.NVRAM",
+      "scheme_id": "microelectronics.product_v1.scheme"
+    },
+    {
+      "id": "microelectronics.product_v1.M.NV.NVRAM.RRAM",
+      "parent_id": "microelectronics.product_v1.M.NV.NVRAM",
+      "scheme_id": "microelectronics.product_v1.scheme"
+    },
+    {
+      "id": "microelectronics.product_v1.M.NV.ROM",
+      "parent_id": "microelectronics.product_v1.M.NV",
+      "scheme_id": "microelectronics.product_v1.scheme"
+    },
+    {
+      "id": "microelectronics.product_v1.M.V",
+      "parent_id": "microelectronics.product_v1.M",
+      "scheme_id": "microelectronics.product_v1.scheme"
+    },
+    {
+      "id": "microelectronics.product_v1.M.V.DRAM",
+      "parent_id": "microelectronics.product_v1.M.V",
+      "scheme_id": "microelectronics.product_v1.scheme"
+    },
+    {
+      "id": "microelectronics.product_v1.M.V.SRAM",
+      "parent_id": "microelectronics.product_v1.M.V",
+      "scheme_id": "microelectronics.product_v1.scheme"
+    },
+    {
+      "id": "microelectronics.product_v1.O",
+      "parent_id": null,
+      "scheme_id": "microelectronics.product_v1.scheme"
+    },
+    {
+      "id": "microelectronics.product_v1.O.DISC",
+      "parent_id": "microelectronics.product_v1.O",
+      "scheme_id": "microelectronics.product_v1.scheme"
+    },
+    {
+      "id": "microelectronics.product_v1.O.DISC.DIO",
+      "parent_id": "microelectronics.product_v1.O.DISC",
+      "scheme_id": "microelectronics.product_v1.scheme"
+    },
+    {
+      "id": "microelectronics.product_v1.O.DISC.SW",
+      "parent_id": "microelectronics.product_v1.O.DISC",
+      "scheme_id": "microelectronics.product_v1.scheme"
+    },
+    {
+      "id": "microelectronics.product_v1.O.OPTO",
+      "parent_id": "microelectronics.product_v1.O",
+      "scheme_id": "microelectronics.product_v1.scheme"
+    },
+    {
+      "id": "microelectronics.product_v1.O.OPTO.CIS",
+      "parent_id": "microelectronics.product_v1.O.OPTO",
+      "scheme_id": "microelectronics.product_v1.scheme"
+    },
+    {
+      "id": "microelectronics.product_v1.O.OPTO.EMIT",
+      "parent_id": "microelectronics.product_v1.O.OPTO",
+      "scheme_id": "microelectronics.product_v1.scheme"
+    },
+    {
+      "id": "microelectronics.product_v1.O.OPTO.PHOT",
+      "parent_id": "microelectronics.product_v1.O.OPTO",
+      "scheme_id": "microelectronics.product_v1.scheme"
+    },
+    {
+      "id": "microelectronics.product_v1.O.OPTO.PIC",
+      "parent_id": "microelectronics.product_v1.O.OPTO",
+      "scheme_id": "microelectronics.product_v1.scheme"
+    },
+    {
+      "id": "microelectronics.product_v1.O.OTHER",
+      "parent_id": "microelectronics.product_v1.O",
+      "scheme_id": "microelectronics.product_v1.scheme"
+    },
+    {
+      "id": "microelectronics.product_v1.O.OTHER.Q",
+      "parent_id": "microelectronics.product_v1.O.OTHER",
+      "scheme_id": "microelectronics.product_v1.scheme"
+    },
+    {
+      "id": "microelectronics.product_v1.O.SENS",
+      "parent_id": "microelectronics.product_v1.O",
+      "scheme_id": "microelectronics.product_v1.scheme"
+    },
+    {
+      "id": "microelectronics.product_v1.O.SENS.ACO",
+      "parent_id": "microelectronics.product_v1.O.SENS",
+      "scheme_id": "microelectronics.product_v1.scheme"
+    },
+    {
+      "id": "microelectronics.product_v1.O.SENS.ACT",
+      "parent_id": "microelectronics.product_v1.O.SENS",
+      "scheme_id": "microelectronics.product_v1.scheme"
+    },
+    {
+      "id": "microelectronics.product_v1.O.SENS.ENV",
+      "parent_id": "microelectronics.product_v1.O.SENS",
+      "scheme_id": "microelectronics.product_v1.scheme"
+    },
+    {
+      "id": "microelectronics.product_v1.O.SENS.IMU",
+      "parent_id": "microelectronics.product_v1.O.SENS",
+      "scheme_id": "microelectronics.product_v1.scheme"
+    },
+    {
+      "id": "microelectronics.product_v1.O.SENS.MAG",
+      "parent_id": "microelectronics.product_v1.O.SENS",
+      "scheme_id": "microelectronics.product_v1.scheme"
+    },
+    {
+      "id": "microelectronics.product_v1.O.SENS.RAD",
+      "parent_id": "microelectronics.product_v1.O.SENS",
+      "scheme_id": "microelectronics.product_v1.scheme"
+    },
+    {
+      "id": "microelectronics.product_v1.O.SENS.RANGE",
+      "parent_id": "microelectronics.product_v1.O.SENS",
+      "scheme_id": "microelectronics.product_v1.scheme"
+    },
+    {
+      "id": "microelectronics.product_v1.O.SENS.SMART",
+      "parent_id": "microelectronics.product_v1.O.SENS",
+      "scheme_id": "microelectronics.product_v1.scheme"
+    },
+    {
+      "id": "microelectronics.product_v1.X",
+      "parent_id": null,
+      "scheme_id": "microelectronics.product_v1.scheme"
+    },
+    {
+      "id": "microelectronics.product_v1.X.DEV",
+      "parent_id": "microelectronics.product_v1.X",
+      "scheme_id": "microelectronics.product_v1.scheme"
+    },
+    {
+      "id": "microelectronics.product_v1.X.FAB",
+      "parent_id": "microelectronics.product_v1.X",
+      "scheme_id": "microelectronics.product_v1.scheme"
+    },
+    {
+      "id": "microelectronics.product_v1.X.IP",
+      "parent_id": "microelectronics.product_v1.X",
+      "scheme_id": "microelectronics.product_v1.scheme"
+    },
+    {
+      "id": "microelectronics.product_v1.X.MAT",
+      "parent_id": "microelectronics.product_v1.X",
+      "scheme_id": "microelectronics.product_v1.scheme"
+    },
+    {
+      "id": "microelectronics.product_v1.X.MOD",
+      "parent_id": "microelectronics.product_v1.X",
+      "scheme_id": "microelectronics.product_v1.scheme"
+    },
+    {
+      "id": "microelectronics.product_v1.X.SW",
+      "parent_id": "microelectronics.product_v1.X",
+      "scheme_id": "microelectronics.product_v1.scheme"
+    }
+  ],
+  "labels": [
+    {
+      "label": "ADC and AFE",
+      "locale": "en",
+      "term_id": "microelectronics.product_v1.A.SC.ADC"
+    },
+    {
+      "label": "ADC and AFE",
+      "locale": "uk",
+      "term_id": "microelectronics.product_v1.A.SC.ADC"
+    },
+    {
+      "label": "AI MCU with accelerator",
+      "locale": "en",
+      "term_id": "microelectronics.product_v1.L.MCU.AI"
+    },
+    {
+      "label": "AI MCU with accelerator",
+      "locale": "uk",
+      "term_id": "microelectronics.product_v1.L.MCU.AI"
+    },
+    {
+      "label": "ASIC",
+      "locale": "en",
+      "term_id": "microelectronics.product_v1.L.ASIC"
+    },
+    {
+      "label": "ASIC",
+      "locale": "uk",
+      "term_id": "microelectronics.product_v1.L.ASIC"
+    },
+    {
+      "label": "Accelerometer / gyro / IMU",
+      "locale": "en",
+      "term_id": "microelectronics.product_v1.O.SENS.IMU"
+    },
+    {
+      "label": "Accelerometer / gyro / IMU",
+      "locale": "uk",
+      "term_id": "microelectronics.product_v1.O.SENS.IMU"
+    },
+    {
+      "label": "Amplifier",
+      "locale": "en",
+      "term_id": "microelectronics.product_v1.A.AMP"
+    },
+    {
+      "label": "Amplifier",
+      "locale": "uk",
+      "term_id": "microelectronics.product_v1.A.AMP"
+    },
+    {
+      "label": "Analog / mixed-signal AI accelerator",
+      "locale": "en",
+      "term_id": "microelectronics.product_v1.L.IPU.ANALOG"
+    },
+    {
+      "label": "Analog / mixed-signal AI accelerator",
+      "locale": "uk",
+      "term_id": "microelectronics.product_v1.L.IPU.ANALOG"
+    },
+    {
+      "label": "CMOS image sensor / focal plane",
+      "locale": "en",
+      "term_id": "microelectronics.product_v1.O.OPTO.CIS"
+    },
+    {
+      "label": "CMOS image sensor / focal plane",
+      "locale": "uk",
+      "term_id": "microelectronics.product_v1.O.OPTO.CIS"
+    },
+    {
+      "label": "CPU",
+      "locale": "en",
+      "term_id": "microelectronics.product_v1.L.CPU"
+    },
+    {
+      "label": "CPU",
+      "locale": "uk",
+      "term_id": "microelectronics.product_v1.L.CPU"
+    },
+    {
+      "label": "DAC",
+      "locale": "en",
+      "term_id": "microelectronics.product_v1.A.SC.DAC"
+    },
+    {
+      "label": "DAC",
+      "locale": "uk",
+      "term_id": "microelectronics.product_v1.A.SC.DAC"
+    },
+    {
+      "label": "DC/DC, LDO, PMIC",
+      "locale": "en",
+      "term_id": "microelectronics.product_v1.A.PM.REG"
+    },
+    {
+      "label": "DC/DC, LDO, PMIC",
+      "locale": "uk",
+      "term_id": "microelectronics.product_v1.A.PM.REG"
+    },
+    {
+      "label": "DRAM",
+      "locale": "en",
+      "term_id": "microelectronics.product_v1.M.V.DRAM"
+    },
+    {
+      "label": "DRAM",
+      "locale": "uk",
+      "term_id": "microelectronics.product_v1.M.V.DRAM"
+    },
+    {
+      "label": "DSP",
+      "locale": "en",
+      "term_id": "microelectronics.product_v1.L.DSP"
+    },
+    {
+      "label": "DSP",
+      "locale": "uk",
+      "term_id": "microelectronics.product_v1.L.DSP"
+    },
+    {
+      "label": "Development kit",
+      "locale": "en",
+      "term_id": "microelectronics.product_v1.X.DEV"
+    },
+    {
+      "label": "Development kit",
+      "locale": "uk",
+      "term_id": "microelectronics.product_v1.X.DEV"
+    },
+    {
+      "label": "Digital inference accelerator / NPU",
+      "locale": "en",
+      "term_id": "microelectronics.product_v1.L.IPU.NPU"
+    },
+    {
+      "label": "Digital inference accelerator / NPU",
+      "locale": "uk",
+      "term_id": "microelectronics.product_v1.L.IPU.NPU"
+    },
+    {
+      "label": "Digital-dominant connectivity ASIC",
+      "locale": "en",
+      "term_id": "microelectronics.product_v1.L.ASIC.RF"
+    },
+    {
+      "label": "Digital-dominant connectivity ASIC",
+      "locale": "uk",
+      "term_id": "microelectronics.product_v1.L.ASIC.RF"
+    },
+    {
+      "label": "Diode / rectifier / protection",
+      "locale": "en",
+      "term_id": "microelectronics.product_v1.O.DISC.DIO"
+    },
+    {
+      "label": "Diode / rectifier / protection",
+      "locale": "uk",
+      "term_id": "microelectronics.product_v1.O.DISC.DIO"
+    },
+    {
+      "label": "Discrete",
+      "locale": "en",
+      "term_id": "microelectronics.product_v1.O.DISC"
+    },
+    {
+      "label": "Discrete",
+      "locale": "uk",
+      "term_id": "microelectronics.product_v1.O.DISC"
+    },
+    {
+      "label": "EDA / compiler / SDK / runtime",
+      "locale": "en",
+      "term_id": "microelectronics.product_v1.X.SW"
+    },
+    {
+      "label": "EDA / compiler / SDK / runtime",
+      "locale": "uk",
+      "term_id": "microelectronics.product_v1.X.SW"
+    },
+    {
+      "label": "Edge application SoC/MPU",
+      "locale": "en",
+      "term_id": "microelectronics.product_v1.L.MPU.EDGE"
+    },
+    {
+      "label": "Edge application SoC/MPU",
+      "locale": "uk",
+      "term_id": "microelectronics.product_v1.L.MPU.EDGE"
+    },
+    {
+      "label": "Embedded GPU",
+      "locale": "en",
+      "term_id": "microelectronics.product_v1.L.GPU.EDGE"
+    },
+    {
+      "label": "Embedded GPU",
+      "locale": "uk",
+      "term_id": "microelectronics.product_v1.L.GPU.EDGE"
+    },
+    {
+      "label": "Emerging semiconductor devices",
+      "locale": "en",
+      "term_id": "microelectronics.product_v1.O.OTHER.Q"
+    },
+    {
+      "label": "Emerging semiconductor devices",
+      "locale": "uk",
+      "term_id": "microelectronics.product_v1.O.OTHER.Q"
+    },
+    {
+      "label": "Energy harvesting / battery management IC",
+      "locale": "en",
+      "term_id": "microelectronics.product_v1.A.PM.HARV"
+    },
+    {
+      "label": "Energy harvesting / battery management IC",
+      "locale": "uk",
+      "term_id": "microelectronics.product_v1.A.PM.HARV"
+    },
+    {
+      "label": "FPGA/FPLD",
+      "locale": "en",
+      "term_id": "microelectronics.product_v1.L.PLD.FPGA"
+    },
+    {
+      "label": "FPGA/FPLD",
+      "locale": "uk",
+      "term_id": "microelectronics.product_v1.L.PLD.FPGA"
+    },
+    {
+      "label": "Flash",
+      "locale": "en",
+      "term_id": "microelectronics.product_v1.M.NV.FLASH"
+    },
+    {
+      "label": "Flash",
+      "locale": "uk",
+      "term_id": "microelectronics.product_v1.M.NV.FLASH"
+    },
+    {
+      "label": "GPU",
+      "locale": "en",
+      "term_id": "microelectronics.product_v1.L.GPU"
+    },
+    {
+      "label": "GPU",
+      "locale": "uk",
+      "term_id": "microelectronics.product_v1.L.GPU"
+    },
+    {
+      "label": "Gate / motor driver IC",
+      "locale": "en",
+      "term_id": "microelectronics.product_v1.A.PM.DRV"
+    },
+    {
+      "label": "Gate / motor driver IC",
+      "locale": "uk",
+      "term_id": "microelectronics.product_v1.A.PM.DRV"
+    },
+    {
+      "label": "High-throughput FPGA",
+      "locale": "en",
+      "term_id": "microelectronics.product_v1.L.PLD.FPGA.HIGH"
+    },
+    {
+      "label": "High-throughput FPGA",
+      "locale": "uk",
+      "term_id": "microelectronics.product_v1.L.PLD.FPGA.HIGH"
+    },
+    {
+      "label": "IC-Analog",
+      "locale": "en",
+      "term_id": "microelectronics.product_v1.A"
+    },
+    {
+      "label": "IC-Analog",
+      "locale": "uk",
+      "term_id": "microelectronics.product_v1.A"
+    },
+    {
+      "label": "IC-Logic",
+      "locale": "en",
+      "term_id": "microelectronics.product_v1.L"
+    },
+    {
+      "label": "IC-Logic",
+      "locale": "uk",
+      "term_id": "microelectronics.product_v1.L"
+    },
+    {
+      "label": "IC-Memory",
+      "locale": "en",
+      "term_id": "microelectronics.product_v1.M"
+    },
+    {
+      "label": "IC-Memory",
+      "locale": "uk",
+      "term_id": "microelectronics.product_v1.M"
+    },
+    {
+      "label": "IPU",
+      "locale": "en",
+      "term_id": "microelectronics.product_v1.L.IPU"
+    },
+    {
+      "label": "IPU",
+      "locale": "uk",
+      "term_id": "microelectronics.product_v1.L.IPU"
+    },
+    {
+      "label": "Integrated radar sensing device",
+      "locale": "en",
+      "term_id": "microelectronics.product_v1.O.SENS.RAD"
+    },
+    {
+      "label": "Integrated radar sensing device",
+      "locale": "uk",
+      "term_id": "microelectronics.product_v1.O.SENS.RAD"
+    },
+    {
+      "label": "LED, VCSEL, laser",
+      "locale": "en",
+      "term_id": "microelectronics.product_v1.O.OPTO.EMIT"
+    },
+    {
+      "label": "LED, VCSEL, laser",
+      "locale": "uk",
+      "term_id": "microelectronics.product_v1.O.OPTO.EMIT"
+    },
+    {
+      "label": "Licensable semiconductor IP",
+      "locale": "en",
+      "term_id": "microelectronics.product_v1.X.IP"
+    },
+    {
+      "label": "Licensable semiconductor IP",
+      "locale": "uk",
+      "term_id": "microelectronics.product_v1.X.IP"
+    },
+    {
+      "label": "Low-density FPGA",
+      "locale": "en",
+      "term_id": "microelectronics.product_v1.L.PLD.FPGA.SMALL"
+    },
+    {
+      "label": "Low-density FPGA",
+      "locale": "uk",
+      "term_id": "microelectronics.product_v1.L.PLD.FPGA.SMALL"
+    },
+    {
+      "label": "MCU",
+      "locale": "en",
+      "term_id": "microelectronics.product_v1.L.MCU"
+    },
+    {
+      "label": "MCU",
+      "locale": "uk",
+      "term_id": "microelectronics.product_v1.L.MCU"
+    },
+    {
+      "label": "MEMS actuator / transducer",
+      "locale": "en",
+      "term_id": "microelectronics.product_v1.O.SENS.ACT"
+    },
+    {
+      "label": "MEMS actuator / transducer",
+      "locale": "uk",
+      "term_id": "microelectronics.product_v1.O.SENS.ACT"
+    },
+    {
+      "label": "MEMS microphone / acoustic / ultrasound",
+      "locale": "en",
+      "term_id": "microelectronics.product_v1.O.SENS.ACO"
+    },
+    {
+      "label": "MEMS microphone / acoustic / ultrasound",
+      "locale": "uk",
+      "term_id": "microelectronics.product_v1.O.SENS.ACO"
+    },
+    {
+      "label": "MPU",
+      "locale": "en",
+      "term_id": "microelectronics.product_v1.L.MPU"
+    },
+    {
+      "label": "MPU",
+      "locale": "uk",
+      "term_id": "microelectronics.product_v1.L.MPU"
+    },
+    {
+      "label": "MRAM",
+      "locale": "en",
+      "term_id": "microelectronics.product_v1.M.NV.NVRAM.MRAM"
+    },
+    {
+      "label": "MRAM",
+      "locale": "uk",
+      "term_id": "microelectronics.product_v1.M.NV.NVRAM.MRAM"
+    },
+    {
+      "label": "Magnetic / Hall / current sensor",
+      "locale": "en",
+      "term_id": "microelectronics.product_v1.O.SENS.MAG"
+    },
+    {
+      "label": "Magnetic / Hall / current sensor",
+      "locale": "uk",
+      "term_id": "microelectronics.product_v1.O.SENS.MAG"
+    },
+    {
+      "label": "Mixed-signal RF transceiver / converter",
+      "locale": "en",
+      "term_id": "microelectronics.product_v1.A.SC.RF"
+    },
+    {
+      "label": "Mixed-signal RF transceiver / converter",
+      "locale": "uk",
+      "term_id": "microelectronics.product_v1.A.SC.RF"
+    },
+    {
+      "label": "Module / SiP / board",
+      "locale": "en",
+      "term_id": "microelectronics.product_v1.X.MOD"
+    },
+    {
+      "label": "Module / SiP / board",
+      "locale": "uk",
+      "term_id": "microelectronics.product_v1.X.MOD"
+    },
+    {
+      "label": "NAND",
+      "locale": "en",
+      "term_id": "microelectronics.product_v1.M.NV.FLASH.NAND"
+    },
+    {
+      "label": "NAND",
+      "locale": "uk",
+      "term_id": "microelectronics.product_v1.M.NV.FLASH.NAND"
+    },
+    {
+      "label": "NOR",
+      "locale": "en",
+      "term_id": "microelectronics.product_v1.M.NV.FLASH.NOR"
+    },
+    {
+      "label": "NOR",
+      "locale": "uk",
+      "term_id": "microelectronics.product_v1.M.NV.FLASH.NOR"
+    },
+    {
+      "label": "NVRAM",
+      "locale": "en",
+      "term_id": "microelectronics.product_v1.M.NV.NVRAM"
+    },
+    {
+      "label": "NVRAM",
+      "locale": "uk",
+      "term_id": "microelectronics.product_v1.M.NV.NVRAM"
+    },
+    {
+      "label": "Neuromorphic accelerator",
+      "locale": "en",
+      "term_id": "microelectronics.product_v1.L.IPU.NEURO"
+    },
+    {
+      "label": "Neuromorphic accelerator",
+      "locale": "uk",
+      "term_id": "microelectronics.product_v1.L.IPU.NEURO"
+    },
+    {
+      "label": "Non-Volatile",
+      "locale": "en",
+      "term_id": "microelectronics.product_v1.M.NV"
+    },
+    {
+      "label": "Non-Volatile",
+      "locale": "uk",
+      "term_id": "microelectronics.product_v1.M.NV"
+    },
+    {
+      "label": "Non-chip products & enabling assets",
+      "locale": "en",
+      "term_id": "microelectronics.product_v1.X"
+    },
+    {
+      "label": "Non-chip products & enabling assets",
+      "locale": "uk",
+      "term_id": "microelectronics.product_v1.X"
+    },
+    {
+      "label": "Optoelectronics",
+      "locale": "en",
+      "term_id": "microelectronics.product_v1.O.OPTO"
+    },
+    {
+      "label": "Optoelectronics",
+      "locale": "uk",
+      "term_id": "microelectronics.product_v1.O.OPTO"
+    },
+    {
+      "label": "Others (O)",
+      "locale": "en",
+      "term_id": "microelectronics.product_v1.O"
+    },
+    {
+      "label": "Others (O)",
+      "locale": "uk",
+      "term_id": "microelectronics.product_v1.O"
+    },
+    {
+      "label": "Others (O.OTHER)",
+      "locale": "en",
+      "term_id": "microelectronics.product_v1.O.OTHER"
+    },
+    {
+      "label": "Others (O.OTHER)",
+      "locale": "uk",
+      "term_id": "microelectronics.product_v1.O.OTHER"
+    },
+    {
+      "label": "Photodiode, SPAD, optical detector",
+      "locale": "en",
+      "term_id": "microelectronics.product_v1.O.OPTO.PHOT"
+    },
+    {
+      "label": "Photodiode, SPAD, optical detector",
+      "locale": "uk",
+      "term_id": "microelectronics.product_v1.O.OPTO.PHOT"
+    },
+    {
+      "label": "Photonic integrated circuit",
+      "locale": "en",
+      "term_id": "microelectronics.product_v1.O.OPTO.PIC"
+    },
+    {
+      "label": "Photonic integrated circuit",
+      "locale": "uk",
+      "term_id": "microelectronics.product_v1.O.OPTO.PIC"
+    },
+    {
+      "label": "Power MOSFET / IGBT / GaN / SiC switch",
+      "locale": "en",
+      "term_id": "microelectronics.product_v1.O.DISC.SW"
+    },
+    {
+      "label": "Power MOSFET / IGBT / GaN / SiC switch",
+      "locale": "uk",
+      "term_id": "microelectronics.product_v1.O.DISC.SW"
+    },
+    {
+      "label": "Power Management",
+      "locale": "en",
+      "term_id": "microelectronics.product_v1.A.PM"
+    },
+    {
+      "label": "Power Management",
+      "locale": "uk",
+      "term_id": "microelectronics.product_v1.A.PM"
+    },
+    {
+      "label": "Precision / instrumentation amplifier",
+      "locale": "en",
+      "term_id": "microelectronics.product_v1.A.AMP.PREC"
+    },
+    {
+      "label": "Precision / instrumentation amplifier",
+      "locale": "uk",
+      "term_id": "microelectronics.product_v1.A.AMP.PREC"
+    },
+    {
+      "label": "Process platforms and equipment",
+      "locale": "en",
+      "term_id": "microelectronics.product_v1.X.FAB"
+    },
+    {
+      "label": "Process platforms and equipment",
+      "locale": "uk",
+      "term_id": "microelectronics.product_v1.X.FAB"
+    },
+    {
+      "label": "Programmable Logic Devices",
+      "locale": "en",
+      "term_id": "microelectronics.product_v1.L.PLD"
+    },
+    {
+      "label": "Programmable Logic Devices",
+      "locale": "uk",
+      "term_id": "microelectronics.product_v1.L.PLD"
+    },
+    {
+      "label": "RF LNA / PA / amplifier",
+      "locale": "en",
+      "term_id": "microelectronics.product_v1.A.AMP.RF"
+    },
+    {
+      "label": "RF LNA / PA / amplifier",
+      "locale": "uk",
+      "term_id": "microelectronics.product_v1.A.AMP.RF"
+    },
+    {
+      "label": "ROM",
+      "locale": "en",
+      "term_id": "microelectronics.product_v1.M.NV.ROM"
+    },
+    {
+      "label": "ROM",
+      "locale": "uk",
+      "term_id": "microelectronics.product_v1.M.NV.ROM"
+    },
+    {
+      "label": "ReRAM / PCM / FeRAM (subtype tag)",
+      "locale": "en",
+      "term_id": "microelectronics.product_v1.M.NV.NVRAM.RRAM"
+    },
+    {
+      "label": "ReRAM / PCM / FeRAM (subtype tag)",
+      "locale": "uk",
+      "term_id": "microelectronics.product_v1.M.NV.NVRAM.RRAM"
+    },
+    {
+      "label": "Real-time / control MCU",
+      "locale": "en",
+      "term_id": "microelectronics.product_v1.L.MCU.RT"
+    },
+    {
+      "label": "Real-time / control MCU",
+      "locale": "uk",
+      "term_id": "microelectronics.product_v1.L.MCU.RT"
+    },
+    {
+      "label": "SRAM",
+      "locale": "en",
+      "term_id": "microelectronics.product_v1.M.V.SRAM"
+    },
+    {
+      "label": "SRAM",
+      "locale": "uk",
+      "term_id": "microelectronics.product_v1.M.V.SRAM"
+    },
+    {
+      "label": "Security / cryptographic ASIC",
+      "locale": "en",
+      "term_id": "microelectronics.product_v1.L.ASIC.SEC"
+    },
+    {
+      "label": "Security / cryptographic ASIC",
+      "locale": "uk",
+      "term_id": "microelectronics.product_v1.L.ASIC.SEC"
+    },
+    {
+      "label": "Sensors and actuators",
+      "locale": "en",
+      "term_id": "microelectronics.product_v1.O.SENS"
+    },
+    {
+      "label": "Sensors and actuators",
+      "locale": "uk",
+      "term_id": "microelectronics.product_v1.O.SENS"
+    },
+    {
+      "label": "Signal Conversion",
+      "locale": "en",
+      "term_id": "microelectronics.product_v1.A.SC"
+    },
+    {
+      "label": "Signal Conversion",
+      "locale": "uk",
+      "term_id": "microelectronics.product_v1.A.SC"
+    },
+    {
+      "label": "Smart sensor / event sensor with embedded compute",
+      "locale": "en",
+      "term_id": "microelectronics.product_v1.O.SENS.SMART"
+    },
+    {
+      "label": "Smart sensor / event sensor with embedded compute",
+      "locale": "uk",
+      "term_id": "microelectronics.product_v1.O.SENS.SMART"
+    },
+    {
+      "label": "SoC FPGA",
+      "locale": "en",
+      "term_id": "microelectronics.product_v1.L.PLD.FPGA.SOC"
+    },
+    {
+      "label": "SoC FPGA",
+      "locale": "uk",
+      "term_id": "microelectronics.product_v1.L.PLD.FPGA.SOC"
+    },
+    {
+      "label": "Temperature / pressure / humidity / gas / chemical",
+      "locale": "en",
+      "term_id": "microelectronics.product_v1.O.SENS.ENV"
+    },
+    {
+      "label": "Temperature / pressure / humidity / gas / chemical",
+      "locale": "uk",
+      "term_id": "microelectronics.product_v1.O.SENS.ENV"
+    },
+    {
+      "label": "ToF / ranging sensor module",
+      "locale": "en",
+      "term_id": "microelectronics.product_v1.O.SENS.RANGE"
+    },
+    {
+      "label": "ToF / ranging sensor module",
+      "locale": "uk",
+      "term_id": "microelectronics.product_v1.O.SENS.RANGE"
+    },
+    {
+      "label": "Ultra-low-power MCU",
+      "locale": "en",
+      "term_id": "microelectronics.product_v1.L.MCU.ULP"
+    },
+    {
+      "label": "Ultra-low-power MCU",
+      "locale": "uk",
+      "term_id": "microelectronics.product_v1.L.MCU.ULP"
+    },
+    {
+      "label": "Vision / multimedia application SoC",
+      "locale": "en",
+      "term_id": "microelectronics.product_v1.L.MPU.VISION"
+    },
+    {
+      "label": "Vision / multimedia application SoC",
+      "locale": "uk",
+      "term_id": "microelectronics.product_v1.L.MPU.VISION"
+    },
+    {
+      "label": "Volatile",
+      "locale": "en",
+      "term_id": "microelectronics.product_v1.M.V"
+    },
+    {
+      "label": "Volatile",
+      "locale": "uk",
+      "term_id": "microelectronics.product_v1.M.V"
+    },
+    {
+      "label": "Wafers / materials / packaging",
+      "locale": "en",
+      "term_id": "microelectronics.product_v1.X.MAT"
+    },
+    {
+      "label": "Wafers / materials / packaging",
+      "locale": "uk",
+      "term_id": "microelectronics.product_v1.X.MAT"
+    },
+    {
+      "label": "Wireless MCU / radio SoC",
+      "locale": "en",
+      "term_id": "microelectronics.product_v1.L.MCU.RF"
+    },
+    {
+      "label": "Wireless MCU / radio SoC",
+      "locale": "uk",
+      "term_id": "microelectronics.product_v1.L.MCU.RF"
+    }
+  ],
+  "terms": [
+    {
+      "code": "A",
+      "definition": "{\n  \"class\": \"IC-Analog\",\n  \"kb_node\": \"A\",\n  \"origin\": \"OECD_NODE\",\n  \"parent\": null,\n  \"profile_rule\": \"Core classification; local identifier\",\n  \"reference\": \"https://www.oecd.org/en/publications/chips-nodes-and-wafers_f68de895-en.html\"\n}",
+      "id": "microelectronics.product_v1.A",
+      "kind": "concept",
+      "namespace_id": "microelectronics.product_v1",
+      "status": "draft"
+    },
+    {
+      "code": "A.AMP",
+      "definition": "{\n  \"class\": \"Amplifier\",\n  \"kb_node\": \"A.AMP\",\n  \"origin\": \"OECD_NODE\",\n  \"parent\": \"A\",\n  \"profile_rule\": \"Core classification; local identifier\",\n  \"reference\": \"https://www.oecd.org/en/publications/chips-nodes-and-wafers_f68de895-en.html\"\n}",
+      "id": "microelectronics.product_v1.A.AMP",
+      "kind": "concept",
+      "namespace_id": "microelectronics.product_v1",
+      "status": "draft"
+    },
+    {
+      "code": "A.AMP.PREC",
+      "definition": "{\n  \"class\": \"Precision / instrumentation amplifier\",\n  \"kb_node\": \"A.AMP.PREC\",\n  \"origin\": \"KB_EXTENSION\",\n  \"parent\": \"A.AMP\",\n  \"profile_rule\": \"ANALOG\",\n  \"reference\": \"https://www.oecd.org/en/publications/chips-nodes-and-wafers_f68de895-en.html\"\n}",
+      "id": "microelectronics.product_v1.A.AMP.PREC",
+      "kind": "concept",
+      "namespace_id": "microelectronics.product_v1",
+      "status": "draft"
+    },
+    {
+      "code": "A.AMP.RF",
+      "definition": "{\n  \"class\": \"RF LNA / PA / amplifier\",\n  \"kb_node\": \"A.AMP.RF\",\n  \"origin\": \"KB_EXTENSION\",\n  \"parent\": \"A.AMP\",\n  \"profile_rule\": \"RF\",\n  \"reference\": \"https://www.oecd.org/en/publications/chips-nodes-and-wafers_f68de895-en.html\"\n}",
+      "id": "microelectronics.product_v1.A.AMP.RF",
+      "kind": "concept",
+      "namespace_id": "microelectronics.product_v1",
+      "status": "draft"
+    },
+    {
+      "code": "A.PM",
+      "definition": "{\n  \"class\": \"Power Management\",\n  \"kb_node\": \"A.PM\",\n  \"origin\": \"OECD_NODE\",\n  \"parent\": \"A\",\n  \"profile_rule\": \"Core classification; local identifier\",\n  \"reference\": \"https://www.oecd.org/en/publications/chips-nodes-and-wafers_f68de895-en.html\"\n}",
+      "id": "microelectronics.product_v1.A.PM",
+      "kind": "concept",
+      "namespace_id": "microelectronics.product_v1",
+      "status": "draft"
+    },
+    {
+      "code": "A.PM.DRV",
+      "definition": "{\n  \"class\": \"Gate / motor driver IC\",\n  \"kb_node\": \"A.PM.DRV\",\n  \"origin\": \"KB_EXTENSION\",\n  \"parent\": \"A.PM\",\n  \"profile_rule\": \"POWER\",\n  \"reference\": \"https://www.oecd.org/en/publications/chips-nodes-and-wafers_f68de895-en.html\"\n}",
+      "id": "microelectronics.product_v1.A.PM.DRV",
+      "kind": "concept",
+      "namespace_id": "microelectronics.product_v1",
+      "status": "draft"
+    },
+    {
+      "code": "A.PM.HARV",
+      "definition": "{\n  \"class\": \"Energy harvesting / battery management IC\",\n  \"kb_node\": \"A.PM.HARV\",\n  \"origin\": \"KB_EXTENSION\",\n  \"parent\": \"A.PM\",\n  \"profile_rule\": \"POWER\",\n  \"reference\": \"https://www.oecd.org/en/publications/chips-nodes-and-wafers_f68de895-en.html\"\n}",
+      "id": "microelectronics.product_v1.A.PM.HARV",
+      "kind": "concept",
+      "namespace_id": "microelectronics.product_v1",
+      "status": "draft"
+    },
+    {
+      "code": "A.PM.REG",
+      "definition": "{\n  \"class\": \"DC/DC, LDO, PMIC\",\n  \"kb_node\": \"A.PM.REG\",\n  \"origin\": \"KB_EXTENSION\",\n  \"parent\": \"A.PM\",\n  \"profile_rule\": \"POWER\",\n  \"reference\": \"https://www.oecd.org/en/publications/chips-nodes-and-wafers_f68de895-en.html\"\n}",
+      "id": "microelectronics.product_v1.A.PM.REG",
+      "kind": "concept",
+      "namespace_id": "microelectronics.product_v1",
+      "status": "draft"
+    },
+    {
+      "code": "A.SC",
+      "definition": "{\n  \"class\": \"Signal Conversion\",\n  \"kb_node\": \"A.SC\",\n  \"origin\": \"OECD_NODE\",\n  \"parent\": \"A\",\n  \"profile_rule\": \"Core classification; local identifier\",\n  \"reference\": \"https://www.oecd.org/en/publications/chips-nodes-and-wafers_f68de895-en.html\"\n}",
+      "id": "microelectronics.product_v1.A.SC",
+      "kind": "concept",
+      "namespace_id": "microelectronics.product_v1",
+      "status": "draft"
+    },
+    {
+      "code": "A.SC.ADC",
+      "definition": "{\n  \"class\": \"ADC and AFE\",\n  \"kb_node\": \"A.SC.ADC\",\n  \"origin\": \"KB_EXTENSION\",\n  \"parent\": \"A.SC\",\n  \"profile_rule\": \"ANALOG\",\n  \"reference\": \"https://www.oecd.org/en/publications/chips-nodes-and-wafers_f68de895-en.html\"\n}",
+      "id": "microelectronics.product_v1.A.SC.ADC",
+      "kind": "concept",
+      "namespace_id": "microelectronics.product_v1",
+      "status": "draft"
+    },
+    {
+      "code": "A.SC.DAC",
+      "definition": "{\n  \"class\": \"DAC\",\n  \"kb_node\": \"A.SC.DAC\",\n  \"origin\": \"KB_EXTENSION\",\n  \"parent\": \"A.SC\",\n  \"profile_rule\": \"ANALOG\",\n  \"reference\": \"https://www.oecd.org/en/publications/chips-nodes-and-wafers_f68de895-en.html\"\n}",
+      "id": "microelectronics.product_v1.A.SC.DAC",
+      "kind": "concept",
+      "namespace_id": "microelectronics.product_v1",
+      "status": "draft"
+    },
+    {
+      "code": "A.SC.RF",
+      "definition": "{\n  \"class\": \"Mixed-signal RF transceiver / converter\",\n  \"kb_node\": \"A.SC.RF\",\n  \"origin\": \"KB_EXTENSION\",\n  \"parent\": \"A.SC\",\n  \"profile_rule\": \"RF; only if primary analog conversion\",\n  \"reference\": \"https://www.oecd.org/en/publications/chips-nodes-and-wafers_f68de895-en.html\"\n}",
+      "id": "microelectronics.product_v1.A.SC.RF",
+      "kind": "concept",
+      "namespace_id": "microelectronics.product_v1",
+      "status": "draft"
+    },
+    {
+      "code": "L",
+      "definition": "{\n  \"class\": \"IC-Logic\",\n  \"kb_node\": \"L\",\n  \"origin\": \"OECD_NODE\",\n  \"parent\": null,\n  \"profile_rule\": \"Core classification; local identifier\",\n  \"reference\": \"https://www.oecd.org/en/publications/chips-nodes-and-wafers_f68de895-en.html\"\n}",
+      "id": "microelectronics.product_v1.L",
+      "kind": "concept",
+      "namespace_id": "microelectronics.product_v1",
+      "status": "draft"
+    },
+    {
+      "code": "L.ASIC",
+      "definition": "{\n  \"class\": \"ASIC\",\n  \"kb_node\": \"L.ASIC\",\n  \"origin\": \"OECD_NODE\",\n  \"parent\": \"L\",\n  \"profile_rule\": \"Core classification; local identifier\",\n  \"reference\": \"https://www.oecd.org/en/publications/chips-nodes-and-wafers_f68de895-en.html\"\n}",
+      "id": "microelectronics.product_v1.L.ASIC",
+      "kind": "concept",
+      "namespace_id": "microelectronics.product_v1",
+      "status": "draft"
+    },
+    {
+      "code": "L.ASIC.RF",
+      "definition": "{\n  \"class\": \"Digital-dominant connectivity ASIC\",\n  \"kb_node\": \"L.ASIC.RF\",\n  \"origin\": \"KB_EXTENSION\",\n  \"parent\": \"L.ASIC\",\n  \"profile_rule\": \"RF; verify dominant function\",\n  \"reference\": \"https://www.oecd.org/en/publications/chips-nodes-and-wafers_f68de895-en.html\"\n}",
+      "id": "microelectronics.product_v1.L.ASIC.RF",
+      "kind": "concept",
+      "namespace_id": "microelectronics.product_v1",
+      "status": "draft"
+    },
+    {
+      "code": "L.ASIC.SEC",
+      "definition": "{\n  \"class\": \"Security / cryptographic ASIC\",\n  \"kb_node\": \"L.ASIC.SEC\",\n  \"origin\": \"KB_EXTENSION\",\n  \"parent\": \"L.ASIC\",\n  \"profile_rule\": \"MCU; Security\",\n  \"reference\": \"https://www.oecd.org/en/publications/chips-nodes-and-wafers_f68de895-en.html\"\n}",
+      "id": "microelectronics.product_v1.L.ASIC.SEC",
+      "kind": "concept",
+      "namespace_id": "microelectronics.product_v1",
+      "status": "draft"
+    },
+    {
+      "code": "L.CPU",
+      "definition": "{\n  \"class\": \"CPU\",\n  \"kb_node\": \"L.CPU\",\n  \"origin\": \"OECD_NODE\",\n  \"parent\": \"L\",\n  \"profile_rule\": \"Core classification; local identifier\",\n  \"reference\": \"https://www.oecd.org/en/publications/chips-nodes-and-wafers_f68de895-en.html\"\n}",
+      "id": "microelectronics.product_v1.L.CPU",
+      "kind": "concept",
+      "namespace_id": "microelectronics.product_v1",
+      "status": "draft"
+    },
+    {
+      "code": "L.DSP",
+      "definition": "{\n  \"class\": \"DSP\",\n  \"kb_node\": \"L.DSP\",\n  \"origin\": \"OECD_NODE\",\n  \"parent\": \"L\",\n  \"profile_rule\": \"Core classification; local identifier\",\n  \"reference\": \"https://www.oecd.org/en/publications/chips-nodes-and-wafers_f68de895-en.html\"\n}",
+      "id": "microelectronics.product_v1.L.DSP",
+      "kind": "concept",
+      "namespace_id": "microelectronics.product_v1",
+      "status": "draft"
+    },
+    {
+      "code": "L.GPU",
+      "definition": "{\n  \"class\": \"GPU\",\n  \"kb_node\": \"L.GPU\",\n  \"origin\": \"OECD_NODE\",\n  \"parent\": \"L\",\n  \"profile_rule\": \"Core classification; local identifier\",\n  \"reference\": \"https://www.oecd.org/en/publications/chips-nodes-and-wafers_f68de895-en.html\"\n}",
+      "id": "microelectronics.product_v1.L.GPU",
+      "kind": "concept",
+      "namespace_id": "microelectronics.product_v1",
+      "status": "draft"
+    },
+    {
+      "code": "L.GPU.EDGE",
+      "definition": "{\n  \"class\": \"Embedded GPU\",\n  \"kb_node\": \"L.GPU.EDGE\",\n  \"origin\": \"KB_EXTENSION\",\n  \"parent\": \"L.GPU\",\n  \"profile_rule\": \"SOC; AI\",\n  \"reference\": \"https://www.oecd.org/en/publications/chips-nodes-and-wafers_f68de895-en.html\"\n}",
+      "id": "microelectronics.product_v1.L.GPU.EDGE",
+      "kind": "concept",
+      "namespace_id": "microelectronics.product_v1",
+      "status": "draft"
+    },
+    {
+      "code": "L.IPU",
+      "definition": "{\n  \"class\": \"IPU\",\n  \"kb_node\": \"L.IPU\",\n  \"origin\": \"OECD_NODE\",\n  \"parent\": \"L\",\n  \"profile_rule\": \"Core classification; local identifier\",\n  \"reference\": \"https://www.oecd.org/en/publications/chips-nodes-and-wafers_f68de895-en.html\"\n}",
+      "id": "microelectronics.product_v1.L.IPU",
+      "kind": "concept",
+      "namespace_id": "microelectronics.product_v1",
+      "status": "draft"
+    },
+    {
+      "code": "L.IPU.ANALOG",
+      "definition": "{\n  \"class\": \"Analog / mixed-signal AI accelerator\",\n  \"kb_node\": \"L.IPU.ANALOG\",\n  \"origin\": \"KB_EXTENSION\",\n  \"parent\": \"L.IPU\",\n  \"profile_rule\": \"AI; ANALOG (IP stays IP)\",\n  \"reference\": \"https://www.oecd.org/en/publications/chips-nodes-and-wafers_f68de895-en.html\"\n}",
+      "id": "microelectronics.product_v1.L.IPU.ANALOG",
+      "kind": "concept",
+      "namespace_id": "microelectronics.product_v1",
+      "status": "draft"
+    },
+    {
+      "code": "L.IPU.NEURO",
+      "definition": "{\n  \"class\": \"Neuromorphic accelerator\",\n  \"kb_node\": \"L.IPU.NEURO\",\n  \"origin\": \"KB_EXTENSION\",\n  \"parent\": \"L.IPU\",\n  \"profile_rule\": \"AI\",\n  \"reference\": \"https://www.oecd.org/en/publications/chips-nodes-and-wafers_f68de895-en.html\"\n}",
+      "id": "microelectronics.product_v1.L.IPU.NEURO",
+      "kind": "concept",
+      "namespace_id": "microelectronics.product_v1",
+      "status": "draft"
+    },
+    {
+      "code": "L.IPU.NPU",
+      "definition": "{\n  \"class\": \"Digital inference accelerator / NPU\",\n  \"kb_node\": \"L.IPU.NPU\",\n  \"origin\": \"KB_EXTENSION\",\n  \"parent\": \"L.IPU\",\n  \"profile_rule\": \"AI\",\n  \"reference\": \"https://www.oecd.org/en/publications/chips-nodes-and-wafers_f68de895-en.html\"\n}",
+      "id": "microelectronics.product_v1.L.IPU.NPU",
+      "kind": "concept",
+      "namespace_id": "microelectronics.product_v1",
+      "status": "draft"
+    },
+    {
+      "code": "L.MCU",
+      "definition": "{\n  \"class\": \"MCU\",\n  \"kb_node\": \"L.MCU\",\n  \"origin\": \"OECD_NODE\",\n  \"parent\": \"L\",\n  \"profile_rule\": \"Core classification; local identifier\",\n  \"reference\": \"https://www.oecd.org/en/publications/chips-nodes-and-wafers_f68de895-en.html\"\n}",
+      "id": "microelectronics.product_v1.L.MCU",
+      "kind": "concept",
+      "namespace_id": "microelectronics.product_v1",
+      "status": "draft"
+    },
+    {
+      "code": "L.MCU.AI",
+      "definition": "{\n  \"class\": \"AI MCU with accelerator\",\n  \"kb_node\": \"L.MCU.AI\",\n  \"origin\": \"KB_EXTENSION\",\n  \"parent\": \"L.MCU\",\n  \"profile_rule\": \"MCU; AI\",\n  \"reference\": \"https://www.oecd.org/en/publications/chips-nodes-and-wafers_f68de895-en.html\"\n}",
+      "id": "microelectronics.product_v1.L.MCU.AI",
+      "kind": "concept",
+      "namespace_id": "microelectronics.product_v1",
+      "status": "draft"
+    },
+    {
+      "code": "L.MCU.RF",
+      "definition": "{\n  \"class\": \"Wireless MCU / radio SoC\",\n  \"kb_node\": \"L.MCU.RF\",\n  \"origin\": \"KB_EXTENSION\",\n  \"parent\": \"L.MCU\",\n  \"profile_rule\": \"MCU; RF\",\n  \"reference\": \"https://www.oecd.org/en/publications/chips-nodes-and-wafers_f68de895-en.html\"\n}",
+      "id": "microelectronics.product_v1.L.MCU.RF",
+      "kind": "concept",
+      "namespace_id": "microelectronics.product_v1",
+      "status": "draft"
+    },
+    {
+      "code": "L.MCU.RT",
+      "definition": "{\n  \"class\": \"Real-time / control MCU\",\n  \"kb_node\": \"L.MCU.RT\",\n  \"origin\": \"KB_EXTENSION\",\n  \"parent\": \"L.MCU\",\n  \"profile_rule\": \"MCU\",\n  \"reference\": \"https://www.oecd.org/en/publications/chips-nodes-and-wafers_f68de895-en.html\"\n}",
+      "id": "microelectronics.product_v1.L.MCU.RT",
+      "kind": "concept",
+      "namespace_id": "microelectronics.product_v1",
+      "status": "draft"
+    },
+    {
+      "code": "L.MCU.ULP",
+      "definition": "{\n  \"class\": \"Ultra-low-power MCU\",\n  \"kb_node\": \"L.MCU.ULP\",\n  \"origin\": \"KB_EXTENSION\",\n  \"parent\": \"L.MCU\",\n  \"profile_rule\": \"MCU; ENERGY\",\n  \"reference\": \"https://www.oecd.org/en/publications/chips-nodes-and-wafers_f68de895-en.html\"\n}",
+      "id": "microelectronics.product_v1.L.MCU.ULP",
+      "kind": "concept",
+      "namespace_id": "microelectronics.product_v1",
+      "status": "draft"
+    },
+    {
+      "code": "L.MPU",
+      "definition": "{\n  \"class\": \"MPU\",\n  \"kb_node\": \"L.MPU\",\n  \"origin\": \"OECD_NODE\",\n  \"parent\": \"L\",\n  \"profile_rule\": \"Core classification; local identifier\",\n  \"reference\": \"https://www.oecd.org/en/publications/chips-nodes-and-wafers_f68de895-en.html\"\n}",
+      "id": "microelectronics.product_v1.L.MPU",
+      "kind": "concept",
+      "namespace_id": "microelectronics.product_v1",
+      "status": "draft"
+    },
+    {
+      "code": "L.MPU.EDGE",
+      "definition": "{\n  \"class\": \"Edge application SoC/MPU\",\n  \"kb_node\": \"L.MPU.EDGE\",\n  \"origin\": \"KB_EXTENSION\",\n  \"parent\": \"L.MPU\",\n  \"profile_rule\": \"SOC; AI\",\n  \"reference\": \"https://www.oecd.org/en/publications/chips-nodes-and-wafers_f68de895-en.html\"\n}",
+      "id": "microelectronics.product_v1.L.MPU.EDGE",
+      "kind": "concept",
+      "namespace_id": "microelectronics.product_v1",
+      "status": "draft"
+    },
+    {
+      "code": "L.MPU.VISION",
+      "definition": "{\n  \"class\": \"Vision / multimedia application SoC\",\n  \"kb_node\": \"L.MPU.VISION\",\n  \"origin\": \"KB_EXTENSION\",\n  \"parent\": \"L.MPU\",\n  \"profile_rule\": \"SOC; IMAGING\",\n  \"reference\": \"https://www.oecd.org/en/publications/chips-nodes-and-wafers_f68de895-en.html\"\n}",
+      "id": "microelectronics.product_v1.L.MPU.VISION",
+      "kind": "concept",
+      "namespace_id": "microelectronics.product_v1",
+      "status": "draft"
+    },
+    {
+      "code": "L.PLD",
+      "definition": "{\n  \"class\": \"Programmable Logic Devices\",\n  \"kb_node\": \"L.PLD\",\n  \"origin\": \"OECD_NODE\",\n  \"parent\": \"L\",\n  \"profile_rule\": \"Core classification; local identifier\",\n  \"reference\": \"https://www.oecd.org/en/publications/chips-nodes-and-wafers_f68de895-en.html\"\n}",
+      "id": "microelectronics.product_v1.L.PLD",
+      "kind": "concept",
+      "namespace_id": "microelectronics.product_v1",
+      "status": "draft"
+    },
+    {
+      "code": "L.PLD.FPGA",
+      "definition": "{\n  \"class\": \"FPGA/FPLD\",\n  \"kb_node\": \"L.PLD.FPGA\",\n  \"origin\": \"OECD_NODE\",\n  \"parent\": \"L.PLD\",\n  \"profile_rule\": \"Core classification; local identifier\",\n  \"reference\": \"https://www.oecd.org/en/publications/chips-nodes-and-wafers_f68de895-en.html\"\n}",
+      "id": "microelectronics.product_v1.L.PLD.FPGA",
+      "kind": "concept",
+      "namespace_id": "microelectronics.product_v1",
+      "status": "draft"
+    },
+    {
+      "code": "L.PLD.FPGA.HIGH",
+      "definition": "{\n  \"class\": \"High-throughput FPGA\",\n  \"kb_node\": \"L.PLD.FPGA.HIGH\",\n  \"origin\": \"KB_EXTENSION\",\n  \"parent\": \"L.PLD.FPGA\",\n  \"profile_rule\": \"FPGA\",\n  \"reference\": \"https://www.oecd.org/en/publications/chips-nodes-and-wafers_f68de895-en.html\"\n}",
+      "id": "microelectronics.product_v1.L.PLD.FPGA.HIGH",
+      "kind": "concept",
+      "namespace_id": "microelectronics.product_v1",
+      "status": "draft"
+    },
+    {
+      "code": "L.PLD.FPGA.SMALL",
+      "definition": "{\n  \"class\": \"Low-density FPGA\",\n  \"kb_node\": \"L.PLD.FPGA.SMALL\",\n  \"origin\": \"KB_EXTENSION\",\n  \"parent\": \"L.PLD.FPGA\",\n  \"profile_rule\": \"FPGA\",\n  \"reference\": \"https://www.oecd.org/en/publications/chips-nodes-and-wafers_f68de895-en.html\"\n}",
+      "id": "microelectronics.product_v1.L.PLD.FPGA.SMALL",
+      "kind": "concept",
+      "namespace_id": "microelectronics.product_v1",
+      "status": "draft"
+    },
+    {
+      "code": "L.PLD.FPGA.SOC",
+      "definition": "{\n  \"class\": \"SoC FPGA\",\n  \"kb_node\": \"L.PLD.FPGA.SOC\",\n  \"origin\": \"KB_EXTENSION\",\n  \"parent\": \"L.PLD.FPGA\",\n  \"profile_rule\": \"FPGA; SOC\",\n  \"reference\": \"https://www.oecd.org/en/publications/chips-nodes-and-wafers_f68de895-en.html\"\n}",
+      "id": "microelectronics.product_v1.L.PLD.FPGA.SOC",
+      "kind": "concept",
+      "namespace_id": "microelectronics.product_v1",
+      "status": "draft"
+    },
+    {
+      "code": "M",
+      "definition": "{\n  \"class\": \"IC-Memory\",\n  \"kb_node\": \"M\",\n  \"origin\": \"OECD_NODE\",\n  \"parent\": null,\n  \"profile_rule\": \"Core classification; local identifier\",\n  \"reference\": \"https://www.oecd.org/en/publications/chips-nodes-and-wafers_f68de895-en.html\"\n}",
+      "id": "microelectronics.product_v1.M",
+      "kind": "concept",
+      "namespace_id": "microelectronics.product_v1",
+      "status": "draft"
+    },
+    {
+      "code": "M.NV",
+      "definition": "{\n  \"class\": \"Non-Volatile\",\n  \"kb_node\": \"M.NV\",\n  \"origin\": \"OECD_NODE\",\n  \"parent\": \"M\",\n  \"profile_rule\": \"Core classification; local identifier\",\n  \"reference\": \"https://www.oecd.org/en/publications/chips-nodes-and-wafers_f68de895-en.html\"\n}",
+      "id": "microelectronics.product_v1.M.NV",
+      "kind": "concept",
+      "namespace_id": "microelectronics.product_v1",
+      "status": "draft"
+    },
+    {
+      "code": "M.NV.FLASH",
+      "definition": "{\n  \"class\": \"Flash\",\n  \"kb_node\": \"M.NV.FLASH\",\n  \"origin\": \"OECD_NODE\",\n  \"parent\": \"M.NV\",\n  \"profile_rule\": \"Core classification; local identifier\",\n  \"reference\": \"https://www.oecd.org/en/publications/chips-nodes-and-wafers_f68de895-en.html\"\n}",
+      "id": "microelectronics.product_v1.M.NV.FLASH",
+      "kind": "concept",
+      "namespace_id": "microelectronics.product_v1",
+      "status": "draft"
+    },
+    {
+      "code": "M.NV.FLASH.NAND",
+      "definition": "{\n  \"class\": \"NAND\",\n  \"kb_node\": \"M.NV.FLASH.NAND\",\n  \"origin\": \"OECD_NODE\",\n  \"parent\": \"M.NV.FLASH\",\n  \"profile_rule\": \"Core classification; local identifier\",\n  \"reference\": \"https://www.oecd.org/en/publications/chips-nodes-and-wafers_f68de895-en.html\"\n}",
+      "id": "microelectronics.product_v1.M.NV.FLASH.NAND",
+      "kind": "concept",
+      "namespace_id": "microelectronics.product_v1",
+      "status": "draft"
+    },
+    {
+      "code": "M.NV.FLASH.NOR",
+      "definition": "{\n  \"class\": \"NOR\",\n  \"kb_node\": \"M.NV.FLASH.NOR\",\n  \"origin\": \"OECD_NODE\",\n  \"parent\": \"M.NV.FLASH\",\n  \"profile_rule\": \"Core classification; local identifier\",\n  \"reference\": \"https://www.oecd.org/en/publications/chips-nodes-and-wafers_f68de895-en.html\"\n}",
+      "id": "microelectronics.product_v1.M.NV.FLASH.NOR",
+      "kind": "concept",
+      "namespace_id": "microelectronics.product_v1",
+      "status": "draft"
+    },
+    {
+      "code": "M.NV.NVRAM",
+      "definition": "{\n  \"class\": \"NVRAM\",\n  \"kb_node\": \"M.NV.NVRAM\",\n  \"origin\": \"OECD_NODE\",\n  \"parent\": \"M.NV\",\n  \"profile_rule\": \"Core classification; local identifier\",\n  \"reference\": \"https://www.oecd.org/en/publications/chips-nodes-and-wafers_f68de895-en.html\"\n}",
+      "id": "microelectronics.product_v1.M.NV.NVRAM",
+      "kind": "concept",
+      "namespace_id": "microelectronics.product_v1",
+      "status": "draft"
+    },
+    {
+      "code": "M.NV.NVRAM.MRAM",
+      "definition": "{\n  \"class\": \"MRAM\",\n  \"kb_node\": \"M.NV.NVRAM.MRAM\",\n  \"origin\": \"KB_EXTENSION\",\n  \"parent\": \"M.NV.NVRAM\",\n  \"profile_rule\": \"MEMORY\",\n  \"reference\": \"https://www.oecd.org/en/publications/chips-nodes-and-wafers_f68de895-en.html\"\n}",
+      "id": "microelectronics.product_v1.M.NV.NVRAM.MRAM",
+      "kind": "concept",
+      "namespace_id": "microelectronics.product_v1",
+      "status": "draft"
+    },
+    {
+      "code": "M.NV.NVRAM.RRAM",
+      "definition": "{\n  \"class\": \"ReRAM / PCM / FeRAM (subtype tag)\",\n  \"kb_node\": \"M.NV.NVRAM.RRAM\",\n  \"origin\": \"KB_EXTENSION\",\n  \"parent\": \"M.NV.NVRAM\",\n  \"profile_rule\": \"MEMORY\",\n  \"reference\": \"https://www.oecd.org/en/publications/chips-nodes-and-wafers_f68de895-en.html\"\n}",
+      "id": "microelectronics.product_v1.M.NV.NVRAM.RRAM",
+      "kind": "concept",
+      "namespace_id": "microelectronics.product_v1",
+      "status": "draft"
+    },
+    {
+      "code": "M.NV.ROM",
+      "definition": "{\n  \"class\": \"ROM\",\n  \"kb_node\": \"M.NV.ROM\",\n  \"origin\": \"OECD_NODE\",\n  \"parent\": \"M.NV\",\n  \"profile_rule\": \"Core classification; local identifier\",\n  \"reference\": \"https://www.oecd.org/en/publications/chips-nodes-and-wafers_f68de895-en.html\"\n}",
+      "id": "microelectronics.product_v1.M.NV.ROM",
+      "kind": "concept",
+      "namespace_id": "microelectronics.product_v1",
+      "status": "draft"
+    },
+    {
+      "code": "M.V",
+      "definition": "{\n  \"class\": \"Volatile\",\n  \"kb_node\": \"M.V\",\n  \"origin\": \"OECD_NODE\",\n  \"parent\": \"M\",\n  \"profile_rule\": \"Core classification; local identifier\",\n  \"reference\": \"https://www.oecd.org/en/publications/chips-nodes-and-wafers_f68de895-en.html\"\n}",
+      "id": "microelectronics.product_v1.M.V",
+      "kind": "concept",
+      "namespace_id": "microelectronics.product_v1",
+      "status": "draft"
+    },
+    {
+      "code": "M.V.DRAM",
+      "definition": "{\n  \"class\": \"DRAM\",\n  \"kb_node\": \"M.V.DRAM\",\n  \"origin\": \"OECD_NODE\",\n  \"parent\": \"M.V\",\n  \"profile_rule\": \"Core classification; local identifier\",\n  \"reference\": \"https://www.oecd.org/en/publications/chips-nodes-and-wafers_f68de895-en.html\"\n}",
+      "id": "microelectronics.product_v1.M.V.DRAM",
+      "kind": "concept",
+      "namespace_id": "microelectronics.product_v1",
+      "status": "draft"
+    },
+    {
+      "code": "M.V.SRAM",
+      "definition": "{\n  \"class\": \"SRAM\",\n  \"kb_node\": \"M.V.SRAM\",\n  \"origin\": \"OECD_NODE\",\n  \"parent\": \"M.V\",\n  \"profile_rule\": \"Core classification; local identifier\",\n  \"reference\": \"https://www.oecd.org/en/publications/chips-nodes-and-wafers_f68de895-en.html\"\n}",
+      "id": "microelectronics.product_v1.M.V.SRAM",
+      "kind": "concept",
+      "namespace_id": "microelectronics.product_v1",
+      "status": "draft"
+    },
+    {
+      "code": "O",
+      "definition": "{\n  \"class\": \"Others\",\n  \"kb_node\": \"O\",\n  \"origin\": \"OECD_NODE\",\n  \"parent\": null,\n  \"profile_rule\": \"Core classification; local identifier\",\n  \"reference\": \"https://www.oecd.org/en/publications/chips-nodes-and-wafers_f68de895-en.html\"\n}",
+      "id": "microelectronics.product_v1.O",
+      "kind": "concept",
+      "namespace_id": "microelectronics.product_v1",
+      "status": "draft"
+    },
+    {
+      "code": "O.DISC",
+      "definition": "{\n  \"class\": \"Discrete\",\n  \"kb_node\": \"O.DISC\",\n  \"origin\": \"OECD_NODE\",\n  \"parent\": \"O\",\n  \"profile_rule\": \"Core classification; local identifier\",\n  \"reference\": \"https://www.oecd.org/en/publications/chips-nodes-and-wafers_f68de895-en.html\"\n}",
+      "id": "microelectronics.product_v1.O.DISC",
+      "kind": "concept",
+      "namespace_id": "microelectronics.product_v1",
+      "status": "draft"
+    },
+    {
+      "code": "O.DISC.DIO",
+      "definition": "{\n  \"class\": \"Diode / rectifier / protection\",\n  \"kb_node\": \"O.DISC.DIO\",\n  \"origin\": \"KB_EXTENSION\",\n  \"parent\": \"O.DISC\",\n  \"profile_rule\": \"POWER\",\n  \"reference\": \"https://www.oecd.org/en/publications/chips-nodes-and-wafers_f68de895-en.html\"\n}",
+      "id": "microelectronics.product_v1.O.DISC.DIO",
+      "kind": "concept",
+      "namespace_id": "microelectronics.product_v1",
+      "status": "draft"
+    },
+    {
+      "code": "O.DISC.SW",
+      "definition": "{\n  \"class\": \"Power MOSFET / IGBT / GaN / SiC switch\",\n  \"kb_node\": \"O.DISC.SW\",\n  \"origin\": \"KB_EXTENSION\",\n  \"parent\": \"O.DISC\",\n  \"profile_rule\": \"POWER\",\n  \"reference\": \"https://www.oecd.org/en/publications/chips-nodes-and-wafers_f68de895-en.html\"\n}",
+      "id": "microelectronics.product_v1.O.DISC.SW",
+      "kind": "concept",
+      "namespace_id": "microelectronics.product_v1",
+      "status": "draft"
+    },
+    {
+      "code": "O.OPTO",
+      "definition": "{\n  \"class\": \"Optoelectronics\",\n  \"kb_node\": \"O.OPTO\",\n  \"origin\": \"OECD_NODE\",\n  \"parent\": \"O\",\n  \"profile_rule\": \"Core classification; local identifier\",\n  \"reference\": \"https://www.oecd.org/en/publications/chips-nodes-and-wafers_f68de895-en.html\"\n}",
+      "id": "microelectronics.product_v1.O.OPTO",
+      "kind": "concept",
+      "namespace_id": "microelectronics.product_v1",
+      "status": "draft"
+    },
+    {
+      "code": "O.OPTO.CIS",
+      "definition": "{\n  \"class\": \"CMOS image sensor / focal plane\",\n  \"kb_node\": \"O.OPTO.CIS\",\n  \"origin\": \"KB_EXTENSION\",\n  \"parent\": \"O.OPTO\",\n  \"profile_rule\": \"IMAGING\",\n  \"reference\": \"https://www.oecd.org/en/publications/chips-nodes-and-wafers_f68de895-en.html\"\n}",
+      "id": "microelectronics.product_v1.O.OPTO.CIS",
+      "kind": "concept",
+      "namespace_id": "microelectronics.product_v1",
+      "status": "draft"
+    },
+    {
+      "code": "O.OPTO.EMIT",
+      "definition": "{\n  \"class\": \"LED, VCSEL, laser\",\n  \"kb_node\": \"O.OPTO.EMIT\",\n  \"origin\": \"KB_EXTENSION\",\n  \"parent\": \"O.OPTO\",\n  \"profile_rule\": \"OPTO\",\n  \"reference\": \"https://www.oecd.org/en/publications/chips-nodes-and-wafers_f68de895-en.html\"\n}",
+      "id": "microelectronics.product_v1.O.OPTO.EMIT",
+      "kind": "concept",
+      "namespace_id": "microelectronics.product_v1",
+      "status": "draft"
+    },
+    {
+      "code": "O.OPTO.PHOT",
+      "definition": "{\n  \"class\": \"Photodiode, SPAD, optical detector\",\n  \"kb_node\": \"O.OPTO.PHOT\",\n  \"origin\": \"KB_EXTENSION\",\n  \"parent\": \"O.OPTO\",\n  \"profile_rule\": \"IMAGING\",\n  \"reference\": \"https://www.oecd.org/en/publications/chips-nodes-and-wafers_f68de895-en.html\"\n}",
+      "id": "microelectronics.product_v1.O.OPTO.PHOT",
+      "kind": "concept",
+      "namespace_id": "microelectronics.product_v1",
+      "status": "draft"
+    },
+    {
+      "code": "O.OPTO.PIC",
+      "definition": "{\n  \"class\": \"Photonic integrated circuit\",\n  \"kb_node\": \"O.OPTO.PIC\",\n  \"origin\": \"KB_EXTENSION\",\n  \"parent\": \"O.OPTO\",\n  \"profile_rule\": \"OPTO\",\n  \"reference\": \"https://www.oecd.org/en/publications/chips-nodes-and-wafers_f68de895-en.html\"\n}",
+      "id": "microelectronics.product_v1.O.OPTO.PIC",
+      "kind": "concept",
+      "namespace_id": "microelectronics.product_v1",
+      "status": "draft"
+    },
+    {
+      "code": "O.OTHER",
+      "definition": "{\n  \"class\": \"Others\",\n  \"kb_node\": \"O.OTHER\",\n  \"origin\": \"OECD_NODE\",\n  \"parent\": \"O\",\n  \"profile_rule\": \"Core classification; local identifier\",\n  \"reference\": \"https://www.oecd.org/en/publications/chips-nodes-and-wafers_f68de895-en.html\"\n}",
+      "id": "microelectronics.product_v1.O.OTHER",
+      "kind": "concept",
+      "namespace_id": "microelectronics.product_v1",
+      "status": "draft"
+    },
+    {
+      "code": "O.OTHER.Q",
+      "definition": "{\n  \"class\": \"Emerging semiconductor devices\",\n  \"kb_node\": \"O.OTHER.Q\",\n  \"origin\": \"KB_EXTENSION\",\n  \"parent\": \"O.OTHER\",\n  \"profile_rule\": \"Research candidate\",\n  \"reference\": \"https://www.oecd.org/en/publications/chips-nodes-and-wafers_f68de895-en.html\"\n}",
+      "id": "microelectronics.product_v1.O.OTHER.Q",
+      "kind": "concept",
+      "namespace_id": "microelectronics.product_v1",
+      "status": "draft"
+    },
+    {
+      "code": "O.SENS",
+      "definition": "{\n  \"class\": \"Sensors and actuators\",\n  \"kb_node\": \"O.SENS\",\n  \"origin\": \"OECD_NODE\",\n  \"parent\": \"O\",\n  \"profile_rule\": \"Core classification; local identifier\",\n  \"reference\": \"https://www.oecd.org/en/publications/chips-nodes-and-wafers_f68de895-en.html\"\n}",
+      "id": "microelectronics.product_v1.O.SENS",
+      "kind": "concept",
+      "namespace_id": "microelectronics.product_v1",
+      "status": "draft"
+    },
+    {
+      "code": "O.SENS.ACO",
+      "definition": "{\n  \"class\": \"MEMS microphone / acoustic / ultrasound\",\n  \"kb_node\": \"O.SENS.ACO\",\n  \"origin\": \"KB_EXTENSION\",\n  \"parent\": \"O.SENS\",\n  \"profile_rule\": \"ACOUSTIC\",\n  \"reference\": \"https://www.oecd.org/en/publications/chips-nodes-and-wafers_f68de895-en.html\"\n}",
+      "id": "microelectronics.product_v1.O.SENS.ACO",
+      "kind": "concept",
+      "namespace_id": "microelectronics.product_v1",
+      "status": "draft"
+    },
+    {
+      "code": "O.SENS.ACT",
+      "definition": "{\n  \"class\": \"MEMS actuator / transducer\",\n  \"kb_node\": \"O.SENS.ACT\",\n  \"origin\": \"KB_EXTENSION\",\n  \"parent\": \"O.SENS\",\n  \"profile_rule\": \"SENSOR\",\n  \"reference\": \"https://www.oecd.org/en/publications/chips-nodes-and-wafers_f68de895-en.html\"\n}",
+      "id": "microelectronics.product_v1.O.SENS.ACT",
+      "kind": "concept",
+      "namespace_id": "microelectronics.product_v1",
+      "status": "draft"
+    },
+    {
+      "code": "O.SENS.ENV",
+      "definition": "{\n  \"class\": \"Temperature / pressure / humidity / gas / chemical\",\n  \"kb_node\": \"O.SENS.ENV\",\n  \"origin\": \"KB_EXTENSION\",\n  \"parent\": \"O.SENS\",\n  \"profile_rule\": \"SENSOR\",\n  \"reference\": \"https://www.oecd.org/en/publications/chips-nodes-and-wafers_f68de895-en.html\"\n}",
+      "id": "microelectronics.product_v1.O.SENS.ENV",
+      "kind": "concept",
+      "namespace_id": "microelectronics.product_v1",
+      "status": "draft"
+    },
+    {
+      "code": "O.SENS.IMU",
+      "definition": "{\n  \"class\": \"Accelerometer / gyro / IMU\",\n  \"kb_node\": \"O.SENS.IMU\",\n  \"origin\": \"KB_EXTENSION\",\n  \"parent\": \"O.SENS\",\n  \"profile_rule\": \"IMU\",\n  \"reference\": \"https://www.oecd.org/en/publications/chips-nodes-and-wafers_f68de895-en.html\"\n}",
+      "id": "microelectronics.product_v1.O.SENS.IMU",
+      "kind": "concept",
+      "namespace_id": "microelectronics.product_v1",
+      "status": "draft"
+    },
+    {
+      "code": "O.SENS.MAG",
+      "definition": "{\n  \"class\": \"Magnetic / Hall / current sensor\",\n  \"kb_node\": \"O.SENS.MAG\",\n  \"origin\": \"KB_EXTENSION\",\n  \"parent\": \"O.SENS\",\n  \"profile_rule\": \"SENSOR\",\n  \"reference\": \"https://www.oecd.org/en/publications/chips-nodes-and-wafers_f68de895-en.html\"\n}",
+      "id": "microelectronics.product_v1.O.SENS.MAG",
+      "kind": "concept",
+      "namespace_id": "microelectronics.product_v1",
+      "status": "draft"
+    },
+    {
+      "code": "O.SENS.RAD",
+      "definition": "{\n  \"class\": \"Integrated radar sensing device\",\n  \"kb_node\": \"O.SENS.RAD\",\n  \"origin\": \"KB_EXTENSION\",\n  \"parent\": \"O.SENS\",\n  \"profile_rule\": \"RADAR; classify radio chip by dominant function\",\n  \"reference\": \"https://www.oecd.org/en/publications/chips-nodes-and-wafers_f68de895-en.html\"\n}",
+      "id": "microelectronics.product_v1.O.SENS.RAD",
+      "kind": "concept",
+      "namespace_id": "microelectronics.product_v1",
+      "status": "draft"
+    },
+    {
+      "code": "O.SENS.RANGE",
+      "definition": "{\n  \"class\": \"ToF / ranging sensor module\",\n  \"kb_node\": \"O.SENS.RANGE\",\n  \"origin\": \"KB_EXTENSION\",\n  \"parent\": \"O.SENS\",\n  \"profile_rule\": \"RANGE; optoelectronic dies may be O.OPTO\",\n  \"reference\": \"https://www.oecd.org/en/publications/chips-nodes-and-wafers_f68de895-en.html\"\n}",
+      "id": "microelectronics.product_v1.O.SENS.RANGE",
+      "kind": "concept",
+      "namespace_id": "microelectronics.product_v1",
+      "status": "draft"
+    },
+    {
+      "code": "O.SENS.SMART",
+      "definition": "{\n  \"class\": \"Smart sensor / event sensor with embedded compute\",\n  \"kb_node\": \"O.SENS.SMART\",\n  \"origin\": \"KB_EXTENSION\",\n  \"parent\": \"O.SENS\",\n  \"profile_rule\": \"SENSOR; choose modality first where known\",\n  \"reference\": \"https://www.oecd.org/en/publications/chips-nodes-and-wafers_f68de895-en.html\"\n}",
+      "id": "microelectronics.product_v1.O.SENS.SMART",
+      "kind": "concept",
+      "namespace_id": "microelectronics.product_v1",
+      "status": "draft"
+    },
+    {
+      "code": "X",
+      "definition": "{\n  \"class\": \"Non-chip products & enabling assets\",\n  \"kb_node\": \"X\",\n  \"origin\": \"KB_NON_CHIP\",\n  \"parent\": null,\n  \"profile_rule\": \"Separate from OECD chip totals\",\n  \"reference\": \"Local KB extension\"\n}",
+      "id": "microelectronics.product_v1.X",
+      "kind": "concept",
+      "namespace_id": "microelectronics.product_v1",
+      "status": "draft"
+    },
+    {
+      "code": "X.DEV",
+      "definition": "{\n  \"class\": \"Development kit\",\n  \"kb_node\": \"X.DEV\",\n  \"origin\": \"KB_NON_CHIP\",\n  \"parent\": \"X\",\n  \"profile_rule\": \"DEV\",\n  \"reference\": \"Local KB extension\"\n}",
+      "id": "microelectronics.product_v1.X.DEV",
+      "kind": "concept",
+      "namespace_id": "microelectronics.product_v1",
+      "status": "draft"
+    },
+    {
+      "code": "X.FAB",
+      "definition": "{\n  \"class\": \"Process platforms and equipment\",\n  \"kb_node\": \"X.FAB\",\n  \"origin\": \"KB_NON_CHIP\",\n  \"parent\": \"X\",\n  \"profile_rule\": \"PROC/FAC; not chip\",\n  \"reference\": \"Local KB extension\"\n}",
+      "id": "microelectronics.product_v1.X.FAB",
+      "kind": "concept",
+      "namespace_id": "microelectronics.product_v1",
+      "status": "draft"
+    },
+    {
+      "code": "X.IP",
+      "definition": "{\n  \"class\": \"Licensable semiconductor IP\",\n  \"kb_node\": \"X.IP\",\n  \"origin\": \"KB_NON_CHIP\",\n  \"parent\": \"X\",\n  \"profile_rule\": \"IP\",\n  \"reference\": \"Local KB extension\"\n}",
+      "id": "microelectronics.product_v1.X.IP",
+      "kind": "concept",
+      "namespace_id": "microelectronics.product_v1",
+      "status": "draft"
+    },
+    {
+      "code": "X.MAT",
+      "definition": "{\n  \"class\": \"Wafers / materials / packaging\",\n  \"kb_node\": \"X.MAT\",\n  \"origin\": \"KB_NON_CHIP\",\n  \"parent\": \"X\",\n  \"profile_rule\": \"Material product\",\n  \"reference\": \"Local KB extension\"\n}",
+      "id": "microelectronics.product_v1.X.MAT",
+      "kind": "concept",
+      "namespace_id": "microelectronics.product_v1",
+      "status": "draft"
+    },
+    {
+      "code": "X.MOD",
+      "definition": "{\n  \"class\": \"Module / SiP / board\",\n  \"kb_node\": \"X.MOD\",\n  \"origin\": \"KB_NON_CHIP\",\n  \"parent\": \"X\",\n  \"profile_rule\": \"Product form; link contained dies/parts\",\n  \"reference\": \"Local KB extension\"\n}",
+      "id": "microelectronics.product_v1.X.MOD",
+      "kind": "concept",
+      "namespace_id": "microelectronics.product_v1",
+      "status": "draft"
+    },
+    {
+      "code": "X.SW",
+      "definition": "{\n  \"class\": \"EDA / compiler / SDK / runtime\",\n  \"kb_node\": \"X.SW\",\n  \"origin\": \"KB_NON_CHIP\",\n  \"parent\": \"X\",\n  \"profile_rule\": \"SW\",\n  \"reference\": \"Local KB extension\"\n}",
+      "id": "microelectronics.product_v1.X.SW",
+      "kind": "concept",
+      "namespace_id": "microelectronics.product_v1",
+      "status": "draft"
+    }
+  ]
+}

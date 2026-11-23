@@ -1,0 +1,5 @@
+version: 1
+identity:
+  source_id: space:row-4
+  labels: {en: Fixture source}
+  owner: fixture-maintainer

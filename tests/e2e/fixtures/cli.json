@@ -18,7 +18,7 @@
       "expected": {
         "exit_code": 0,
         "stderr": "",
-        "stdout": "usage: kn [-h] [--locale LOCALE] [--json] {info,contract,db,space} ...\n\noptions:\n  -h, --help            show this help message and exit\n  --locale LOCALE       interface language (en or uk)\n  --json                emit machine-readable JSON with stable keys\n\ncommands:\n  {info,contract,db,space}\n    info                show the installed project identity\n    contract            validate or compile open data contracts\n    db                  apply or verify governed schema revisions\n    space               space-domain datasets\n"
+        "stdout": "usage: kn [-h] [--locale LOCALE] [--json]\n          {info,contract,db,source,space,vocabulary} ...\n\noptions:\n  -h, --help            show this help message and exit\n  --locale LOCALE       interface language (en or uk)\n  --json                emit machine-readable JSON with stable keys\n\ncommands:\n  {info,contract,db,source,space,vocabulary}\n    info                show the installed project identity\n    contract            validate or compile open data contracts\n    db                  apply or verify governed schema revisions\n    source              list and validate sources\n    space               space-domain datasets\n    vocabulary          review and export controlled vocabularies\n"
       },
       "id": "root-help"
     },
@@ -45,6 +45,46 @@
         "stdout": "usage: kn db [-h] {upgrade,verify,rebuild}\n\narguments:\n  {upgrade,verify,rebuild}\n\noptions:\n  -h, --help            show this help message and exit\n"
       },
       "id": "database-help"
+    },
+    {
+      "arguments": [
+        "source",
+        "--help"
+      ],
+      "expected": {
+        "exit_code": 0,
+        "stdout": "usage: kn source [-h] {list,validate} ...\n\noptions:\n  -h, --help       show this help message and exit\n\ncommands:\n  {list,validate}\n    list           list sources and their catalogue states\n    validate       validate a crawler configuration and its enablement\n                   evidence\n",
+        "stderr": ""
+      },
+      "id": "source-help"
+    },
+    {
+      "id": "source-validate",
+      "arguments": [
+        "--json",
+        "source",
+        "validate",
+        "tests/sources/fixtures/config/http.yaml"
+      ],
+      "expected": {
+        "exit_code": 0,
+        "stdout": "",
+        "stderr": "{\"source_id\": \"space:row-4\", \"state\": \"candidate\", \"status\": \"valid\"}\n"
+      }
+    },
+    {
+      "id": "source-validate-invalid",
+      "arguments": [
+        "--json",
+        "source",
+        "validate",
+        "tests/sources/fixtures/config/invalid-labels.yaml"
+      ],
+      "expected": {
+        "exit_code": 1,
+        "stdout": "",
+        "stderr": "{\"error\": {\"code\": \"E_SOURCE_CONFIG\", \"path\": \"$/identity/labels/uk\", \"rule\": \"required\", \"hint\": \"include the required property\"}}\n"
+      }
     },
     {
       "arguments": [
@@ -78,7 +118,7 @@
       ],
       "expected": {
         "exit_code": 0,
-        "stderr": "Contract kn.system.governance 1.0.0 d11eb70b855741d6901677151d2b8bb048cf41b0aa074feae24f0db370c51d06\nContract kn.space.satcom 1.0.0 498e717814a2eb29e44756f256fd3dab4277b069812f4b54e2bb42a496d2ec10\nContract kn.core.semantic 1.0.0 24931173efca9a0e47d10c75d0e00fb325bfc608207a32e7db8c17126f5fb58d\n",
+        "stderr": "Contract kn.system.governance 1.0.0 d11eb70b855741d6901677151d2b8bb048cf41b0aa074feae24f0db370c51d06\nContract kn.system.source_catalogue 1.0.0 0ce10ede802cc012d5d122c7d94c03769f20baef4860d7eb1163bbc2b0a3df06\nContract kn.space.satcom 1.0.0 498e717814a2eb29e44756f256fd3dab4277b069812f4b54e2bb42a496d2ec10\nContract kn.core.semantic 1.0.0 5dfdbc18f4452ba7dca18fc5e11738d7b27a75593b38664e3b6c920aab83a760\nContract kn.core.human_verification 1.0.0 a89d36f9d1f5642c00c1ff5aaee9ce868b28ee51141c6dbc1eb6c226461686f5\nContract kn.core.identity 1.0.0 d6b3174421aaa3cfd1b71d46f928797e55620d397b80ece4a93225949a1113c6\n",
         "stdout": ""
       },
       "id": "contract-lint"
@@ -91,7 +131,7 @@
       ],
       "expected": {
         "exit_code": 0,
-        "stderr": "Contract kn.system.governance 1.0.0 d11eb70b855741d6901677151d2b8bb048cf41b0aa074feae24f0db370c51d06\nContract kn.space.satcom 1.0.0 498e717814a2eb29e44756f256fd3dab4277b069812f4b54e2bb42a496d2ec10\nContract kn.core.semantic 1.0.0 24931173efca9a0e47d10c75d0e00fb325bfc608207a32e7db8c17126f5fb58d\n",
+        "stderr": "Contract kn.system.governance 1.0.0 d11eb70b855741d6901677151d2b8bb048cf41b0aa074feae24f0db370c51d06\nContract kn.system.source_catalogue 1.0.0 0ce10ede802cc012d5d122c7d94c03769f20baef4860d7eb1163bbc2b0a3df06\nContract kn.space.satcom 1.0.0 498e717814a2eb29e44756f256fd3dab4277b069812f4b54e2bb42a496d2ec10\nContract kn.core.semantic 1.0.0 5dfdbc18f4452ba7dca18fc5e11738d7b27a75593b38664e3b6c920aab83a760\nContract kn.core.human_verification 1.0.0 a89d36f9d1f5642c00c1ff5aaee9ce868b28ee51141c6dbc1eb6c226461686f5\nContract kn.core.identity 1.0.0 d6b3174421aaa3cfd1b71d46f928797e55620d397b80ece4a93225949a1113c6\n",
         "stdout": ""
       },
       "id": "contract-check"
@@ -116,7 +156,7 @@
       "expected": {
         "exit_code": 2,
         "stderr": "E_ARGUMENTS: invalid arguments for kn; use --help.\n",
-        "stdout": "usage: kn [-h] [--locale LOCALE] [--json] {info,contract,db,space} ...\n"
+        "stdout": "usage: kn [-h] [--locale LOCALE] [--json]\n          {info,contract,db,source,space,vocabulary} ...\n"
       },
       "id": "invalid-command"
     },
@@ -125,7 +165,7 @@
       "expected": {
         "exit_code": 2,
         "stderr": "E_ARGUMENTS: invalid arguments for kn; use --help.\n",
-        "stdout": "usage: kn [-h] [--locale LOCALE] [--json] {info,contract,db,space} ...\n"
+        "stdout": "usage: kn [-h] [--locale LOCALE] [--json]\n          {info,contract,db,source,space,vocabulary} ...\n"
       },
       "id": "missing-command"
     },
@@ -276,7 +316,7 @@
       "expected": {
         "exit_code": 0,
         "stderr": "",
-        "stdout": "\u0432\u0438\u043a\u043e\u0440\u0438\u0441\u0442\u0430\u043d\u043d\u044f: kn [-h] [--locale LOCALE] [--json] {info,contract,db,space} ...\n\n\u043f\u0430\u0440\u0430\u043c\u0435\u0442\u0440\u0438:\n  -h, --help            \u043f\u043e\u043a\u0430\u0437\u0430\u0442\u0438 \u0446\u044e \u0434\u043e\u0432\u0456\u0434\u043a\u0443 \u0439 \u0432\u0438\u0439\u0442\u0438\n  --locale LOCALE       \u043c\u043e\u0432\u0430 \u0456\u043d\u0442\u0435\u0440\u0444\u0435\u0439\u0441\u0443 (en \u0430\u0431\u043e uk)\n  --json                \u0432\u0438\u0432\u0435\u0441\u0442\u0438 JSON \u0437\u0456 \u0441\u0442\u0430\u043b\u0438\u043c\u0438 \u043a\u043b\u044e\u0447\u0430\u043c\u0438\n\n\u043a\u043e\u043c\u0430\u043d\u0434\u0438:\n  {info,contract,db,space}\n    info                \u043f\u043e\u043a\u0430\u0437\u0430\u0442\u0438 \u0434\u0430\u043d\u0456 \u0432\u0441\u0442\u0430\u043d\u043e\u0432\u043b\u0435\u043d\u043e\u0433\u043e \u043f\u0440\u043e\u0454\u043a\u0442\u0443\n    contract            \u043f\u0435\u0440\u0435\u0432\u0456\u0440\u0438\u0442\u0438 \u0430\u0431\u043e \u0441\u043a\u043e\u043c\u043f\u0456\u043b\u044e\u0432\u0430\u0442\u0438 \u043a\u043e\u043d\u0442\u0440\u0430\u043a\u0442\u0438 \u0434\u0430\u043d\u0438\u0445\n    db                  \u0437\u0430\u0441\u0442\u043e\u0441\u0443\u0432\u0430\u0442\u0438 \u0430\u0431\u043e \u043f\u0435\u0440\u0435\u0432\u0456\u0440\u0438\u0442\u0438 \u0440\u0435\u0432\u0456\u0437\u0456\u0457 \u0441\u0445\u0435\u043c\n    space               \u043d\u0430\u0431\u043e\u0440\u0438 \u0434\u0430\u043d\u0438\u0445 \u043a\u043e\u0441\u043c\u0456\u0447\u043d\u043e\u0457 \u0433\u0430\u043b\u0443\u0437\u0456\n"
+        "stdout": "\u0432\u0438\u043a\u043e\u0440\u0438\u0441\u0442\u0430\u043d\u043d\u044f: kn [-h] [--locale LOCALE] [--json]\n                 {info,contract,db,source,space,vocabulary} ...\n\n\u043f\u0430\u0440\u0430\u043c\u0435\u0442\u0440\u0438:\n  -h, --help            \u043f\u043e\u043a\u0430\u0437\u0430\u0442\u0438 \u0446\u044e \u0434\u043e\u0432\u0456\u0434\u043a\u0443 \u0439 \u0432\u0438\u0439\u0442\u0438\n  --locale LOCALE       \u043c\u043e\u0432\u0430 \u0456\u043d\u0442\u0435\u0440\u0444\u0435\u0439\u0441\u0443 (en \u0430\u0431\u043e uk)\n  --json                \u0432\u0438\u0432\u0435\u0441\u0442\u0438 JSON \u0437\u0456 \u0441\u0442\u0430\u043b\u0438\u043c\u0438 \u043a\u043b\u044e\u0447\u0430\u043c\u0438\n\n\u043a\u043e\u043c\u0430\u043d\u0434\u0438:\n  {info,contract,db,source,space,vocabulary}\n    info                \u043f\u043e\u043a\u0430\u0437\u0430\u0442\u0438 \u0434\u0430\u043d\u0456 \u0432\u0441\u0442\u0430\u043d\u043e\u0432\u043b\u0435\u043d\u043e\u0433\u043e \u043f\u0440\u043e\u0454\u043a\u0442\u0443\n    contract            \u043f\u0435\u0440\u0435\u0432\u0456\u0440\u0438\u0442\u0438 \u0430\u0431\u043e \u0441\u043a\u043e\u043c\u043f\u0456\u043b\u044e\u0432\u0430\u0442\u0438 \u043a\u043e\u043d\u0442\u0440\u0430\u043a\u0442\u0438 \u0434\u0430\u043d\u0438\u0445\n    db                  \u0437\u0430\u0441\u0442\u043e\u0441\u0443\u0432\u0430\u0442\u0438 \u0430\u0431\u043e \u043f\u0435\u0440\u0435\u0432\u0456\u0440\u0438\u0442\u0438 \u0440\u0435\u0432\u0456\u0437\u0456\u0457 \u0441\u0445\u0435\u043c\n    source              \u043f\u0435\u0440\u0435\u0433\u043b\u044f\u0434\u0430\u0442\u0438 \u0439 \u043f\u0435\u0440\u0435\u0432\u0456\u0440\u044f\u0442\u0438 \u0434\u0436\u0435\u0440\u0435\u043b\u0430\n    space               \u043d\u0430\u0431\u043e\u0440\u0438 \u0434\u0430\u043d\u0438\u0445 \u043a\u043e\u0441\u043c\u0456\u0447\u043d\u043e\u0457 \u0433\u0430\u043b\u0443\u0437\u0456\n    vocabulary          \u043f\u0435\u0440\u0435\u0433\u043b\u044f\u043d\u0443\u0442\u0438 \u0439 \u0435\u043a\u0441\u043f\u043e\u0440\u0442\u0443\u0432\u0430\u0442\u0438 \u0441\u043b\u043e\u0432\u043d\u0438\u043a\u0438\n"
       },
       "id": "root-help"
     },
@@ -303,6 +343,46 @@
         "stdout": "\u0432\u0438\u043a\u043e\u0440\u0438\u0441\u0442\u0430\u043d\u043d\u044f: kn db [-h] {upgrade,verify,rebuild}\n\n\u0430\u0440\u0433\u0443\u043c\u0435\u043d\u0442\u0438:\n  {upgrade,verify,rebuild}\n\n\u043f\u0430\u0440\u0430\u043c\u0435\u0442\u0440\u0438:\n  -h, --help            \u043f\u043e\u043a\u0430\u0437\u0430\u0442\u0438 \u0446\u044e \u0434\u043e\u0432\u0456\u0434\u043a\u0443 \u0439 \u0432\u0438\u0439\u0442\u0438\n"
       },
       "id": "database-help"
+    },
+    {
+      "arguments": [
+        "source",
+        "--help"
+      ],
+      "expected": {
+        "exit_code": 0,
+        "stdout": "\u0432\u0438\u043a\u043e\u0440\u0438\u0441\u0442\u0430\u043d\u043d\u044f: kn source [-h] {list,validate} ...\n\n\u043f\u0430\u0440\u0430\u043c\u0435\u0442\u0440\u0438:\n  -h, --help       \u043f\u043e\u043a\u0430\u0437\u0430\u0442\u0438 \u0446\u044e \u0434\u043e\u0432\u0456\u0434\u043a\u0443 \u0439 \u0432\u0438\u0439\u0442\u0438\n\n\u043a\u043e\u043c\u0430\u043d\u0434\u0438:\n  {list,validate}\n    list           \u043f\u043e\u043a\u0430\u0437\u0430\u0442\u0438 \u0434\u0436\u0435\u0440\u0435\u043b\u0430 \u0442\u0430 \u0457\u0445\u043d\u0456 \u0441\u0442\u0430\u043d\u0438 \u0432 \u043a\u0430\u0442\u0430\u043b\u043e\u0437\u0456\n    validate       \u043f\u0435\u0440\u0435\u0432\u0456\u0440\u0438\u0442\u0438 \u043a\u043e\u043d\u0444\u0456\u0433\u0443\u0440\u0430\u0446\u0456\u044e \u0437\u0431\u0438\u0440\u0430\u043d\u043d\u044f \u0442\u0430 \u0434\u043e\u043a\u0430\u0437\u0438 \u0434\u043b\u044f \u0457\u0457\n                   \u0432\u0432\u0456\u043c\u043a\u043d\u0435\u043d\u043d\u044f\n",
+        "stderr": ""
+      },
+      "id": "source-help"
+    },
+    {
+      "id": "source-validate",
+      "arguments": [
+        "--json",
+        "source",
+        "validate",
+        "tests/sources/fixtures/config/http.yaml"
+      ],
+      "expected": {
+        "exit_code": 0,
+        "stdout": "",
+        "stderr": "{\"source_id\": \"space:row-4\", \"state\": \"candidate\", \"status\": \"valid\"}\n"
+      }
+    },
+    {
+      "id": "source-validate-invalid",
+      "arguments": [
+        "--json",
+        "source",
+        "validate",
+        "tests/sources/fixtures/config/invalid-labels.yaml"
+      ],
+      "expected": {
+        "exit_code": 1,
+        "stdout": "",
+        "stderr": "{\"error\": {\"code\": \"E_SOURCE_CONFIG\", \"path\": \"$/identity/labels/uk\", \"rule\": \"required\", \"hint\": \"include the required property\"}}\n"
+      }
     },
     {
       "arguments": [
@@ -336,7 +416,7 @@
       ],
       "expected": {
         "exit_code": 0,
-        "stderr": "\u041a\u043e\u043d\u0442\u0440\u0430\u043a\u0442 kn.system.governance 1.0.0 d11eb70b855741d6901677151d2b8bb048cf41b0aa074feae24f0db370c51d06\n\u041a\u043e\u043d\u0442\u0440\u0430\u043a\u0442 kn.space.satcom 1.0.0 498e717814a2eb29e44756f256fd3dab4277b069812f4b54e2bb42a496d2ec10\n\u041a\u043e\u043d\u0442\u0440\u0430\u043a\u0442 kn.core.semantic 1.0.0 24931173efca9a0e47d10c75d0e00fb325bfc608207a32e7db8c17126f5fb58d\n",
+        "stderr": "\u041a\u043e\u043d\u0442\u0440\u0430\u043a\u0442 kn.system.governance 1.0.0 d11eb70b855741d6901677151d2b8bb048cf41b0aa074feae24f0db370c51d06\n\u041a\u043e\u043d\u0442\u0440\u0430\u043a\u0442 kn.system.source_catalogue 1.0.0 0ce10ede802cc012d5d122c7d94c03769f20baef4860d7eb1163bbc2b0a3df06\n\u041a\u043e\u043d\u0442\u0440\u0430\u043a\u0442 kn.space.satcom 1.0.0 498e717814a2eb29e44756f256fd3dab4277b069812f4b54e2bb42a496d2ec10\n\u041a\u043e\u043d\u0442\u0440\u0430\u043a\u0442 kn.core.semantic 1.0.0 5dfdbc18f4452ba7dca18fc5e11738d7b27a75593b38664e3b6c920aab83a760\n\u041a\u043e\u043d\u0442\u0440\u0430\u043a\u0442 kn.core.human_verification 1.0.0 a89d36f9d1f5642c00c1ff5aaee9ce868b28ee51141c6dbc1eb6c226461686f5\n\u041a\u043e\u043d\u0442\u0440\u0430\u043a\u0442 kn.core.identity 1.0.0 d6b3174421aaa3cfd1b71d46f928797e55620d397b80ece4a93225949a1113c6\n",
         "stdout": ""
       },
       "id": "contract-lint"
@@ -349,7 +429,7 @@
       ],
       "expected": {
         "exit_code": 0,
-        "stderr": "\u041a\u043e\u043d\u0442\u0440\u0430\u043a\u0442 kn.system.governance 1.0.0 d11eb70b855741d6901677151d2b8bb048cf41b0aa074feae24f0db370c51d06\n\u041a\u043e\u043d\u0442\u0440\u0430\u043a\u0442 kn.space.satcom 1.0.0 498e717814a2eb29e44756f256fd3dab4277b069812f4b54e2bb42a496d2ec10\n\u041a\u043e\u043d\u0442\u0440\u0430\u043a\u0442 kn.core.semantic 1.0.0 24931173efca9a0e47d10c75d0e00fb325bfc608207a32e7db8c17126f5fb58d\n",
+        "stderr": "\u041a\u043e\u043d\u0442\u0440\u0430\u043a\u0442 kn.system.governance 1.0.0 d11eb70b855741d6901677151d2b8bb048cf41b0aa074feae24f0db370c51d06\n\u041a\u043e\u043d\u0442\u0440\u0430\u043a\u0442 kn.system.source_catalogue 1.0.0 0ce10ede802cc012d5d122c7d94c03769f20baef4860d7eb1163bbc2b0a3df06\n\u041a\u043e\u043d\u0442\u0440\u0430\u043a\u0442 kn.space.satcom 1.0.0 498e717814a2eb29e44756f256fd3dab4277b069812f4b54e2bb42a496d2ec10\n\u041a\u043e\u043d\u0442\u0440\u0430\u043a\u0442 kn.core.semantic 1.0.0 5dfdbc18f4452ba7dca18fc5e11738d7b27a75593b38664e3b6c920aab83a760\n\u041a\u043e\u043d\u0442\u0440\u0430\u043a\u0442 kn.core.human_verification 1.0.0 a89d36f9d1f5642c00c1ff5aaee9ce868b28ee51141c6dbc1eb6c226461686f5\n\u041a\u043e\u043d\u0442\u0440\u0430\u043a\u0442 kn.core.identity 1.0.0 d6b3174421aaa3cfd1b71d46f928797e55620d397b80ece4a93225949a1113c6\n",
         "stdout": ""
       },
       "id": "contract-check"
@@ -374,7 +454,7 @@
       "expected": {
         "exit_code": 2,
         "stderr": "E_ARGUMENTS: \u043d\u0435\u043a\u043e\u0440\u0435\u043a\u0442\u043d\u0456 \u0430\u0440\u0433\u0443\u043c\u0435\u043d\u0442\u0438 kn; \u0441\u043a\u043e\u0440\u0438\u0441\u0442\u0430\u0439\u0442\u0435\u0441\u044f --help.\n",
-        "stdout": "\u0432\u0438\u043a\u043e\u0440\u0438\u0441\u0442\u0430\u043d\u043d\u044f: kn [-h] [--locale LOCALE] [--json] {info,contract,db,space} ...\n"
+        "stdout": "\u0432\u0438\u043a\u043e\u0440\u0438\u0441\u0442\u0430\u043d\u043d\u044f: kn [-h] [--locale LOCALE] [--json]\n                 {info,contract,db,source,space,vocabulary} ...\n"
       },
       "id": "invalid-command"
     },
@@ -383,7 +463,7 @@
       "expected": {
         "exit_code": 2,
         "stderr": "E_ARGUMENTS: \u043d\u0435\u043a\u043e\u0440\u0435\u043a\u0442\u043d\u0456 \u0430\u0440\u0433\u0443\u043c\u0435\u043d\u0442\u0438 kn; \u0441\u043a\u043e\u0440\u0438\u0441\u0442\u0430\u0439\u0442\u0435\u0441\u044f --help.\n",
-        "stdout": "\u0432\u0438\u043a\u043e\u0440\u0438\u0441\u0442\u0430\u043d\u043d\u044f: kn [-h] [--locale LOCALE] [--json] {info,contract,db,space} ...\n"
+        "stdout": "\u0432\u0438\u043a\u043e\u0440\u0438\u0441\u0442\u0430\u043d\u043d\u044f: kn [-h] [--locale LOCALE] [--json]\n                 {info,contract,db,source,space,vocabulary} ...\n"
       },
       "id": "missing-command"
     },

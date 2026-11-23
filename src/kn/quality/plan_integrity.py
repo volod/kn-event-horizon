@@ -10,6 +10,7 @@ from pathlib import Path
 from kn.quality.plan_dependencies import dependency_findings
 from kn.quality.plan_model import (
     AGENT_SECTION,
+    EXECUTION_STAGES,
     HUMAN_SECTION,
     PLAN_SECTIONS,
     Capability,
@@ -17,6 +18,7 @@ from kn.quality.plan_model import (
     read_registry,
     read_tasks,
 )
+from kn.quality.plan_order import task_order_findings
 from kn.quality.project_root import discover_project_root
 
 _LOG = logging.getLogger(__name__)
@@ -83,18 +85,21 @@ def _task_identity_findings(task: Task, known: set[str], identifiers: set[str]) 
         findings.append(f"{where}: no valid `Serves` capability id")
     elif task.serves not in known:
         findings.append(f"{where}: serves unregistered capability `{task.serves}`")
-    elif task.group != task.serves:
+    elif task.section == HUMAN_SECTION and task.group != task.serves:
         findings.append(f"{where}: serves `{task.serves}` under `{task.group}`")
     return findings
 
 
 def _task_metadata_findings(task: Task) -> list[str]:
     where = f"{PLAN_DOC}: `{task.identifier}`"
-    return [
+    findings = [
         f"{where}: missing non-empty `{field.title()}` field"
         for field in REQUIRED_FIELDS
         if not task.fields.get(field)
     ]
+    if task.execution_stage not in EXECUTION_STAGES:
+        findings.append(f"{where}: execution stage must be MODEL or DELIVERY")
+    return findings
 
 
 def _task_status_findings(task: Task) -> list[str]:
@@ -151,8 +156,10 @@ def _order_findings(capabilities: list[Capability], tasks: list[Task]) -> list[s
     line = [capability.identifier for capability in capabilities]
     findings: list[str] = []
     for section in PLAN_SECTIONS:
-        findings.extend(_section_order_findings(line, tasks, section))
+        if section == HUMAN_SECTION:
+            findings.extend(_section_order_findings(line, tasks, section))
         findings.extend(_optional_order_findings(tasks, section))
+    findings.extend(f"{PLAN_DOC}: {finding}" for finding in task_order_findings(tasks))
     return findings
 
 

@@ -2,6 +2,7 @@
 
 import os
 from collections.abc import Sequence
+from pathlib import Path
 
 import sqlalchemy as sa
 from sqlalchemy.engine import Connection
@@ -11,6 +12,10 @@ from kn.db.governance import deployment, upgrade, verify
 from kn.db.platform import SCHEMAS, apply_platform
 from kn.db.seeds import load_reviewed_seeds
 from kn.db.verification import verify_compiled_catalog
+from kn.identity.journal import Journal
+from kn.identity.store import lock as identity_lock
+from kn.identity.store import replay as replay_identity
+from kn.quality.project_root import discover_project_root
 
 
 class RebuildRefused(ValueError):
@@ -25,7 +30,12 @@ def require_development() -> None:
         )
 
 
-def rebuild(connection: Connection, contracts: Sequence[Contract] | None = None) -> None:
+def rebuild(
+    connection: Connection,
+    contracts: Sequence[Contract] | None = None,
+    *,
+    data_dir: Path | None = None,
+) -> None:
     """The caller commits; a failure restores the previous schemas even when caught.
 
     After the drop, the database is empty, and the normal upgrade recreates every registered
@@ -39,8 +49,14 @@ def rebuild(connection: Connection, contracts: Sequence[Contract] | None = None)
     # All schemas form one group: references and the Alembic marker cannot become partial.
     with connection.begin_nested():
         apply_platform(connection)
+        identity_lock(connection)
         _drop_schemas(connection)
         upgrade(connection, deployed)
+        if any(contract.contract_id == "kn.core.identity" for contract in deployed):
+            directory = data_dir or Path(os.environ.get("DATA_DIR", ".data"))
+            if not directory.is_absolute():
+                directory = discover_project_root() / directory
+            replay_identity(connection, Journal(directory))
         load_reviewed_seeds(connection)
         verify(connection, deployed)
         verify_compiled_catalog(connection, deployed)

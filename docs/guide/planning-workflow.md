@@ -44,6 +44,8 @@ that states what would reopen the question.
 Use the optional `Requires` field for open tasks that must leave the plan before work can start.
 List backticked task IDs separated by commas. IDs can refer to either lane. The integrity check
 rejects missing IDs, cycles, and required tasks that depend on optional work.
+Within each lane, prerequisites must appear before their dependents, including an ancestor
+reached through the other lane. Cross-lane gates keep their own lane and remain blocking.
 
 ```markdown
 - Requires: `prepare-fixtures`, `approve-inputs`
@@ -58,12 +60,16 @@ Long prerequisite lists can continue on the next line with two spaces of indenta
 `make plan-status` skips tasks with an open `Requires` entry, then lists priority in each lane.
 Check the `Dependencies` field and the task's acceptance gates before starting.
 
+Tasks can label contracts and fixture-based storage work `Execution stage: MODEL`. Other work
+defaults to DELIVERY. These labels describe the work for reporting. Dependencies and the order
+of delivery groups determine when it can start.
+
 ## Task shape
 
 Task ids are stable lowercase slugs. A task heading may end with `(optional)`. Use this structure:
 
 ```markdown
-### Capability name -- `capability-id`
+### Delivery group name -- `group-id`
 
 #### stable-task-id
 
@@ -71,6 +77,7 @@ Describe the unresolved operator problem in present or future tense.
 
 - Serves: `capability-id` -- [Specification section](../design/spec.md#section)
 - Agent status: CLEAR
+- Execution stage: DELIVERY
 - Dependencies: none.
 - User-visible outcome: State what becomes possible or trustworthy.
 - Scope boundary: State what is in scope and explicitly out of scope.
@@ -80,32 +87,43 @@ Describe the unresolved operator problem in present or future tense.
 - Documentation target: [Current-state area](../impl/current.md#areas).
 ```
 
-The plan integrity gate requires every field. Human-lane tasks use a human-lane status. Optional work
-follows required work within its capability.
+The plan integrity gate requires every field. Human-lane tasks use a human-lane status. Optional
+agent work follows all required agent work; within the human lane it follows required work for
+the same capability.
 
 ## Ordering
 
-Capability groups follow the registry. Within a group:
+The agent lane consists of contiguous delivery groups. Name the group for an observable outcome,
+place prerequisites before dependents, and keep the specification owner in each task's `Serves`
+field. A group may cross capability boundaries. Keep required groups first. Human tasks retain
+their capability headings and explicit approvals. Scan past a blocked task to find independent
+ready work. MODEL and DELIVERY can occur in either order when dependencies permit it.
 
-1. hard prerequisites;
-2. changes to inputs that later evaluation consumes;
-3. required work before optional refinements;
-4. cheap deterministic work before expensive runs.
-
-The summary prefers required work across capabilities, then uses registry and document order.
-If capability priorities change, edit the registry order and move the same groups in both lanes.
+End each group with `<group-id>-implementation-audit`. Its prerequisites cover every open member,
+including measured runs, directly or through another member. A consumer in another agent group
+requires the producing audit, directly or transitively. Name any human decisions separately.
+Keep a human approval that enables the group's own run inside that dependency path. Split fixture
+delivery and external acceptance when one can be audited independently. Once only the audit
+remains, keep its heading and run it against accepted records.
 
 ## Implementation audits
 
-Each capability group in the agent lane ends with an optional `<group>-implementation-audit` task.
-The audit checks the group's built work against its specification section before later groups
-build on it, so that known issues are fixed or scheduled while they are still cheap to change.
+Each required group has a required closing audit. An optional extension has an audit with the
+same optional status and must pass it to claim acceptance of that extension. Compare the group
+with the owning spec sections, the actual normal entry point and named downstream consumers.
+Reproduce the member acceptance gates, including measured results and required human evidence.
+For human decisions and one-time external writes, verify the recorded approval, receipts and
+read-back evidence. Repeat a live operation only within its authorization. Document remaining
+uncertainties, supported limits and conditions for re-evaluation.
 
-The audit requires the group's required `CLEAR` tasks. The group's open `RUN NEEDED` and human-lane
-tasks are reviewed for the readiness of their inputs, not for results. Required work never depends
-on an audit. A group without required `CLEAR` tasks has an audit that requires its other tasks. A
-clean audit is a valid result when the record shows the evidence for each check. The task names
-the group's focus areas in its scope boundary and its planted cases in its execution path.
+Record findings when discovered during implementation as well as during the audit. For each,
+give a stable ID, severity, evidence, affected consumer, owner and disposition. Fix in-scope
+defects with a failing regression. Give deferred bugs, specified features and quality
+improvements a forward task with a concrete acceptance check and link its ID from the finding.
+Route new product promises through specification review. Insert prerequisite fixes before the audit and
+add their IDs to its `Requires`. A blocker keeps the audit open. For nonblocking follow-ups,
+gate affected consumers where necessary and document the residual risk. A clean audit records
+commands, results and the boundaries actually checked.
 
 The record gives each check a result:
 
@@ -141,6 +159,7 @@ command and its output, or a failing test), and one disposition:
 | Scheduled bug | A defect too large for the audit becomes a plan task in the owning group, with observed behavior, impact, and an acceptance check. |
 | Scheduled feature | A missing behavior that the specification already promises becomes a plan task with its operator problem. Tasks that need it gain a `Requires` entry. |
 | Specification change | A change to a product promise follows [Choose the work contract](#choose-the-work-contract) before any task is planned. |
+| Quality improvement | Schedule a measurable reliability, maintainability or verification improvement with an owner and acceptance check. |
 | Research | An uncertain path becomes a task with `Research: yes`. |
 | Accepted | A risk kept on purpose is listed under known limitations on the current-state page, with its reason and what would reopen it. |
 

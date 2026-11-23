@@ -4,10 +4,20 @@
       "path": "system/1.0.0.json"
     },
     {
+      "path": "system/source-catalogue/1.0.0.json"
+    },
+    {
       "path": "satcom/1.0.0.json"
     },
     {
       "path": "semantic/1.0.0.json"
+    },
+    {
+      "path": "evidence/1.0.0.json"
+    },
+    {
+      "path": "identity/1.0.0.json",
+      "references": "identity/references.json"
     }
   ]
 }

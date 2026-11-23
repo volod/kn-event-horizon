@@ -50,6 +50,16 @@ def test_rebuild_creates_and_records_every_registered_contract(
             "DELETE FROM system.installed_contracts WHERE storage_schema = 'semantic'",
             "digest drift",
         ),
+        (
+            "UPDATE system.installed_contracts SET storage_schema = 'identity' "
+            "WHERE contract_id = 'kn.space.fixture_observations'",
+            "digest drift",
+        ),
+        (
+            "UPDATE system.installed_contracts SET managed_tables_json = '[]' "
+            "WHERE contract_id = 'kn.space.fixture_observations'",
+            "digest drift",
+        ),
         ("CREATE TABLE space.unregistered (id integer)", "schema space"),
         ("CREATE TABLE identity.unregistered (id integer)", "schema identity"),
     ],

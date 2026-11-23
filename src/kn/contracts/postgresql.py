@@ -23,6 +23,7 @@ def manifest(contract: Contract) -> dict[str, Any]:
                     "columns": [column.name for column in index.columns],
                     "unique": index.unique,
                     "method": index.dialect_options["postgresql"].get("using"),
+                    **_predicate(index, postgres),
                 }
                 for index in sorted(table.indexes, key=lambda item: str(item.name))
             ],
@@ -67,3 +68,12 @@ def _checks(table: sa.Table, postgres: sa.engine.Dialect) -> list[dict[str, str]
         for check in sorted(table.constraints, key=lambda key: str(key.name))
         if isinstance(check, sa.CheckConstraint)
     ]
+
+
+def _predicate(index: sa.Index, postgres: sa.engine.Dialect) -> dict[str, str]:
+    predicate = index.dialect_options["postgresql"].get("where")
+    if predicate is None:
+        return {}
+    return {
+        "where": str(predicate.compile(dialect=postgres, compile_kwargs={"literal_binds": True}))
+    }

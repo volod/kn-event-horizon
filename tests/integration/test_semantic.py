@@ -1,9 +1,6 @@
 """The semantic contract stores exact values and enforces keys, enums and deferred FKs."""
 
-import json
-from datetime import datetime
 from decimal import Decimal
-from pathlib import Path
 
 import pytest
 import sqlalchemy as sa
@@ -13,6 +10,7 @@ from kn.contracts.sqlalchemy import metadata
 from kn.semantic import validate_model
 from kn.semantic.structure import semantic_contract
 from tests.integration.harness import IntegrationDatabase, ScratchSchemas
+from tests.integration.semantic_fixtures import native_rows, text_fixture
 from tests.semantic.conftest import REFERENCES
 
 
@@ -22,8 +20,9 @@ def test_semantic_round_trip_and_database_constraints(
     schema = scratch_schemas.schema("semantic")
     contract = semantic_contract()
     model = metadata(contract, schema)
-    snapshot = json.loads((Path(__file__).parents[1] / "semantic/fixtures/model.json").read_text())
+    snapshot = text_fixture()
     validate_model(snapshot, REFERENCES)
+    native = native_rows(contract, snapshot)
     engine = sa.create_engine("postgresql+psycopg://", creator=integration_database.connect)
     try:
         with engine.connect() as connection, connection.begin():
@@ -31,19 +30,26 @@ def test_semantic_round_trip_and_database_constraints(
             # Reverse table order proves that deferred references permit unordered input.
             for definition in reversed(contract.tables):
                 table = model.tables[f"{schema}.{definition.name}"]
-                for row in snapshot[definition.name]:
-                    native = dict(row)
-                    for field in definition.fields:
-                        value = native.get(field.name)
-                        if value is not None and field.logical_type == "timestamp":
-                            native[field.name] = datetime.fromisoformat(value)
-                        elif value is not None and field.logical_type == "number":
-                            native[field.name] = Decimal(value)
-                    connection.execute(table.insert().values(**native))
+                connection.execute(table.insert(), native[definition.name])
             connection.exec_driver_sql("SET CONSTRAINTS ALL IMMEDIATE")
             criteria = model.tables[f"{schema}.rubric_criteria"]
             assert connection.scalar(sa.select(criteria.c.weight)) == Decimal("1.25")
             terms = model.tables[f"{schema}.terms"]
+            assert (
+                connection.scalar(
+                    sa.select(terms.c.definition).where(terms.c.id == "space.demo.001")
+                )
+                is None
+            )
+            term_labels = model.tables[f"{schema}.labels"]
+            assert (
+                connection.scalar(
+                    sa.select(term_labels.c.review_reference).where(
+                        term_labels.c.locale == "uk", term_labels.c.term_id == "space.demo.001"
+                    )
+                )
+                == "fixture:reviewed-translation"
+            )
             assert (
                 connection.scalar(sa.select(terms.c.code).where(terms.c.id == "space.demo.001"))
                 == "001"

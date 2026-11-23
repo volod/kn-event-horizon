@@ -1,6 +1,7 @@
 # Ontology and Taxonomy
 
-The semantic meta-model is available; vocabulary content is still planned. The packaged ODCS
+The semantic meta-model and [reviewed vocabulary seeds](ontology-taxonomy/seeds.md) are available.
+The packaged ODCS
 contract `src/kn/contracts/resources/semantic/1.0.0.json` defines `kn.core.semantic` in the `semantic`
 schema and is registered after governance and SATCOM in the [deployment
 set](data-contracts.md#deployment-set). Source installations and wheels use the same contract.
@@ -15,8 +16,8 @@ The contract has 18 tables:
 | Tables | Purpose |
 | --- | --- |
 | `namespaces`, `namespace_labels` | Domain and scheme/edition boundaries and localized names |
-| `terms` | Shared IDs, original string codes, kind, status and definition |
-| `labels`, `alternative_labels` | Preferred labels, localized definitions, inverse relation labels and alternatives |
+| `terms` | Shared IDs, original string codes, kind, status and optional prose definition |
+| `labels`, `alternative_labels` | Source-language preferred labels, localized definitions, inverse labels, alternatives and translation review references |
 | `entity_classes` | Classes and their primary parent |
 | `relation_types` | Source/target classes, cardinality, minimum evidence and guarded errors |
 | `concept_schemes` | Origin, publisher, edition, publication URI, checksum and verification reason |
@@ -35,8 +36,11 @@ native term codes allow ASCII letters, digits, underscores, dots, colons and hyp
 explicit, independent of input ordering, and shared across semantic kinds. A term has exactly one
 matching subtype row. Namespaces and terms cannot reuse an ID.
 
-Named terms and namespaces require preferred labels in `en` and `uk`; additional language tags
-are supported. Concept preferred labels are unique per scheme and language; other named terms
+Named terms and namespaces require at least one preferred label in its source language;
+translations are optional. [Text integrity](ontology-taxonomy/text.md) requires English originals
+for proposal-derived seeds, review references for derived translations, and an explicit reviewed
+identity marker for identical English and Ukrainian text. Concept preferred labels are unique per
+scheme and language; other named terms
 are unique within their kind and namespace. Comparison uses Unicode NFC, case folding and collapsed
 whitespace, while storage preserves the original text. Each term has one preferred label per
 language tag, compared without case. Alternative labels require a preferred label in the same
@@ -73,7 +77,8 @@ stay separate from SKOS mappings. Scheme origin remains one of `official`, `kb_n
 `kb_extension`, `service_extension`, or `native`; verification never rewrites it. Verification
 states are `unverified` and `verified`, both with a reason. Verified schemes require publisher,
 edition, a credential-free HTTP(S) publication URI and a lowercase SHA-256 checksum. These checks
-establish evidence shape; comparing an official publication remains a separate review task.
+establish evidence shape; the [publication reviews](ontology-taxonomy/verification.md) bind
+reviewed scheme metadata to the checked seed content and record comparison boundaries.
 
 Tag verification states are `unreviewed`, `corroborated`, `verified`, `disputed`, and `rejected`.
 Validity intervals are half-open and increasing when both ends exist; unknown ends stay null.
@@ -81,9 +86,24 @@ Timestamps are checked for real calendar dates and explicit offsets without opti
 checker dependencies. Comparison attributes and conditions must belong to the profile's entity
 class; rubric criteria must name a profile attribute and use a positive exact decimal weight.
 
-Failures raise the existing `ContractError` with a JSON Pointer, a rule such as
-`semantic.cycle` or `semantic.endpoint`, and a value-free hint. Row-shape failures use the existing
-JSON Schema rule names. No semantic CLI or automatic discovery of proposal files is provided.
+Failures raise the existing `ContractError` with a JSON Pointer, a rule such as `semantic.cycle` or
+`semantic.endpoint`, and a value-free hint. A cycle names the parent or replacement link of a row on
+the cycle, for example `$/concepts/12/parent_id`. A publication URI must also be a valid IRI:
+whitespace, control characters, the backtick and `<>"{}|\^` are refused, because RDF serializations
+cannot write them; percent-encoding and non-ASCII characters are allowed. Row-shape failures use the
+existing JSON Schema rule names. The [seed reconciliation command](ontology-taxonomy/seeds.md) is
+separate from model validation; rebuilds load only explicitly reviewed packaged files.
+
+## Lifecycle report
+
+Deprecated and replaced concepts stay valid endpoints, so validation accepts them. Review needs the
+opposite view, which `kn.semantic.lifecycle.lifecycle_report(snapshot, external_uses=None)` gives:
+one finding per retired concept that is still in use, with its status, the end of its replacement
+chain and that successor's status, and every use. A use is a child concept, a mapping endpoint, an
+entity tag, a replacement link, or a record of another engine. `external_uses` maps concept IDs to
+such records, for example the claims that cite them; the owning engines supply it. Every seed
+reconciliation writes the report for the combined reviewed content under `lifecycle`. The reviewed
+seeds hold only `draft` concepts, so the report is empty today.
 
 ## Enforcement boundary and verification
 
@@ -98,11 +118,35 @@ execute conversions, ranking or evidence selection.
 - `make ci`: compilation drift, type/lint/complexity checks and network-free fixture validation.
 - `tests/semantic/`: all 11 meta-model kinds, hierarchy cycles, missing parents, duplicate labels,
   unknown endpoints, ID collisions, lifecycle, schemes, mappings, policies and malformed input.
+  `test_lifecycle.py` reports deprecated parents, mapping endpoints, tags, replacement chains and
+  external uses; `test_integrity.py` covers cycle locations and publication IRIs.
 - `tests/integration/test_semantic.py`: exact PostgreSQL round trip, deferred references, leading
   zeroes, Unicode, decimals, duplicate IDs, invalid status and missing parents.
 - `make test-integration`: the new round trip and existing registry deployment/rebuild verification.
 
 The [task record](../records/0020-ontology-taxonomy-semantic-model-contracts.md) contains acceptance
-evidence. Reviewed content import, proposal reconciliation, publication comparison and SKOS export
-remain in the [plan](../plan.md). The ontology-taxonomy capability remains planned until those
-outcomes are available.
+evidence. The [separate verified OECD product scheme and crosswalks](ontology-taxonomy/oecd.md)
+are available alongside the original mixed product vocabulary.
+[Seed import and proposal reconciliation](ontology-taxonomy/seeds.md) and
+[official publication comparison](ontology-taxonomy/verification.md) are available.
+[SKOS Turtle export](ontology-taxonomy/skos.md) preserves labels, hierarchy, mappings, scheme
+origins, verification states and publication boundaries. The
+[implementation audit](../records/0025-ontology-taxonomy-ontology-taxonomy-implementation-audit.md)
+of the group records its findings and their dispositions.
+
+## Known limitations
+
+- Ukrainian vocabulary translations remain absent pending `review-ukrainian-terminology`.
+  [Display and export](ontology-taxonomy/text.md#skos-and-interfaces) select English source text
+  with its actual language and explicit fallback. Concept definitions remain absent until genuine
+  prose is supplied; proposal columns remain in provenance.
+- Exported term URIs use `urn:kn:term:<id>`, and `kn` is not a registered URN namespace.
+  `decide-vocabulary-uri-namespace` lets the owner choose a base before any consumer stores the
+  URIs.
+- Each concept has one primary parent. A scheme with several broader concepts per concept needs a
+  secondary hierarchy table, which is additive; reopen when a reviewed scheme needs one.
+- Mappings are not restricted to concepts of different schemes. SKOS links schemes with mapping
+  properties by convention, not by an integrity condition, and no reviewed mapping joins one
+  scheme. Reopen when reviewed content does.
+- Nothing re-checks the pinned publications for changed bytes; `official-publication-drift-check`
+  in the plan adds that.
