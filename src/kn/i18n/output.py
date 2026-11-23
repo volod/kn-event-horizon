@@ -17,6 +17,12 @@ def render_result(translator: Translator, command: str, result: dict[str, object
     if command == "db":
         return translator.text("cli.db_ok")
     if command == "source":
+        if result.get("status") == "valid":
+            return translator.text(
+                "cli.source_config_ok",
+                source_id=result["source_id"],
+                state=_source_states(translator)[str(result["state"])],
+            )
         sources = result["sources"]
         assert isinstance(sources, list)
         return _render_sources(translator, sources)
@@ -33,10 +39,8 @@ def render_result(translator: Translator, command: str, result: dict[str, object
     return translator.text("cli.already_imported", **result)
 
 
-def _render_sources(translator: Translator, sources: list[dict[str, object]]) -> str:
-    if not sources:
-        return translator.text("cli.source_empty")
-    states = {
+def _source_states(translator: Translator) -> dict[str, str]:
+    return {
         "candidate": translator.text("cli.source_candidate"),
         "investigating": translator.text("cli.source_investigating"),
         "sampling_authorized": translator.text("cli.source_sampling_authorized"),
@@ -46,6 +50,12 @@ def _render_sources(translator: Translator, sources: list[dict[str, object]]) ->
         "retired": translator.text("cli.source_retired"),
         "rejected": translator.text("cli.source_rejected"),
     }
+
+
+def _render_sources(translator: Translator, sources: list[dict[str, object]]) -> str:
+    if not sources:
+        return translator.text("cli.source_empty")
+    states = _source_states(translator)
     access = translator.text("cli.source_unverified")
     return "\n".join(
         [

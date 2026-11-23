@@ -32,40 +32,13 @@ archive.
 
 ### Source keys and onboarding -- `source-admission`
 
-#### crawler-config-schema
-
-Crawler behavior, including ontology mapping, error mapping, and monitoring, must be declared and
-validated.
-
-- Serves: `source-management` -- [Source management](../design/spec.md#source-management)
-- Agent status: CLEAR
-- Execution stage: MODEL
-- Dependencies: The [reviewed catalogue and qualified source IDs](current/source-management.md).
-- User-visible outcome: `kn source validate` checks a crawler YAML against its schema and refuses
-  enablement without a rights review, an approval reference, fixtures, and passing tests.
-- Scope boundary: The JSON Schema for every block in the specification, including source record
-  keys and the `adapter_api` method, and the standard error-code table. Record whether the dlt
-  REST client and paginators are adopted for HTTP pagination, given the raw-archive constraint. No
-  runtime execution.
-  Include the known HTTP, curated, prefetched-package, watch and counterpart adapter configuration
-  shapes now, while keeping their later execution and source enablement separate.
-- Data and artifact paths: `src/kn/sources/config/`, `domains/<domain>/sources/`,
-  `tests/sources/`.
-- Execution path: Use a schema-first design with valid and invalid fixture configurations, plus an
-  error-code mapping test per code.
-- Acceptance gates: Invalid fixtures fail with path-specific diagnostics. An enabled configuration
-  without approval fails. The dlt decision is recorded with its reason.
-- Documentation target: `current/source-management.md` listed in the
-  [areas index](current.md#areas).
-
 #### source-onboarding-workflow
 
 Coding-agent source investigation needs a fixed, safe procedure before the first real source.
 
 - Serves: `source-management` -- [Source management](../design/spec.md#source-management)
 - Agent status: CLEAR
-- Requires: `crawler-config-schema`
-- Dependencies: none.
+- Dependencies: The [crawler configuration and enablement checks](current/source-management.md#validate-crawler-configurations).
 - User-visible outcome: Contributors follow a documented workflow with templates for the terms
   dossier, investigation report, fixture sanitization, and review checklist. `AGENTS.md` states the
   untrusted-content rule for agents reading source material.
@@ -86,8 +59,9 @@ Verify the source keys and onboarding handoff against its specification and the 
 
 - Serves: `source-management` -- [Source management](../design/spec.md#source-management)
 - Agent status: CLEAR
-- Requires: `crawler-config-schema`, `source-onboarding-workflow`
+- Requires: `source-onboarding-workflow`
 - Dependencies: The [catalogue import record](records/0035-source-management-source-catalogue-import.md),
+  the [crawler configuration record](records/0036-source-management-crawler-config-schema.md),
   other group acceptance records, and the
   [audit procedure](../guide/planning-workflow.md#implementation-audits).
 - User-visible outcome: The group has reproducible acceptance evidence and owned follow-up work.
@@ -502,8 +476,9 @@ monitoring workflows begin writing them.
 - Execution stage: MODEL
 - Requires: `source-admission-implementation-audit`, `object-identity-implementation-audit`,
   `raw-archive-implementation-audit`
-- Dependencies: The run, cursor, archive and monitoring fields in the specification. Fixtures can
-  supply source IDs, archive IDs and claim keys without executing a crawler.
+- Dependencies: The run, cursor, archive and monitoring fields in the specification and the
+  [standard source error codes](current/source-management.md#error-codes-and-pagination).
+  Fixtures can supply source IDs, archive IDs and claim keys without executing a crawler.
 - User-visible outcome: Registered contracts define run attempts/status/error history, source
   checkpoints, committed batch/archive references, configuration/code versions and health metrics.
 - Scope boundary: Schemas, keys, enums, time semantics, human-verification coverage and

@@ -1,0 +1,66 @@
+version: 1
+identity:
+  source_id: space:row-4
+  labels: {en: Fixture source, uk: "\u0422\u0435\u0441\u0442"}
+  owner: fixture-maintainer
+access:
+  method: http_json
+  endpoints: [https://api.example.test/records]
+  allowed_hosts: [api.example.test]
+  redirect_policy: deny
+  auth_env: FIXTURE_TOKEN
+  secret_query_parameters: [access_token]
+  request_budget:
+    max_requests: 10
+    timeout_seconds: 30
+    max_response_bytes: 1048576
+    max_decoded_bytes: 2097152
+  rate_limit: {requests: 1, per_seconds: 2}
+  conditional_requests: {etag: true, last_modified: true}
+  content_types: [application/json]
+  pagination: {strategy: next_link, response_field: links.next}
+schedule: {cron: "0 */2 * * *", timezone: UTC}
+cursor:
+  strategy: updated_since
+  field: updated
+  overlap_seconds: 60
+  backfill_namespace: history
+raw: {format: warc, retention_days: 30, redistribution: forbidden}
+parse:
+  entry_point: "kn.domains.space.fixture:parse"
+  native_schema: "fixture/v1"
+  schema_fingerprint: "0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef"
+mapping:
+  record_key: [publisher, id]
+  version_field: updated
+  fields: [{native: height, field_id: satcom.altitude, unit: km}]
+  codes: [{native: category, code: "001", concept: space.example, mapping_type: exactMatch}]
+  classes: [{native: test_class, class_id: space.example}]
+  relations: [{native: test_relation, relation_id: space.example_relation}]
+  identifiers: [{native: id, namespace: publisher, authority_level: source_qualified}]
+  identity_attributes:
+    - native: name
+      field_id: satcom.name
+      normalizer: casefold
+      comparator: exact
+      authority_level: weak
+  time_fields: [{native: updated, semantics: updated_at, timezone: UTC}]
+quality:
+  required_fields: [publisher, id, updated]
+  ranges: [{field: height, min: 0, max: 5000}]
+  expected_volume: {min: 0, max: 1000}
+  quarantine_limit: 5
+  batch_stop: [record_key_missing, time_invalid, schema_drift]
+errors:
+  - condition: {kind: http_status, status: 429}
+    code: rate_limited
+    retry_class: rate_limit
+  - condition: {kind: signal, name: truncated_payload}
+    code: payload_invalid
+    retry_class: permanent
+monitoring:
+  freshness_sla_seconds: 21600
+  alert_thresholds: {consecutive_failures: 3, cursor_lag_seconds: 21600}
+  expected_records: {min: 0, max: 1000}
+rights: {permission: pending}
+approval: {state: candidate}

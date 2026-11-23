@@ -1,0 +1,59 @@
+version: 1
+identity:
+  source_id: space:row-4
+  labels:
+    en: Fixture source
+    uk: "\u0422\u0435\u0441\u0442"
+  owner: fixture-maintainer
+access:
+  method: curated_file
+  curated:
+    directory: domains/space/curation/observations
+    uri_field: cited_uri
+    capture_time_field: captured_at
+    curator_field: curator
+schedule:
+  cron: 0 */2 * * *
+  timezone: UTC
+cursor:
+  strategy: snapshot_hash
+  backfill_namespace: history
+raw:
+  format: warc
+  retention_days: 30
+  redistribution: forbidden
+parse:
+  entry_point: kn.domains.space.fixture:parse
+  native_schema: fixture/v1
+  schema_fingerprint: 0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef
+mapping:
+  record_key:
+  - id
+  fields: []
+quality:
+  required_fields:
+  - publisher
+  - id
+  - updated
+  ranges: []
+  expected_volume:
+    min: 0
+    max: 1000
+  quarantine_limit: 5
+  batch_stop:
+  - record_key_missing
+  - time_invalid
+  - schema_drift
+errors: []
+monitoring:
+  freshness_sla_seconds: 21600
+  alert_thresholds:
+    consecutive_failures: 3
+    cursor_lag_seconds: 21600
+  expected_records:
+    min: 0
+    max: 1000
+rights:
+  permission: pending
+approval:
+  state: candidate

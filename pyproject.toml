@@ -69,6 +69,7 @@ where = ["src"]
 "kn.i18n.locales" = ["*/*.json"]
 "kn.semantic" = ["resources/*.json"]
 "kn.sources" = ["resources/*.json", "resources/*.yaml"]
+"kn.sources.config" = ["crawler.schema.json"]
 "kn.db" = ["migrations/*.py", "migrations/versions/*.py"]
 
 [tool.ruff]

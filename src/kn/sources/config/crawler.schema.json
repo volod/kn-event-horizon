@@ -1,0 +1,951 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:kn:sources:crawler-config:1",
+  "title": "KN crawler configuration, version 1",
+  "type": "object",
+  "additionalProperties": false,
+  "properties": {
+    "version": {"const": 1},
+    "identity": {"$ref": "#/$defs/identity"},
+    "access": {"$ref": "#/$defs/access"},
+    "schedule": {"$ref": "#/$defs/schedule"},
+    "cursor": {"$ref": "#/$defs/cursor"},
+    "raw": {"$ref": "#/$defs/raw"},
+    "parse": {"$ref": "#/$defs/parse"},
+    "mapping": {"$ref": "#/$defs/mapping"},
+    "quality": {"$ref": "#/$defs/quality"},
+    "monitoring": {"$ref": "#/$defs/monitoring"},
+    "rights": {"$ref": "#/$defs/rights"},
+    "approval": {"$ref": "#/$defs/approval"},
+    "verification": {"$ref": "#/$defs/verification"},
+    "exchange": {"$ref": "#/$defs/exchange"},
+    "errors": {
+      "type": "array",
+      "items": {"$ref": "#/$defs/errorRule"},
+      "minItems": 0,
+      "uniqueItems": true
+    }
+  },
+  "required": [
+    "version",
+    "identity",
+    "access",
+    "schedule",
+    "cursor",
+    "raw",
+    "parse",
+    "mapping",
+    "quality",
+    "monitoring",
+    "rights",
+    "approval",
+    "errors"
+  ],
+  "allOf": [
+    {
+      "if": {
+        "properties": {"approval": {"properties": {"state": {"const": "enabled"}}, "required": ["state"]}},
+        "required": ["approval"]
+      },
+      "then": {
+        "required": ["verification"],
+        "properties": {
+          "rights": {
+            "required": [
+              "terms_uri",
+              "reviewer",
+              "reviewed_at",
+              "licence",
+              "export_policy",
+              "retention_days"
+            ],
+            "properties": {"permission": {"const": "granted"}}
+          },
+          "approval": {"required": ["approver", "reference"]}
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "access": {"properties": {"method": {"const": "adapter_api"}}, "required": ["method"]}
+        },
+        "required": ["access"]
+      },
+      "then": {"required": ["exchange"]},
+      "else": {"not": {"anyOf": [{"required": ["exchange"]}]}}
+    },
+    {
+      "if": {"properties": {"access": {"required": ["watches"]}}, "required": ["access"]},
+      "then": {
+        "properties": {
+          "cursor": {"properties": {"strategy": {"const": "window"}}, "required": ["strategy"]}
+        }
+      }
+    }
+  ],
+  "$defs": {
+    "text": {
+      "type": "string",
+      "minLength": 1,
+      "pattern": "\\S",
+      "not": {"pattern": "[\\u0000-\\u001f\\u007f-\\u009f]"}
+    },
+    "token": {"type": "string", "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]*$(?!\\n)"},
+    "slug": {"type": "string", "pattern": "^[a-z][a-z0-9_-]*$(?!\\n)"},
+    "field": {
+      "type": "string",
+      "minLength": 1,
+      "pattern": "\\S",
+      "not": {"pattern": "[\\u0000-\\u001f\\u007f-\\u009f]"}
+    },
+    "relativePath": {
+      "type": "string",
+      "pattern": "^(?:(?!\\.{1,2}/)[A-Za-z0-9_.-]+/)*(?!\\.{1,2}$)[A-Za-z0-9_.-]+$(?!\\n)"
+    },
+    "httpsUri": {
+      "type": "string",
+      "format": "uri",
+      "pattern": "^https://[^/?#@\\s]+(?:[/?][^#\\s]*)?$(?!\\n)"
+    },
+    "env": {"type": "string", "pattern": "^[A-Z_][A-Z0-9_]*$(?!\\n)"},
+    "labels": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {"en": {"$ref": "#/$defs/text"}, "uk": {"$ref": "#/$defs/text"}},
+      "required": ["en", "uk"]
+    },
+    "countRange": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {"min": {"type": "integer", "minimum": 0}, "max": {"type": "integer", "minimum": 0}},
+      "required": ["min", "max"]
+    },
+    "identity": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "source_id": {"type": "string", "pattern": "^[a-z][a-z0-9_]*:[A-Za-z0-9][A-Za-z0-9_.-]*$(?!\\n)"},
+        "labels": {"$ref": "#/$defs/labels"},
+        "owner": {"$ref": "#/$defs/text"}
+      },
+      "required": ["source_id", "labels", "owner"]
+    },
+    "access": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "method": {
+          "enum": [
+            "http_json",
+            "http_csv",
+            "http_xml",
+            "feed",
+            "html_permitted",
+            "adapter_api",
+            "bulk_file",
+            "curated_file"
+          ]
+        },
+        "endpoints": {
+          "type": "array",
+          "items": {"$ref": "#/$defs/httpsUri"},
+          "minItems": 1,
+          "uniqueItems": true
+        },
+        "allowed_hosts": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "pattern": "^(?=.{1,253}$)(?:[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?\\.)+[a-z](?:[a-z0-9-]{0,61}[a-z0-9])?$(?!\\n)"
+          },
+          "minItems": 1,
+          "uniqueItems": true
+        },
+        "redirect_policy": {"enum": ["deny", "allowlisted"]},
+        "auth_env": {"$ref": "#/$defs/env"},
+        "secret_query_parameters": {
+          "type": "array",
+          "items": {"$ref": "#/$defs/token"},
+          "minItems": 1,
+          "uniqueItems": true
+        },
+        "request_budget": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "max_requests": {"type": "integer", "minimum": 1},
+            "timeout_seconds": {"type": "integer", "minimum": 1},
+            "max_response_bytes": {"type": "integer", "minimum": 1},
+            "max_decoded_bytes": {"type": "integer", "minimum": 1}
+          },
+          "required": ["max_requests", "timeout_seconds", "max_response_bytes", "max_decoded_bytes"]
+        },
+        "rate_limit": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "requests": {"type": "integer", "minimum": 1},
+            "per_seconds": {"type": "integer", "minimum": 1}
+          },
+          "required": ["requests", "per_seconds"]
+        },
+        "conditional_requests": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {"etag": {"type": "boolean"}, "last_modified": {"type": "boolean"}},
+          "required": ["etag", "last_modified"]
+        },
+        "content_types": {
+          "type": "array",
+          "items": {"type": "string", "pattern": "^[a-z0-9!#$&^_.+-]+/[a-z0-9!#$&^_.+-]+$(?!\\n)"},
+          "minItems": 1,
+          "uniqueItems": true
+        },
+        "pagination": {"$ref": "#/$defs/pagination"},
+        "curated": {"$ref": "#/$defs/curated"},
+        "package": {"$ref": "#/$defs/package"},
+        "watches": {
+          "type": "array",
+          "items": {"$ref": "#/$defs/watch"},
+          "minItems": 1,
+          "uniqueItems": true
+        },
+        "adapter": {"$ref": "#/$defs/adapter"}
+      },
+      "required": ["method"],
+      "allOf": [
+        {
+          "if": {"properties": {"method": {"enum": ["bulk_file"]}}, "required": ["method"]},
+          "then": {
+            "if": {"required": ["package"]},
+            "then": {"not": {"anyOf": [{"required": ["endpoints"]}]}},
+            "else": {"required": ["endpoints"]}
+          },
+          "else": {"not": {"anyOf": [{"required": ["package"]}]}}
+        },
+        {
+          "if": {"properties": {"method": {"const": "curated_file"}}, "required": ["method"]},
+          "then": {"required": ["curated"], "not": {"anyOf": [{"required": ["endpoints"]}]}},
+          "else": {"not": {"anyOf": [{"required": ["curated"]}]}}
+        },
+        {
+          "if": {"properties": {"method": {"const": "adapter_api"}}, "required": ["method"]},
+          "then": {"required": ["adapter", "auth_env", "pagination"]},
+          "else": {"not": {"anyOf": [{"required": ["adapter"]}]}}
+        },
+        {
+          "if": {
+            "properties": {
+              "method": {
+                "enum": ["http_json", "http_csv", "http_xml", "feed", "html_permitted", "adapter_api"]
+              }
+            },
+            "required": ["method"]
+          },
+          "then": {"required": ["endpoints"]}
+        },
+        {
+          "if": {"required": ["endpoints"]},
+          "then": {
+            "required": [
+              "allowed_hosts",
+              "redirect_policy",
+              "request_budget",
+              "rate_limit",
+              "conditional_requests",
+              "content_types"
+            ]
+          },
+          "else": {
+            "not": {
+              "anyOf": [
+                {"required": ["auth_env"]},
+                {"required": ["secret_query_parameters"]},
+                {"required": ["pagination"]}
+              ]
+            }
+          }
+        },
+        {
+          "if": {"properties": {"package": {"required": ["drive"]}}, "required": ["package"]},
+          "then": {
+            "required": [
+              "allowed_hosts",
+              "redirect_policy",
+              "request_budget",
+              "rate_limit",
+              "conditional_requests",
+              "content_types"
+            ],
+            "properties": {
+              "allowed_hosts": {"const": ["www.googleapis.com"]},
+              "redirect_policy": {"const": "deny"}
+            }
+          }
+        },
+        {
+          "if": {
+            "not": {
+              "anyOf": [
+                {"required": ["endpoints"]},
+                {"properties": {"package": {"required": ["drive"]}}, "required": ["package"]}
+              ]
+            }
+          },
+          "then": {
+            "not": {
+              "anyOf": [
+                {"required": ["allowed_hosts"]},
+                {"required": ["redirect_policy"]},
+                {"required": ["request_budget"]},
+                {"required": ["rate_limit"]},
+                {"required": ["conditional_requests"]},
+                {"required": ["content_types"]}
+              ]
+            }
+          }
+        },
+        {
+          "if": {"properties": {"method": {"not": {"const": "http_json"}}}, "required": ["method"]},
+          "then": {"not": {"anyOf": [{"required": ["watches"]}]}}
+        },
+        {
+          "if": {"properties": {"method": {"const": "adapter_api"}}, "required": ["method"]},
+          "then": {
+            "properties": {
+              "pagination": {
+                "required": ["page_size_parameter", "page_size"],
+                "properties": {
+                  "page_size_parameter": {"const": "limit"},
+                  "strategy": {"enum": ["next_link", "offset"]}
+                }
+              }
+            }
+          }
+        }
+      ]
+    },
+    "pagination": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "strategy": {"enum": ["next_link", "cursor", "page", "offset"]},
+        "response_field": {"$ref": "#/$defs/field"},
+        "parameter": {"$ref": "#/$defs/token"},
+        "page_size_parameter": {"$ref": "#/$defs/token"},
+        "page_size": {"type": "integer", "minimum": 1}
+      },
+      "required": ["strategy"],
+      "dependentRequired": {"page_size_parameter": ["page_size"], "page_size": ["page_size_parameter"]},
+      "allOf": [
+        {
+          "if": {
+            "properties": {"strategy": {"enum": ["next_link", "cursor"]}},
+            "required": ["strategy"]
+          },
+          "then": {"required": ["response_field"]}
+        },
+        {
+          "if": {
+            "properties": {"strategy": {"enum": ["cursor", "page", "offset"]}},
+            "required": ["strategy"]
+          },
+          "then": {"required": ["parameter"]}
+        },
+        {
+          "if": {"properties": {"strategy": {"const": "offset"}}, "required": ["strategy"]},
+          "then": {"required": ["page_size", "page_size_parameter"]}
+        }
+      ]
+    },
+    "curated": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "directory": {"$ref": "#/$defs/relativePath"},
+        "uri_field": {"$ref": "#/$defs/field"},
+        "capture_time_field": {"$ref": "#/$defs/field"},
+        "curator_field": {"$ref": "#/$defs/field"}
+      },
+      "required": ["directory", "uri_field", "capture_time_field", "curator_field"]
+    },
+    "package": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "location_env": {"$ref": "#/$defs/env"},
+        "default_directory": {"$ref": "#/$defs/relativePath"},
+        "dataset_contract": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "id": {"$ref": "#/$defs/token"},
+            "version": {
+              "type": "string",
+              "pattern": "^[0-9]+\\.[0-9]+\\.[0-9]+(?:[-+][A-Za-z0-9.-]+)?$(?!\\n)"
+            }
+          },
+          "required": ["id", "version"]
+        },
+        "expected_files": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+              "path": {"$ref": "#/$defs/relativePath"},
+              "headers": {
+                "type": "array",
+                "items": {"$ref": "#/$defs/field"},
+                "minItems": 1,
+                "uniqueItems": true
+              }
+            },
+            "required": ["path"],
+            "allOf": [
+              {
+                "if": {
+                  "properties": {"path": {"pattern": "\\.[Cc][Ss][Vv]$(?!\\n)"}},
+                  "required": ["path"]
+                },
+                "then": {"required": ["headers"]},
+                "else": {"not": {"anyOf": [{"required": ["headers"]}]}}
+              }
+            ]
+          },
+          "minItems": 1,
+          "uniqueItems": true
+        },
+        "csv_dialect": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "delimiter": {"type": "string", "minLength": 1, "maxLength": 1, "pattern": "[^\\r\\n\\x00]"},
+            "quotechar": {"type": "string", "minLength": 1, "maxLength": 1, "pattern": "[^\\r\\n\\x00]"},
+            "encoding": {"enum": ["utf-8", "utf-8-sig"]}
+          },
+          "required": ["delimiter", "quotechar", "encoding"]
+        },
+        "limits": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "max_archive_bytes": {"type": "integer", "minimum": 1},
+            "max_unpacked_bytes": {"type": "integer", "minimum": 1},
+            "max_files": {"type": "integer", "minimum": 1}
+          },
+          "required": ["max_archive_bytes", "max_unpacked_bytes", "max_files"]
+        },
+        "drive": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {"service_account_key_file_env": {"$ref": "#/$defs/env"}},
+          "required": ["service_account_key_file_env"]
+        }
+      },
+      "required": ["location_env", "default_directory", "dataset_contract", "expected_files", "limits"],
+      "allOf": [
+        {
+          "if": {
+            "properties": {"expected_files": {"contains": {"required": ["headers"]}}},
+            "required": ["expected_files"]
+          },
+          "then": {"required": ["csv_dialect"]}
+        }
+      ]
+    },
+    "watch": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "id": {"$ref": "#/$defs/slug"},
+        "query": {"$ref": "#/$defs/text"},
+        "aliases": {"$ref": "#/$defs/labels"},
+        "purpose": {"$ref": "#/$defs/text"},
+        "owner": {"$ref": "#/$defs/text"},
+        "lookback_seconds": {"type": "integer", "minimum": 1},
+        "result_cap": {"type": "integer", "minimum": 1},
+        "min_window_seconds": {"type": "integer", "minimum": 1}
+      },
+      "required": [
+        "id",
+        "query",
+        "aliases",
+        "purpose",
+        "owner",
+        "lookback_seconds",
+        "result_cap",
+        "min_window_seconds"
+      ]
+    },
+    "adapter": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "name": {"const": "inventree"},
+        "review_reference": {"$ref": "#/$defs/token"},
+        "resources": {
+          "type": "array",
+          "items": {
+            "enum": [
+              "company",
+              "part",
+              "manufacturer_part",
+              "supplier_part",
+              "parameter",
+              "parameter_template",
+              "part_category",
+              "attachment",
+              "tag",
+              "stock"
+            ]
+          },
+          "minItems": 1,
+          "uniqueItems": true
+        }
+      },
+      "required": ["name", "review_reference", "resources"]
+    },
+    "schedule": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "cron": {"$ref": "#/$defs/text"},
+        "timezone": {"const": "UTC"},
+        "freshness_seconds": {"type": "integer", "minimum": 1}
+      },
+      "required": ["cron", "timezone"]
+    },
+    "cursor": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "strategy": {"enum": ["snapshot_hash", "updated_since", "id_range", "window"]},
+        "field": {"$ref": "#/$defs/field"},
+        "overlap_seconds": {"type": "integer", "minimum": 0},
+        "window_seconds": {"type": "integer", "minimum": 1},
+        "backfill_namespace": {"allOf": [{"$ref": "#/$defs/slug"}, {"not": {"const": "live"}}]}
+      },
+      "required": ["strategy", "backfill_namespace"],
+      "allOf": [
+        {
+          "if": {
+            "properties": {"strategy": {"enum": ["updated_since", "id_range"]}},
+            "required": ["strategy"]
+          },
+          "then": {"required": ["field"]},
+          "else": {"not": {"anyOf": [{"required": ["field"]}]}}
+        },
+        {
+          "if": {
+            "properties": {"strategy": {"enum": ["updated_since", "window"]}},
+            "required": ["strategy"]
+          },
+          "then": {"required": ["overlap_seconds"]},
+          "else": {"not": {"anyOf": [{"required": ["overlap_seconds"]}]}}
+        },
+        {
+          "if": {"properties": {"strategy": {"const": "window"}}, "required": ["strategy"]},
+          "then": {"required": ["window_seconds"]},
+          "else": {"not": {"anyOf": [{"required": ["window_seconds"]}]}}
+        }
+      ]
+    },
+    "raw": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "format": {"enum": ["warc", "blob"]},
+        "retention_days": {"type": "integer", "minimum": 0},
+        "redistribution": {"enum": ["forbidden", "restricted", "permitted"]}
+      },
+      "required": ["format", "retention_days", "redistribution"]
+    },
+    "parse": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "entry_point": {
+          "type": "string",
+          "pattern": "^kn\\.domains\\.[a-z][a-z0-9_]*(?:\\.[A-Za-z_][A-Za-z0-9_]*)+:[A-Za-z_][A-Za-z0-9_]*$(?!\\n)"
+        },
+        "native_schema": {"$ref": "#/$defs/text"},
+        "codebook_edition": {"$ref": "#/$defs/text"},
+        "schema_fingerprint": {"type": "string", "pattern": "^[0-9a-f]{64}$(?!\\n)"}
+      },
+      "required": ["entry_point", "schema_fingerprint"],
+      "anyOf": [{"required": ["native_schema"]}, {"required": ["codebook_edition"]}]
+    },
+    "mapping": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "record_key": {
+          "type": "array",
+          "items": {"$ref": "#/$defs/field"},
+          "minItems": 1,
+          "uniqueItems": true
+        },
+        "version_field": {"$ref": "#/$defs/field"},
+        "fields": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+              "native": {"$ref": "#/$defs/field"},
+              "field_id": {"$ref": "#/$defs/token"},
+              "unit": {"$ref": "#/$defs/text"}
+            },
+            "required": ["native", "field_id"]
+          },
+          "minItems": 0,
+          "uniqueItems": true
+        },
+        "codes": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+              "native": {"$ref": "#/$defs/field"},
+              "code": {"$ref": "#/$defs/text"},
+              "concept": {"$ref": "#/$defs/token"},
+              "mapping_type": {
+                "enum": [
+                  "exactMatch",
+                  "closeMatch",
+                  "broadMatch",
+                  "narrowMatch",
+                  "relatedMatch",
+                  "analyst_crosswalk"
+                ]
+              }
+            },
+            "required": ["native", "code", "concept", "mapping_type"]
+          },
+          "minItems": 0,
+          "uniqueItems": true
+        },
+        "classes": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {"native": {"$ref": "#/$defs/text"}, "class_id": {"$ref": "#/$defs/token"}},
+            "required": ["native", "class_id"]
+          },
+          "minItems": 0,
+          "uniqueItems": true
+        },
+        "relations": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {"native": {"$ref": "#/$defs/text"}, "relation_id": {"$ref": "#/$defs/token"}},
+            "required": ["native", "relation_id"]
+          },
+          "minItems": 0,
+          "uniqueItems": true
+        },
+        "identifiers": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+              "native": {"$ref": "#/$defs/field"},
+              "namespace": {"$ref": "#/$defs/token"},
+              "issuing_authority": {"$ref": "#/$defs/text"},
+              "authority_level": {"enum": ["authoritative", "source_qualified", "weak"]}
+            },
+            "required": ["native", "namespace", "authority_level"]
+          },
+          "minItems": 0,
+          "uniqueItems": true
+        },
+        "identity_attributes": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+              "native": {"$ref": "#/$defs/field"},
+              "field_id": {"$ref": "#/$defs/token"},
+              "normalizer": {"$ref": "#/$defs/token"},
+              "comparator": {"$ref": "#/$defs/token"},
+              "authority_level": {"enum": ["authoritative", "source_qualified", "weak"]}
+            },
+            "required": ["native", "field_id", "normalizer", "comparator", "authority_level"]
+          },
+          "minItems": 0,
+          "uniqueItems": true
+        },
+        "time_fields": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+              "native": {"$ref": "#/$defs/field"},
+              "semantics": {
+                "enum": [
+                  "observed_at",
+                  "published_at",
+                  "updated_at",
+                  "valid_from",
+                  "valid_to",
+                  "effective_at",
+                  "retrieved_at",
+                  "source_timestamp"
+                ]
+              },
+              "timezone": {"$ref": "#/$defs/text"},
+              "format": {"$ref": "#/$defs/text"}
+            },
+            "required": ["native", "semantics"]
+          },
+          "minItems": 0,
+          "uniqueItems": true
+        }
+      },
+      "required": ["record_key", "fields"]
+    },
+    "quality": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "required_fields": {
+          "type": "array",
+          "items": {"$ref": "#/$defs/field"},
+          "minItems": 0,
+          "uniqueItems": true
+        },
+        "ranges": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+              "field": {"$ref": "#/$defs/field"},
+              "min": {"type": "number"},
+              "max": {"type": "number"}
+            },
+            "required": ["field", "min", "max"]
+          },
+          "minItems": 0,
+          "uniqueItems": true
+        },
+        "expected_volume": {"$ref": "#/$defs/countRange"},
+        "quarantine_limit": {"type": "integer", "minimum": 0},
+        "batch_stop": {
+          "type": "array",
+          "items": {
+            "enum": [
+              "record_key_missing",
+              "time_invalid",
+              "schema_drift",
+              "integrity_lost",
+              "quarantine_limit",
+              "volume_out_of_range"
+            ]
+          },
+          "minItems": 1,
+          "uniqueItems": true
+        }
+      },
+      "required": ["required_fields", "ranges", "expected_volume", "quarantine_limit", "batch_stop"]
+    },
+    "transientCodes": {"enum": ["transient_network"]},
+    "rate_limitCodes": {"enum": ["rate_limited"]},
+    "permanentCodes": {
+      "enum": [
+        "auth_failed",
+        "permission_denied",
+        "payload_invalid",
+        "schema_drift",
+        "integrity_lost",
+        "budget_exhausted"
+      ]
+    },
+    "noneCodes": {"enum": ["not_modified"]},
+    "errorRule": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "condition": {"$ref": "#/$defs/errorCondition"},
+        "code": {
+          "anyOf": [
+            {"$ref": "#/$defs/transientCodes"},
+            {"$ref": "#/$defs/rate_limitCodes"},
+            {"$ref": "#/$defs/permanentCodes"},
+            {"$ref": "#/$defs/noneCodes"}
+          ]
+        },
+        "retry_class": {"enum": ["transient", "rate_limit", "permanent", "none"]}
+      },
+      "required": ["condition", "code", "retry_class"],
+      "allOf": [
+        {
+          "if": {"properties": {"code": {"$ref": "#/$defs/transientCodes"}}, "required": ["code"]},
+          "then": {"properties": {"retry_class": {"const": "transient"}}, "required": ["retry_class"]}
+        },
+        {
+          "if": {"properties": {"code": {"$ref": "#/$defs/rate_limitCodes"}}, "required": ["code"]},
+          "then": {
+            "properties": {"retry_class": {"const": "rate_limit"}},
+            "required": ["retry_class"]
+          }
+        },
+        {
+          "if": {"properties": {"code": {"$ref": "#/$defs/permanentCodes"}}, "required": ["code"]},
+          "then": {"properties": {"retry_class": {"const": "permanent"}}, "required": ["retry_class"]}
+        },
+        {
+          "if": {"properties": {"code": {"$ref": "#/$defs/noneCodes"}}, "required": ["code"]},
+          "then": {"properties": {"retry_class": {"const": "none"}}, "required": ["retry_class"]}
+        },
+        {
+          "if": {"properties": {"condition": {"properties": {"status": {"const": 304}}, "required": ["status"]}}},
+          "then": {"properties": {"code": {"const": "not_modified"}}}
+        },
+        {
+          "if": {"properties": {"condition": {"properties": {"status": {"const": 401}}, "required": ["status"]}}},
+          "then": {"properties": {"code": {"const": "auth_failed"}}}
+        },
+        {
+          "if": {"properties": {"condition": {"properties": {"status": {"const": 403}}, "required": ["status"]}}},
+          "then": {"properties": {"code": {"const": "permission_denied"}}}
+        },
+        {
+          "if": {"properties": {"condition": {"properties": {"status": {"const": 429}}, "required": ["status"]}}},
+          "then": {"properties": {"code": {"const": "rate_limited"}}}
+        }
+      ]
+    },
+    "errorCondition": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "kind": {"enum": ["http_status", "signal"]},
+        "status": {"type": "integer", "minimum": 100, "maximum": 599},
+        "name": {"$ref": "#/$defs/token"}
+      },
+      "required": ["kind"],
+      "allOf": [
+        {
+          "if": {"properties": {"kind": {"const": "http_status"}}, "required": ["kind"]},
+          "then": {"required": ["status"], "not": {"anyOf": [{"required": ["name"]}]}},
+          "else": {"required": ["name"], "not": {"anyOf": [{"required": ["status"]}]}}
+        }
+      ]
+    },
+    "monitoring": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "freshness_sla_seconds": {"type": "integer", "minimum": 1},
+        "alert_thresholds": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "consecutive_failures": {"type": "integer", "minimum": 1},
+            "reject_count": {"type": "integer", "minimum": 0},
+            "quarantine_count": {"type": "integer", "minimum": 0},
+            "cursor_lag_seconds": {"type": "integer", "minimum": 1}
+          },
+          "required": [],
+          "minProperties": 1
+        },
+        "expected_records": {"$ref": "#/$defs/countRange"}
+      },
+      "required": ["freshness_sla_seconds", "alert_thresholds", "expected_records"]
+    },
+    "rights": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "terms_uri": {"$ref": "#/$defs/httpsUri"},
+        "reviewer": {"$ref": "#/$defs/text"},
+        "reviewed_at": {"type": "string", "format": "date-time"},
+        "licence": {"$ref": "#/$defs/text"},
+        "permission": {"enum": ["pending", "granted", "denied"]},
+        "export_policy": {"enum": ["forbidden", "restricted", "permitted", "owner_private"]},
+        "retention_days": {"type": "integer", "minimum": 0},
+        "owner_export_approval_reference": {"$ref": "#/$defs/token"}
+      },
+      "required": ["permission"],
+      "dependentRequired": {"owner_export_approval_reference": ["export_policy"]}
+    },
+    "approval": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "state": {
+          "enum": [
+            "candidate",
+            "investigating",
+            "sampling_authorized",
+            "approved",
+            "enabled",
+            "paused",
+            "retired",
+            "rejected"
+          ]
+        },
+        "approver": {"$ref": "#/$defs/text"},
+        "reference": {"$ref": "#/$defs/token"}
+      },
+      "required": ["state"]
+    },
+    "verification": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "fixtures": {
+          "type": "array",
+          "items": {"$ref": "#/$defs/relativePath"},
+          "minItems": 1,
+          "uniqueItems": true
+        },
+        "test_report": {"$ref": "#/$defs/relativePath"}
+      },
+      "required": ["fixtures", "test_report"]
+    },
+    "exchange": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "direction": {"enum": ["import", "export", "bidirectional"]},
+        "export_profile": {"$ref": "#/$defs/token"},
+        "field_ownership": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+              "field_id": {"$ref": "#/$defs/token"},
+              "owner": {"enum": ["kn", "counterpart", "shared"]}
+            },
+            "required": ["field_id", "owner"]
+          },
+          "minItems": 0,
+          "uniqueItems": true
+        },
+        "write_approval_reference": {"$ref": "#/$defs/token"}
+      },
+      "required": ["direction", "field_ownership"],
+      "allOf": [
+        {
+          "if": {
+            "properties": {"direction": {"enum": ["export", "bidirectional"]}},
+            "required": ["direction"]
+          },
+          "then": {"required": ["export_profile", "write_approval_reference"]}
+        }
+      ]
+    }
+  }
+}

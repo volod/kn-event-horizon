@@ -42,7 +42,7 @@
   "cli.skos_format_help": "interchange format (skos)",
   "cli.skos_scheme_help": "qualified concept scheme ID, including .scheme",
   "cli.skos_ok": "Exported {scheme_id}: {concepts} concepts; origin {origin}; {verification_state}. Turtle: {path} Label fallbacks: en={fallbacks_en}, uk={fallbacks_uk}.",
-  "cli.catalogue_help": "inspect the source catalogue",
+  "cli.catalogue_help": "list and validate sources",
   "cli.source_list_help": "list sources and their catalogue states",
   "cli.source_heading": "Source catalogue",
   "cli.source_row": "{source_id} | {label} | Priority {priority} | Cadence {cadence} | {state} | Access notes: {access}",
@@ -55,5 +55,9 @@
   "cli.source_retired": "Retired",
   "cli.source_rejected": "Rejected",
   "cli.source_unverified": "Unverified",
-  "cli.source_empty": "The source catalogue is empty."
+  "cli.source_empty": "The source catalogue is empty.",
+  "cli.source_validate_help": "validate a crawler configuration and its enablement evidence",
+  "cli.source_config_help": "crawler configuration YAML file",
+  "cli.source_config_diagnostic": "E_SOURCE_CONFIG at {path} ({rule}): {hint}.",
+  "cli.source_config_ok": "Crawler configuration is valid for {source_id} ({state})."
 }

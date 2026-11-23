@@ -30,6 +30,8 @@ from kn.operations import (
 from kn.quality.project_root import discover_project_root
 from kn.semantic.seeds import import_proposals
 from kn.semantic.skos import export_scheme
+from kn.sources.config import source_validate_operation
+from kn.sources.config.schema import CrawlerConfigError
 
 _LOG = logging.getLogger("kn.operator")
 
@@ -63,6 +65,10 @@ def build_parser(
         dest="action", required=True, title=tr.text("cli.commands"), parser_class=parser_class
     )
     source_actions.add_parser("list", help=tr.text("cli.source_list_help"))
+    validate_source = source_actions.add_parser(
+        "validate", help=tr.text("cli.source_validate_help")
+    )
+    validate_source.add_argument("source", type=Path, help=tr.text("cli.source_config_help"))
     space = subcommands.add_parser("space", help=tr.text("cli.space_help"))
     datasets = space.add_subparsers(
         dest="dataset", required=True, title=tr.text("cli.commands"), parser_class=parser_class
@@ -118,6 +124,11 @@ def main(argv: Sequence[str] | None = None) -> int:
     except RebuildRefused:
         _report_error(translator.text("cli.rebuild_refused"), "E_INPUT", selected.json)
         return 1
+    except CrawlerConfigError as error:
+        diagnostic = error.diagnostic()
+        message = translator.text("cli.source_config_diagnostic", **diagnostic)
+        _report_error(message, "E_SOURCE_CONFIG", selected.json, diagnostic)
+        return 1
     except ContractError as error:
         diagnostic = error.diagnostic()
         message = translator.text("cli.contract_diagnostic", **diagnostic)
@@ -158,6 +169,8 @@ def _run(args: argparse.Namespace) -> dict[str, object]:
     if args.command == "db":
         return database_operation(args.action)
     if args.command == "source":
+        if args.action == "validate":
+            return source_validate_operation(args.source)
         return source_list_operation()
     if args.command == "vocabulary":
         if args.action == "export":
