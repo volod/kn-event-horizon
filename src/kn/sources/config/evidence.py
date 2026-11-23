@@ -41,6 +41,8 @@ def _passing_suites(root: ElementTree.Element, suites: list[ElementTree.Element]
     nonpassing = ("failure", "error", "skipped")
     if any(next(root.iter(tag), None) is not None for tag in nonpassing):
         return False
+    if set(root.iter("testsuite")) != set(suites):
+        return False
     for suite in {root, *suites}:
         if any(suite.get(name, "0") != "0" for name in ("failures", "errors", "skipped")):
             return False
@@ -48,6 +50,8 @@ def _passing_suites(root: ElementTree.Element, suites: list[ElementTree.Element]
         if suite.get("tests", str(len(cases))) != str(len(cases)):
             return False
     cases = [case for suite in suites for case in suite.findall("testcase")]
+    if set(cases) != set(root.iter("testcase")):
+        return False
     return bool(cases) and all(case.get("name", "").strip() for case in cases)
 
 

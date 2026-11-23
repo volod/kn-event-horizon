@@ -106,12 +106,20 @@ parameters fail validation.
 Use `approval.state: enabled` with an approver and an approval reference. The corresponding
 rights review must record granted permission, a terms URI, reviewer, review timestamp with
 offset, licence, export policy, and retention. Raw retention must fit within the review.
+Raw redistribution must also fit the export policy. Both `owner_private` and `forbidden`
+require `raw.redistribution: forbidden`. A restricted export policy permits forbidden or
+restricted raw redistribution.
 
 List nonempty fixture files in `verification.fixtures` and put a pytest JUnit XML report path
 in `verification.test_report`. Use paths relative to the repository root or, for a standalone
 configuration, its containing directory. The UTF-8 report must fit within 8 MiB and contain at
-least one named test case and zero failures, errors or skips. Review establishes which source and
-revision the report covers. The command validates evidence for the declared configuration state.
+least one named test case and zero failures, errors or skips. Use a single `testsuite` or
+a `testsuites` root with direct suite children. Each case belongs directly to its suite.
+Review establishes which source and revision the report covers.
+
+A successful draft validation reports its declared state, including `candidate`. A fetch consumer
+must validate the reviewed profile and require `approval.state: enabled` before issuing a scheduled
+request.
 
 ### Error codes and pagination
 
@@ -167,6 +175,8 @@ formats and explains the manual review for rights and sensitive data.
 [Catalogue record 0035](../records/0035-source-management-source-catalogue-import.md),
 [crawler configuration record 0036](../records/0036-source-management-crawler-config-schema.md),
 and [onboarding record 0037](../records/0037-source-management-source-onboarding-workflow.md)
-preserve acceptance evidence. The
-[source admission audit](../plan.md#source-admission-implementation-audit) and
-[source health](../plan.md#ingestion-state-contracts) remain in the forward plan.
+preserve the member gates. The
+[source admission audit](../records/0038-source-management-source-admission-implementation-audit.md)
+records the handoff. Run history and source health belong to
+[ingestion state contracts](../plan.md#ingestion-state-contracts) and
+[source status monitoring](../plan.md#source-status-monitoring).

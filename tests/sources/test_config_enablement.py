@@ -55,6 +55,7 @@ def _write(root: Path, config: dict[str, Any]) -> Path:
 @pytest.mark.parametrize(
     ("block", "key"),
     [
+        ("rights", "permission"),
         ("rights", "terms_uri"),
         ("rights", "reviewer"),
         ("rights", "reviewed_at"),
@@ -112,6 +113,8 @@ def test_enabled_config_validates_review_and_artifacts(
         '<testsuite><testcase name="source"><failure/></testcase></testsuite>',
         '<testsuite><testcase name="source"><error/></testcase></testsuite>',
         '<testsuite><testcase name="source"><skipped/></testcase></testsuite>',
+        '<testsuite><testcase name="source"/><testsuite failures="1"/></testsuite>',
+        '<testsuites><testsuite><testcase name="source"/></testsuite><testcase/></testsuites>',
         "<testsuites><testcase/></testsuites>",
         "<testsuite><testcase/></testsuite>",
         '<!DOCTYPE testsuite><testsuite><testcase name="source"/></testsuite>',
@@ -123,6 +126,19 @@ def test_incomplete_and_failed_reports_refuse_enablement(
 ) -> None:
     (tmp_path / "run/suite.xml").write_text(content, encoding="ascii")
     with pytest.raises(CrawlerConfigError, match=r"\$/verification/test_report: testReport"):
+        load_crawler_config(_write(tmp_path, enabled))
+
+
+@pytest.mark.parametrize(
+    ("policy", "redistribution"),
+    [("forbidden", "restricted"), ("owner_private", "permitted"), ("restricted", "permitted")],
+)
+def test_raw_redistribution_cannot_exceed_reviewed_rights(
+    enabled: dict[str, Any], tmp_path: Path, policy: str, redistribution: str
+) -> None:
+    enabled["rights"]["export_policy"] = policy
+    enabled["raw"]["redistribution"] = redistribution
+    with pytest.raises(CrawlerConfigError, match=r"\$/raw/redistribution"):
         load_crawler_config(_write(tmp_path, enabled))
 
 

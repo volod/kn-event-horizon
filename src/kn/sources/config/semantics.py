@@ -10,6 +10,13 @@ from kn.sources.config.schedule import valid_cron
 from kn.sources.config.schema import CrawlerConfigError
 from kn.sources.seeds import reviewed_catalogue
 
+_RAW_REDISTRIBUTION = {
+    "owner_private": {"forbidden"},
+    "forbidden": {"forbidden"},
+    "restricted": {"forbidden", "restricted"},
+    "permitted": {"forbidden", "restricted", "permitted"},
+}
+
 
 @cache
 def _reviewed_ids() -> frozenset[str]:
@@ -108,20 +115,26 @@ def _rights(config: dict[str, Any]) -> None:
     raw = config["raw"]
     if "retention_days" in rights:
         _ordered(raw["retention_days"], rights["retention_days"], ("raw", "retention_days"))
-    if config["access"]["method"] == "adapter_api":
-        private = rights.get("export_policy", "owner_private") in {"owner_private", "forbidden"}
-        if not private and "owner_export_approval_reference" not in rights:
-            raise CrawlerConfigError(
-                ("rights", "owner_export_approval_reference"),
-                "ownerPrivate",
-                "record owner approval before changing the private export policy",
-            )
-        if private and raw["redistribution"] != "forbidden":
-            raise CrawlerConfigError(
-                ("raw", "redistribution"),
-                "ownerPrivate",
-                "forbid redistribution of private raw data",
-            )
+    adapter = config["access"]["method"] == "adapter_api"
+    policy = rights.get("export_policy", "owner_private" if adapter else None)
+    if policy is not None and raw["redistribution"] not in _RAW_REDISTRIBUTION[policy]:
+        raise CrawlerConfigError(
+            ("raw", "redistribution"),
+            "ownerPrivate"
+            if adapter and policy in {"owner_private", "forbidden"}
+            else "exportPolicy",
+            "keep raw redistribution within reviewed export rights",
+        )
+    if (
+        adapter
+        and policy in {"restricted", "permitted"}
+        and "owner_export_approval_reference" not in rights
+    ):
+        raise CrawlerConfigError(
+            ("rights", "owner_export_approval_reference"),
+            "ownerPrivate",
+            "record owner approval before changing the private export policy",
+        )
 
 
 def _data_rules(config: dict[str, Any]) -> None:

@@ -52,5 +52,6 @@ decision. A record can name a plan task by ID because plan headings disappear on
 | 0035 | `source-catalogue-import` | [Source catalogue import](0035-source-management-source-catalogue-import.md) |
 | 0036 | `crawler-config-schema` | [Crawler configuration schema](0036-source-management-crawler-config-schema.md) |
 | 0037 | `source-onboarding-workflow` | [Source onboarding workflow](0037-source-management-source-onboarding-workflow.md) |
+| 0038 | `source-admission-implementation-audit` | [Source admission implementation audit](0038-source-management-source-admission-implementation-audit.md) |
 
-Next unused sequence is `0038`.
+Next unused sequence is `0039`.

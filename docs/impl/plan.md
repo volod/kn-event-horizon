@@ -30,27 +30,6 @@ archive.
 
 ## Agent Implementation Tasks
 
-### Source keys and onboarding -- `source-admission`
-
-#### source-admission-implementation-audit
-
-Verify the source keys and onboarding handoff against its specification and the next consumer.
-
-- Serves: `source-management` -- [Source management](../design/spec.md#source-management)
-- Agent status: CLEAR
-- Dependencies: The [catalogue import record](records/0035-source-management-source-catalogue-import.md),
-  the [crawler configuration record](records/0036-source-management-crawler-config-schema.md),
-  the [source onboarding record](records/0037-source-management-source-onboarding-workflow.md),
-  and the [audit procedure](../guide/planning-workflow.md#implementation-audits).
-- User-visible outcome: The group has reproducible acceptance evidence and owned follow-up work.
-- Scope boundary: Verify this group's outputs, failure paths and downstream compatibility.
-- Data and artifact paths: Group fixtures, the numbered audit record and the forward plan.
-- Execution path: Run onboarding with a disabled catalogue entry and a configuration missing its
-  rights decision. Check that neither can schedule a fetch.
-- Acceptance gates: Reproduce the member gates, run the six audit checks and record each finding
-  with evidence, severity and disposition. Fix blockers before handoff and run `make ci`.
-- Documentation target: [Current-state areas](current.md#areas).
-
 ### Identity lifecycle and matching -- `identity-resolution`
 
 #### object-lifecycle-operations
@@ -135,8 +114,7 @@ Claims, evidence, and canonical facts need contracts that carry every provenance
 - Serves: `evidence-model` -- [Evidence model](../design/spec.md#evidence-model)
 - Agent status: CLEAR
 - Execution stage: MODEL
-- Requires: `source-admission-implementation-audit`
-- Dependencies: none.
+- Dependencies: The [qualified catalogue IDs](current/source-management.md#reviewed-inputs-and-identifiers).
 - User-visible outcome: The `evidence` schema holds alias, claim, claim confirmation, evidence,
   relation assertion, canonical fact, and review item datasets with value-or-missing-reason
   constraints. Every claim refers to a KN ID and to its source record version.
@@ -452,7 +430,7 @@ monitoring workflows begin writing them.
 - Serves: `ingestion-engine` -- [Ingestion engine](../design/spec.md#ingestion-engine)
 - Agent status: CLEAR
 - Execution stage: MODEL
-- Requires: `source-admission-implementation-audit`, `object-identity-implementation-audit`,
+- Requires: `object-identity-implementation-audit`,
   `raw-archive-implementation-audit`
 - Dependencies: The run, cursor, archive and monitoring fields in the specification and the
   [standard source error codes](current/source-management.md#error-codes-and-pagination).
@@ -478,10 +456,10 @@ The core engine must run end to end on a synthetic source before any real source
 
 - Serves: `ingestion-engine` -- [Ingestion engine](../design/spec.md#ingestion-engine)
 - Agent status: CLEAR
-- Requires: `raw-archive-implementation-audit`, `source-admission-implementation-audit`,
+- Requires: `raw-archive-implementation-audit`,
   `object-identity-implementation-audit`, `identity-resolution-implementation-audit`,
   `ingestion-state-contracts`
-- Dependencies: none.
+- Dependencies: The [crawler validator and enablement evidence](current/source-management.md#enablement-evidence).
 - User-visible outcome: `kn source run` and `kn source replay` process a synthetic fixture source
   served locally. They write WARC records, identity events, claims with evidence linked to KN IDs,
   a checkpoint, and a run summary with a declared status.
@@ -494,8 +472,10 @@ The core engine must run end to end on a synthetic source before any real source
   `tests/engine/`, `tests/fixtures/fixture/`.
 - Execution path: Fixture-first. A test HTTP server serves the synthetic payloads, the adapter
   interface returns records and claims, and the loader is the only writer.
-- Acceptance gates: A second run is idempotent. An interrupted run resumes from the committed
-  checkpoint. A crash after archive finalization and before SQL commit reuses the archived batch.
+- Acceptance gates: A catalogue candidate and a profile missing its rights decision each
+  produce zero requests at the fixture server. A second enabled run is idempotent. An interrupted
+  run resumes from the committed checkpoint. A crash after archive finalization and before SQL
+  commit reuses the archived batch.
   Replay without network yields the same claims. Russian, Chinese, and unknown-language source
   fixtures ingest without English or Ukrainian translations, retain originals and provenance, and
   use the [shared text selector](current/localization.md#source-data-and-translations) for display.
@@ -1373,7 +1353,6 @@ Space sources need documented terms and limits before any sample is fetched.
 - Serves: `space-elt` -- [Space ELT](../design/spec.md#space-elt)
 - Agent status: CLEAR
 - Research: yes
-- Requires: `source-admission-implementation-audit`
 - Dependencies: Public documentation for CelesTrak, Launch Library 2, Natural Earth, and the four
   candidate operators' terms of use.
 - User-visible outcome: A terms dossier per pilot source (licence, rate limits, permitted access,
@@ -1852,7 +1831,6 @@ GDELT access paths need verified limits and dictionary editions before collectio
 - Serves: `gdelt-elt` -- [GDELT ELT](../design/spec.md#gdelt-elt)
 - Agent status: CLEAR
 - Research: yes
-- Requires: `source-admission-implementation-audit`
 - Dependencies: Public GDELT documentation, codebooks, and lookup indexes.
 - User-visible outcome: A dossier covering current DOC 2.0 API limits, terms, codebook editions,
   and dictionary locations, plus catalogue state `investigating`.
@@ -2035,7 +2013,6 @@ Microelectronics sources need documented terms before sampling.
 - Serves: `microelectronics-elt` -- [Microelectronics ELT](../design/spec.md#microelectronics-elt)
 - Agent status: CLEAR
 - Research: yes
-- Requires: `source-admission-implementation-audit`
 - Dependencies: Public documentation for MLPerf Tiny results, CORDIS datasets, and the watchlist
   vendors' datasheet terms, plus official trade-policy publications for target markets.
 - User-visible outcome: A dossier per first-wave source and catalogue state `investigating`.
