@@ -24,6 +24,7 @@ deployment order, with paths relative to the registry and an optional reference 
 {
   "contracts": [
     {"path": "system/1.0.0.json"},
+    {"path": "system/source-catalogue/1.0.0.json"},
     {"path": "satcom/1.0.0.json"},
     {"path": "semantic/1.0.0.json"},
     {"path": "evidence/1.0.0.json"},
@@ -36,7 +37,8 @@ The identity entry deploys the [identity registry and replay model](object-ident
 The semantic entry deploys the [ontology meta-model](ontology-taxonomy.md), with no content import.
 The first entry is the governance contract `kn.system.governance`. Its table
 `system.installed_contracts` is the installed-contract marker: one row per registered contract with
-version, digest, storage schema and table names. `kn.contracts.registry.registered_contracts()`
+version, digest, storage schema and table names. The next entry deploys the
+[source catalogue](source-management.md) beside it. `kn.contracts.registry.registered_contracts()`
 loads and validates every entry without touching a database. It refuses a file outside the registry
 directory, a registry that does not start with the governance contract, a repeated contract ID, a
 field ID used by two contracts, and a table, primary key or index name used twice in one schema.
@@ -92,7 +94,7 @@ schema objects come from SQLAlchemy metadata, and the platform policy from typed
 
 The [shared human verification protocol](evidence-model.md) adds a registered decision-log contract
 and typed record/field targets, UTC/null semantics, authenticated reviewer context, durable history
-and transactional application. The registry now defines 51 tables and 473 fields. Dataset-wide
+and transactional application. The registry now defines 62 tables and 558 fields. Dataset-wide
 coverage and read projections remain open in `human-verification-projections` in the
 [plan](../plan.md).
 

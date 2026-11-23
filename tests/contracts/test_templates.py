@@ -13,6 +13,7 @@ from kn.contracts import load_contract
 from kn.contracts.compiler import compile_contract
 from kn.contracts.diagnostics import ContractError
 from kn.contracts.exports import artifacts
+from kn.contracts.registry import registered_contracts
 from tests.contracts.test_compiler import compiler_document, write_document
 
 
@@ -118,14 +119,10 @@ def test_each_contract_checks_its_own_default_directory(
     compile_contract(contract)
     compile_contract(contract, check=True)
     compile_contract(load_contract(), check=True)
-    assert sorted(path.name for path in (tmp_path / "generated" / "contracts").iterdir()) == [
-        "kn.core.human_verification",
-        "kn.core.identity",
-        "kn.core.semantic",
-        "kn.space.satcom",
-        "kn.system.governance",
-        "space.example",
-    ]
+    assert {path.name for path in (tmp_path / "generated" / "contracts").iterdir()} == {
+        contract.contract_id,
+        *(registered.contract_id for registered in registered_contracts()),
+    }
 
 
 def test_canonical_outputs_ignore_object_key_order_and_bind_reference_payload(

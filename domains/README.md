@@ -2,7 +2,7 @@
 
 Each directory under `domains/` is a knowledge domain package: `space`, `gdelt`, and
 `microelectronics`. The [specification](../docs/design/spec.md#repository-layout) defines the full
-package layout. Each package holds proposals and a reviewed semantic seed file.
+package layout. Each package holds proposals, a reviewed semantic seed file, and a reviewed source catalogue seed file.
 
 ## Seed proposals
 
@@ -53,3 +53,10 @@ publication evidence or a local-vocabulary decision. Four schemes or scoped subs
 remain unverified with reasons. Examples remain fixtures only.
 See the [seed reference](../docs/impl/current/ontology-taxonomy/seeds.md) for review,
 identifiers, unmapped rows and verification.
+
+## Reviewed source catalogue
+
+`<domain>/seeds/sources.json` links to the packaged reviewed source snapshot. The three
+source sheets contribute 119 unverified candidates to the
+[source catalogue](../docs/impl/current/source-management.md) on rebuild. Each seed preserves
+the original worksheet row and cell values.

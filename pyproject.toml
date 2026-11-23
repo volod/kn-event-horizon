@@ -68,6 +68,7 @@ where = ["src"]
 "kn.contracts" = ["resources/**/*.json"]
 "kn.i18n.locales" = ["*/*.json"]
 "kn.semantic" = ["resources/*.json"]
+"kn.sources" = ["resources/*.json", "resources/*.yaml"]
 "kn.db" = ["migrations/*.py", "migrations/versions/*.py"]
 
 [tool.ruff]

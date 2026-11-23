@@ -106,7 +106,7 @@ def _decision(builder: SeedBuilder, row: Proposal) -> tuple[str, str, list[str]]
     if row.workbook == "data_sources_v1" or row.sheet == "12_sources_ingestion":
         return (
             "needs_mapping",
-            "Deferred to source-catalogue-import; candidate sources are not enabled by vocabulary import.",
+            "Source management owns the catalogue and onboarding sheets. Vocabulary import leaves these rows unchanged.",
             [],
         )
     if row.sheet in EXAMPLE_SHEETS:

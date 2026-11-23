@@ -17,6 +17,7 @@ from kn.db.rebuild import rebuild, require_development
 from kn.domains.space.satcom.archive import archive
 from kn.domains.space.satcom.importer import import_package
 from kn.domains.space.satcom.package import read_package
+from kn.sources.catalogue import list_sources
 
 
 def contract_operation(
@@ -89,5 +90,14 @@ def satcom_operation(action: str, source: Path, data_dir: Path) -> dict[str, obj
             "status": "imported" if changed else "already_imported",
             "archive": str(destination),
         }
+    finally:
+        engine.dispose()
+
+
+def source_list_operation() -> dict[str, object]:
+    engine = engine_from_env()
+    try:
+        with engine.connect() as connection:
+            return {"sources": list_sources(connection)}
     finally:
         engine.dispose()

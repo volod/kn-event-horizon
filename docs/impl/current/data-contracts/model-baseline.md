@@ -1,10 +1,10 @@
 # Registered Model Baseline Check
 
-`make model-baseline` provides combined-registry fixture validation for the available governance,
-SATCOM, semantic, human verification and identity contracts: 61 tables and 544 fields. The full
-checkpoint in the [plan](../../plan.md) also requires claims, dataset-wide verification,
-supply, source/run, exchange and canonical domain fixtures. Each delivery group extends the
-subset check. The integrated result and its audit gate release approval.
+`make model-baseline` provides combined-registry fixture validation for governance, the source
+catalogue, SATCOM, semantic, human verification and identity contracts. These define 62 tables
+and 558 fields. The full checkpoint in the [plan](../../plan.md) also requires claims, dataset-wide
+verification, supply, ingestion run, exchange and canonical domain fixtures. Each delivery group
+extends the subset check. The integrated result and its audit gate release approval.
 
 ## Run and evidence
 
@@ -28,17 +28,19 @@ The check also runs as part of `make test-integration` and `make ci-local`.
 ## Coverage
 
 `tests/integration/test_model_baseline.py` compiles and checks the entire registered set, then
-performs two all-schema rebuilds through the normal Alembic path. Each rebuild loads reviewed
-vocabulary seeds, imports the reference-closed 168-row real SATCOM mixture as the space loader,
-and loads the synthetic semantic fixture as the semantic loader. Reimporting SATCOM must be a
-no-op. The fixture supplies decimal weights, condition values, aware timestamps, multilingual
-labels, nulls and a translation review reference alongside the reviewed seeds.
+performs two all-schema rebuilds through the normal Alembic path. Each rebuild loads the
+reviewed source catalogue and vocabulary seeds, imports the reference-closed 168-row real SATCOM
+mixture as the space loader, and loads the synthetic semantic fixture as the semantic loader.
+Reimporting SATCOM must be a no-op. The fixture supplies decimal weights, condition values,
+aware timestamps, multilingual labels, nulls and a translation review reference alongside the
+reviewed seeds.
 
-All 61 tables must contain representative data. Every typed SATCOM row and original CSV cell must
+All 62 tables must contain representative data. Every typed SATCOM row and original CSV cell must
 equal the source fixture, and every semantic field must equal the reviewed seed or native fixture
-value. The test reads all columns, ordered by the contract's primary keys, and requires identical
-snapshots after the two rebuilds. This includes snapshot identifiers, semantic keys, review
-references, original human decision times/actors/IDs and every field of each contract marker.
+value. All 119 catalogue rows must equal the reviewed seeds. The test reads every column and
+orders rows by the contract's primary keys. The two rebuilds must yield identical snapshots,
+including snapshot identifiers, semantic keys, review references, original human decision
+times/actors/IDs and every field of each contract marker.
 Database governance and role verification run after each replay. SATCOM tables retain their
 snapshot meaning and existing
 field IDs; no canonical space table is introduced by this check.

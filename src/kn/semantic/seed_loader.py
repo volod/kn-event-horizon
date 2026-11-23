@@ -1,12 +1,10 @@
 """Load the validated reviewed snapshot into the semantic schema inside the rebuild."""
 
-from typing import Any
-
-from sqlalchemy import MetaData, Table, select
-from sqlalchemy.dialects.postgresql import insert
+from sqlalchemy import MetaData
 from sqlalchemy.engine import Connection
 
 from kn.contracts.sqlalchemy import metadata
+from kn.db.seed_rows import load_seed_rows
 from kn.db.statements import SetConstraints
 from kn.semantic.seeds import reviewed_snapshot
 from kn.semantic.structure import semantic_contract
@@ -20,24 +18,8 @@ def load_reviewed_seeds(connection: Connection) -> None:
     model = metadata(semantic_contract())
     with connection.begin_nested():
         for name, rows in snapshot.items():
-            _load_table(connection, model.tables["semantic." + name], rows)
+            load_seed_rows(connection, model.tables["semantic." + name], rows)
         _check_references(connection, model)
-
-
-def _load_table(connection: Connection, table: Table, rows: list[dict[str, Any]]) -> None:
-    # Explicit nulls give all parameter sets one shape; the semantic contract has no SQL defaults.
-    native = [{column.name: row.get(column.name) for column in table.columns} for row in rows]
-    if not native:
-        return
-    connection.execute(insert(table).on_conflict_do_nothing(), native)
-    keys = [column.name for column in table.primary_key.columns]
-    stored = {
-        tuple(row[key] for key in keys): dict(row)
-        for row in connection.execute(select(table)).mappings()
-    }
-    for row in native:
-        if stored.get(tuple(row[key] for key in keys)) != row:
-            raise ValueError("reviewed seed conflicts with stored content; rebuild required")
 
 
 def _check_references(connection: Connection, model: MetaData) -> None:

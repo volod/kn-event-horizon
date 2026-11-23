@@ -24,6 +24,8 @@ from kn.domains.space.satcom.importer import import_package
 from kn.domains.space.satcom.package import Package, read_package
 from kn.semantic import Snapshot, validate_model
 from kn.semantic.seeds import reviewed_snapshot
+from kn.sources.catalogue import TABLE_NAME
+from kn.sources.seeds import reviewed_catalogue
 from tests.integration.identity_fixtures import seed_identity_fixture
 from tests.integration.review_fixtures import replay_review_fixture
 from tests.integration.semantic_fixtures import native_rows, text_fixture
@@ -32,6 +34,7 @@ from tests.semantic.conftest import REFERENCES
 # Every new owner must supply fixture replay before this suite can cover its registration.
 FIXTURE_OWNERS = {
     "kn.system.governance",
+    "kn.system.source_catalogue",
     "kn.space.satcom",
     "kn.core.semantic",
     "kn.core.human_verification",
@@ -140,6 +143,9 @@ def test_registered_model_fixture_rebuild_is_lossless_and_repeatable(
         snapshot = _snapshot(connection, contracts)
         _assert_satcom(snapshot, package, satcom)
         _assert_semantic(snapshot, semantic, semantic_fixture)
+        assert snapshot[TABLE_NAME] == sorted(
+            reviewed_catalogue(), key=lambda row: row["source_id"]
+        )
         assert all(snapshot.values()), "provide at least one representative row per table"
         (tmp_path / f"rebuild-{iteration + 1}.json").write_text(
             json.dumps(snapshot, default=_encoded, ensure_ascii=True, sort_keys=True, indent=2)

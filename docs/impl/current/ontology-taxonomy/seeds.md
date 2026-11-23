@@ -103,8 +103,9 @@ rows. The [text reference](text.md) describes nullable definitions and translati
 
 The 477 pending rows remain available in the reconciliation and the original proposals:
 
-- 188 source, coverage, watchlist and ingestion rows belong to `source-catalogue-import` and later
-  source onboarding. No source is enabled by this import.
+- Source management owns 188 source, coverage, watchlist and ingestion rows. The
+  [catalogue](../source-management.md) now includes 119 candidate entries. The remaining 69
+  rows supply guidance for later source onboarding and domain work.
 - 195 attribute dictionary rows need the class, type, unit and condition decisions owned by
   `vendor-information-coverage` and `supply-model-contracts`.
 - 31 observation-schema, comparison-profile and rubric rows need typed conditions and attributes

@@ -32,31 +32,6 @@ archive.
 
 ### Source keys and onboarding -- `source-admission`
 
-#### source-catalogue-import
-
-Every candidate source must be visible and disabled before any crawler exists.
-
-- Serves: `source-management` -- [Source management](../design/spec.md#source-management)
-- Agent status: CLEAR
-- Execution stage: MODEL
-- Dependencies: The [reviewed seed hook](current/data-contracts/rebuild.md#reviewed-seed-hook), the
-  [deployment set](current/data-contracts.md#deployment-set) that registers the catalogue contract
-  beside the governance contract in `system`, and the data-source proposal JSON for space,
-  microelectronics, and GDELT; the [shared verification protocol](current/evidence-model.md).
-- User-visible outcome: Every rebuild loads `system.source_catalogue` with 37 space, 65
-  microelectronics, and 17 GDELT candidates. `kn source list` shows them in both locales.
-- Scope boundary: The catalogue contract, original IDs, lifecycle states, and access notes marked
-  unverified. Source rank overrides are validated against catalogue IDs. No crawler
-  configuration and no enablement.
-- Data and artifact paths: `contracts/core/system/`, `domains/<domain>/seeds/sources.json`,
-  `src/kn/sources/`, `tests/sources/`.
-- Execution path: Write reviewed seed files from the proposals and add a catalogue loader to the
-  rebuild hook.
-- Acceptance gates: Every proposal row is loaded or rejected with a reason. Every row is
-  `candidate`. Nothing is schedulable from the catalogue.
-- Documentation target: A new `current/source-management.md` page listed in the
-  [areas index](current.md#areas).
-
 #### crawler-config-schema
 
 Crawler behavior, including ontology mapping, error mapping, and monitoring, must be declared and
@@ -65,8 +40,7 @@ validated.
 - Serves: `source-management` -- [Source management](../design/spec.md#source-management)
 - Agent status: CLEAR
 - Execution stage: MODEL
-- Requires: `source-catalogue-import`
-- Dependencies: none.
+- Dependencies: The [reviewed catalogue and qualified source IDs](current/source-management.md).
 - User-visible outcome: `kn source validate` checks a crawler YAML against its schema and refuses
   enablement without a rights review, an approval reference, fixtures, and passing tests.
 - Scope boundary: The JSON Schema for every block in the specification, including source record
@@ -112,8 +86,9 @@ Verify the source keys and onboarding handoff against its specification and the 
 
 - Serves: `source-management` -- [Source management](../design/spec.md#source-management)
 - Agent status: CLEAR
-- Requires: `source-catalogue-import`, `crawler-config-schema`, `source-onboarding-workflow`
-- Dependencies: Group acceptance records and the
+- Requires: `crawler-config-schema`, `source-onboarding-workflow`
+- Dependencies: The [catalogue import record](records/0035-source-management-source-catalogue-import.md),
+  other group acceptance records, and the
   [audit procedure](../guide/planning-workflow.md#implementation-audits).
 - User-visible outcome: The group has reproducible acceptance evidence and owned follow-up work.
 - Scope boundary: Verify this group's outputs, failure paths and downstream compatibility.
@@ -276,7 +251,7 @@ leaves an object's value. Arrival order must never decide.
 - Serves: `evidence-model` -- [Evidence model](../design/spec.md#evidence-model)
 - Agent status: CLEAR
 - Requires: `evidence-claim-contracts`, `identity-resolution-implementation-audit`
-- Dependencies: none.
+- Dependencies: The [reviewed source rank override format and catalogue IDs](current/source-management.md#reviewed-inputs-and-identifiers).
 - User-visible outcome: The engine projects each field's canonical value through its update
   policy. The modes are `priority`, `latest_observed`, `accumulate`, and `fixed`. A candidate value
   ranks by its best supporting claim: source rank, then evidence class, then data time within one

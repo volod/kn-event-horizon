@@ -1819,7 +1819,7 @@ ready required tasks in written order before optional work.
 | 8 | `object-identity` | planned | KN IDs survive rebuilds; lifecycle, matching, partial-update, and lineage fixtures pass; calibrated classes meet the precision gate | [Registry contracts and replay](../impl/current/object-identity.md) |
 | 9 | `raw-archive` | planned | WARC round trip, atomic write, ledger reindex, redaction, revisit, and corruption checks pass | - |
 | 10 | `part-supply-model` | planned | Every vendor coverage group maps or records an exclusion; part, variant, offer, price, and substitute fixtures pass | - |
-| 11 | `source-management` | planned | Catalogue import is complete; configuration validation refuses unapproved enablement; error and status mapping fixtures pass | - |
+| 11 | `source-management` | planned | Catalogue import is complete; configuration validation refuses unapproved enablement; error and status mapping fixtures pass | [Catalogue import](../impl/current/source-management.md) |
 | 12 | `ingestion-engine` | planned | Failure-mode fixtures yield declared statuses without cursor jumps; two rebuilds produce identical canonical tables; a prefetched package gives one snapshot from every location | - |
 | 13 | `data-interchange` | planned | Contract diffs enforce version bumps; packages reproduce and round-trip; upgrade chains and three-way sync fixtures pass | - |
 | 14 | `inventree-exchange` | planned | The target release imports deterministically; approved plans apply idempotently with read-back; schema drift blocks writes; the upgrade check classifies candidate releases; `vl-itree` passes read and write exchange | - |

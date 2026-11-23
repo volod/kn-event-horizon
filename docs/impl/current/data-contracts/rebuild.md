@@ -29,10 +29,10 @@ replay remain planned.
 owner, in registry order, and records one row per contract in `system.installed_contracts`. A
 rebuild and an upgrade of an empty database therefore use one mechanism. No SQL text is executed;
 the generated `postgresql/schema.sql` is a review artifact only, and an archived source
-`schema.sql` is evidence that nothing reads. The current set holds the governance table in
-`system`, 31 SATCOM tables in `space`, 18 semantic tables in `semantic`, and the human decision
-table in `evidence`, and ten [identity tables](../object-identity.md); the other five schemas have no
-contracted datasets.
+`schema.sql` is evidence that nothing reads. The current set holds governance and source catalogue
+tables in `system`, 31 SATCOM tables in `space`, 18 semantic tables in `semantic`, the human
+decision table in `evidence`, and ten [identity tables](../object-identity.md). The other five
+schemas have no contracted datasets.
 `rebuild()` and `upgrade()` accept another validated set, which the integration tests use for
 fixture contracts in `space` and `semantic`.
 
@@ -62,9 +62,10 @@ that schema's loader role (`SET LOCAL ROLE`), with DML privileges only, and then
 Loaders must use the supplied transaction and must not commit independently. An exception aborts the
 rebuild.
 
-The registry explicitly loads the [reviewed semantic vocabulary](../ontology-taxonomy/seeds.md)
-from packaged files as the semantic loader role. Proposals are never loaded automatically, and
-SATCOM source imports are not seed data. Source catalogue loading remains a separate plan task.
+The registry loads the [reviewed source catalogue](../source-management.md) as the system
+loader and the [reviewed semantic vocabulary](../ontology-taxonomy/seeds.md) as the semantic
+loader. Both use packaged files. Proposal workbooks remain offline inputs. Restore SATCOM
+source data with the separate import command.
 
 ## Verification
 
@@ -91,7 +92,7 @@ schemas and checks that the catalog, a sentinel row and verification are unchang
 probes roll back and leave the original database in place. Run `make test-integration` against local
 PostGIS, or `make ci-local` for both the required CI gate and local-only tests.
 The [combined fixture check](model-baseline.md) rebuilds the complete registered set twice with
-real SATCOM, semantic rows, identity history and durable human decision fixtures together; its
+the source catalogue, real SATCOM, semantic rows, identity history and human decision fixtures; its
 full-model checkpoint remains open.
 
 [Task record 0016](../../records/0016-data-contracts-development-rebuild-mode.md) preserves acceptance

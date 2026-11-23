@@ -27,3 +27,4 @@ documentation checks that came with the template are described in the
 | [Ontology and taxonomy](current/ontology-taxonomy.md) | Semantic contracts, qualified IDs, source-language labels with explicit fallback, hierarchy and mapping validation, verification evidence, tags and comparison policy definitions, reviewed vocabulary seeds, all-row proposal reconciliation and SKOS Turtle export |
 | [Evidence model](current/evidence-model.md) | Typed human verification decisions, trusted actor boundary, coverage/resolver interfaces, durable journal, transactional application, causal conflicts and exact-target replay |
 | [Object identity](current/object-identity.md) | Identity registry contracts, UUIDv7 anchors, durable event journal, lifecycle validation, profile wire schema and transactional rebuild replay |
+| [Source management](current/source-management.md) | Reviewed source catalogue, qualified IDs, bilingual listing, and rank override reference validation |

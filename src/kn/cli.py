@@ -21,7 +21,12 @@ from kn.i18n import DEFAULT_LOCALE, Translator
 from kn.i18n.output import render_result
 from kn.i18n.parser import OperatorParser, parse_interface_options
 from kn.metadata import project_info
-from kn.operations import contract_operation, database_operation, satcom_operation
+from kn.operations import (
+    contract_operation,
+    database_operation,
+    satcom_operation,
+    source_list_operation,
+)
 from kn.quality.project_root import discover_project_root
 from kn.semantic.seeds import import_proposals
 from kn.semantic.skos import export_scheme
@@ -53,6 +58,11 @@ def build_parser(
     contracts.add_argument("--check", action="store_true", help=tr.text("cli.check_help"))
     database = subcommands.add_parser("db", help=tr.text("cli.db_help"))
     database.add_argument("action", choices=("upgrade", "verify", "rebuild"))
+    source = subcommands.add_parser("source", help=tr.text("cli.catalogue_help"))
+    source_actions = source.add_subparsers(
+        dest="action", required=True, title=tr.text("cli.commands"), parser_class=parser_class
+    )
+    source_actions.add_parser("list", help=tr.text("cli.source_list_help"))
     space = subcommands.add_parser("space", help=tr.text("cli.space_help"))
     datasets = space.add_subparsers(
         dest="dataset", required=True, title=tr.text("cli.commands"), parser_class=parser_class
@@ -147,6 +157,8 @@ def _run(args: argparse.Namespace) -> dict[str, object]:
         )
     if args.command == "db":
         return database_operation(args.action)
+    if args.command == "source":
+        return source_list_operation()
     if args.command == "vocabulary":
         if args.action == "export":
             return export_scheme(args.scheme, args.data_dir)
