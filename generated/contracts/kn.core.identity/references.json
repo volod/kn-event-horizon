@@ -1,0 +1,1 @@
+{"comparator":{"identity.exact":{"description":"Byte-exact digest equality; no scored matching."}},"matchProfile":{"identity.anchor-v1":{"description":"Registry anchor uniqueness only; entity-class scored profiles are later work."}},"normalizer":{"identity.exact":{"description":"Preserve the digest of an exact source-qualified key."}}}

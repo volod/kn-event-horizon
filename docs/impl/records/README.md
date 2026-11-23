@@ -47,5 +47,6 @@ decision. A record can name a plan task by ID because plan headings disappear on
 | 0030 | `development-model-baseline` (open) | [0030-data-contracts-development-model-baseline.md](0030-data-contracts-development-model-baseline.md) |
 | 0031 | `adhoc` dependency-ordered plan | [0031-adhoc-dependency-ordered-plan.md](0031-adhoc-dependency-ordered-plan.md) |
 | 0032 | `human-verification-contracts` | [0032-evidence-model-human-verification-contracts.md](0032-evidence-model-human-verification-contracts.md) |
+| 0033 | `identity-registry-contracts` | [0033-object-identity-identity-registry-contracts.md](0033-object-identity-identity-registry-contracts.md) |
 
-Next unused sequence is `0033`.
+Next unused sequence is `0034`.

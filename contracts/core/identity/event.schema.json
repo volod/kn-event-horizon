@@ -1,0 +1,969 @@
+{
+  "$defs": {
+    "Assignment": {
+      "additionalProperties": false,
+      "properties": {
+        "item_id": {
+          "pattern": "^[0-9a-f]{64}$",
+          "title": "Item Id",
+          "type": "string"
+        },
+        "successor": {
+          "minLength": 1,
+          "pattern": "\\S",
+          "title": "Successor",
+          "type": "string"
+        }
+      },
+      "required": [
+        "item_id",
+        "successor"
+      ],
+      "title": "Assignment",
+      "type": "object"
+    },
+    "Attribute": {
+      "additionalProperties": false,
+      "properties": {
+        "kind": {
+          "const": "attribute_recorded",
+          "default": "attribute_recorded",
+          "title": "Kind",
+          "type": "string"
+        },
+        "kn_id": {
+          "minLength": 1,
+          "pattern": "\\S",
+          "title": "Kn Id",
+          "type": "string"
+        },
+        "field_id": {
+          "minLength": 1,
+          "pattern": "\\S",
+          "title": "Field Id",
+          "type": "string"
+        },
+        "original": {
+          "minLength": 1,
+          "pattern": "\\S",
+          "title": "Original",
+          "type": "string"
+        },
+        "normalized": {
+          "minLength": 1,
+          "pattern": "\\S",
+          "title": "Normalized",
+          "type": "string"
+        },
+        "normalizer": {
+          "minLength": 1,
+          "pattern": "\\S",
+          "title": "Normalizer",
+          "type": "string"
+        },
+        "profile_digest": {
+          "pattern": "^[0-9a-f]{64}$",
+          "title": "Profile Digest",
+          "type": "string"
+        }
+      },
+      "required": [
+        "kn_id",
+        "field_id",
+        "original",
+        "normalized",
+        "normalizer",
+        "profile_digest"
+      ],
+      "title": "Attribute",
+      "type": "object"
+    },
+    "Candidate": {
+      "additionalProperties": false,
+      "properties": {
+        "kn_id": {
+          "minLength": 1,
+          "pattern": "\\S",
+          "title": "Kn Id",
+          "type": "string"
+        },
+        "features": {
+          "items": {
+            "$ref": "#/$defs/Feature"
+          },
+          "title": "Features",
+          "type": "array"
+        },
+        "score": {
+          "title": "Score",
+          "type": "number"
+        },
+        "probability": {
+          "maximum": 1,
+          "minimum": 0,
+          "title": "Probability",
+          "type": "number"
+        }
+      },
+      "required": [
+        "kn_id",
+        "features",
+        "score",
+        "probability"
+      ],
+      "title": "Candidate",
+      "type": "object"
+    },
+    "ChangeSet": {
+      "additionalProperties": false,
+      "properties": {
+        "kind": {
+          "const": "changes_recorded",
+          "default": "changes_recorded",
+          "title": "Kind",
+          "type": "string"
+        },
+        "version_id": {
+          "pattern": "^[0-9a-f]{64}$",
+          "title": "Version Id",
+          "type": "string"
+        },
+        "changes": {
+          "items": {
+            "$ref": "#/$defs/FieldChange"
+          },
+          "title": "Changes",
+          "type": "array"
+        }
+      },
+      "required": [
+        "version_id",
+        "changes"
+      ],
+      "title": "ChangeSet",
+      "type": "object"
+    },
+    "Feature": {
+      "additionalProperties": false,
+      "properties": {
+        "field_id": {
+          "minLength": 1,
+          "pattern": "\\S",
+          "title": "Field Id",
+          "type": "string"
+        },
+        "left": {
+          "anyOf": [
+            {
+              "minLength": 1,
+              "pattern": "\\S",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Left"
+        },
+        "right": {
+          "anyOf": [
+            {
+              "minLength": 1,
+              "pattern": "\\S",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Right"
+        },
+        "comparator": {
+          "minLength": 1,
+          "pattern": "\\S",
+          "title": "Comparator",
+          "type": "string"
+        },
+        "outcome": {
+          "minLength": 1,
+          "pattern": "\\S",
+          "title": "Outcome",
+          "type": "string"
+        },
+        "weight": {
+          "title": "Weight",
+          "type": "number"
+        }
+      },
+      "required": [
+        "field_id",
+        "left",
+        "right",
+        "comparator",
+        "outcome",
+        "weight"
+      ],
+      "title": "Feature",
+      "type": "object"
+    },
+    "FieldChange": {
+      "additionalProperties": false,
+      "properties": {
+        "field_id": {
+          "minLength": 1,
+          "pattern": "\\S",
+          "title": "Field Id",
+          "type": "string"
+        },
+        "change": {
+          "enum": [
+            "added",
+            "changed",
+            "unchanged",
+            "emptied",
+            "not_stated"
+          ],
+          "title": "Change",
+          "type": "string"
+        },
+        "previous_hash": {
+          "anyOf": [
+            {
+              "pattern": "^[0-9a-f]{64}$",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Previous Hash"
+        },
+        "current_hash": {
+          "anyOf": [
+            {
+              "pattern": "^[0-9a-f]{64}$",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Current Hash"
+        }
+      },
+      "required": [
+        "field_id",
+        "change"
+      ],
+      "title": "FieldChange",
+      "type": "object"
+    },
+    "FieldHash": {
+      "additionalProperties": false,
+      "properties": {
+        "field_id": {
+          "minLength": 1,
+          "pattern": "\\S",
+          "title": "Field Id",
+          "type": "string"
+        },
+        "digest": {
+          "pattern": "^[0-9a-f]{64}$",
+          "title": "Digest",
+          "type": "string"
+        }
+      },
+      "required": [
+        "field_id",
+        "digest"
+      ],
+      "title": "FieldHash",
+      "type": "object"
+    },
+    "Identifier": {
+      "additionalProperties": false,
+      "properties": {
+        "kind": {
+          "const": "identifier_recorded",
+          "default": "identifier_recorded",
+          "title": "Kind",
+          "type": "string"
+        },
+        "kn_id": {
+          "minLength": 1,
+          "pattern": "\\S",
+          "title": "Kn Id",
+          "type": "string"
+        },
+        "namespace": {
+          "minLength": 1,
+          "pattern": "\\S",
+          "title": "Namespace",
+          "type": "string"
+        },
+        "value": {
+          "minLength": 1,
+          "pattern": "\\S",
+          "title": "Value",
+          "type": "string"
+        },
+        "issuer": {
+          "minLength": 1,
+          "pattern": "\\S",
+          "title": "Issuer",
+          "type": "string"
+        },
+        "authority": {
+          "enum": [
+            "authoritative",
+            "source_qualified",
+            "weak"
+          ],
+          "title": "Authority",
+          "type": "string"
+        },
+        "valid_from": {
+          "format": "date-time",
+          "title": "Valid From",
+          "type": "string"
+        },
+        "valid_to": {
+          "anyOf": [
+            {
+              "format": "date-time",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Valid To"
+        }
+      },
+      "required": [
+        "kn_id",
+        "namespace",
+        "value",
+        "issuer",
+        "authority",
+        "valid_from"
+      ],
+      "title": "Identifier",
+      "type": "object"
+    },
+    "Link": {
+      "additionalProperties": false,
+      "properties": {
+        "kind": {
+          "const": "linked",
+          "default": "linked",
+          "title": "Kind",
+          "type": "string"
+        },
+        "record": {
+          "$ref": "#/$defs/SourceKey"
+        },
+        "kn_id": {
+          "minLength": 1,
+          "pattern": "\\S",
+          "title": "Kn Id",
+          "type": "string"
+        },
+        "method": {
+          "enum": [
+            "authoritative_key",
+            "existing_link",
+            "scored_match",
+            "review_decision",
+            "minted"
+          ],
+          "title": "Method",
+          "type": "string"
+        },
+        "score": {
+          "anyOf": [
+            {
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Score"
+        },
+        "probability": {
+          "anyOf": [
+            {
+              "maximum": 1,
+              "minimum": 0,
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Probability"
+        },
+        "profile_digest": {
+          "anyOf": [
+            {
+              "pattern": "^[0-9a-f]{64}$",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Profile Digest"
+        },
+        "profile_version": {
+          "anyOf": [
+            {
+              "minLength": 1,
+              "pattern": "\\S",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Profile Version"
+        },
+        "match_id": {
+          "anyOf": [
+            {
+              "pattern": "^[0-9a-f]{64}$",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Match Id"
+        }
+      },
+      "required": [
+        "record",
+        "kn_id",
+        "method"
+      ],
+      "title": "Link",
+      "type": "object"
+    },
+    "Match": {
+      "additionalProperties": false,
+      "properties": {
+        "kind": {
+          "const": "match_recorded",
+          "default": "match_recorded",
+          "title": "Kind",
+          "type": "string"
+        },
+        "record": {
+          "$ref": "#/$defs/SourceKey"
+        },
+        "profile_digest": {
+          "pattern": "^[0-9a-f]{64}$",
+          "title": "Profile Digest",
+          "type": "string"
+        },
+        "profile_version": {
+          "minLength": 1,
+          "pattern": "\\S",
+          "title": "Profile Version",
+          "type": "string"
+        },
+        "candidates": {
+          "items": {
+            "$ref": "#/$defs/Candidate"
+          },
+          "title": "Candidates",
+          "type": "array"
+        },
+        "decision": {
+          "enum": [
+            "link",
+            "review",
+            "mint"
+          ],
+          "title": "Decision",
+          "type": "string"
+        },
+        "selected": {
+          "anyOf": [
+            {
+              "minLength": 1,
+              "pattern": "\\S",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Selected"
+        }
+      },
+      "required": [
+        "record",
+        "profile_digest",
+        "profile_version",
+        "candidates",
+        "decision"
+      ],
+      "title": "Match",
+      "type": "object"
+    },
+    "Merge": {
+      "additionalProperties": false,
+      "properties": {
+        "kind": {
+          "const": "merged",
+          "default": "merged",
+          "title": "Kind",
+          "type": "string"
+        },
+        "kn_id": {
+          "minLength": 1,
+          "pattern": "\\S",
+          "title": "Kn Id",
+          "type": "string"
+        },
+        "survivor": {
+          "minLength": 1,
+          "pattern": "\\S",
+          "title": "Survivor",
+          "type": "string"
+        }
+      },
+      "required": [
+        "kn_id",
+        "survivor"
+      ],
+      "title": "Merge",
+      "type": "object"
+    },
+    "Mint": {
+      "additionalProperties": false,
+      "properties": {
+        "kind": {
+          "const": "minted",
+          "default": "minted",
+          "title": "Kind",
+          "type": "string"
+        },
+        "kn_id": {
+          "minLength": 1,
+          "pattern": "\\S",
+          "title": "Kn Id",
+          "type": "string"
+        },
+        "entity_class": {
+          "minLength": 1,
+          "pattern": "\\S",
+          "title": "Entity Class",
+          "type": "string"
+        },
+        "anchor": {
+          "$ref": "#/$defs/SourceKey"
+        }
+      },
+      "required": [
+        "kn_id",
+        "entity_class",
+        "anchor"
+      ],
+      "title": "Mint",
+      "type": "object"
+    },
+    "Reclassify": {
+      "additionalProperties": false,
+      "properties": {
+        "kind": {
+          "const": "reclassified",
+          "default": "reclassified",
+          "title": "Kind",
+          "type": "string"
+        },
+        "kn_id": {
+          "minLength": 1,
+          "pattern": "\\S",
+          "title": "Kn Id",
+          "type": "string"
+        },
+        "successor": {
+          "$ref": "#/$defs/Mint"
+        }
+      },
+      "required": [
+        "kn_id",
+        "successor"
+      ],
+      "title": "Reclassify",
+      "type": "object"
+    },
+    "Restore": {
+      "additionalProperties": false,
+      "properties": {
+        "kind": {
+          "const": "restored",
+          "default": "restored",
+          "title": "Kind",
+          "type": "string"
+        },
+        "kn_id": {
+          "minLength": 1,
+          "pattern": "\\S",
+          "title": "Kn Id",
+          "type": "string"
+        }
+      },
+      "required": [
+        "kn_id"
+      ],
+      "title": "Restore",
+      "type": "object"
+    },
+    "Retire": {
+      "additionalProperties": false,
+      "properties": {
+        "kind": {
+          "const": "retired",
+          "default": "retired",
+          "title": "Kind",
+          "type": "string"
+        },
+        "kn_id": {
+          "minLength": 1,
+          "pattern": "\\S",
+          "title": "Kn Id",
+          "type": "string"
+        }
+      },
+      "required": [
+        "kn_id"
+      ],
+      "title": "Retire",
+      "type": "object"
+    },
+    "SourceKey": {
+      "additionalProperties": false,
+      "properties": {
+        "source": {
+          "minLength": 1,
+          "pattern": "\\S",
+          "title": "Source",
+          "type": "string"
+        },
+        "key": {
+          "minLength": 1,
+          "pattern": "\\S",
+          "title": "Key",
+          "type": "string"
+        }
+      },
+      "required": [
+        "source",
+        "key"
+      ],
+      "title": "SourceKey",
+      "type": "object"
+    },
+    "Split": {
+      "additionalProperties": false,
+      "properties": {
+        "kind": {
+          "const": "split",
+          "default": "split",
+          "title": "Kind",
+          "type": "string"
+        },
+        "kn_id": {
+          "minLength": 1,
+          "pattern": "\\S",
+          "title": "Kn Id",
+          "type": "string"
+        },
+        "successors": {
+          "items": {
+            "minLength": 1,
+            "pattern": "\\S",
+            "type": "string"
+          },
+          "minItems": 2,
+          "title": "Successors",
+          "type": "array"
+        },
+        "assignments": {
+          "default": [],
+          "items": {
+            "$ref": "#/$defs/Assignment"
+          },
+          "title": "Assignments",
+          "type": "array"
+        }
+      },
+      "required": [
+        "kn_id",
+        "successors"
+      ],
+      "title": "Split",
+      "type": "object"
+    },
+    "Unlink": {
+      "additionalProperties": false,
+      "properties": {
+        "kind": {
+          "const": "unlinked",
+          "default": "unlinked",
+          "title": "Kind",
+          "type": "string"
+        },
+        "record": {
+          "$ref": "#/$defs/SourceKey"
+        },
+        "kn_id": {
+          "minLength": 1,
+          "pattern": "\\S",
+          "title": "Kn Id",
+          "type": "string"
+        }
+      },
+      "required": [
+        "record",
+        "kn_id"
+      ],
+      "title": "Unlink",
+      "type": "object"
+    },
+    "Version": {
+      "additionalProperties": false,
+      "properties": {
+        "kind": {
+          "const": "version_recorded",
+          "default": "version_recorded",
+          "title": "Kind",
+          "type": "string"
+        },
+        "record": {
+          "$ref": "#/$defs/SourceKey"
+        },
+        "version": {
+          "minLength": 1,
+          "pattern": "\\S",
+          "title": "Version",
+          "type": "string"
+        },
+        "content_digest": {
+          "pattern": "^[0-9a-f]{64}$",
+          "title": "Content Digest",
+          "type": "string"
+        },
+        "field_hashes": {
+          "items": {
+            "$ref": "#/$defs/FieldHash"
+          },
+          "title": "Field Hashes",
+          "type": "array"
+        },
+        "observed_at": {
+          "format": "date-time",
+          "title": "Observed At",
+          "type": "string"
+        },
+        "source_updated_at": {
+          "anyOf": [
+            {
+              "format": "date-time",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Source Updated At"
+        },
+        "fetch_id": {
+          "minLength": 1,
+          "pattern": "\\S",
+          "title": "Fetch Id",
+          "type": "string"
+        },
+        "archive_record_id": {
+          "minLength": 1,
+          "pattern": "\\S",
+          "title": "Archive Record Id",
+          "type": "string"
+        },
+        "code_digest": {
+          "pattern": "^[0-9a-f]{64}$",
+          "title": "Code Digest",
+          "type": "string"
+        }
+      },
+      "required": [
+        "record",
+        "version",
+        "content_digest",
+        "field_hashes",
+        "observed_at",
+        "fetch_id",
+        "archive_record_id",
+        "code_digest"
+      ],
+      "title": "Version",
+      "type": "object"
+    }
+  },
+  "additionalProperties": false,
+  "properties": {
+    "schema_version": {
+      "const": 1,
+      "default": 1,
+      "title": "Schema Version",
+      "type": "integer"
+    },
+    "sequence": {
+      "minimum": 1,
+      "title": "Sequence",
+      "type": "integer"
+    },
+    "previous": {
+      "anyOf": [
+        {
+          "pattern": "^[0-9a-f]{64}$",
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "title": "Previous"
+    },
+    "event_id": {
+      "pattern": "^[0-9a-f]{64}$",
+      "title": "Event Id",
+      "type": "string"
+    },
+    "occurred_at": {
+      "format": "date-time",
+      "title": "Occurred At",
+      "type": "string"
+    },
+    "actor": {
+      "minLength": 1,
+      "pattern": "\\S",
+      "title": "Actor",
+      "type": "string"
+    },
+    "reason": {
+      "minLength": 1,
+      "pattern": "\\S",
+      "title": "Reason",
+      "type": "string"
+    },
+    "evidence": {
+      "minLength": 1,
+      "pattern": "\\S",
+      "title": "Evidence",
+      "type": "string"
+    },
+    "decision_ref": {
+      "anyOf": [
+        {
+          "minLength": 1,
+          "pattern": "\\S",
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Decision Ref"
+    },
+    "payload": {
+      "discriminator": {
+        "mapping": {
+          "attribute_recorded": "#/$defs/Attribute",
+          "changes_recorded": "#/$defs/ChangeSet",
+          "identifier_recorded": "#/$defs/Identifier",
+          "linked": "#/$defs/Link",
+          "match_recorded": "#/$defs/Match",
+          "merged": "#/$defs/Merge",
+          "minted": "#/$defs/Mint",
+          "reclassified": "#/$defs/Reclassify",
+          "restored": "#/$defs/Restore",
+          "retired": "#/$defs/Retire",
+          "split": "#/$defs/Split",
+          "unlinked": "#/$defs/Unlink",
+          "version_recorded": "#/$defs/Version"
+        },
+        "propertyName": "kind"
+      },
+      "oneOf": [
+        {
+          "$ref": "#/$defs/Mint"
+        },
+        {
+          "$ref": "#/$defs/Link"
+        },
+        {
+          "$ref": "#/$defs/Unlink"
+        },
+        {
+          "$ref": "#/$defs/Merge"
+        },
+        {
+          "$ref": "#/$defs/Split"
+        },
+        {
+          "$ref": "#/$defs/Reclassify"
+        },
+        {
+          "$ref": "#/$defs/Retire"
+        },
+        {
+          "$ref": "#/$defs/Restore"
+        },
+        {
+          "$ref": "#/$defs/Identifier"
+        },
+        {
+          "$ref": "#/$defs/Attribute"
+        },
+        {
+          "$ref": "#/$defs/Version"
+        },
+        {
+          "$ref": "#/$defs/Match"
+        },
+        {
+          "$ref": "#/$defs/ChangeSet"
+        }
+      ],
+      "title": "Payload"
+    }
+  },
+  "required": [
+    "sequence",
+    "previous",
+    "event_id",
+    "occurred_at",
+    "actor",
+    "reason",
+    "evidence",
+    "payload"
+  ],
+  "title": "Event",
+  "type": "object"
+}

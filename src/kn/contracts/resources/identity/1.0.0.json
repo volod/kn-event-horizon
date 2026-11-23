@@ -1,0 +1,1661 @@
+{
+  "apiVersion": "v3.1.0",
+  "kind": "DataContract",
+  "id": "kn.core.identity",
+  "name": "KN identity registry",
+  "version": "1.0.0",
+  "status": "draft",
+  "customProperties": [
+    {
+      "property": "kn.storageSchema",
+      "value": "identity"
+    }
+  ],
+  "schema": [
+    {
+      "name": "lifecycle_events",
+      "logicalType": "object",
+      "physicalType": "table",
+      "description": "Disposable projection of identity events: lifecycle events.",
+      "customProperties": [
+        {
+          "property": "kn.humanVerification",
+          "value": {
+            "strategy": "decision-log",
+            "resolver": "contract-v1",
+            "recordFields": [
+              "identity.lifecycle_events.event_id",
+              "identity.lifecycle_events.sequence",
+              "identity.lifecycle_events.previous",
+              "identity.lifecycle_events.kind",
+              "identity.lifecycle_events.occurred_at",
+              "identity.lifecycle_events.actor",
+              "identity.lifecycle_events.reason",
+              "identity.lifecycle_events.evidence",
+              "identity.lifecycle_events.decision_ref",
+              "identity.lifecycle_events.event_json"
+            ],
+            "fieldContexts": {}
+          }
+        },
+        {
+          "property": "kn.index",
+          "value": [
+            {
+              "name": "identity_event_sequence_idx",
+              "fields": [
+                "sequence"
+              ],
+              "method": "btree",
+              "unique": true
+            }
+          ]
+        }
+      ],
+      "properties": [
+        {
+          "name": "event_id",
+          "logicalType": "string",
+          "required": true,
+          "primaryKey": true,
+          "description": "lifecycle_events: event id.",
+          "customProperties": [
+            {
+              "property": "kn.fieldId",
+              "value": "identity.lifecycle_events.event_id"
+            }
+          ]
+        },
+        {
+          "name": "sequence",
+          "logicalType": "integer",
+          "required": true,
+          "primaryKey": false,
+          "description": "lifecycle_events: sequence.",
+          "customProperties": [
+            {
+              "property": "kn.fieldId",
+              "value": "identity.lifecycle_events.sequence"
+            }
+          ]
+        },
+        {
+          "name": "previous",
+          "logicalType": "string",
+          "required": false,
+          "primaryKey": false,
+          "description": "lifecycle_events: previous.",
+          "customProperties": [
+            {
+              "property": "kn.fieldId",
+              "value": "identity.lifecycle_events.previous"
+            },
+            {
+              "property": "kn.foreignKey",
+              "value": {
+                "table": "lifecycle_events",
+                "fields": [
+                  "previous"
+                ],
+                "targetFields": [
+                  "event_id"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "kind",
+          "logicalType": "string",
+          "required": true,
+          "primaryKey": false,
+          "description": "lifecycle_events: kind.",
+          "customProperties": [
+            {
+              "property": "kn.fieldId",
+              "value": "identity.lifecycle_events.kind"
+            },
+            {
+              "property": "kn.enum",
+              "value": [
+                "minted",
+                "linked",
+                "unlinked",
+                "merged",
+                "split",
+                "reclassified",
+                "retired",
+                "restored",
+                "identifier_recorded",
+                "attribute_recorded",
+                "version_recorded",
+                "match_recorded",
+                "changes_recorded"
+              ]
+            }
+          ]
+        },
+        {
+          "name": "occurred_at",
+          "logicalType": "timestamp",
+          "required": true,
+          "primaryKey": false,
+          "description": "lifecycle_events: occurred at.",
+          "customProperties": [
+            {
+              "property": "kn.fieldId",
+              "value": "identity.lifecycle_events.occurred_at"
+            }
+          ]
+        },
+        {
+          "name": "actor",
+          "logicalType": "string",
+          "required": true,
+          "primaryKey": false,
+          "description": "lifecycle_events: actor.",
+          "customProperties": [
+            {
+              "property": "kn.fieldId",
+              "value": "identity.lifecycle_events.actor"
+            }
+          ]
+        },
+        {
+          "name": "reason",
+          "logicalType": "string",
+          "required": true,
+          "primaryKey": false,
+          "description": "lifecycle_events: reason.",
+          "customProperties": [
+            {
+              "property": "kn.fieldId",
+              "value": "identity.lifecycle_events.reason"
+            }
+          ]
+        },
+        {
+          "name": "evidence",
+          "logicalType": "string",
+          "required": true,
+          "primaryKey": false,
+          "description": "lifecycle_events: evidence.",
+          "customProperties": [
+            {
+              "property": "kn.fieldId",
+              "value": "identity.lifecycle_events.evidence"
+            }
+          ]
+        },
+        {
+          "name": "decision_ref",
+          "logicalType": "string",
+          "required": false,
+          "primaryKey": false,
+          "description": "lifecycle_events: decision ref.",
+          "customProperties": [
+            {
+              "property": "kn.fieldId",
+              "value": "identity.lifecycle_events.decision_ref"
+            }
+          ]
+        },
+        {
+          "name": "event_json",
+          "logicalType": "string",
+          "required": true,
+          "primaryKey": false,
+          "description": "lifecycle_events: event json.",
+          "customProperties": [
+            {
+              "property": "kn.fieldId",
+              "value": "identity.lifecycle_events.event_json"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "objects",
+      "logicalType": "object",
+      "physicalType": "table",
+      "description": "Disposable projection of identity events: objects.",
+      "customProperties": [
+        {
+          "property": "kn.humanVerification",
+          "value": {
+            "strategy": "external",
+            "resolver": "contract-v1",
+            "recordFields": [
+              "identity.objects.kn_id",
+              "identity.objects.entity_class",
+              "identity.objects.state",
+              "identity.objects.anchor_record_id",
+              "identity.objects.mint_event",
+              "identity.objects.current_redirect"
+            ],
+            "fieldContexts": {}
+          }
+        },
+        {
+          "property": "kn.index",
+          "value": [
+            {
+              "name": "identity_anchor_idx",
+              "fields": [
+                "anchor_record_id"
+              ],
+              "method": "btree",
+              "unique": true
+            }
+          ]
+        },
+        {
+          "property": "kn.identity",
+          "value": {
+            "strategy": "uuidv7",
+            "externalKeys": [
+              {
+                "namespace": "kn",
+                "fields": [
+                  "kn_id"
+                ],
+                "authority": "authoritative"
+              }
+            ],
+            "sourceRecordKey": [
+              "anchor_record_id"
+            ],
+            "attributes": [
+              {
+                "fieldId": "identity.objects.anchor_record_id",
+                "normalizer": "identity.exact",
+                "comparator": "identity.exact",
+                "authority": "source_qualified"
+              }
+            ],
+            "matchProfile": "identity.anchor-v1"
+          }
+        }
+      ],
+      "properties": [
+        {
+          "name": "kn_id",
+          "logicalType": "string",
+          "required": true,
+          "primaryKey": true,
+          "description": "objects: kn id.",
+          "customProperties": [
+            {
+              "property": "kn.fieldId",
+              "value": "identity.objects.kn_id"
+            }
+          ]
+        },
+        {
+          "name": "entity_class",
+          "logicalType": "string",
+          "required": true,
+          "primaryKey": false,
+          "description": "objects: entity class.",
+          "customProperties": [
+            {
+              "property": "kn.fieldId",
+              "value": "identity.objects.entity_class"
+            }
+          ]
+        },
+        {
+          "name": "state",
+          "logicalType": "string",
+          "required": true,
+          "primaryKey": false,
+          "description": "objects: state.",
+          "customProperties": [
+            {
+              "property": "kn.fieldId",
+              "value": "identity.objects.state"
+            },
+            {
+              "property": "kn.enum",
+              "value": [
+                "active",
+                "merged",
+                "split",
+                "retired"
+              ]
+            }
+          ]
+        },
+        {
+          "name": "anchor_record_id",
+          "logicalType": "string",
+          "required": true,
+          "primaryKey": false,
+          "description": "objects: anchor record id.",
+          "customProperties": [
+            {
+              "property": "kn.fieldId",
+              "value": "identity.objects.anchor_record_id"
+            },
+            {
+              "property": "kn.foreignKey",
+              "value": {
+                "table": "source_records",
+                "fields": [
+                  "anchor_record_id"
+                ],
+                "targetFields": [
+                  "record_id"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "mint_event",
+          "logicalType": "string",
+          "required": true,
+          "primaryKey": false,
+          "description": "objects: mint event.",
+          "customProperties": [
+            {
+              "property": "kn.fieldId",
+              "value": "identity.objects.mint_event"
+            },
+            {
+              "property": "kn.foreignKey",
+              "value": {
+                "table": "lifecycle_events",
+                "fields": [
+                  "mint_event"
+                ],
+                "targetFields": [
+                  "event_id"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "current_redirect",
+          "logicalType": "string",
+          "required": false,
+          "primaryKey": false,
+          "description": "objects: current redirect.",
+          "customProperties": [
+            {
+              "property": "kn.fieldId",
+              "value": "identity.objects.current_redirect"
+            },
+            {
+              "property": "kn.foreignKey",
+              "value": {
+                "table": "objects",
+                "fields": [
+                  "current_redirect"
+                ],
+                "targetFields": [
+                  "kn_id"
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "source_records",
+      "logicalType": "object",
+      "physicalType": "table",
+      "description": "Disposable projection of identity events: source records.",
+      "customProperties": [
+        {
+          "property": "kn.humanVerification",
+          "value": {
+            "strategy": "external",
+            "resolver": "contract-v1",
+            "recordFields": [
+              "identity.source_records.record_id",
+              "identity.source_records.source",
+              "identity.source_records.native_key"
+            ],
+            "fieldContexts": {}
+          }
+        },
+        {
+          "property": "kn.index",
+          "value": [
+            {
+              "name": "identity_source_key_idx",
+              "fields": [
+                "source",
+                "native_key"
+              ],
+              "method": "btree",
+              "unique": true
+            }
+          ]
+        },
+        {
+          "property": "kn.identity",
+          "value": {
+            "strategy": "source_qualified",
+            "externalKeys": [
+              {
+                "namespace": "source-record",
+                "fields": [
+                  "record_id"
+                ],
+                "authority": "source_qualified"
+              }
+            ],
+            "sourceRecordKey": [
+              "record_id"
+            ],
+            "attributes": [
+              {
+                "fieldId": "identity.source_records.record_id",
+                "normalizer": "identity.exact",
+                "comparator": "identity.exact",
+                "authority": "source_qualified"
+              }
+            ],
+            "matchProfile": "identity.anchor-v1"
+          }
+        }
+      ],
+      "properties": [
+        {
+          "name": "record_id",
+          "logicalType": "string",
+          "required": true,
+          "primaryKey": true,
+          "description": "source_records: record id.",
+          "customProperties": [
+            {
+              "property": "kn.fieldId",
+              "value": "identity.source_records.record_id"
+            }
+          ]
+        },
+        {
+          "name": "source",
+          "logicalType": "string",
+          "required": true,
+          "primaryKey": false,
+          "description": "source_records: source.",
+          "customProperties": [
+            {
+              "property": "kn.fieldId",
+              "value": "identity.source_records.source"
+            }
+          ]
+        },
+        {
+          "name": "native_key",
+          "logicalType": "string",
+          "required": true,
+          "primaryKey": false,
+          "description": "source_records: native key.",
+          "customProperties": [
+            {
+              "property": "kn.fieldId",
+              "value": "identity.source_records.native_key"
+            }
+          ]
+        },
+        {
+          "name": "last_seen",
+          "logicalType": "timestamp",
+          "required": false,
+          "primaryKey": false,
+          "description": "source_records: last seen.",
+          "customProperties": [
+            {
+              "property": "kn.fieldId",
+              "value": "identity.source_records.last_seen"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "source_versions",
+      "logicalType": "object",
+      "physicalType": "table",
+      "description": "Disposable projection of identity events: source versions.",
+      "customProperties": [
+        {
+          "property": "kn.humanVerification",
+          "value": {
+            "strategy": "external",
+            "resolver": "contract-v1",
+            "recordFields": [
+              "identity.source_versions.version_id",
+              "identity.source_versions.record_id",
+              "identity.source_versions.version",
+              "identity.source_versions.content_digest",
+              "identity.source_versions.field_hashes_json",
+              "identity.source_versions.observed_at",
+              "identity.source_versions.source_updated_at",
+              "identity.source_versions.fetch_id",
+              "identity.source_versions.archive_record_id",
+              "identity.source_versions.code_digest"
+            ],
+            "fieldContexts": {}
+          }
+        },
+        {
+          "property": "kn.index",
+          "value": [
+            {
+              "name": "identity_record_version_idx",
+              "fields": [
+                "record_id",
+                "version"
+              ],
+              "method": "btree",
+              "unique": true
+            }
+          ]
+        }
+      ],
+      "properties": [
+        {
+          "name": "version_id",
+          "logicalType": "string",
+          "required": true,
+          "primaryKey": true,
+          "description": "source_versions: version id.",
+          "customProperties": [
+            {
+              "property": "kn.fieldId",
+              "value": "identity.source_versions.version_id"
+            },
+            {
+              "property": "kn.foreignKey",
+              "value": {
+                "table": "lifecycle_events",
+                "fields": [
+                  "version_id"
+                ],
+                "targetFields": [
+                  "event_id"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "record_id",
+          "logicalType": "string",
+          "required": true,
+          "primaryKey": false,
+          "description": "source_versions: record id.",
+          "customProperties": [
+            {
+              "property": "kn.fieldId",
+              "value": "identity.source_versions.record_id"
+            },
+            {
+              "property": "kn.foreignKey",
+              "value": {
+                "table": "source_records",
+                "fields": [
+                  "record_id"
+                ],
+                "targetFields": [
+                  "record_id"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "version",
+          "logicalType": "string",
+          "required": true,
+          "primaryKey": false,
+          "description": "source_versions: version.",
+          "customProperties": [
+            {
+              "property": "kn.fieldId",
+              "value": "identity.source_versions.version"
+            }
+          ]
+        },
+        {
+          "name": "content_digest",
+          "logicalType": "string",
+          "required": true,
+          "primaryKey": false,
+          "description": "source_versions: content digest.",
+          "customProperties": [
+            {
+              "property": "kn.fieldId",
+              "value": "identity.source_versions.content_digest"
+            }
+          ]
+        },
+        {
+          "name": "field_hashes_json",
+          "logicalType": "string",
+          "required": true,
+          "primaryKey": false,
+          "description": "source_versions: field hashes json.",
+          "customProperties": [
+            {
+              "property": "kn.fieldId",
+              "value": "identity.source_versions.field_hashes_json"
+            }
+          ]
+        },
+        {
+          "name": "observed_at",
+          "logicalType": "timestamp",
+          "required": true,
+          "primaryKey": false,
+          "description": "source_versions: observed at.",
+          "customProperties": [
+            {
+              "property": "kn.fieldId",
+              "value": "identity.source_versions.observed_at"
+            }
+          ]
+        },
+        {
+          "name": "source_updated_at",
+          "logicalType": "timestamp",
+          "required": false,
+          "primaryKey": false,
+          "description": "source_versions: source updated at.",
+          "customProperties": [
+            {
+              "property": "kn.fieldId",
+              "value": "identity.source_versions.source_updated_at"
+            }
+          ]
+        },
+        {
+          "name": "fetch_id",
+          "logicalType": "string",
+          "required": true,
+          "primaryKey": false,
+          "description": "source_versions: fetch id.",
+          "customProperties": [
+            {
+              "property": "kn.fieldId",
+              "value": "identity.source_versions.fetch_id"
+            }
+          ]
+        },
+        {
+          "name": "archive_record_id",
+          "logicalType": "string",
+          "required": true,
+          "primaryKey": false,
+          "description": "source_versions: archive record id.",
+          "customProperties": [
+            {
+              "property": "kn.fieldId",
+              "value": "identity.source_versions.archive_record_id"
+            }
+          ]
+        },
+        {
+          "name": "code_digest",
+          "logicalType": "string",
+          "required": true,
+          "primaryKey": false,
+          "description": "source_versions: code digest.",
+          "customProperties": [
+            {
+              "property": "kn.fieldId",
+              "value": "identity.source_versions.code_digest"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "identifiers",
+      "logicalType": "object",
+      "physicalType": "table",
+      "description": "Disposable projection of identity events: identifiers.",
+      "customProperties": [
+        {
+          "property": "kn.humanVerification",
+          "value": {
+            "strategy": "external",
+            "resolver": "contract-v1",
+            "recordFields": [
+              "identity.identifiers.identifier_id",
+              "identity.identifiers.kn_id",
+              "identity.identifiers.namespace",
+              "identity.identifiers.value",
+              "identity.identifiers.issuer",
+              "identity.identifiers.authority",
+              "identity.identifiers.valid_from",
+              "identity.identifiers.valid_to",
+              "identity.identifiers.evidence"
+            ],
+            "fieldContexts": {}
+          }
+        }
+      ],
+      "properties": [
+        {
+          "name": "identifier_id",
+          "logicalType": "string",
+          "required": true,
+          "primaryKey": true,
+          "description": "identifiers: identifier id.",
+          "customProperties": [
+            {
+              "property": "kn.fieldId",
+              "value": "identity.identifiers.identifier_id"
+            },
+            {
+              "property": "kn.foreignKey",
+              "value": {
+                "table": "lifecycle_events",
+                "fields": [
+                  "identifier_id"
+                ],
+                "targetFields": [
+                  "event_id"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "kn_id",
+          "logicalType": "string",
+          "required": true,
+          "primaryKey": false,
+          "description": "identifiers: kn id.",
+          "customProperties": [
+            {
+              "property": "kn.fieldId",
+              "value": "identity.identifiers.kn_id"
+            },
+            {
+              "property": "kn.foreignKey",
+              "value": {
+                "table": "objects",
+                "fields": [
+                  "kn_id"
+                ],
+                "targetFields": [
+                  "kn_id"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "namespace",
+          "logicalType": "string",
+          "required": true,
+          "primaryKey": false,
+          "description": "identifiers: namespace.",
+          "customProperties": [
+            {
+              "property": "kn.fieldId",
+              "value": "identity.identifiers.namespace"
+            }
+          ]
+        },
+        {
+          "name": "value",
+          "logicalType": "string",
+          "required": true,
+          "primaryKey": false,
+          "description": "identifiers: value.",
+          "customProperties": [
+            {
+              "property": "kn.fieldId",
+              "value": "identity.identifiers.value"
+            }
+          ]
+        },
+        {
+          "name": "issuer",
+          "logicalType": "string",
+          "required": true,
+          "primaryKey": false,
+          "description": "identifiers: issuer.",
+          "customProperties": [
+            {
+              "property": "kn.fieldId",
+              "value": "identity.identifiers.issuer"
+            }
+          ]
+        },
+        {
+          "name": "authority",
+          "logicalType": "string",
+          "required": true,
+          "primaryKey": false,
+          "description": "identifiers: authority.",
+          "customProperties": [
+            {
+              "property": "kn.fieldId",
+              "value": "identity.identifiers.authority"
+            },
+            {
+              "property": "kn.enum",
+              "value": [
+                "authoritative",
+                "source_qualified",
+                "weak"
+              ]
+            }
+          ]
+        },
+        {
+          "name": "valid_from",
+          "logicalType": "timestamp",
+          "required": true,
+          "primaryKey": false,
+          "description": "identifiers: valid from.",
+          "customProperties": [
+            {
+              "property": "kn.fieldId",
+              "value": "identity.identifiers.valid_from"
+            }
+          ]
+        },
+        {
+          "name": "valid_to",
+          "logicalType": "timestamp",
+          "required": false,
+          "primaryKey": false,
+          "description": "identifiers: valid to.",
+          "customProperties": [
+            {
+              "property": "kn.fieldId",
+              "value": "identity.identifiers.valid_to"
+            }
+          ]
+        },
+        {
+          "name": "evidence",
+          "logicalType": "string",
+          "required": true,
+          "primaryKey": false,
+          "description": "identifiers: evidence.",
+          "customProperties": [
+            {
+              "property": "kn.fieldId",
+              "value": "identity.identifiers.evidence"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "attributes",
+      "logicalType": "object",
+      "physicalType": "table",
+      "description": "Disposable projection of identity events: attributes.",
+      "customProperties": [
+        {
+          "property": "kn.humanVerification",
+          "value": {
+            "strategy": "external",
+            "resolver": "contract-v1",
+            "recordFields": [
+              "identity.attributes.attribute_id",
+              "identity.attributes.kn_id",
+              "identity.attributes.field_id",
+              "identity.attributes.original",
+              "identity.attributes.normalized",
+              "identity.attributes.normalizer",
+              "identity.attributes.profile_digest",
+              "identity.attributes.evidence"
+            ],
+            "fieldContexts": {}
+          }
+        }
+      ],
+      "properties": [
+        {
+          "name": "attribute_id",
+          "logicalType": "string",
+          "required": true,
+          "primaryKey": true,
+          "description": "attributes: attribute id.",
+          "customProperties": [
+            {
+              "property": "kn.fieldId",
+              "value": "identity.attributes.attribute_id"
+            },
+            {
+              "property": "kn.foreignKey",
+              "value": {
+                "table": "lifecycle_events",
+                "fields": [
+                  "attribute_id"
+                ],
+                "targetFields": [
+                  "event_id"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "kn_id",
+          "logicalType": "string",
+          "required": true,
+          "primaryKey": false,
+          "description": "attributes: kn id.",
+          "customProperties": [
+            {
+              "property": "kn.fieldId",
+              "value": "identity.attributes.kn_id"
+            },
+            {
+              "property": "kn.foreignKey",
+              "value": {
+                "table": "objects",
+                "fields": [
+                  "kn_id"
+                ],
+                "targetFields": [
+                  "kn_id"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "field_id",
+          "logicalType": "string",
+          "required": true,
+          "primaryKey": false,
+          "description": "attributes: field id.",
+          "customProperties": [
+            {
+              "property": "kn.fieldId",
+              "value": "identity.attributes.field_id"
+            }
+          ]
+        },
+        {
+          "name": "original",
+          "logicalType": "string",
+          "required": true,
+          "primaryKey": false,
+          "description": "attributes: original.",
+          "customProperties": [
+            {
+              "property": "kn.fieldId",
+              "value": "identity.attributes.original"
+            }
+          ]
+        },
+        {
+          "name": "normalized",
+          "logicalType": "string",
+          "required": true,
+          "primaryKey": false,
+          "description": "attributes: normalized.",
+          "customProperties": [
+            {
+              "property": "kn.fieldId",
+              "value": "identity.attributes.normalized"
+            }
+          ]
+        },
+        {
+          "name": "normalizer",
+          "logicalType": "string",
+          "required": true,
+          "primaryKey": false,
+          "description": "attributes: normalizer.",
+          "customProperties": [
+            {
+              "property": "kn.fieldId",
+              "value": "identity.attributes.normalizer"
+            }
+          ]
+        },
+        {
+          "name": "profile_digest",
+          "logicalType": "string",
+          "required": true,
+          "primaryKey": false,
+          "description": "attributes: profile digest.",
+          "customProperties": [
+            {
+              "property": "kn.fieldId",
+              "value": "identity.attributes.profile_digest"
+            }
+          ]
+        },
+        {
+          "name": "evidence",
+          "logicalType": "string",
+          "required": true,
+          "primaryKey": false,
+          "description": "attributes: evidence.",
+          "customProperties": [
+            {
+              "property": "kn.fieldId",
+              "value": "identity.attributes.evidence"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "links",
+      "logicalType": "object",
+      "physicalType": "table",
+      "description": "Disposable projection of identity events: links.",
+      "customProperties": [
+        {
+          "property": "kn.humanVerification",
+          "value": {
+            "strategy": "external",
+            "resolver": "contract-v1",
+            "recordFields": [
+              "identity.links.link_id",
+              "identity.links.record_id",
+              "identity.links.kn_id",
+              "identity.links.method",
+              "identity.links.score",
+              "identity.links.probability",
+              "identity.links.profile_digest",
+              "identity.links.profile_version",
+              "identity.links.match_id",
+              "identity.links.decision_ref",
+              "identity.links.ended_event"
+            ],
+            "fieldContexts": {}
+          }
+        },
+        {
+          "property": "kn.index",
+          "value": [
+            {
+              "name": "identity_active_link_idx",
+              "fields": [
+                "record_id"
+              ],
+              "method": "btree",
+              "unique": true,
+              "whereNull": "ended_event"
+            }
+          ]
+        }
+      ],
+      "properties": [
+        {
+          "name": "link_id",
+          "logicalType": "string",
+          "required": true,
+          "primaryKey": true,
+          "description": "links: link id.",
+          "customProperties": [
+            {
+              "property": "kn.fieldId",
+              "value": "identity.links.link_id"
+            },
+            {
+              "property": "kn.foreignKey",
+              "value": {
+                "table": "lifecycle_events",
+                "fields": [
+                  "link_id"
+                ],
+                "targetFields": [
+                  "event_id"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "record_id",
+          "logicalType": "string",
+          "required": true,
+          "primaryKey": false,
+          "description": "links: record id.",
+          "customProperties": [
+            {
+              "property": "kn.fieldId",
+              "value": "identity.links.record_id"
+            },
+            {
+              "property": "kn.foreignKey",
+              "value": {
+                "table": "source_records",
+                "fields": [
+                  "record_id"
+                ],
+                "targetFields": [
+                  "record_id"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "kn_id",
+          "logicalType": "string",
+          "required": true,
+          "primaryKey": false,
+          "description": "links: kn id.",
+          "customProperties": [
+            {
+              "property": "kn.fieldId",
+              "value": "identity.links.kn_id"
+            },
+            {
+              "property": "kn.foreignKey",
+              "value": {
+                "table": "objects",
+                "fields": [
+                  "kn_id"
+                ],
+                "targetFields": [
+                  "kn_id"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "method",
+          "logicalType": "string",
+          "required": true,
+          "primaryKey": false,
+          "description": "links: method.",
+          "customProperties": [
+            {
+              "property": "kn.fieldId",
+              "value": "identity.links.method"
+            },
+            {
+              "property": "kn.enum",
+              "value": [
+                "authoritative_key",
+                "existing_link",
+                "scored_match",
+                "review_decision",
+                "minted"
+              ]
+            }
+          ]
+        },
+        {
+          "name": "score",
+          "logicalType": "number",
+          "required": false,
+          "primaryKey": false,
+          "description": "links: score.",
+          "customProperties": [
+            {
+              "property": "kn.fieldId",
+              "value": "identity.links.score"
+            }
+          ]
+        },
+        {
+          "name": "probability",
+          "logicalType": "number",
+          "required": false,
+          "primaryKey": false,
+          "description": "links: probability.",
+          "customProperties": [
+            {
+              "property": "kn.fieldId",
+              "value": "identity.links.probability"
+            }
+          ]
+        },
+        {
+          "name": "profile_digest",
+          "logicalType": "string",
+          "required": false,
+          "primaryKey": false,
+          "description": "links: profile digest.",
+          "customProperties": [
+            {
+              "property": "kn.fieldId",
+              "value": "identity.links.profile_digest"
+            }
+          ]
+        },
+        {
+          "name": "profile_version",
+          "logicalType": "string",
+          "required": false,
+          "primaryKey": false,
+          "description": "links: profile version.",
+          "customProperties": [
+            {
+              "property": "kn.fieldId",
+              "value": "identity.links.profile_version"
+            }
+          ]
+        },
+        {
+          "name": "match_id",
+          "logicalType": "string",
+          "required": false,
+          "primaryKey": false,
+          "description": "links: match id.",
+          "customProperties": [
+            {
+              "property": "kn.fieldId",
+              "value": "identity.links.match_id"
+            },
+            {
+              "property": "kn.foreignKey",
+              "value": {
+                "table": "matches",
+                "fields": [
+                  "match_id"
+                ],
+                "targetFields": [
+                  "match_id"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "decision_ref",
+          "logicalType": "string",
+          "required": false,
+          "primaryKey": false,
+          "description": "links: decision ref.",
+          "customProperties": [
+            {
+              "property": "kn.fieldId",
+              "value": "identity.links.decision_ref"
+            }
+          ]
+        },
+        {
+          "name": "ended_event",
+          "logicalType": "string",
+          "required": false,
+          "primaryKey": false,
+          "description": "links: ended event.",
+          "customProperties": [
+            {
+              "property": "kn.fieldId",
+              "value": "identity.links.ended_event"
+            },
+            {
+              "property": "kn.foreignKey",
+              "value": {
+                "table": "lifecycle_events",
+                "fields": [
+                  "ended_event"
+                ],
+                "targetFields": [
+                  "event_id"
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "matches",
+      "logicalType": "object",
+      "physicalType": "table",
+      "description": "Disposable projection of identity events: matches.",
+      "customProperties": [
+        {
+          "property": "kn.humanVerification",
+          "value": {
+            "strategy": "external",
+            "resolver": "contract-v1",
+            "recordFields": [
+              "identity.matches.match_id",
+              "identity.matches.record_id",
+              "identity.matches.profile_digest",
+              "identity.matches.profile_version",
+              "identity.matches.candidates_json",
+              "identity.matches.decision",
+              "identity.matches.selected",
+              "identity.matches.decision_ref"
+            ],
+            "fieldContexts": {}
+          }
+        }
+      ],
+      "properties": [
+        {
+          "name": "match_id",
+          "logicalType": "string",
+          "required": true,
+          "primaryKey": true,
+          "description": "matches: match id.",
+          "customProperties": [
+            {
+              "property": "kn.fieldId",
+              "value": "identity.matches.match_id"
+            },
+            {
+              "property": "kn.foreignKey",
+              "value": {
+                "table": "lifecycle_events",
+                "fields": [
+                  "match_id"
+                ],
+                "targetFields": [
+                  "event_id"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "record_id",
+          "logicalType": "string",
+          "required": true,
+          "primaryKey": false,
+          "description": "matches: record id.",
+          "customProperties": [
+            {
+              "property": "kn.fieldId",
+              "value": "identity.matches.record_id"
+            },
+            {
+              "property": "kn.foreignKey",
+              "value": {
+                "table": "source_records",
+                "fields": [
+                  "record_id"
+                ],
+                "targetFields": [
+                  "record_id"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "profile_digest",
+          "logicalType": "string",
+          "required": true,
+          "primaryKey": false,
+          "description": "matches: profile digest.",
+          "customProperties": [
+            {
+              "property": "kn.fieldId",
+              "value": "identity.matches.profile_digest"
+            }
+          ]
+        },
+        {
+          "name": "profile_version",
+          "logicalType": "string",
+          "required": true,
+          "primaryKey": false,
+          "description": "matches: profile version.",
+          "customProperties": [
+            {
+              "property": "kn.fieldId",
+              "value": "identity.matches.profile_version"
+            }
+          ]
+        },
+        {
+          "name": "candidates_json",
+          "logicalType": "string",
+          "required": true,
+          "primaryKey": false,
+          "description": "matches: candidates json.",
+          "customProperties": [
+            {
+              "property": "kn.fieldId",
+              "value": "identity.matches.candidates_json"
+            }
+          ]
+        },
+        {
+          "name": "decision",
+          "logicalType": "string",
+          "required": true,
+          "primaryKey": false,
+          "description": "matches: decision.",
+          "customProperties": [
+            {
+              "property": "kn.fieldId",
+              "value": "identity.matches.decision"
+            },
+            {
+              "property": "kn.enum",
+              "value": [
+                "link",
+                "review",
+                "mint"
+              ]
+            }
+          ]
+        },
+        {
+          "name": "selected",
+          "logicalType": "string",
+          "required": false,
+          "primaryKey": false,
+          "description": "matches: selected.",
+          "customProperties": [
+            {
+              "property": "kn.fieldId",
+              "value": "identity.matches.selected"
+            },
+            {
+              "property": "kn.foreignKey",
+              "value": {
+                "table": "objects",
+                "fields": [
+                  "selected"
+                ],
+                "targetFields": [
+                  "kn_id"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "decision_ref",
+          "logicalType": "string",
+          "required": false,
+          "primaryKey": false,
+          "description": "matches: decision ref.",
+          "customProperties": [
+            {
+              "property": "kn.fieldId",
+              "value": "identity.matches.decision_ref"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "change_sets",
+      "logicalType": "object",
+      "physicalType": "table",
+      "description": "Disposable projection of identity events: change sets.",
+      "customProperties": [
+        {
+          "property": "kn.humanVerification",
+          "value": {
+            "strategy": "external",
+            "resolver": "contract-v1",
+            "recordFields": [
+              "identity.change_sets.change_set_id",
+              "identity.change_sets.version_id",
+              "identity.change_sets.changes_json"
+            ],
+            "fieldContexts": {}
+          }
+        },
+        {
+          "property": "kn.index",
+          "value": [
+            {
+              "name": "identity_changes_version_idx",
+              "fields": [
+                "version_id"
+              ],
+              "method": "btree",
+              "unique": true
+            }
+          ]
+        }
+      ],
+      "properties": [
+        {
+          "name": "change_set_id",
+          "logicalType": "string",
+          "required": true,
+          "primaryKey": true,
+          "description": "change_sets: change set id.",
+          "customProperties": [
+            {
+              "property": "kn.fieldId",
+              "value": "identity.change_sets.change_set_id"
+            },
+            {
+              "property": "kn.foreignKey",
+              "value": {
+                "table": "lifecycle_events",
+                "fields": [
+                  "change_set_id"
+                ],
+                "targetFields": [
+                  "event_id"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "version_id",
+          "logicalType": "string",
+          "required": true,
+          "primaryKey": false,
+          "description": "change_sets: version id.",
+          "customProperties": [
+            {
+              "property": "kn.fieldId",
+              "value": "identity.change_sets.version_id"
+            },
+            {
+              "property": "kn.foreignKey",
+              "value": {
+                "table": "source_versions",
+                "fields": [
+                  "version_id"
+                ],
+                "targetFields": [
+                  "version_id"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "changes_json",
+          "logicalType": "string",
+          "required": true,
+          "primaryKey": false,
+          "description": "change_sets: changes json.",
+          "customProperties": [
+            {
+              "property": "kn.fieldId",
+              "value": "identity.change_sets.changes_json"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "redirects",
+      "logicalType": "object",
+      "physicalType": "table",
+      "description": "Disposable projection of identity events: redirects.",
+      "customProperties": [
+        {
+          "property": "kn.humanVerification",
+          "value": {
+            "strategy": "external",
+            "resolver": "contract-v1",
+            "recordFields": [
+              "identity.redirects.kn_id",
+              "identity.redirects.successor"
+            ],
+            "fieldContexts": {}
+          }
+        }
+      ],
+      "properties": [
+        {
+          "name": "kn_id",
+          "logicalType": "string",
+          "required": true,
+          "primaryKey": true,
+          "description": "redirects: kn id.",
+          "customProperties": [
+            {
+              "property": "kn.fieldId",
+              "value": "identity.redirects.kn_id"
+            },
+            {
+              "property": "kn.foreignKey",
+              "value": {
+                "table": "objects",
+                "fields": [
+                  "kn_id"
+                ],
+                "targetFields": [
+                  "kn_id"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "successor",
+          "logicalType": "string",
+          "required": true,
+          "primaryKey": true,
+          "description": "redirects: successor.",
+          "customProperties": [
+            {
+              "property": "kn.fieldId",
+              "value": "identity.redirects.successor"
+            },
+            {
+              "property": "kn.foreignKey",
+              "value": {
+                "table": "objects",
+                "fields": [
+                  "successor"
+                ],
+                "targetFields": [
+                  "kn_id"
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

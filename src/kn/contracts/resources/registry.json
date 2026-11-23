@@ -11,6 +11,10 @@
     },
     {
       "path": "evidence/1.0.0.json"
+    },
+    {
+      "path": "identity/1.0.0.json",
+      "references": "identity/references.json"
     }
   ]
 }

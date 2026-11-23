@@ -17,7 +17,8 @@ All tables inside KN schemas are disposable, including obsolete tables absent fr
 contract. This replaces the earlier SATCOM-only rebuild that kept unmanaged tables inside `space`.
 Separate databases, schemas outside the KN list, PostGIS in `public`, and files under `DATA_DIR`
 are preserved. A rebuild clears imported SATCOM rows; restore them explicitly with the import
-command. Raw archive replay, identity event replay and decision replay remain planned.
+command. Identity events replay automatically before seeds; raw archive replay and all-target human decision
+replay remain planned.
 
 ## Execution and transaction boundary
 
@@ -30,7 +31,8 @@ rebuild and an upgrade of an empty database therefore use one mechanism. No SQL 
 the generated `postgresql/schema.sql` is a review artifact only, and an archived source
 `schema.sql` is evidence that nothing reads. The current set holds the governance table in
 `system`, 31 SATCOM tables in `space`, 18 semantic tables in `semantic`, and the human decision
-table in `evidence`; the other six schemas have no contracted datasets.
+table in `evidence`, and ten [identity tables](../object-identity.md); the other five schemas have no
+contracted datasets.
 `rebuild()` and `upgrade()` accept another validated set, which the integration tests use for
 fixture contracts in `space` and `semantic`.
 
@@ -38,8 +40,8 @@ The caller owns the transaction. A nested transaction groups all KN schemas, bec
 references and the migration marker must stay consistent. The shared platform advisory lock
 serializes bootstrap, upgrade and rebuild. Rebuild reflects only KN tables without following
 foreign keys outside them, drops the tables without cascade, then drops the empty schemas with
-SQLAlchemy `DropSchema`, which PostgreSQL applies as `RESTRICT`. It then loads reviewed seeds and
-verifies the database before returning.
+SQLAlchemy `DropSchema`, which PostgreSQL applies as `RESTRICT`. It then replays the durable
+identity journal, loads reviewed seeds and verifies the database before returning.
 
 External dependencies refuse instead of being cascaded away. Non-table schema objects that the
 compiler does not manage, such as views, functions or standalone sequences, also refuse if they
@@ -89,8 +91,8 @@ schemas and checks that the catalog, a sentinel row and verification are unchang
 probes roll back and leave the original database in place. Run `make test-integration` against local
 PostGIS, or `make ci-local` for both the required CI gate and local-only tests.
 The [combined fixture check](model-baseline.md) rebuilds the complete registered set twice with
-real SATCOM, semantic rows and durable human decision fixtures together; its full-model checkpoint
-remains open.
+real SATCOM, semantic rows, identity history and durable human decision fixtures together; its
+full-model checkpoint remains open.
 
 [Task record 0016](../../records/0016-data-contracts-development-rebuild-mode.md) preserves acceptance
 evidence and the plan transition, and the group audit in

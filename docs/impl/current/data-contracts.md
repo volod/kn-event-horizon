@@ -6,7 +6,7 @@ through a shared path (`prefetched-dataset-method` in the [plan](../plan.md)); t
 SATCOM-specific. SATCOM is a subset of space, not a domain, service, or PostgreSQL schema of its
 own. This implementation supplies the first bounded profile
 of the [data contracts capability](../../design/spec.md#data-contracts). The remaining ontology content,
-identity, interchange and raw replay work stays in the [plan](../plan.md).
+matching, interchange and raw replay work stays in the [plan](../plan.md).
 
 ## One definition for each model
 
@@ -26,11 +26,13 @@ deployment order, with paths relative to the registry and an optional reference 
     {"path": "system/1.0.0.json"},
     {"path": "satcom/1.0.0.json"},
     {"path": "semantic/1.0.0.json"},
-    {"path": "evidence/1.0.0.json"}
+    {"path": "evidence/1.0.0.json"},
+    {"path": "identity/1.0.0.json", "references": "identity/references.json"}
   ]
 }
 ```
 
+The identity entry deploys the [identity registry and replay model](object-identity.md).
 The semantic entry deploys the [ontology meta-model](ontology-taxonomy.md), with no content import.
 The first entry is the governance contract `kn.system.governance`. Its table
 `system.installed_contracts` is the installed-contract marker: one row per registered contract with

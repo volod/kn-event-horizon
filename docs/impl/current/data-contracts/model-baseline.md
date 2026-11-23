@@ -1,11 +1,10 @@
 # Registered Model Baseline Check
 
 `make model-baseline` provides combined-registry fixture validation for the available governance,
-SATCOM, semantic and human verification contracts: 51 tables and 473 fields. It prepares the
+SATCOM, semantic, human verification and identity contracts: 61 tables and 544 fields. It prepares the
 integrated
-development checkpoint. The complete checkpoint remains open in the [plan](../../plan.md): its 15
-remaining
-prerequisite model tasks still need identity, claims, dataset-wide human verification projections,
+development checkpoint. The complete checkpoint remains open in the [plan](../../plan.md): its 14 remaining
+prerequisite model tasks still need claims, dataset-wide human verification projections,
 supply, source/run, exchange and canonical domain contracts. Passing this subset does not accept
 those missing models, adopt a new shared database baseline or freeze a release.
 
@@ -37,7 +36,7 @@ and loads the synthetic semantic fixture as the semantic loader. Reimporting SAT
 no-op. The fixture supplies decimal weights, condition values, aware timestamps, multilingual
 labels, nulls and a translation review reference alongside the reviewed seeds.
 
-All 51 tables must contain representative data. Every typed SATCOM row and original CSV cell must
+All 61 tables must contain representative data. Every typed SATCOM row and original CSV cell must
 equal the source fixture, and every semantic field must equal the reviewed seed or native fixture
 value. The test reads all columns, ordered by the contract's primary keys, and requires identical
 snapshots after the two rebuilds. This includes snapshot identifiers, semantic keys, review
@@ -71,3 +70,7 @@ review of a semantic label identified by namespace and locale. The first rebuild
 fixture decision; the second reuses the same journal and replays the original event. The test
 checks the acceptance stamp as well as the stored event and complete marker snapshots. This
 fixture coverage does not supply dataset-wide registration and read projections.
+
+The [identity fixture](../object-identity.md) seeds the durable journal before either rebuild.
+Identity replay precedes SATCOM import; all lifecycle events, record versions, match features,
+change sets, ownership and flattened redirects survive the two complete snapshots.

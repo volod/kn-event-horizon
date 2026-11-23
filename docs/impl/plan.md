@@ -42,39 +42,6 @@ not move ahead of required work that is ready.
 
 ## Agent Implementation Tasks
 
-### Object identity -- `object-identity`
-
-#### identity-registry-contracts
-
-Every later capability needs one durable KN ID per object before any claim refers to it.
-
-- Serves: `object-identity` -- [Object identity](../design/spec.md#object-identity)
-- Agent status: CLEAR
-- Execution stage: MODEL
-- Dependencies: The [semantic meta-model](current/ontology-taxonomy.md) and
-  [shared human verification protocol](current/evidence-model.md).
-- User-visible outcome: The `identity` schema holds objects, identifiers with authority levels,
-  identity attributes, source records with versions, links, match records, lifecycle events, and
-  redirects. `kn db rebuild` replays the append-only identity event log in `$DATA_DIR/identity/`
-  before any raw record, so every KN ID survives a rebuild.
-- Scope boundary: Contracts with the `kn.identity` extension, including source record keys;
-  constraints (no reused KN ID, one active link per source record, identifiers unique per
-  namespace within their validity, links only to active objects); the event log format and its
-  replay; UUIDv7 minting keyed by the anchoring record. Lifecycle commands, matching execution and change
-  detection come in later tasks.
-  Define source-record versions, change-set/per-field hash storage, matching-record features,
-  scores/profile versions and lifecycle decision references now; later matching/tracking tasks
-  execute those rules without redesigning the storage. Include the shared verification trait.
-- Data and artifact paths: `contracts/core/identity/`, `src/kn/identity/`, `$DATA_DIR/identity/`,
-  `tests/identity/`.
-- Execution path: Write the contracts and the log schema, compile, and test replay against the
-  integration database. Fixture logs cover every event type and every invalid transition.
-- Acceptance gates: Replaying one log twice gives identical tables. Dropping the database and
-  rebuilding keeps every KN ID. A reused ID, a link to a retired object, and a merge into a merged
-  object are rejected. A merged ID resolves to its survivor. `make ci` passes.
-- Documentation target: A new `current/object-identity.md` page listed in the
-  [areas index](current.md#areas).
-
 ### Raw archive -- `raw-archive`
 
 #### warc-raw-store
@@ -168,7 +135,7 @@ Claims, evidence, and canonical facts need contracts that carry every provenance
 - Serves: `evidence-model` -- [Evidence model](../design/spec.md#evidence-model)
 - Agent status: CLEAR
 - Execution stage: MODEL
-- Requires: `identity-registry-contracts`, `source-catalogue-import`
+- Requires: `source-catalogue-import`
 - Dependencies: none.
 - User-visible outcome: The `evidence` schema holds alias, claim, claim confirmation, evidence,
   relation assertion, canonical fact, and review item datasets with value-or-missing-reason
@@ -205,7 +172,7 @@ domain and counterpart shares.
 - Serves: `part-supply-model` -- [Part and supply model](../design/spec.md#part-and-supply-model)
 - Agent status: CLEAR
 - Execution stage: MODEL
-- Requires: `vendor-information-coverage`, `evidence-claim-contracts`, `identity-registry-contracts`
+- Requires: `vendor-information-coverage`, `evidence-claim-contracts`
 - Dependencies: none.
 - User-visible outcome: The `supply` schema holds organization roles, product families and models,
   manufacturer parts, orderable variants, and supplier offers. It also holds price, stock, and
@@ -350,7 +317,7 @@ counterpart begin creating durable references.
 - Serves: `data-interchange` -- [Data interchange](../design/spec.md#data-interchange)
 - Agent status: CLEAR
 - Execution stage: MODEL
-- Requires: `interchange-contract`, `identity-registry-contracts`
+- Requires: `interchange-contract`
 - Dependencies: The ledger and synchronization states in the specification, using synthetic
   counterpart IDs and authored object/version fixtures rather than a live service.
 - User-visible outcome: Registered contracts define counterpart bindings, field ownership,
@@ -543,8 +510,9 @@ Merges, splits, and retirements must be explicit, reviewed, and kept as reversib
 
 - Serves: `object-identity` -- [Object identity](../design/spec.md#object-identity)
 - Agent status: CLEAR
-- Requires: `identity-registry-contracts`, `development-model-baseline`
-- Dependencies: none.
+- Requires: `development-model-baseline`
+- Dependencies: The [registry replay APIs](current/object-identity.md#replay-and-integrity) and
+  [shared trusted review protocol](current/evidence-model.md#trusted-decision-application).
 - User-visible outcome: `kn identity show|resolve|history|merge|split|retire|restore` work in `en`
   and `uk`. Each state change writes a review decision and the identity event that cites it. It
   moves links, so claims follow their source records, and old IDs stay resolvable.
@@ -554,8 +522,8 @@ Merges, splits, and retirements must be explicit, reviewed, and kept as reversib
   for match candidates come in `review-queue-cli`.
 - Data and artifact paths: `src/kn/identity/lifecycle.py`, `src/kn/cli.py`, `$DATA_DIR/decisions/`,
   `tests/identity/`.
-- Execution path: Write fixture-first tests for each transition in the specification table, then
-  the state machine and the CLI with localized messages.
+- Execution path: Extend the registry replay validators with fixture-first operation and review
+  tests, then implement the lifecycle workflow and CLI with localized messages.
 - Acceptance gates: A merge followed by a split restores links deterministically with full history.
   A cross-class merge is refused. A redirect chain resolves in one step. A lookup by a split ID
   returns its successors. Golden outputs exist in both locales.
@@ -575,7 +543,8 @@ decisions.
   source-qualified links, scored matching over declared identity attributes, and alias candidates,
   in that order. Each decision writes a match record with features, comparator outcomes, weights,
   score, probability, profile digest, and the outcome: auto-link, review, or new object.
-- Scope boundary: Matching behavior and validation against the early profile schema, including
+- Scope boundary: Matching behavior and validation against the
+  [early profile schema](../../contracts/core/identity/match-profile.schema.json), including
   rejection of name-only link paths.
   Normalizers for MPNs, organization names, web domains, and identifiers. Blocking, comparators,
   Fellegi-Sunter weights, thresholds and margin, the `calibrated` flag that keeps uncalibrated
@@ -2087,7 +2056,7 @@ lifecycle, or matching is the most expensive kind to fix later.
 
 - Serves: `object-identity` -- [Object identity](../design/spec.md#object-identity)
 - Agent status: CLEAR
-- Requires: `identity-registry-contracts`, `object-lifecycle-operations`, `identity-match-engine`,
+- Requires: `object-lifecycle-operations`, `identity-match-engine`,
   `partial-update-tracking`, `object-lineage-lookup`
 - Dependencies: The accepted task records of the group and the [implementation
   audit](../guide/planning-workflow.md#implementation-audits) checks. `identity-match-calibration`

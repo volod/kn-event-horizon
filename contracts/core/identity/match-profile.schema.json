@@ -1,0 +1,200 @@
+{
+  "$defs": {
+    "Agreement": {
+      "additionalProperties": false,
+      "properties": {
+        "outcome": {
+          "minLength": 1,
+          "pattern": "\\S",
+          "title": "Outcome",
+          "type": "string"
+        },
+        "m": {
+          "$ref": "#/$defs/Chance"
+        },
+        "u": {
+          "$ref": "#/$defs/Chance"
+        }
+      },
+      "required": [
+        "outcome",
+        "m",
+        "u"
+      ],
+      "title": "Agreement",
+      "type": "object"
+    },
+    "Attribute": {
+      "additionalProperties": false,
+      "properties": {
+        "field_id": {
+          "minLength": 1,
+          "pattern": "\\S",
+          "title": "Field Id",
+          "type": "string"
+        },
+        "normalizer": {
+          "minLength": 1,
+          "pattern": "\\S",
+          "title": "Normalizer",
+          "type": "string"
+        },
+        "comparator": {
+          "enum": [
+            "exact",
+            "normalized_exact",
+            "graded_string",
+            "numeric_tolerance",
+            "date_window",
+            "set_overlap"
+          ],
+          "title": "Comparator",
+          "type": "string"
+        },
+        "authority": {
+          "enum": [
+            "authoritative",
+            "source_qualified",
+            "weak"
+          ],
+          "title": "Authority",
+          "type": "string"
+        },
+        "discriminating": {
+          "title": "Discriminating",
+          "type": "boolean"
+        },
+        "tolerance": {
+          "anyOf": [
+            {
+              "minimum": 0,
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Tolerance"
+        },
+        "agreements": {
+          "items": {
+            "$ref": "#/$defs/Agreement"
+          },
+          "minItems": 1,
+          "title": "Agreements",
+          "type": "array"
+        }
+      },
+      "required": [
+        "field_id",
+        "normalizer",
+        "comparator",
+        "authority",
+        "discriminating",
+        "agreements"
+      ],
+      "title": "Attribute",
+      "type": "object"
+    },
+    "Chance": {
+      "exclusiveMaximum": 1,
+      "exclusiveMinimum": 0,
+      "type": "number"
+    }
+  },
+  "additionalProperties": false,
+  "properties": {
+    "schema_version": {
+      "const": 1,
+      "default": 1,
+      "title": "Schema Version",
+      "type": "integer"
+    },
+    "profile_id": {
+      "minLength": 1,
+      "pattern": "\\S",
+      "title": "Profile Id",
+      "type": "string"
+    },
+    "version": {
+      "minLength": 1,
+      "pattern": "\\S",
+      "title": "Version",
+      "type": "string"
+    },
+    "entity_class": {
+      "minLength": 1,
+      "pattern": "\\S",
+      "title": "Entity Class",
+      "type": "string"
+    },
+    "blocking_keys": {
+      "items": {
+        "items": {
+          "minLength": 1,
+          "pattern": "\\S",
+          "type": "string"
+        },
+        "type": "array"
+      },
+      "minItems": 1,
+      "title": "Blocking Keys",
+      "type": "array"
+    },
+    "attributes": {
+      "items": {
+        "$ref": "#/$defs/Attribute"
+      },
+      "minItems": 1,
+      "title": "Attributes",
+      "type": "array"
+    },
+    "prior": {
+      "$ref": "#/$defs/Chance"
+    },
+    "review_threshold": {
+      "$ref": "#/$defs/Chance"
+    },
+    "link_threshold": {
+      "$ref": "#/$defs/Chance"
+    },
+    "minimum_margin": {
+      "minimum": 0,
+      "title": "Minimum Margin",
+      "type": "number"
+    },
+    "calibrated": {
+      "default": false,
+      "title": "Calibrated",
+      "type": "boolean"
+    },
+    "calibration_ref": {
+      "anyOf": [
+        {
+          "minLength": 1,
+          "pattern": "\\S",
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Calibration Ref"
+    }
+  },
+  "required": [
+    "profile_id",
+    "version",
+    "entity_class",
+    "blocking_keys",
+    "attributes",
+    "prior",
+    "review_threshold",
+    "link_threshold",
+    "minimum_margin"
+  ],
+  "title": "Profile",
+  "type": "object"
+}

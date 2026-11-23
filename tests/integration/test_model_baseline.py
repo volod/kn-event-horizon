@@ -24,6 +24,7 @@ from kn.domains.space.satcom.importer import import_package
 from kn.domains.space.satcom.package import Package, read_package
 from kn.semantic import Snapshot, validate_model
 from kn.semantic.seeds import reviewed_snapshot
+from tests.integration.identity_fixtures import seed_identity_fixture
 from tests.integration.review_fixtures import replay_review_fixture
 from tests.integration.semantic_fixtures import native_rows, text_fixture
 from tests.semantic.conftest import REFERENCES
@@ -34,6 +35,7 @@ FIXTURE_OWNERS = {
     "kn.space.satcom",
     "kn.core.semantic",
     "kn.core.human_verification",
+    "kn.core.identity",
 }
 
 
@@ -119,9 +121,10 @@ def test_registered_model_fixture_rebuild_is_lossless_and_repeatable(
     validate_model(semantic_fixture, REFERENCES)
     semantic_fixture = native_rows(semantic, semantic_fixture)
     connection = rebuild_connection
+    seed_identity_fixture(tmp_path)
     snapshots = []
     for iteration in range(2):
-        rebuild(connection, contracts)
+        rebuild(connection, contracts, data_dir=tmp_path)
         connection.execute(SetRole(role_name(satcom.schema, "loader")))
         assert import_package(connection, package, satcom)
         assert not import_package(connection, package, satcom)

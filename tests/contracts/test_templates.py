@@ -120,6 +120,7 @@ def test_each_contract_checks_its_own_default_directory(
     compile_contract(load_contract(), check=True)
     assert sorted(path.name for path in (tmp_path / "generated" / "contracts").iterdir()) == [
         "kn.core.human_verification",
+        "kn.core.identity",
         "kn.core.semantic",
         "kn.space.satcom",
         "kn.system.governance",

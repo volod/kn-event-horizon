@@ -441,6 +441,9 @@
           },
           "unique": {
             "type": "boolean"
+          },
+          "whereNull": {
+            "$ref": "#/$defs/reference"
           }
         },
         "required": [

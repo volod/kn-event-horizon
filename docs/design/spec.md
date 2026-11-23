@@ -1823,7 +1823,7 @@ uses compiled contracts and deterministic database/fixture checks, independent o
 | 5 | `data-contracts` | planned | Contracts compile deterministically, invalid contracts fail, drift fails CI, rebuild creates every schema, loaders cannot run DDL; the integrated core/domain baseline passes before runtime consumers | [Compiler and development rebuild](../impl/current/data-contracts.md) |
 | 6 | `ontology-taxonomy` | planned | Every proposal row is classified, identifiers are stable, invalid hierarchies are rejected, SKOS round-trips | [Semantic model, reviewed seeds and SKOS export](../impl/current/ontology-taxonomy.md) |
 | 7 | `evidence-model` | planned | Conflict, time, provenance, update policy and replay pass; optional version-bound human verification covers every registered dataset | [Shared human verification protocol](../impl/current/evidence-model.md) |
-| 8 | `object-identity` | planned | KN IDs survive rebuilds; lifecycle, matching, partial-update, and lineage fixtures pass; calibrated classes meet the precision gate | - |
+| 8 | `object-identity` | planned | KN IDs survive rebuilds; lifecycle, matching, partial-update, and lineage fixtures pass; calibrated classes meet the precision gate | [Registry contracts and replay](../impl/current/object-identity.md) |
 | 9 | `raw-archive` | planned | WARC round trip, atomic write, ledger reindex, redaction, revisit, and corruption checks pass | - |
 | 10 | `part-supply-model` | planned | Every vendor coverage group maps or records an exclusion; part, variant, offer, price, and substitute fixtures pass | - |
 | 11 | `source-management` | planned | Catalogue import is complete; configuration validation refuses unapproved enablement; error and status mapping fixtures pass | - |
