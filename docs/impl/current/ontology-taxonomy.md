@@ -129,10 +129,10 @@ evidence. The [separate verified OECD product scheme and crosswalks](ontology-ta
 are available alongside the original mixed product vocabulary.
 [Seed import and proposal reconciliation](ontology-taxonomy/seeds.md) and
 [official publication comparison](ontology-taxonomy/verification.md) are available.
-[SKOS Turtle export](ontology-taxonomy/skos.md) preserves labels, hierarchy, mappings, scheme
-origins, verification states and publication boundaries. The
-[implementation audit](../records/0025-ontology-taxonomy-ontology-taxonomy-implementation-audit.md)
-of the group records its findings and their dispositions.
+[SKOS Turtle export](ontology-taxonomy/skos.md) uses a configurable authority within `urn:publicid`
+that defaults to `summa.dev`. It preserves labels, hierarchy, mappings, scheme origins,
+verification states and publication boundaries. The group's findings and their dispositions are in the
+[implementation audit](../records/0025-ontology-taxonomy-ontology-taxonomy-implementation-audit.md).
 
 ## Known limitations
 
@@ -140,9 +140,6 @@ of the group records its findings and their dispositions.
   [Display and export](ontology-taxonomy/text.md#skos-and-interfaces) select English source text
   with its actual language and explicit fallback. Concept definitions remain absent until genuine
   prose is supplied; proposal columns remain in provenance.
-- Exported term URIs use `urn:kn:term:<id>`, and `kn` is not a registered URN namespace.
-  `decide-vocabulary-uri-namespace` lets the owner choose a base before any consumer stores the
-  URIs.
 - Each concept has one primary parent. A scheme with several broader concepts per concept needs a
   secondary hierarchy table, which is additive; reopen when a reviewed scheme needs one.
 - Mappings are not restricted to concepts of different schemes. SKOS links schemes with mapping

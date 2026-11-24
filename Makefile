@@ -134,7 +134,8 @@ ci-local: ci ## Run make ci, every local-only test (make db-up first) and the Je
 
 skos-reference-check: ## Validate every SKOS export with the pinned Apache Jena RIOT (local only)
 	@test -x "$(PY)" || { echo "ERROR: run 'make bootstrap' first"; exit 1; }
-	@"$(PY)" -m kn.quality.skos_reference --root "$(PROJECT_ROOT)" --data-dir "$(DATA_ROOT)"
+	@source "$(PROJECT_ROOT)/scripts/shared/common.sh" && kn_load_env && \
+		"$(PY)" -m kn.quality.skos_reference --root "$(PROJECT_ROOT)" --data-dir "$$DATA_DIR"
 
 build: ## Build source and wheel distributions
 	@source "$(PROJECT_ROOT)/scripts/shared/common.sh"; kn_load_env; uv build

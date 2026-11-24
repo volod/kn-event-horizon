@@ -2401,8 +2401,7 @@ Verify the owner's decision and its effect on the published interface.
 
 - Serves: `ontology-taxonomy` -- [Ontology and taxonomy](../design/spec.md#ontology-and-taxonomy)
 - Agent status: CLEAR
-- Requires: `decide-vocabulary-uri-namespace`
-- Dependencies: The accepted human task record and its retained evidence.
+- Dependencies: The [namespace decision and its retained evidence](records/0041-ontology-taxonomy-decide-vocabulary-uri-namespace.md).
 - User-visible outcome: Exports reflect the approved namespace and preserve internal keys.
 - Scope boundary: The approved public URI base, exports and stable internal term IDs.
 - Data and artifact paths: The owner task record, its artifacts and the numbered audit record.
@@ -2720,32 +2719,6 @@ prompts would be costly to unwind.
 - Documentation target: `current/ai-extraction.md` listed in the [areas index](current.md#areas).
 
 ## Human-Assisted Tasks
-
-### Ontology and taxonomy -- `ontology-taxonomy`
-
-#### decide-vocabulary-uri-namespace
-
-Exported vocabulary terms use `urn:kn:term:<id>`, but `kn` is not a registered URN namespace, and
-the URIs become references in other systems once an export is shared.
-
-- Serves: `ontology-taxonomy` -- [Ontology and taxonomy](../design/spec.md#ontology-and-taxonomy)
-- Agent status: HUMAN-GATED
-- Execution stage: MODEL
-- Dependencies: The owner chooses a base that the owner controls: an HTTPS path on a domain the
-  owner holds, or a `tag:` URI (RFC 4151) with an authority the owner holds. An agent prepares the
-  options with their consequences, as described in finding ON-09 of the
-  [ontology audit](records/0025-ontology-taxonomy-ontology-taxonomy-implementation-audit.md#findings).
-- User-visible outcome: A recorded URI base, applied by the agent to the SKOS export while no
-  consumer stores the old URIs.
-- Scope boundary: The decision and the export change only. Qualified term IDs stay unchanged; no
-  web service is published.
-- Data and artifact paths: `src/kn/semantic/skos.py`, `tests/semantic/`, and the task record.
-- Execution path: The owner picks the base. The agent changes the URI function and its tests and
-  re-exports every scheme.
-- Acceptance gates: Every exported term URI uses the recorded base, the IDs inside them are
-  unchanged, and the export still parses and round-trips its labels.
-- Documentation target: `current/ontology-taxonomy.md` listed in the
-  [areas index](current.md#areas).
 
 ### Ingestion engine -- `ingestion-engine`
 
