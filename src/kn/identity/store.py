@@ -12,6 +12,7 @@ from kn.contracts.schemas import RESOURCES
 from kn.contracts.sqlalchemy import metadata
 from kn.db.statements import SetConstraints
 from kn.identity.journal import Journal, LockedJournal
+from kn.identity.lifecycle_reviews import restore
 from kn.identity.projection import rows
 from kn.identity.state import State
 
@@ -63,6 +64,8 @@ def _check_prefix(connection: Connection, locked: LockedJournal) -> None:
 
 def _project(connection: Connection, locked: LockedJournal) -> None:
     _check_prefix(connection, locked)
+    # Review writers take the review lock before resolving any target rows.
+    restore(connection, locked)
     model = metadata(contract())
     projected = rows(locked.state)
     events = model.tables["identity.lifecycle_events"]

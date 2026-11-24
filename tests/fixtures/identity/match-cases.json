@@ -1,0 +1,82 @@
+[
+  {
+    "case": "same MPN from two manufacturers",
+    "class": "core.manufacturer_part",
+    "objects": [
+      {"attributes": {"part.manufacturer": "fixture-maker-one", "part.mpn": "AB-0042"}}
+    ],
+    "incoming": {"part.manufacturer": "fixture-maker-two", "part.mpn": "AB-0042"},
+    "decision": "mint",
+    "candidates": []
+  },
+  {
+    "case": "packaging variants of one manufacturer part",
+    "class": "core.orderable_variant",
+    "objects": [
+      {"attributes": {"variant.part": "fixture-part", "variant.packaging": "tape-and-reel"}}
+    ],
+    "incoming": {"variant.part": "fixture-part", "variant.packaging": "cut-tape"},
+    "decision": "mint",
+    "candidates": []
+  },
+  {
+    "case": "renamed organization with a stable LEI",
+    "class": "core.organization",
+    "objects": [
+      {
+        "attributes": {"organization.name": "Old Fixture Ltd"},
+        "lei": "00000000000000000042"
+      }
+    ],
+    "incoming": {"organization.name": "Renamed Fixture Ltd"},
+    "lei": "00000000000000000042",
+    "decision": "link",
+    "candidates": [0]
+  },
+  {
+    "case": "name alone supports review",
+    "class": "core.organization",
+    "objects": [
+      {"attributes": {"organization.name": "Fixture Widgets, Ltd", "organization.country": "GB"}}
+    ],
+    "incoming": {"organization.name": "Fixture Widgets LTD"},
+    "decision": "review",
+    "candidates": [0]
+  },
+  {
+    "case": "two high scoring close candidates",
+    "class": "core.organization",
+    "objects": [
+      {
+        "attributes": {"organization.name": "Fixture Components Ltd",
+                       "organization.domain": "sales.fixture.example.com",
+                       "organization.country": "GB"}
+      },
+      {
+        "attributes": {"organization.name": "Fixture Component Ltd",
+                       "organization.domain": "www.example.com",
+                       "organization.country": "GB"}
+      }
+    ],
+    "incoming": {"organization.name": "Fixture Components Ltd",
+                 "organization.domain": "https://example.com/pages",
+                 "organization.country": "GB"},
+    "calibrated": true,
+    "decision": "review",
+    "candidates": [0, 1]
+  },
+  {
+    "case": "supplier SKU is scoped to supplier and orderable",
+    "class": "core.supplier_offer",
+    "objects": [
+      {
+        "attributes": {"offer.supplier": "fixture-supplier-one", "offer.sku": "00042",
+                       "offer.variant": "fixture-variant"}
+      }
+    ],
+    "incoming": {"offer.supplier": "fixture-supplier-two", "offer.sku": "00042",
+                 "offer.variant": "fixture-variant"},
+    "decision": "mint",
+    "candidates": []
+  }
+]

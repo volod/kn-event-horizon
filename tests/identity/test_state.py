@@ -1,6 +1,7 @@
 """Registry integrity and lifecycle replay, independent of SQL and filesystem order."""
 
 import json
+from itertools import pairwise
 from pathlib import Path
 from uuid import UUID
 
@@ -200,7 +201,7 @@ def test_long_redirect_chain_resolves_without_recursion() -> None:
             "core.organization",
             SourceKey(source="fixture:chain", key=str(index)),
             "a" * 64,
-            state="merged" if index + 1 < len(keys) else "active",
-            successors=(keys[index + 1],) if index + 1 < len(keys) else (),
         )
+    for source, successor in pairwise(keys):
+        state.redirect(state.objects[source], (successor,))
     assert state.resolve(keys[0]) == (keys[-1],)

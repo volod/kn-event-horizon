@@ -32,70 +32,15 @@ archive.
 
 ### Identity lifecycle and matching -- `identity-resolution`
 
-#### object-lifecycle-operations
-
-Merges, splits, and retirements must be explicit, reviewed, and kept as reversible history.
-
-- Serves: `object-identity` -- [Object identity](../design/spec.md#object-identity)
-- Agent status: CLEAR
-- Dependencies: The [registry replay APIs](current/object-identity.md#replay-and-integrity) and
-  [shared trusted review protocol](current/evidence-model.md#trusted-decision-application).
-- User-visible outcome: `kn identity show|resolve|history|merge|split|retire|restore` work in `en`
-  and `uk`. Each state change writes a review decision and the identity event that cites it. It
-  moves links, so claims follow their source records, and old IDs stay resolvable.
-- Scope boundary: The lifecycle state machine from the specification; merge and split semantics,
-  with each link assigned to exactly one successor; reclassification as retirement plus a successor
-  mint; forced merges on a shared authoritative identifier; redirect collapse. Review queue items
-  for match candidates come in `review-queue-cli`.
-- Data and artifact paths: `src/kn/identity/lifecycle.py`, `src/kn/cli.py`, `$DATA_DIR/decisions/`,
-  `tests/identity/`.
-- Execution path: Extend the registry replay validators with fixture-first operation and review
-  tests, then implement the lifecycle workflow and CLI with localized messages.
-- Acceptance gates: A merge followed by a split restores links deterministically with full history.
-  A cross-class merge is refused. A redirect chain resolves in one step. A lookup by a split ID
-  returns its successors. Golden outputs exist in both locales.
-- Documentation target: `current/object-identity.md` listed in the [areas index](current.md#areas).
-
-#### identity-match-engine
-
-Data about one object from different sources must meet at one KN ID through explained, scored
-decisions.
-
-- Serves: `object-identity` -- [Object identity](../design/spec.md#object-identity)
-- Agent status: CLEAR
-- Requires: `object-lifecycle-operations`
-- Dependencies: The smallest justified string-similarity dependency, or a local comparator with
-  tests.
-- User-visible outcome: The resolver applies exact authoritative identifiers, existing
-  source-qualified links, scored matching over declared identity attributes, and alias candidates,
-  in that order. Each decision writes a match record with features, comparator outcomes, weights,
-  score, probability, profile digest, and the outcome: auto-link, review, or new object.
-- Scope boundary: Matching behavior and validation against the
-  [early profile schema](../../contracts/core/identity/match-profile.schema.json), including
-  rejection of name-only link paths.
-  Normalizers for MPNs, organization names, web domains, and identifiers. Blocking, comparators,
-  Fellegi-Sunter weights, thresholds and margin, the `calibrated` flag that keeps uncalibrated
-  profiles review-only, and deterministic tie-breaking. Profiles for organization, manufacturer
-  part, orderable variant, and supplier offer. Calibration on real records comes in
-  `identity-match-calibration`.
-- Data and artifact paths: `src/kn/identity/matching/`, `contracts/core/identity/match-profiles/`,
-  `tests/identity/`, `tests/fixtures/identity/`.
-- Execution path: Write labeled synthetic fixtures first, then the resolver.
-- Acceptance gates: Fixtures with one MPN from two manufacturers, packaging variants, a renamed
-  organization with a stable LEI, name-only similarity, and two close candidates produce their
-  declared decisions. Permuted input order gives identical decisions. A match record reproduces its
-  score and probability. A profile whose link threshold names alone can reach fails validation.
-- Documentation target: `current/object-identity.md` listed in the [areas index](current.md#areas).
-
 #### identity-resolution-implementation-audit
 
 Verify the identity lifecycle and matching handoff against its specification and the next consumer.
 
 - Serves: `object-identity` -- [Object identity](../design/spec.md#object-identity)
 - Agent status: CLEAR
-- Requires: `object-lifecycle-operations`, `identity-match-engine`
-- Dependencies: Group acceptance records and the
-  [audit procedure](../guide/planning-workflow.md#implementation-audits).
+- Dependencies: The [lifecycle acceptance record](records/0039-object-identity-object-lifecycle-operations.md),
+  the [matching acceptance record](records/0040-object-identity-identity-match-engine.md),
+  and the [audit procedure](../guide/planning-workflow.md#implementation-audits).
 - User-visible outcome: The group has reproducible acceptance evidence and owned follow-up work.
 - Scope boundary: Verify this group's outputs, failure paths and downstream compatibility.
 - Data and artifact paths: Group fixtures, the numbered audit record and the forward plan.
@@ -194,7 +139,8 @@ leaves an object's value. Arrival order must never decide.
   decisions ranked through it; evidence classes; verification states derived from support and
   review; eligibility (minimum rank and evidence class, rights, conditions); empty-claim handling;
   freshness and `stale` labels; audience-specific selection from eligible evidence. Identity
-  resolution belongs to `identity-match-engine`. Domain policies come with domain contracts.
+  resolution uses the [available matcher](current/object-identity.md#match-resolution).
+  Domain policies come with domain contracts.
   Only the matching accepted human decision can supply human-verification metadata for the
   selected claim; timestamps alone never bypass eligibility or resolve a conflict.
 - Data and artifact paths: `src/kn/evidence/`, `contracts/core/policies/`, `tests/evidence/`.

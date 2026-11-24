@@ -16,6 +16,7 @@ from kn.identity.journal import Journal
 from kn.identity.store import lock as identity_lock
 from kn.identity.store import replay as replay_identity
 from kn.quality.project_root import discover_project_root
+from kn.review.store import lock as review_lock
 
 
 class RebuildRefused(ValueError):
@@ -50,6 +51,7 @@ def rebuild(
     with connection.begin_nested():
         apply_platform(connection)
         identity_lock(connection)
+        review_lock(connection)
         _drop_schemas(connection)
         upgrade(connection, deployed)
         if any(contract.contract_id == "kn.core.identity" for contract in deployed):

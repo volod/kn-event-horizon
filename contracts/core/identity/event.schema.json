@@ -510,6 +510,17 @@
           ],
           "default": null,
           "title": "Selected"
+        },
+        "trace": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/MatchTrace"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
         }
       },
       "required": [
@@ -520,6 +531,68 @@
         "decision"
       ],
       "title": "Match",
+      "type": "object"
+    },
+    "MatchTrace": {
+      "additionalProperties": false,
+      "properties": {
+        "request_digest": {
+          "pattern": "^[0-9a-f]{64}$",
+          "title": "Request Digest",
+          "type": "string"
+        },
+        "source_version": {
+          "minLength": 1,
+          "pattern": "\\S",
+          "title": "Source Version",
+          "type": "string"
+        },
+        "route": {
+          "enum": [
+            "authoritative_key",
+            "existing_link",
+            "scored_match",
+            "alias",
+            "conflict",
+            "no_match"
+          ],
+          "title": "Route",
+          "type": "string"
+        },
+        "prior": {
+          "maximum": 1,
+          "minimum": 0,
+          "title": "Prior",
+          "type": "number"
+        },
+        "minted_id": {
+          "anyOf": [
+            {
+              "minLength": 1,
+              "pattern": "\\S",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Minted Id"
+        },
+        "followup_count": {
+          "default": 0,
+          "minimum": 0,
+          "title": "Followup Count",
+          "type": "integer"
+        }
+      },
+      "required": [
+        "request_digest",
+        "source_version",
+        "route",
+        "prior"
+      ],
+      "title": "MatchTrace",
       "type": "object"
     },
     "Merge": {
@@ -542,6 +615,17 @@
           "pattern": "\\S",
           "title": "Survivor",
           "type": "string"
+        },
+        "authoritative": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/Identifier"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
         }
       },
       "required": [

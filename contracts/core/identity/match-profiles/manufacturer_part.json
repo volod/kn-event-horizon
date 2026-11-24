@@ -1,0 +1,114 @@
+{
+  "schema_version": 1,
+  "profile_id": "identity.manufacturer_part",
+  "version": "1.0.0",
+  "entity_class": "core.manufacturer_part",
+  "blocking_keys": [
+    [
+      "part.manufacturer",
+      "part.mpn"
+    ]
+  ],
+  "attributes": [
+    {
+      "field_id": "part.manufacturer",
+      "normalizer": "identifier-v1",
+      "comparator": "normalized_exact",
+      "authority": "source_qualified",
+      "discriminating": true,
+      "agreements": [
+        {
+          "outcome": "agree",
+          "m": 0.99,
+          "u": 0.03
+        },
+        {
+          "outcome": "disagree",
+          "m": 0.01,
+          "u": 0.97
+        }
+      ]
+    },
+    {
+      "field_id": "part.mpn",
+      "normalizer": "mpn-v1",
+      "comparator": "exact",
+      "authority": "source_qualified",
+      "discriminating": true,
+      "agreements": [
+        {
+          "outcome": "agree",
+          "m": 0.99,
+          "u": 0.001
+        },
+        {
+          "outcome": "disagree",
+          "m": 0.01,
+          "u": 0.999
+        }
+      ]
+    },
+    {
+      "field_id": "part.package_code",
+      "normalizer": "upper-identifier-v1",
+      "comparator": "normalized_exact",
+      "authority": "weak",
+      "discriminating": false,
+      "agreements": [
+        {
+          "outcome": "agree",
+          "m": 0.85,
+          "u": 0.35
+        },
+        {
+          "outcome": "disagree",
+          "m": 0.15,
+          "u": 0.65
+        }
+      ]
+    },
+    {
+      "field_id": "part.packaging_suffix",
+      "normalizer": "mpn-v1",
+      "comparator": "normalized_exact",
+      "authority": "weak",
+      "discriminating": false,
+      "agreements": [
+        {
+          "outcome": "agree",
+          "m": 0.85,
+          "u": 0.35
+        },
+        {
+          "outcome": "disagree",
+          "m": 0.15,
+          "u": 0.65
+        }
+      ]
+    },
+    {
+      "field_id": "part.gtin",
+      "normalizer": "gtin-v1",
+      "comparator": "normalized_exact",
+      "authority": "source_qualified",
+      "discriminating": true,
+      "agreements": [
+        {
+          "outcome": "agree",
+          "m": 0.99,
+          "u": 0.001
+        },
+        {
+          "outcome": "disagree",
+          "m": 0.01,
+          "u": 0.999
+        }
+      ]
+    }
+  ],
+  "prior": 0.1,
+  "review_threshold": 0.35,
+  "link_threshold": 0.94,
+  "minimum_margin": 0.06,
+  "calibrated": false
+}

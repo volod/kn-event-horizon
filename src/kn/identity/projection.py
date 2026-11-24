@@ -50,7 +50,7 @@ def _lifecycle(state: State, result: Rows) -> None:
             }
         )
     for item in state.objects.values():
-        successors = state.resolve(item.kn_id) if item.successors else ()
+        successors = state.redirects.get(item.kn_id, ())
         result["objects"].append(
             {
                 "kn_id": item.kn_id,
