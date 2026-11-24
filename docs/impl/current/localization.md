@@ -135,9 +135,11 @@ in `make ci`; ordinary CI runs keep their artifacts in pytest's temporary direct
 
 - `en/cli/` and `uk/cli/` contain actual subprocess exit codes, stdout, and stderr. The committed
   [CLI goldens](../../../tests/e2e/fixtures/cli.json) cover identity, every delivered help surface,
-  contract checks, argument/input/configuration failures, and stable JSON diagnostics. Only the
-  installed project version is normalized for golden comparison. Package validation and contract
-  compilation also run against real fixture inputs; compiled artifact hashes are checked.
+  contract checks, argument/input/configuration failures, and stable JSON diagnostics. Golden
+  comparison normalizes the installed project version and continuation line breaks in successful
+  help synopses, which Python's argument parser wraps differently across versions. The saved output
+  retains the original wrapping. Package validation and contract compilation also run against real
+  fixture inputs; compiled artifact hashes are checked.
 - `en/data-selection.json` and `uk/data-selection.json` contain original variants, all translations,
   and selected text with language, provenance, originality, and fallback metadata. The
   [source-text fixtures](../../../tests/e2e/fixtures/source-text.json) cover English, Ukrainian,

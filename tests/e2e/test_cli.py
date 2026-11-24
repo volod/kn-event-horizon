@@ -2,6 +2,7 @@
 
 import hashlib
 import json
+import re
 from pathlib import Path
 
 import pytest
@@ -13,19 +14,49 @@ from kn.metadata import project_info
 from tests.e2e.support import FIXTURES, LOCALES, run_cli, write_json
 
 
+def _golden_output(
+    result: dict[str, object], *, version: str, usage_prefix: str
+) -> dict[str, object]:
+    normalized = {
+        key: value.replace(version, "<version>") if isinstance(value, str) else value
+        for key, value in result.items()
+    }
+    stdout = normalized["stdout"]
+    if result["exit_code"] == 0 and isinstance(stdout, str) and stdout.startswith(usage_prefix):
+        usage, separator, body = stdout.partition("\n\n")
+        if separator:
+            # argparse can wrap the same synopsis at different points across Python releases.
+            normalized["stdout"] = re.sub(r"\n +", " ", usage) + separator + body
+    return normalized
+
+
+@pytest.mark.parametrize("separator", [" ", "\n                   "])
+def test_cli_golden_normalization_preserves_help_body_and_stderr(separator: str) -> None:
+    result: dict[str, object] = {
+        "stdout": f"usage: kn identity {{show,resolve}}{separator}...\n\n"
+        "commands:\n  show    show current holdings\n          and object state\n",
+        "stderr": "diagnostic from 0.1.0\n  details\n",
+        "exit_code": 0,
+    }
+    assert _golden_output(result, version="0.1.0", usage_prefix="usage: ") == {
+        "stdout": "usage: kn identity {show,resolve} ...\n\n"
+        "commands:\n  show    show current holdings\n          and object state\n",
+        "stderr": "diagnostic from <version>\n  details\n",
+        "exit_code": 0,
+    }
+
+
 @pytest.mark.parametrize("locale", LOCALES)
 def test_cli_golden_paths(locale: str, e2e_artifacts: Path) -> None:
     goldens = json.loads((FIXTURES / "cli.json").read_text("ascii"))[locale]
+    version = project_info().version
+    usage_prefix = Translator(locale).text("cli.usage")
     for case in goldens:
         actual = run_cli(case["arguments"], KN_LOCALE=locale)
         write_json(e2e_artifacts / locale / "cli" / f"{case['id']}.json", actual)
-        normalized = {
-            key: value.replace(project_info().version, "<version>")
-            if isinstance(value, str)
-            else value
-            for key, value in actual.items()
-        }
-        assert normalized == case["expected"], case["id"]
+        assert _golden_output(actual, version=version, usage_prefix=usage_prefix) == _golden_output(
+            case["expected"], version=version, usage_prefix=usage_prefix
+        ), case["id"]
 
 
 @pytest.mark.parametrize("locale", LOCALES)
