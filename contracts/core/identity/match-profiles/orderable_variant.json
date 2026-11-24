@@ -1,0 +1,99 @@
+{
+  "schema_version": 1,
+  "profile_id": "identity.orderable_variant",
+  "version": "1.0.0",
+  "entity_class": "core.orderable_variant",
+  "blocking_keys": [
+    [
+      "variant.part",
+      "variant.packaging"
+    ],
+    [
+      "variant.part",
+      "variant.ordering_suffix"
+    ]
+  ],
+  "attributes": [
+    {
+      "field_id": "variant.part",
+      "normalizer": "identifier-v1",
+      "comparator": "normalized_exact",
+      "authority": "source_qualified",
+      "discriminating": true,
+      "agreements": [
+        {
+          "outcome": "agree",
+          "m": 0.99,
+          "u": 0.03
+        },
+        {
+          "outcome": "disagree",
+          "m": 0.01,
+          "u": 0.97
+        }
+      ]
+    },
+    {
+      "field_id": "variant.packaging",
+      "normalizer": "casefold-v1",
+      "comparator": "normalized_exact",
+      "authority": "source_qualified",
+      "discriminating": true,
+      "agreements": [
+        {
+          "outcome": "agree",
+          "m": 0.99999,
+          "u": 0.2
+        },
+        {
+          "outcome": "disagree",
+          "m": 1e-05,
+          "u": 0.8
+        }
+      ]
+    },
+    {
+      "field_id": "variant.ordering_suffix",
+      "normalizer": "mpn-v1",
+      "comparator": "normalized_exact",
+      "authority": "source_qualified",
+      "discriminating": true,
+      "agreements": [
+        {
+          "outcome": "agree",
+          "m": 0.99999,
+          "u": 0.02
+        },
+        {
+          "outcome": "disagree",
+          "m": 1e-05,
+          "u": 0.98
+        }
+      ]
+    },
+    {
+      "field_id": "variant.gtin",
+      "normalizer": "gtin-v1",
+      "comparator": "normalized_exact",
+      "authority": "source_qualified",
+      "discriminating": true,
+      "agreements": [
+        {
+          "outcome": "agree",
+          "m": 0.97,
+          "u": 0.01
+        },
+        {
+          "outcome": "disagree",
+          "m": 0.03,
+          "u": 0.99
+        }
+      ]
+    }
+  ],
+  "prior": 0.1,
+  "review_threshold": 0.35,
+  "link_threshold": 0.94,
+  "minimum_margin": 0.06,
+  "calibrated": false
+}

@@ -2,14 +2,28 @@
 
 The editable ODCS source is
 [`src/kn/contracts/resources/identity/1.0.0.json`](../../../src/kn/contracts/resources/identity/1.0.0.json).
-Its local reference catalog defines exact source-anchor comparison only. Entity-class matching
-profiles use the structural [profile schema](match-profile.schema.json); the matching engine and
-calibration gates remain separate tasks.
+Its local reference catalog defines exact source-anchor comparison. Class profiles use the
+[profile schema](match-profile.schema.json) and the semantic validation in
+`kn.identity.profiles.Profile`. Load a reviewed profile by class.
+
+| Entity class | Profile |
+| --- | --- |
+| `core.organization` | [Organization](match-profiles/organization.json) |
+| `core.manufacturer_part` | [Manufacturer part](match-profiles/manufacturer_part.json) |
+| `core.orderable_variant` | [Orderable variant](match-profiles/orderable_variant.json) |
+| `core.supplier_offer` | [Supplier offer](match-profiles/supplier_offer.json) |
+
+The profiles ship uncalibrated. Keep the exact version and digest of profiles used for durable
+records so the comparator results and probabilities can be reproduced. A calibrated revision
+requires a held-out evaluation reference.
 
 The [event schema](event.schema.json) is generated from `kn.identity.events.Event`. Every JSON
 Lines entry carries its sequence, predecessor digest, event digest, UTC instant, actor, reason,
-evidence, optional decision reference and discriminated payload. Both schemas are compared with
-their Python models in `tests/identity/`.
+evidence, optional decision reference and discriminated payload. A match event also records the
+profile digest and version, candidates, comparator evidence, weights, score, probability and
+decision. New matches carry a trace with the request digest, source version, route, prior,
+expected follow-up count and minted ID if applicable. Tests compare both schemas with their
+Python models.
 
 A forced merge can carry a second authoritative identifier observation in its payload. The
 existing matching identifier must belong to the other active participant and be valid at the

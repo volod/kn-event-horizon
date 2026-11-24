@@ -1,8 +1,8 @@
 # Object Identity
 
-The identity storage contract, durable event journal, deterministic replay and reviewed lifecycle
-commands are available. Matching execution, change detection, claim lineage and calibration
-remain in the [plan](../plan.md).
+The identity storage contract, durable journal, deterministic replay, reviewed lifecycle commands
+and profile-driven matcher are available. Change detection, claim lineage and real-record
+calibration remain in the [plan](../plan.md).
 
 ## Operator lifecycle commands
 
@@ -63,12 +63,12 @@ Pydantic, wire and engine artifacts under `generated/contracts/kn.core.identity/
 | `lifecycle_events` | Ordered immutable event projection with actor, reason, evidence, time, decision reference and complete canonical payload |
 | `redirects` | Flattened terminal successors; a split can have several |
 
-The [wire contracts](../../../contracts/core/identity/README.md) bind immutable Pydantic payloads
-and a closed, versioned event envelope. Structural match profiles declare blocking keys,
-attributes/normalizers/comparators, agreement m/u probabilities, prior, thresholds, margin and
-calibration reference. Their schema validates shape and references within the profile. Scoring,
-name-only safety and evaluation of calibration evidence belong to `identity-match-engine` and
-`identity-match-calibration`.
+The [wire contracts](../../../contracts/core/identity/README.md) bind immutable Pydantic payloads,
+a closed versioned event envelope and match profiles. New match events carry an optional trace
+field for compatibility with existing v1 event hashes. It records the source version, request
+digest, route, prior, expected follow-up count and minted KN ID when applicable. The SQL match ID
+identifies the corresponding `lifecycle_events` row. `kn identity history KN_ID` includes matches
+involving that object as a candidate or mint target.
 
 Objects and source records declare `kn.identity`; the local `identity.anchor-v1` reference describes
 exact anchor uniqueness, without supplying a class's scored profile. Every table declares shared
@@ -76,6 +76,52 @@ exact anchor uniqueness, without supplying a class's scored profile. Every table
 events declare decision-log coverage. No review timestamp is fabricated by replay, and a lifecycle
 `decision_ref` does not itself prove a human acceptance. Current verification joins and invalidation
 remain owned by `human-verification-projections`.
+
+## Match resolution
+
+Use `kn.identity.matching.ingest.submit(connection, journal, profile, observation, actor=...,
+evidence=...)` from a trusted source adapter in a caller-owned PostgreSQL transaction. The
+`Observation` carries a `SourceKey`, opaque version, time with offset, mapped field readings,
+optional authoritative keys and optional alias KN IDs. The adapter supplies the authority
+classification and exact namespace, issuer and native value for authoritative keys, such as an
+LEI or a reviewed manufacturer-plus-MPN key. The adapter also supplies the trusted actor and
+archive evidence reference. Include the issuing jurisdiction in `organization.tax_id`.
+
+Load the reviewed class JSON with `Profile.model_validate_json`. The four profiles cover
+organizations, manufacturer parts, orderable variants and supplier offers. Organizations block on
+LEI, jurisdiction-qualified tax ID with country, registrable domain, or normalized legal name.
+Parts block on manufacturer plus normalized MPN and score the original MPN exactly. Variants
+block on part plus packaging or ordering suffix. Offers block on supplier, SKU and orderable
+variant together. Use resolved KN IDs for manufacturer, parent part, supplier and orderable
+references. Domains use the pinned local Public Suffix List, including private suffixes, and
+IDNA normalization without network access. [Match profile files](../../../contracts/core/identity/README.md).
+
+The resolver checks exact current authoritative identifiers first, then the record's existing
+ownership. Contradictory authoritative targets, an occupied identifier with a mismatched issuer
+or class, and a conflict with current ownership go to review. A new binding or mint stores the
+match reference in `identity.links`. Existing links retain their original IDs. Successful
+decisions record declared attribute readings and previously unregistered authoritative keys.
+At an observation instant the scorer uses the latest eligible reading for each candidate field.
+Conflicting readings at the same latest time leave that field missing for scoring.
+
+Scoring uses complete normalized blocking keys and records each comparator's input values,
+outcome and natural-log likelihood weight `ln(m/u)`. Missing or unusable values contribute
+zero. The posterior combines the sum and the profile prior. Candidates are ordered by
+descending score and ascending KN ID. A scored link requires a calibrated profile, the link
+threshold, agreement on a discriminating attribute, and a unique lead that meets the margin
+in posterior probability. Candidates reaching the review threshold go to review when these
+gates fail. Alias-only candidates can prompt review. In the absence of a qualifying candidate the
+resolver mints a new UUIDv7. All four supplied profiles are uncalibrated. Name and description
+fields cannot discriminate, and profile validation rejects a link threshold reachable by
+nondiscriminating evidence alone.
+
+A receipt returns the match digest, stored match and bound KN ID, with an empty KN ID for
+review. Review decisions are durable match rows available to `review-queue-cli` when that workflow
+ships. For verification, `kn.identity.matching.scoring.verify_match(profile, match)` checks the
+profile digest and version, reruns the comparators on the recorded inputs, and reproduces the
+score and probability. Exact shortcuts record the matched identifier or source key, with a
+weight and score of zero and a probability of one. The pure `matching.resolve.resolve` API
+computes a decision over a supplied state without writing.
 
 ## Durable journal and minting
 
@@ -135,9 +181,14 @@ The pure replay validator in `state.py` and `transitions.py` enforces:
 SQL primary/foreign keys, enums, unique anchors/versions and the active-link index supplement these
 checks. Temporal overlap and lifecycle semantics are enforced at the journal/application boundary;
 loaders must use that boundary. Arbitrary direct SQL or filesystem administrator tampering is
-outside the trusted protocol. Match profiles and stored features are structural data here; no
-resolver executes matching or classifies updates yet. Replay currently validates the whole local
-log and replaces disposable state; it has no large-log performance claim.
+outside the trusted protocol. Replay validates the whole local log and replaces disposable state.
+Candidate lookup scans the active registry holdings.
+
+Matching validates its full event batch before appending. Retry the same observation and profile
+to reuse the original event digest and KN ID after a SQL rollback. A complete journal prefix of
+an interrupted match can be finished by the same retry. New match requests return a pending
+match error until that retry completes. If another identity operation has already advanced
+the journal, a diverged suffix refuses the retry. The usual torn-line integrity checks apply.
 
 ## Reviewed writes and recovery
 
@@ -174,10 +225,14 @@ pending replay, malformed-log rebuild rollback, SQL/log disagreement and the par
 `tests/integration/test_identity_lifecycle*.py` check CLI writes, cross-class refusal, interrupted
 appends, stale requests and repeat rebuilds with the original decision IDs. `make test-bilingual`
 compares identity lookups and command help with both locale goldens.
+`tests/identity/test_match*.py` cover the labeled match fixtures, profile safety, comparators,
+exact and scored precedence, retries and concurrent writes. The PostgreSQL matching fixture
+checks projection, rollback recovery and rebuild of recorded match receipts.
 `make model-baseline` now includes identity history before SATCOM import and compares every
 registered column after two rebuilds. Run `make ci` and `make test-integration` against local PostGIS;
 `make ci-local` also includes the existing local SKOS gate.
 
 Acceptance evidence is retained in
 [record 0033](../records/0033-object-identity-identity-registry-contracts.md) and
-[record 0039](../records/0039-object-identity-object-lifecycle-operations.md).
+[record 0039](../records/0039-object-identity-object-lifecycle-operations.md) and
+[record 0040](../records/0040-object-identity-identity-match-engine.md).

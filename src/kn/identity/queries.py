@@ -5,7 +5,7 @@ from typing import Literal
 
 from kn.identity.events import Event
 from kn.identity.journal import Journal
-from kn.identity.model import Merge, Reclassify, Split, uuid7
+from kn.identity.model import Match, Merge, Reclassify, Split, uuid7
 from kn.identity.state import Object, State
 
 type Query = Literal["show", "resolve", "history"]
@@ -52,6 +52,10 @@ def _participants(event: Event) -> Iterator[str]:
         yield from payload.successors
     elif isinstance(payload, Reclassify):
         yield payload.successor.kn_id
+    elif isinstance(payload, Match):
+        yield from (candidate.kn_id for candidate in payload.candidates)
+        if payload.trace is not None and payload.trace.minted_id is not None:
+            yield payload.trace.minted_id
 
 
 def _lineage(state: State, item: Object) -> set[str]:

@@ -5,6 +5,7 @@ from datetime import datetime
 
 from kn.identity.events import Event
 from kn.identity.model import (
+    MATCH_LINK_METHODS,
     Attribute,
     ChangeSet,
     Identifier,
@@ -138,25 +139,41 @@ class State:
             raise ValueError("source record already has an active link")
         if payload.match_id is not None:
             match = self.matches.get(payload.match_id)
-            if match is None or match.record != payload.record or match.selected != payload.kn_id:
+            if match is None or match.record != payload.record:
                 raise ValueError("link requires a matching stored decision")
-            candidate = next(
-                (item for item in match.candidates if item.kn_id == payload.kn_id), None
-            )
-            if candidate is None or (
-                payload.score,
-                payload.probability,
-                payload.profile_digest,
-                payload.profile_version,
-            ) != (
-                candidate.score,
-                candidate.probability,
-                match.profile_digest,
-                match.profile_version,
-            ):
-                raise ValueError("link score and profile must match the stored decision")
+            self._match_link(payload, match)
         self.record(payload.record)
         self.holdings[event.event_id] = Holding(event, payload.kn_id)
+
+    def _match_link(self, payload: Link, match: Match) -> None:
+        if match.trace is not None and MATCH_LINK_METHODS.get(match.trace.route) != payload.method:
+            raise ValueError("link method must match the recorded resolution route")
+        if payload.method == "minted" and match.decision == "mint" and match.trace is not None:
+            if (
+                match.trace.minted_id != payload.kn_id
+                or self.objects[payload.kn_id].anchor != payload.record
+            ):
+                raise ValueError("minted link must use the recorded source anchor and KN ID")
+            score, probability = None, None
+        else:
+            candidate = next(
+                (item for item in match.candidates if item.kn_id == match.selected), None
+            )
+            if candidate is None or candidate.kn_id != payload.kn_id:
+                raise ValueError("link requires a matching stored decision")
+            score, probability = candidate.score, candidate.probability
+        if (
+            payload.score,
+            payload.probability,
+            payload.profile_digest,
+            payload.profile_version,
+        ) != (
+            score,
+            probability,
+            match.profile_digest,
+            match.profile_version,
+        ):
+            raise ValueError("link score and profile must match the stored decision")
 
     def _identifier(self, payload: Identifier, event: Event) -> None:
         self.active(payload.kn_id)
@@ -192,6 +209,15 @@ class State:
             raise ValueError("only link decisions select a candidate")
         if payload.selected is not None and payload.selected not in keys:
             raise ValueError("selected match must be a candidate")
+        if payload.trace is not None and (payload.decision == "mint") != (
+            payload.trace.minted_id is not None
+        ):
+            raise ValueError("persisted mint decisions require exactly one new KN ID")
+        if payload.trace is not None and (
+            (payload.decision == "review" and payload.trace.followup_count != 0)
+            or (payload.decision == "mint" and payload.trace.followup_count < 2)
+        ):
+            raise ValueError("match followup count contradicts the decision")
         self.record(payload.record)
         self.matches[event.event_id] = payload
 

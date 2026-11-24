@@ -37,16 +37,26 @@ class LockedJournal:
             if self.events[value.sequence - 1] == value:
                 return False
             raise ValueError("identity event sequence already contains different content")
-        # Validate on a fresh state so a refused append cannot change the locked view.
-        state = replay((*self.events, value))
-        encoded = (canonical(value.model_dump(mode="json")) + "\n").encode("ascii")
+        self._extend((value,))
+        return True
+
+    def append_batch(self, values: tuple[Event, ...]) -> None:
+        if values:
+            self._extend(
+                tuple(Event.model_validate_json(item.model_dump_json()) for item in values)
+            )
+
+    def _extend(self, values: tuple[Event, ...]) -> None:
+        # Validate the entire suffix before writing any part of it.
+        history = (*self.events, *values)
+        state = replay(history)
+        encoded = "".join(canonical(value.model_dump(mode="json")) + "\n" for value in values)
         self.stream.seek(0, os.SEEK_END)
-        self.stream.write(encoded)
+        self.stream.write(encoded.encode("ascii"))
         self.stream.flush()
         os.fsync(self.stream.fileno())
-        self.events = (*self.events, value)
+        self.events = history
         self.state = state
-        return True
 
     def mint(
         self,

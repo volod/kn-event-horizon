@@ -1,0 +1,128 @@
+{
+  "schema_version": 1,
+  "profile_id": "identity.organization",
+  "version": "1.0.0",
+  "entity_class": "core.organization",
+  "blocking_keys": [
+    [
+      "organization.lei"
+    ],
+    [
+      "organization.tax_id",
+      "organization.country"
+    ],
+    [
+      "organization.domain"
+    ],
+    [
+      "organization.name"
+    ]
+  ],
+  "attributes": [
+    {
+      "field_id": "organization.lei",
+      "normalizer": "upper-identifier-v1",
+      "comparator": "normalized_exact",
+      "authority": "authoritative",
+      "discriminating": true,
+      "agreements": [
+        {
+          "outcome": "agree",
+          "m": 0.99,
+          "u": 0.001
+        },
+        {
+          "outcome": "disagree",
+          "m": 0.01,
+          "u": 0.999
+        }
+      ]
+    },
+    {
+      "field_id": "organization.tax_id",
+      "normalizer": "identifier-v1",
+      "comparator": "normalized_exact",
+      "authority": "source_qualified",
+      "discriminating": true,
+      "agreements": [
+        {
+          "outcome": "agree",
+          "m": 0.98,
+          "u": 0.01
+        },
+        {
+          "outcome": "disagree",
+          "m": 0.02,
+          "u": 0.99
+        }
+      ]
+    },
+    {
+      "field_id": "organization.domain",
+      "normalizer": "registrable-domain-v1",
+      "comparator": "normalized_exact",
+      "authority": "source_qualified",
+      "discriminating": true,
+      "agreements": [
+        {
+          "outcome": "agree",
+          "m": 0.98,
+          "u": 0.01
+        },
+        {
+          "outcome": "disagree",
+          "m": 0.02,
+          "u": 0.99
+        }
+      ]
+    },
+    {
+      "field_id": "organization.name",
+      "normalizer": "legal-name-v1",
+      "comparator": "graded_string",
+      "authority": "weak",
+      "discriminating": false,
+      "agreements": [
+        {
+          "outcome": "agree",
+          "m": 0.75,
+          "u": 0.12
+        },
+        {
+          "outcome": "similar",
+          "m": 0.2,
+          "u": 0.13
+        },
+        {
+          "outcome": "disagree",
+          "m": 0.05,
+          "u": 0.75
+        }
+      ]
+    },
+    {
+      "field_id": "organization.country",
+      "normalizer": "upper-identifier-v1",
+      "comparator": "normalized_exact",
+      "authority": "weak",
+      "discriminating": false,
+      "agreements": [
+        {
+          "outcome": "agree",
+          "m": 0.85,
+          "u": 0.25
+        },
+        {
+          "outcome": "disagree",
+          "m": 0.15,
+          "u": 0.75
+        }
+      ]
+    }
+  ],
+  "prior": 0.1,
+  "review_threshold": 0.35,
+  "link_threshold": 0.94,
+  "minimum_margin": 0.06,
+  "calibrated": false
+}

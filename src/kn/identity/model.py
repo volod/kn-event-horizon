@@ -9,6 +9,16 @@ from kn.review.model import Digest, Frozen, Instant, Text
 
 Authority = Literal["authoritative", "source_qualified", "weak"]
 Method = Literal["authoritative_key", "existing_link", "scored_match", "review_decision", "minted"]
+MatchDecision = Literal["link", "review", "mint"]
+MatchRoute = Literal[
+    "authoritative_key", "existing_link", "scored_match", "alias", "conflict", "no_match"
+]
+MATCH_LINK_METHODS: dict[MatchRoute, Method] = {
+    "authoritative_key": "authoritative_key",
+    "existing_link": "existing_link",
+    "scored_match": "scored_match",
+    "no_match": "minted",
+}
 
 
 def uuid7(value: str) -> str:
@@ -177,14 +187,25 @@ class Candidate(Frozen):
     probability: Probability
 
 
+class MatchTrace(Frozen):
+    request_digest: Digest
+    source_version: Text
+    route: MatchRoute
+    prior: Probability
+    minted_id: KnId | None = None
+    followup_count: int = Field(default=0, ge=0, strict=True)
+
+
 class Match(Frozen):
     kind: Literal["match_recorded"] = "match_recorded"
     record: SourceKey
     profile_digest: Digest
     profile_version: Text
     candidates: tuple[Candidate, ...]
-    decision: Literal["link", "review", "mint"]
+    decision: MatchDecision
     selected: KnId | None = None
+    # Earlier events must retain their canonical v1 bytes and hashes.
+    trace: MatchTrace | None = Field(default=None, exclude_if=lambda value: value is None)
 
 
 class FieldChange(Frozen):
