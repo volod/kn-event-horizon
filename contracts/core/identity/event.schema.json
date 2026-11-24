@@ -542,6 +542,17 @@
           "pattern": "\\S",
           "title": "Survivor",
           "type": "string"
+        },
+        "authoritative": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/Identifier"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
         }
       },
       "required": [

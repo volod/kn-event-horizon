@@ -28,7 +28,8 @@ def decision_table() -> sa.Table:
     return metadata(contract).tables["evidence.human_verification_decisions"]
 
 
-def _lock(connection: Connection) -> None:
+def lock(connection: Connection) -> None:
+    """Serialize review writers before locking reviewed rows or replacing their schemas."""
     if not connection.in_transaction():
         raise ValueError("decision application requires a caller-owned transaction")
     if connection.get_isolation_level() != "READ COMMITTED":
@@ -51,7 +52,7 @@ def submit(
     """
     reviewer = authenticate()
     reviewer.authorize(request.target)
-    _lock(connection)
+    lock(connection)
     with connection.begin_nested():
         resolver.resolve(connection, request.target)
         with journal.locked() as log:
@@ -83,7 +84,7 @@ def replay_target(
     connection: Connection, journal: Journal, resolver: TargetResolver, target: Target
 ) -> Projection:
     """Replay one restored exact target. Coverage-wide pending/stale reports come later."""
-    _lock(connection)
+    lock(connection)
     with connection.begin_nested():
         resolver.resolve(connection, target)
         with journal.locked() as log:
@@ -92,32 +93,48 @@ def replay_target(
 
 
 def _apply(connection: Connection, events: tuple[Decision, ...], target: Target) -> None:
-    table = decision_table()
     for event in events:
-        if event.target != target:
-            continue
-        document = canonical(event.model_dump(mode="json"))
-        connection.execute(
-            insert(table)
-            .values(
-                decision_id=event.decision_id,
-                target_id=target.target_id,
-                request_key=digest([event.reviewer, event.request_id]),
-                reviewer=event.reviewer,
-                performed_at=event.performed_at,
-                recorded_at=event.recorded_at,
-                outcome=event.outcome,
-                event_json=document,
-            )
-            .on_conflict_do_nothing()
+        if event.target == target:
+            _insert(connection, event)
+
+
+def replay_selected(
+    connection: Connection,
+    journal: Journal,
+    select: Callable[[dict[str, Decision]], tuple[str, ...]],
+) -> None:
+    """Reproject decisions referenced by another durable log after validating its references."""
+    lock(connection)
+    with journal.locked() as log, connection.begin_nested():
+        by_id = {event.decision_id: event for event in log.events}
+        for key in select(by_id):
+            _insert(connection, by_id[key])
+
+
+def _insert(connection: Connection, event: Decision) -> None:
+    table = decision_table()
+    document = canonical(event.model_dump(mode="json"))
+    connection.execute(
+        insert(table)
+        .values(
+            decision_id=event.decision_id,
+            target_id=event.target.target_id,
+            request_key=digest([event.reviewer, event.request_id]),
+            reviewer=event.reviewer,
+            performed_at=event.performed_at,
+            recorded_at=event.recorded_at,
+            outcome=event.outcome,
+            event_json=document,
         )
-        if (
-            connection.scalar(
-                sa.select(table.c.event_json).where(table.c.decision_id == event.decision_id)
-            )
-            != document
-        ):
-            raise ValueError("stored decision differs from durable journal")
+        .on_conflict_do_nothing()
+    )
+    if (
+        connection.scalar(
+            sa.select(table.c.event_json).where(table.c.decision_id == event.decision_id)
+        )
+        != document
+    ):
+        raise ValueError("stored decision differs from durable journal")
 
 
 def projection(connection: Connection, target: Target) -> Projection:

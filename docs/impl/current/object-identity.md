@@ -1,8 +1,47 @@
 # Object Identity
 
-The identity storage contract, durable event journal and deterministic replay are available.
-Operator lifecycle commands, matching execution, change detection, lineage queries and calibration
+The identity storage contract, durable event journal, deterministic replay and reviewed lifecycle
+commands are available. Matching execution, change detection, claim lineage and calibration
 remain in the [plan](../plan.md).
+
+## Operator lifecycle commands
+
+`kn identity show KN_ID` shows the requested object's class, state, anchor, mint event, terminal
+successors, and current holdings. `kn identity resolve KN_ID` returns the terminal IDs in sorted
+order, including multiple successors after a split. An active or retired object without a
+successor resolves to itself. `kn identity history KN_ID` returns events involving the object
+or its successor paths in journal order, with their original actor, time, evidence and decision
+reference. These commands read the durable identity journal, including any event pending SQL
+projection.
+
+| Command | Operation |
+| --- | --- |
+| `identity merge KN_ID SURVIVOR` | Move current holdings to a distinct active object of the same class. |
+| `identity split KN_ID SUCCESSOR SUCCESSOR ... --assign ITEM=KN_ID` | Assign every current link, identifier and attribute once. Repeat `--assign` with the holding's `event_id` from `show`. Use existing same-class active successors. |
+| `identity retire KN_ID` | Retire the object and close its current links. |
+| `identity restore KN_ID` | Return a retired object without a successor to the active state. Closed links remain historical. |
+| `identity reclassify KN_ID ENTITY_CLASS --anchor-source SOURCE --anchor-key KEY` | Retire the old ID and mint a new-class successor in one event. Use an anchoring source key that has never minted an object. Current holdings move to the successor. |
+
+Each mutation requires `--request-id`, `--performed-at` (an ISO 8601 instant with offset),
+`--reason` and `--evidence` (a supporting reference). Review the displayed proposal on the
+controlling terminal and enter `yes` to approve. The local Unix account supplies the reviewer
+identity as `local:<account>`. The account must own `DATA_DIR` and the existing journal directories
+and files, with group and other write permissions disabled. Give unattended workers separate
+accounts that lack those permissions. The local protocol trusts the journal owner and processes
+with equivalent access. Writes also require `KN_DATABASE_URL`, its configured password or password
+file, and the identity and evidence loader privileges on an upgraded database.
+
+`kn identity --data-dir PATH ACTION ...` overrides `DATA_DIR`; relative paths resolve from the
+project root. When using a project's `.env`, load it with `scripts/shared/common.sh` and
+`kn_load_env` before running the CLI. Use `--locale en` or `--locale uk` for localized headings,
+help, confirmation and diagnostics. `--json` returns the same keys and values in either locale.
+Success for a mutation returns the full identity event and `decision_id`. Input or transition
+errors report `E_INPUT`, terminal or owner refusals report `E_IDENTITY_AUTH`, and SQL errors report
+`E_DATABASE`.
+
+Merge, split and reclassification preserve the original link ID and source record ID while
+changing link ownership. Later claim lineage can follow that source record through the move.
+The original link and every move remain in history.
 
 ## Storage and wire contracts
 
@@ -78,12 +117,17 @@ The pure replay validator in `state.py` and `transitions.py` enforces:
 - Identifier namespace/value intervals never overlap; validity is half-open, so adjacent intervals
   can use the same identifier. Authority levels stay distinct.
 - Merge targets are active, distinct objects of the same class. Merged and split states are
-  terminal. Redirect projections collapse chains to terminal successors.
+  terminal. Replay maintains flattened terminal successors for a single lookup, including
+  converging split branches.
 - A split names at least two distinct active objects of the same class and assigns every current
   link, identifier and attribute to exactly one successor. Reclassification retires the old object
   and mints a new-class successor in one event, retaining ownership lineage.
-- Retirement closes active links. Restore permits a retired object without a successor; links can
-  then be added explicitly. Merge, split, restore and reclassification require decision references.
+- Retirement closes active links. Restore permits a retired object without a successor. Links can
+  then be added explicitly. Operator events cite the accepted review. Trusted ingestion can
+  instead append a `Merge` with an `authoritative` observation, using the opposing object's
+  recorded identifier with the same namespace, issuer and exact value. Both identifiers must be
+  authoritative and valid at the event instant. The merge carries the new evidence without
+  inserting a duplicate identifier interval.
 - Record versions are unique per source key. Older observations remain history without reducing
   `last_seen`. Change sets cite an existing version once. Scored links cite a stored match with the
   same record, selected candidate, score, probability and profile version/digest.
@@ -95,6 +139,24 @@ outside the trusted protocol. Match profiles and stored features are structural 
 resolver executes matching or classifies updates yet. Replay currently validates the whole local
 log and replaces disposable state; it has no large-log performance claim.
 
+## Reviewed writes and recovery
+
+`kn.identity.lifecycle.submit` takes a trusted authenticator and applies the shared
+[review protocol](evidence-model.md#trusted-decision-application) inside the identity writer lock.
+The accepted `workflow` decision binds the normalized transition, the preceding identity event
+digest, and the reviewer, reason, evidence and exact performed time. The decision journal is
+fsynced first. The identity journal event then cites `identity-review:<decision_id>` and is
+fsynced before SQL state is committed. Replay checks both journals and restores the referenced
+decisions alongside identity rows. Rebuild takes the identity lock, then the review lock, before
+replacing schemas. Keep both journals together for rebuilds.
+
+Retry with the same reviewer, request ID, operation, performed time, reason and evidence. An
+applied request returns the original event even after later transitions. If only the decision was
+written, the same request can finish against the same identity head. If the head has advanced,
+inspect the current state and submit a newly reviewed request. A decision by itself never changes
+ownership. A changed identity head between terminal confirmation and submission refuses the
+operation. Historical opaque references from earlier v1 journal entries remain readable.
+
 ## Rebuild and verification
 
 `kn db rebuild` replays identity before reviewed seeds and any later raw-record replay. It uses
@@ -104,13 +166,18 @@ pass `rebuild(connection, data_dir=path)`. Rebuild takes the identity lock befor
 a replay or seed failure restores the complete previous SQL state. Raw replay remains planned.
 
 `tests/identity/` covers every event kind, invalid transitions, namespace validity, typed schemas,
-profile structure, source key preservation, journal damage, retries and concurrent minting.
+profile structure, source key preservation, authoritative merge proof, terminal authorization,
+journal damage, retries and concurrent minting.
 `tests/integration/test_identity.py` and `test_identity_database.py` check repeated replay, complete
 database-drop recovery through the CLI in both locales, concurrent SQL writers, caught SQL errors,
 pending replay, malformed-log rebuild rollback, SQL/log disagreement and the partial index.
+`tests/integration/test_identity_lifecycle*.py` check CLI writes, cross-class refusal, interrupted
+appends, stale requests and repeat rebuilds with the original decision IDs. `make test-bilingual`
+compares identity lookups and command help with both locale goldens.
 `make model-baseline` now includes identity history before SATCOM import and compares every
 registered column after two rebuilds. Run `make ci` and `make test-integration` against local PostGIS;
 `make ci-local` also includes the existing local SKOS gate.
 
 Acceptance evidence is retained in
-[record 0033](../records/0033-object-identity-identity-registry-contracts.md).
+[record 0033](../records/0033-object-identity-identity-registry-contracts.md) and
+[record 0039](../records/0039-object-identity-object-lifecycle-operations.md).

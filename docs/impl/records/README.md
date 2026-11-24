@@ -53,5 +53,6 @@ decision. A record can name a plan task by ID because plan headings disappear on
 | 0036 | `crawler-config-schema` | [Crawler configuration schema](0036-source-management-crawler-config-schema.md) |
 | 0037 | `source-onboarding-workflow` | [Source onboarding workflow](0037-source-management-source-onboarding-workflow.md) |
 | 0038 | `source-admission-implementation-audit` | [Source admission implementation audit](0038-source-management-source-admission-implementation-audit.md) |
+| 0039 | `object-lifecycle-operations` | [Object lifecycle operations](0039-object-identity-object-lifecycle-operations.md) |
 
-Next unused sequence is `0039`.
+Next unused sequence is `0040`.

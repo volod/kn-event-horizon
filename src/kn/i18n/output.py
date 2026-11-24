@@ -1,9 +1,12 @@
 """Operator presentation of structured operation results."""
 
 from kn.i18n import Translator
+from kn.i18n.identity_output import identity_result
 
 
 def render_result(translator: Translator, command: str, result: dict[str, object]) -> str:
+    if command == "identity":
+        return identity_result(translator, result)
     if command == "info":
         return translator.text("cli.info", **result)
     if command == "contract":

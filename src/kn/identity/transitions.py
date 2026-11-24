@@ -1,7 +1,9 @@
-"""Lifecycle validation for durable replay, without operator workflow commands."""
+"""Lifecycle validation and ownership changes for durable replay."""
+
+from datetime import datetime
 
 from kn.identity.events import Event
-from kn.identity.model import Link, Merge, Reclassify, Restore, Retire, Split, Unlink
+from kn.identity.model import Identifier, Link, Merge, Reclassify, Restore, Retire, Split, Unlink
 from kn.identity.state import State
 
 
@@ -14,7 +16,7 @@ def transition(state: State, event: Event) -> None:
     elif isinstance(payload, Retire):
         _retire(state, payload, event)
     elif isinstance(payload, Merge):
-        _merge(state, payload)
+        _merge(state, payload, event)
     elif isinstance(payload, Split):
         _split(state, payload)
     elif isinstance(payload, Reclassify):
@@ -56,19 +58,44 @@ def _reclassify(state: State, payload: Reclassify, event: Event) -> None:
         raise ValueError("reclassification requires a different class")
     state.mint(payload.successor, event)
     item.state = "retired"
-    item.successors = (payload.successor.kn_id,)
+    state.redirect(item, (payload.successor.kn_id,))
     for holding in state.owned(payload.kn_id).values():
         holding.kn_id = payload.successor.kn_id
 
 
-def _merge(state: State, payload: Merge) -> None:
+def _merge(state: State, payload: Merge, event: Event) -> None:
     item, target = state.active(payload.kn_id), state.active(payload.survivor)
     if item.kn_id == target.kn_id or item.entity_class != target.entity_class:
         raise ValueError("merge requires distinct active objects of the same class")
+    if payload.authoritative is not None:
+        _require_authority(state, payload, payload.authoritative, event.occurred_at)
     item.state = "merged"
-    item.successors = (target.kn_id,)
+    state.redirect(item, (target.kn_id,))
     for holding in state.owned(item.kn_id).values():
         holding.kn_id = target.kn_id
+
+
+def _require_authority(state: State, merge: Merge, proof: Identifier, at: datetime) -> None:
+    participants = {merge.kn_id, merge.survivor}
+    if proof.kn_id not in participants or not _authoritative_at(proof, at):
+        raise ValueError("merge requires a current authoritative observation on a participant")
+    (other,) = participants - {proof.kn_id}
+    if not any(
+        isinstance(known := holding.event.payload, Identifier)
+        and (known.namespace, known.value, known.issuer)
+        == (proof.namespace, proof.value, proof.issuer)
+        and _authoritative_at(known, at)
+        for holding in state.owned(other).values()
+    ):
+        raise ValueError("merge requires a shared current authoritative identifier")
+
+
+def _authoritative_at(identifier: Identifier, at: datetime) -> bool:
+    return (
+        identifier.authority == "authoritative"
+        and identifier.valid_from <= at
+        and (identifier.valid_to is None or at < identifier.valid_to)
+    )
 
 
 def _split(state: State, payload: Split) -> None:
@@ -85,6 +112,6 @@ def _split(state: State, payload: Split) -> None:
     if not set(assignments.values()) <= set(payload.successors):
         raise ValueError("split assignment targets an undeclared successor")
     item.state = "split"
-    item.successors = payload.successors
+    state.redirect(item, payload.successors)
     for key, holding in owned.items():
         holding.kn_id = assignments[key]

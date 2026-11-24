@@ -20,6 +20,11 @@ from kn.db.rebuild import RebuildRefused
 from kn.i18n import DEFAULT_LOCALE, Translator
 from kn.i18n.output import render_result
 from kn.i18n.parser import OperatorParser, parse_interface_options
+from kn.identity import operator
+from kn.identity.journal import Journal
+from kn.identity.lifecycle_reviews import Change, Reclassification, ReviewDetails
+from kn.identity.model import Assignment, Merge, Restore, Retire, SourceKey, Split
+from kn.identity.queries import inspect
 from kn.metadata import project_info
 from kn.operations import (
     contract_operation,
@@ -60,6 +65,8 @@ def build_parser(
     contracts.add_argument("--check", action="store_true", help=tr.text("cli.check_help"))
     database = subcommands.add_parser("db", help=tr.text("cli.db_help"))
     database.add_argument("action", choices=("upgrade", "verify", "rebuild"))
+    identity = subcommands.add_parser("identity", help=tr.text("cli.identity_help"))
+    _identity_arguments(identity, parser_class, tr)
     source = subcommands.add_parser("source", help=tr.text("cli.catalogue_help"))
     source_actions = source.add_subparsers(
         dest="action", required=True, title=tr.text("cli.commands"), parser_class=parser_class
@@ -103,6 +110,57 @@ def build_parser(
     return parser
 
 
+def _identity_arguments(
+    parser: OperatorParser, parser_class: type[OperatorParser], tr: Translator
+) -> None:
+    parser.add_argument("--data-dir", type=Path, help=tr.text("cli.data_dir_help"))
+    actions = parser.add_subparsers(
+        dest="action", required=True, title=tr.text("cli.commands"), parser_class=parser_class
+    )
+    descriptions = {
+        "show": tr.text("cli.identity_show_help"),
+        "resolve": tr.text("cli.identity_resolve_help"),
+        "history": tr.text("cli.identity_history_help"),
+        "merge": tr.text("cli.identity_merge_help"),
+        "split": tr.text("cli.identity_split_help"),
+        "retire": tr.text("cli.identity_retire_help"),
+        "restore": tr.text("cli.identity_restore_help"),
+        "reclassify": tr.text("cli.identity_reclassify_help"),
+    }
+    for action, description in descriptions.items():
+        command = actions.add_parser(action, help=description, description=description)
+        command.add_argument("kn_id", metavar="KN_ID", help=tr.text("cli.identity_id_help"))
+        if action in {"show", "resolve", "history"}:
+            continue
+        command.add_argument(
+            "--request-id", required=True, help=tr.text("cli.identity_request_help")
+        )
+        command.add_argument(
+            "--performed-at", required=True, help=tr.text("cli.identity_time_help")
+        )
+        command.add_argument("--reason", required=True, help=tr.text("cli.identity_reason_help"))
+        command.add_argument(
+            "--evidence", required=True, help=tr.text("cli.identity_evidence_help")
+        )
+        if action == "merge":
+            command.add_argument("survivor", help=tr.text("cli.identity_survivor_help"))
+        elif action == "split":
+            command.add_argument(
+                "successors", nargs="+", help=tr.text("cli.identity_successors_help")
+            )
+            command.add_argument(
+                "--assign", action="append", default=[], help=tr.text("cli.identity_assign_help")
+            )
+        elif action == "reclassify":
+            command.add_argument("entity_class", help=tr.text("cli.identity_class_help"))
+            command.add_argument(
+                "--anchor-source", required=True, help=tr.text("cli.identity_anchor_source_help")
+            )
+            command.add_argument(
+                "--anchor-key", required=True, help=tr.text("cli.identity_anchor_key_help")
+            )
+
+
 def main(argv: Sequence[str] | None = None) -> int:
     """Run the selected command, keeping JSON keys and error codes independent of locale."""
     logging.basicConfig(level=logging.INFO, format="%(message)s")
@@ -117,12 +175,15 @@ def main(argv: Sequence[str] | None = None) -> int:
         return 2
     args = build_parser(translator, json_output=selected.json).parse_args(remaining)
     try:
-        result = _run(args)
+        result = _run(args, translator)
     except SQLAlchemyError:
         _report_error(translator.text("cli.database_error"), "E_DATABASE", selected.json)
         return 1
     except RebuildRefused:
         _report_error(translator.text("cli.rebuild_refused"), "E_INPUT", selected.json)
+        return 1
+    except operator.IdentityAuthorizationError:
+        _report_error(translator.text("cli.identity_auth_error"), "E_IDENTITY_AUTH", selected.json)
         return 1
     except CrawlerConfigError as error:
         diagnostic = error.diagnostic()
@@ -159,7 +220,9 @@ def _report_error(
     _LOG.error("%s", json.dumps({"error": error}, ensure_ascii=True) if json_output else message)
 
 
-def _run(args: argparse.Namespace) -> dict[str, object]:
+def _run(args: argparse.Namespace, translator: Translator) -> dict[str, object]:
+    if args.command == "identity":
+        return _identity(args, translator)
     if args.command == "info":
         return asdict(project_info())
     if args.command == "contract":
@@ -177,6 +240,46 @@ def _run(args: argparse.Namespace) -> dict[str, object]:
             return export_scheme(args.scheme, args.data_dir)
         return import_proposals(discover_project_root(), args.data_dir, check=args.check)
     return satcom_operation(args.action, args.source, args.data_dir)
+
+
+def _identity(args: argparse.Namespace, translator: Translator) -> dict[str, object]:
+    directory = args.data_dir or Path(os.environ.get("DATA_DIR", ".data"))
+    if not directory.is_absolute():
+        directory = discover_project_root() / directory
+    journal = Journal(directory)
+    if args.action in {"show", "resolve", "history"}:
+        return inspect(journal, args.action, args.kn_id)
+    details = ReviewDetails.model_validate(
+        {
+            "request_id": args.request_id,
+            "performed_at": args.performed_at,
+            "reason": args.reason,
+            "evidence": args.evidence,
+        }
+    )
+    return operator.apply_change(translator, journal, _identity_change(args), details)
+
+
+def _identity_change(args: argparse.Namespace) -> Change:
+    if args.action == "merge":
+        return Merge(kn_id=args.kn_id, survivor=args.survivor)
+    if args.action == "split":
+        assignments = []
+        for assignment in args.assign:
+            item, _, successor = assignment.partition("=")
+            assignments.append(Assignment(item_id=item, successor=successor))
+        return Split(
+            kn_id=args.kn_id, successors=tuple(args.successors), assignments=tuple(assignments)
+        )
+    if args.action == "reclassify":
+        return Reclassification(
+            kn_id=args.kn_id,
+            entity_class=args.entity_class,
+            anchor=SourceKey(source=args.anchor_source, key=args.anchor_key),
+        )
+    if args.action == "retire":
+        return Retire(kn_id=args.kn_id)
+    return Restore(kn_id=args.kn_id)
 
 
 if __name__ == "__main__":

@@ -11,6 +11,10 @@ Lines entry carries its sequence, predecessor digest, event digest, UTC instant,
 evidence, optional decision reference and discriminated payload. Both schemas are compared with
 their Python models in `tests/identity/`.
 
+A forced merge can carry a second authoritative identifier observation in its payload. The
+existing matching identifier must belong to the other active participant and be valid at the
+merge time. Reviewed merge payloads preserve the original v1 representation.
+
 The storage contract declares `kn.identity` on objects and source records and the shared
 `kn.humanVerification` trait on every dataset. Decision references and imported verification text
 grant no human verification stamp. See the [available registry and replay

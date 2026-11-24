@@ -17,8 +17,8 @@
       ],
       "expected": {
         "exit_code": 0,
-        "stderr": "",
-        "stdout": "usage: kn [-h] [--locale LOCALE] [--json]\n          {info,contract,db,source,space,vocabulary} ...\n\noptions:\n  -h, --help            show this help message and exit\n  --locale LOCALE       interface language (en or uk)\n  --json                emit machine-readable JSON with stable keys\n\ncommands:\n  {info,contract,db,source,space,vocabulary}\n    info                show the installed project identity\n    contract            validate or compile open data contracts\n    db                  apply or verify governed schema revisions\n    source              list and validate sources\n    space               space-domain datasets\n    vocabulary          review and export controlled vocabularies\n"
+        "stdout": "usage: kn [-h] [--locale LOCALE] [--json]\n          {info,contract,db,identity,source,space,vocabulary} ...\n\noptions:\n  -h, --help            show this help message and exit\n  --locale LOCALE       interface language (en or uk)\n  --json                emit machine-readable JSON with stable keys\n\ncommands:\n  {info,contract,db,identity,source,space,vocabulary}\n    info                show the installed project identity\n    contract            validate or compile open data contracts\n    db                  apply or verify governed schema revisions\n    identity            inspect and review object identity\n    source              list and validate sources\n    space               space-domain datasets\n    vocabulary          review and export controlled vocabularies\n",
+        "stderr": ""
       },
       "id": "root-help"
     },
@@ -155,8 +155,8 @@
       ],
       "expected": {
         "exit_code": 2,
-        "stderr": "E_ARGUMENTS: invalid arguments for kn; use --help.\n",
-        "stdout": "usage: kn [-h] [--locale LOCALE] [--json]\n          {info,contract,db,source,space,vocabulary} ...\n"
+        "stdout": "usage: kn [-h] [--locale LOCALE] [--json]\n          {info,contract,db,identity,source,space,vocabulary} ...\n",
+        "stderr": "E_ARGUMENTS: invalid arguments for kn; use --help.\n"
       },
       "id": "invalid-command"
     },
@@ -164,8 +164,8 @@
       "arguments": [],
       "expected": {
         "exit_code": 2,
-        "stderr": "E_ARGUMENTS: invalid arguments for kn; use --help.\n",
-        "stdout": "usage: kn [-h] [--locale LOCALE] [--json]\n          {info,contract,db,source,space,vocabulary} ...\n"
+        "stdout": "usage: kn [-h] [--locale LOCALE] [--json]\n          {info,contract,db,identity,source,space,vocabulary} ...\n",
+        "stderr": "E_ARGUMENTS: invalid arguments for kn; use --help.\n"
       },
       "id": "missing-command"
     },
@@ -295,6 +295,122 @@
         "stdout": ""
       },
       "id": "malformed-locale-json"
+    },
+    {
+      "arguments": [
+        "identity",
+        "--help"
+      ],
+      "expected": {
+        "exit_code": 0,
+        "stdout": "usage: kn identity [-h] [--data-dir DATA_DIR]\n                   {show,resolve,history,merge,split,retire,restore,reclassify}\n                   ...\n\noptions:\n  -h, --help            show this help message and exit\n  --data-dir DATA_DIR   runtime data directory\n\ncommands:\n  {show,resolve,history,merge,split,retire,restore,reclassify}\n    show                show an object's state and current holdings\n    resolve             resolve a KN ID to its terminal IDs\n    history             show identity events and successor history\n    merge               merge into another active object of the same class\n    split               assign current holdings to two or more successors\n    retire              retire an active object and close its links\n    restore             restore a retired object without a successor\n    reclassify          retire the object and mint a successor of a different\n                        class\n",
+        "stderr": ""
+      },
+      "id": "identity-help"
+    },
+    {
+      "arguments": [
+        "identity",
+        "show",
+        "--help"
+      ],
+      "expected": {
+        "exit_code": 0,
+        "stdout": "usage: kn identity show [-h] KN_ID\n\nshow an object's state and current holdings\n\narguments:\n  KN_ID       canonical kn: UUIDv7\n\noptions:\n  -h, --help  show this help message and exit\n",
+        "stderr": ""
+      },
+      "id": "identity-show-help"
+    },
+    {
+      "arguments": [
+        "identity",
+        "resolve",
+        "--help"
+      ],
+      "expected": {
+        "exit_code": 0,
+        "stdout": "usage: kn identity resolve [-h] KN_ID\n\nresolve a KN ID to its terminal IDs\n\narguments:\n  KN_ID       canonical kn: UUIDv7\n\noptions:\n  -h, --help  show this help message and exit\n",
+        "stderr": ""
+      },
+      "id": "identity-resolve-help"
+    },
+    {
+      "arguments": [
+        "identity",
+        "history",
+        "--help"
+      ],
+      "expected": {
+        "exit_code": 0,
+        "stdout": "usage: kn identity history [-h] KN_ID\n\nshow identity events and successor history\n\narguments:\n  KN_ID       canonical kn: UUIDv7\n\noptions:\n  -h, --help  show this help message and exit\n",
+        "stderr": ""
+      },
+      "id": "identity-history-help"
+    },
+    {
+      "arguments": [
+        "identity",
+        "merge",
+        "--help"
+      ],
+      "expected": {
+        "exit_code": 0,
+        "stdout": "usage: kn identity merge [-h] --request-id REQUEST_ID --performed-at\n                         PERFORMED_AT --reason REASON --evidence EVIDENCE\n                         KN_ID survivor\n\nmerge into another active object of the same class\n\narguments:\n  KN_ID                 canonical kn: UUIDv7\n  survivor              KN ID of the surviving object\n\noptions:\n  -h, --help            show this help message and exit\n  --request-id REQUEST_ID\n                        unique review request ID, reused on retry\n  --performed-at PERFORMED_AT\n                        review time in ISO 8601 with an explicit UTC offset\n  --reason REASON       reason for the identity change\n  --evidence EVIDENCE   reference to supporting evidence\n",
+        "stderr": ""
+      },
+      "id": "identity-merge-help"
+    },
+    {
+      "arguments": [
+        "identity",
+        "split",
+        "--help"
+      ],
+      "expected": {
+        "exit_code": 0,
+        "stdout": "usage: kn identity split [-h] --request-id REQUEST_ID --performed-at\n                         PERFORMED_AT --reason REASON --evidence EVIDENCE\n                         [--assign ASSIGN]\n                         KN_ID successors [successors ...]\n\nassign current holdings to two or more successors\n\narguments:\n  KN_ID                 canonical kn: UUIDv7\n  successors            KN IDs of at least two active successors\n\noptions:\n  -h, --help            show this help message and exit\n  --request-id REQUEST_ID\n                        unique review request ID, reused on retry\n  --performed-at PERFORMED_AT\n                        review time in ISO 8601 with an explicit UTC offset\n  --reason REASON       reason for the identity change\n  --evidence EVIDENCE   reference to supporting evidence\n  --assign ASSIGN       holding event digest and successor as ITEM=KN_ID,\n                        repeat for every holding\n",
+        "stderr": ""
+      },
+      "id": "identity-split-help"
+    },
+    {
+      "arguments": [
+        "identity",
+        "retire",
+        "--help"
+      ],
+      "expected": {
+        "exit_code": 0,
+        "stdout": "usage: kn identity retire [-h] --request-id REQUEST_ID --performed-at\n                          PERFORMED_AT --reason REASON --evidence EVIDENCE\n                          KN_ID\n\nretire an active object and close its links\n\narguments:\n  KN_ID                 canonical kn: UUIDv7\n\noptions:\n  -h, --help            show this help message and exit\n  --request-id REQUEST_ID\n                        unique review request ID, reused on retry\n  --performed-at PERFORMED_AT\n                        review time in ISO 8601 with an explicit UTC offset\n  --reason REASON       reason for the identity change\n  --evidence EVIDENCE   reference to supporting evidence\n",
+        "stderr": ""
+      },
+      "id": "identity-retire-help"
+    },
+    {
+      "arguments": [
+        "identity",
+        "restore",
+        "--help"
+      ],
+      "expected": {
+        "exit_code": 0,
+        "stdout": "usage: kn identity restore [-h] --request-id REQUEST_ID --performed-at\n                           PERFORMED_AT --reason REASON --evidence EVIDENCE\n                           KN_ID\n\nrestore a retired object without a successor\n\narguments:\n  KN_ID                 canonical kn: UUIDv7\n\noptions:\n  -h, --help            show this help message and exit\n  --request-id REQUEST_ID\n                        unique review request ID, reused on retry\n  --performed-at PERFORMED_AT\n                        review time in ISO 8601 with an explicit UTC offset\n  --reason REASON       reason for the identity change\n  --evidence EVIDENCE   reference to supporting evidence\n",
+        "stderr": ""
+      },
+      "id": "identity-restore-help"
+    },
+    {
+      "arguments": [
+        "identity",
+        "reclassify",
+        "--help"
+      ],
+      "expected": {
+        "exit_code": 0,
+        "stdout": "usage: kn identity reclassify [-h] --request-id REQUEST_ID --performed-at\n                              PERFORMED_AT --reason REASON --evidence EVIDENCE\n                              --anchor-source ANCHOR_SOURCE --anchor-key\n                              ANCHOR_KEY\n                              KN_ID entity_class\n\nretire the object and mint a successor of a different class\n\narguments:\n  KN_ID                 canonical kn: UUIDv7\n  entity_class          entity class of the new successor\n\noptions:\n  -h, --help            show this help message and exit\n  --request-id REQUEST_ID\n                        unique review request ID, reused on retry\n  --performed-at PERFORMED_AT\n                        review time in ISO 8601 with an explicit UTC offset\n  --reason REASON       reason for the identity change\n  --evidence EVIDENCE   reference to supporting evidence\n  --anchor-source ANCHOR_SOURCE\n                        source of the new anchoring record\n  --anchor-key ANCHOR_KEY\n                        native key of the new anchoring record\n",
+        "stderr": ""
+      },
+      "id": "identity-reclassify-help"
     }
   ],
   "uk": [
@@ -315,8 +431,8 @@
       ],
       "expected": {
         "exit_code": 0,
-        "stderr": "",
-        "stdout": "\u0432\u0438\u043a\u043e\u0440\u0438\u0441\u0442\u0430\u043d\u043d\u044f: kn [-h] [--locale LOCALE] [--json]\n                 {info,contract,db,source,space,vocabulary} ...\n\n\u043f\u0430\u0440\u0430\u043c\u0435\u0442\u0440\u0438:\n  -h, --help            \u043f\u043e\u043a\u0430\u0437\u0430\u0442\u0438 \u0446\u044e \u0434\u043e\u0432\u0456\u0434\u043a\u0443 \u0439 \u0432\u0438\u0439\u0442\u0438\n  --locale LOCALE       \u043c\u043e\u0432\u0430 \u0456\u043d\u0442\u0435\u0440\u0444\u0435\u0439\u0441\u0443 (en \u0430\u0431\u043e uk)\n  --json                \u0432\u0438\u0432\u0435\u0441\u0442\u0438 JSON \u0437\u0456 \u0441\u0442\u0430\u043b\u0438\u043c\u0438 \u043a\u043b\u044e\u0447\u0430\u043c\u0438\n\n\u043a\u043e\u043c\u0430\u043d\u0434\u0438:\n  {info,contract,db,source,space,vocabulary}\n    info                \u043f\u043e\u043a\u0430\u0437\u0430\u0442\u0438 \u0434\u0430\u043d\u0456 \u0432\u0441\u0442\u0430\u043d\u043e\u0432\u043b\u0435\u043d\u043e\u0433\u043e \u043f\u0440\u043e\u0454\u043a\u0442\u0443\n    contract            \u043f\u0435\u0440\u0435\u0432\u0456\u0440\u0438\u0442\u0438 \u0430\u0431\u043e \u0441\u043a\u043e\u043c\u043f\u0456\u043b\u044e\u0432\u0430\u0442\u0438 \u043a\u043e\u043d\u0442\u0440\u0430\u043a\u0442\u0438 \u0434\u0430\u043d\u0438\u0445\n    db                  \u0437\u0430\u0441\u0442\u043e\u0441\u0443\u0432\u0430\u0442\u0438 \u0430\u0431\u043e \u043f\u0435\u0440\u0435\u0432\u0456\u0440\u0438\u0442\u0438 \u0440\u0435\u0432\u0456\u0437\u0456\u0457 \u0441\u0445\u0435\u043c\n    source              \u043f\u0435\u0440\u0435\u0433\u043b\u044f\u0434\u0430\u0442\u0438 \u0439 \u043f\u0435\u0440\u0435\u0432\u0456\u0440\u044f\u0442\u0438 \u0434\u0436\u0435\u0440\u0435\u043b\u0430\n    space               \u043d\u0430\u0431\u043e\u0440\u0438 \u0434\u0430\u043d\u0438\u0445 \u043a\u043e\u0441\u043c\u0456\u0447\u043d\u043e\u0457 \u0433\u0430\u043b\u0443\u0437\u0456\n    vocabulary          \u043f\u0435\u0440\u0435\u0433\u043b\u044f\u043d\u0443\u0442\u0438 \u0439 \u0435\u043a\u0441\u043f\u043e\u0440\u0442\u0443\u0432\u0430\u0442\u0438 \u0441\u043b\u043e\u0432\u043d\u0438\u043a\u0438\n"
+        "stdout": "\u0432\u0438\u043a\u043e\u0440\u0438\u0441\u0442\u0430\u043d\u043d\u044f: kn [-h] [--locale LOCALE] [--json]\n                 {info,contract,db,identity,source,space,vocabulary} ...\n\n\u043f\u0430\u0440\u0430\u043c\u0435\u0442\u0440\u0438:\n  -h, --help            \u043f\u043e\u043a\u0430\u0437\u0430\u0442\u0438 \u0446\u044e \u0434\u043e\u0432\u0456\u0434\u043a\u0443 \u0439 \u0432\u0438\u0439\u0442\u0438\n  --locale LOCALE       \u043c\u043e\u0432\u0430 \u0456\u043d\u0442\u0435\u0440\u0444\u0435\u0439\u0441\u0443 (en \u0430\u0431\u043e uk)\n  --json                \u0432\u0438\u0432\u0435\u0441\u0442\u0438 JSON \u0437\u0456 \u0441\u0442\u0430\u043b\u0438\u043c\u0438 \u043a\u043b\u044e\u0447\u0430\u043c\u0438\n\n\u043a\u043e\u043c\u0430\u043d\u0434\u0438:\n  {info,contract,db,identity,source,space,vocabulary}\n    info                \u043f\u043e\u043a\u0430\u0437\u0430\u0442\u0438 \u0434\u0430\u043d\u0456 \u0432\u0441\u0442\u0430\u043d\u043e\u0432\u043b\u0435\u043d\u043e\u0433\u043e \u043f\u0440\u043e\u0454\u043a\u0442\u0443\n    contract            \u043f\u0435\u0440\u0435\u0432\u0456\u0440\u0438\u0442\u0438 \u0430\u0431\u043e \u0441\u043a\u043e\u043c\u043f\u0456\u043b\u044e\u0432\u0430\u0442\u0438 \u043a\u043e\u043d\u0442\u0440\u0430\u043a\u0442\u0438 \u0434\u0430\u043d\u0438\u0445\n    db                  \u0437\u0430\u0441\u0442\u043e\u0441\u0443\u0432\u0430\u0442\u0438 \u0430\u0431\u043e \u043f\u0435\u0440\u0435\u0432\u0456\u0440\u0438\u0442\u0438 \u0440\u0435\u0432\u0456\u0437\u0456\u0457 \u0441\u0445\u0435\u043c\n    identity            \u043f\u0435\u0440\u0435\u0433\u043b\u044f\u043d\u0443\u0442\u0438 \u0442\u0430 \u043f\u0435\u0440\u0435\u0432\u0456\u0440\u0438\u0442\u0438 \u0456\u0434\u0435\u043d\u0442\u0438\u0447\u043d\u0456\u0441\u0442\u044c \u043e\u0431'\u0454\u043a\u0442\u0456\u0432\n    source              \u043f\u0435\u0440\u0435\u0433\u043b\u044f\u0434\u0430\u0442\u0438 \u0439 \u043f\u0435\u0440\u0435\u0432\u0456\u0440\u044f\u0442\u0438 \u0434\u0436\u0435\u0440\u0435\u043b\u0430\n    space               \u043d\u0430\u0431\u043e\u0440\u0438 \u0434\u0430\u043d\u0438\u0445 \u043a\u043e\u0441\u043c\u0456\u0447\u043d\u043e\u0457 \u0433\u0430\u043b\u0443\u0437\u0456\n    vocabulary          \u043f\u0435\u0440\u0435\u0433\u043b\u044f\u043d\u0443\u0442\u0438 \u0439 \u0435\u043a\u0441\u043f\u043e\u0440\u0442\u0443\u0432\u0430\u0442\u0438 \u0441\u043b\u043e\u0432\u043d\u0438\u043a\u0438\n",
+        "stderr": ""
       },
       "id": "root-help"
     },
@@ -453,8 +569,8 @@
       ],
       "expected": {
         "exit_code": 2,
-        "stderr": "E_ARGUMENTS: \u043d\u0435\u043a\u043e\u0440\u0435\u043a\u0442\u043d\u0456 \u0430\u0440\u0433\u0443\u043c\u0435\u043d\u0442\u0438 kn; \u0441\u043a\u043e\u0440\u0438\u0441\u0442\u0430\u0439\u0442\u0435\u0441\u044f --help.\n",
-        "stdout": "\u0432\u0438\u043a\u043e\u0440\u0438\u0441\u0442\u0430\u043d\u043d\u044f: kn [-h] [--locale LOCALE] [--json]\n                 {info,contract,db,source,space,vocabulary} ...\n"
+        "stdout": "\u0432\u0438\u043a\u043e\u0440\u0438\u0441\u0442\u0430\u043d\u043d\u044f: kn [-h] [--locale LOCALE] [--json]\n                 {info,contract,db,identity,source,space,vocabulary} ...\n",
+        "stderr": "E_ARGUMENTS: \u043d\u0435\u043a\u043e\u0440\u0435\u043a\u0442\u043d\u0456 \u0430\u0440\u0433\u0443\u043c\u0435\u043d\u0442\u0438 kn; \u0441\u043a\u043e\u0440\u0438\u0441\u0442\u0430\u0439\u0442\u0435\u0441\u044f --help.\n"
       },
       "id": "invalid-command"
     },
@@ -462,8 +578,8 @@
       "arguments": [],
       "expected": {
         "exit_code": 2,
-        "stderr": "E_ARGUMENTS: \u043d\u0435\u043a\u043e\u0440\u0435\u043a\u0442\u043d\u0456 \u0430\u0440\u0433\u0443\u043c\u0435\u043d\u0442\u0438 kn; \u0441\u043a\u043e\u0440\u0438\u0441\u0442\u0430\u0439\u0442\u0435\u0441\u044f --help.\n",
-        "stdout": "\u0432\u0438\u043a\u043e\u0440\u0438\u0441\u0442\u0430\u043d\u043d\u044f: kn [-h] [--locale LOCALE] [--json]\n                 {info,contract,db,source,space,vocabulary} ...\n"
+        "stdout": "\u0432\u0438\u043a\u043e\u0440\u0438\u0441\u0442\u0430\u043d\u043d\u044f: kn [-h] [--locale LOCALE] [--json]\n                 {info,contract,db,identity,source,space,vocabulary} ...\n",
+        "stderr": "E_ARGUMENTS: \u043d\u0435\u043a\u043e\u0440\u0435\u043a\u0442\u043d\u0456 \u0430\u0440\u0433\u0443\u043c\u0435\u043d\u0442\u0438 kn; \u0441\u043a\u043e\u0440\u0438\u0441\u0442\u0430\u0439\u0442\u0435\u0441\u044f --help.\n"
       },
       "id": "missing-command"
     },
@@ -593,6 +709,122 @@
         "stdout": ""
       },
       "id": "malformed-locale-json"
+    },
+    {
+      "arguments": [
+        "identity",
+        "--help"
+      ],
+      "expected": {
+        "exit_code": 0,
+        "stdout": "\u0432\u0438\u043a\u043e\u0440\u0438\u0441\u0442\u0430\u043d\u043d\u044f: kn identity [-h] [--data-dir DATA_DIR]\n                          {show,resolve,history,merge,split,retire,restore,reclassify}\n                          ...\n\n\u043f\u0430\u0440\u0430\u043c\u0435\u0442\u0440\u0438:\n  -h, --help            \u043f\u043e\u043a\u0430\u0437\u0430\u0442\u0438 \u0446\u044e \u0434\u043e\u0432\u0456\u0434\u043a\u0443 \u0439 \u0432\u0438\u0439\u0442\u0438\n  --data-dir DATA_DIR   \u043a\u0430\u0442\u0430\u043b\u043e\u0433 \u0440\u043e\u0431\u043e\u0447\u0438\u0445 \u0434\u0430\u043d\u0438\u0445\n\n\u043a\u043e\u043c\u0430\u043d\u0434\u0438:\n  {show,resolve,history,merge,split,retire,restore,reclassify}\n    show                \u043f\u043e\u043a\u0430\u0437\u0430\u0442\u0438 \u0441\u0442\u0430\u043d \u043e\u0431'\u0454\u043a\u0442\u0430 \u0442\u0430 \u043f\u043e\u0442\u043e\u0447\u043d\u0456 \u0437\u0430\u043f\u0438\u0441\u0438\n    resolve             \u0432\u0438\u0437\u043d\u0430\u0447\u0438\u0442\u0438 \u043a\u0456\u043d\u0446\u0435\u0432\u0456 \u0456\u0434\u0435\u043d\u0442\u0438\u0444\u0456\u043a\u0430\u0442\u043e\u0440\u0438 \u0437\u0430 KN ID\n    history             \u043f\u043e\u043a\u0430\u0437\u0430\u0442\u0438 \u043f\u043e\u0434\u0456\u0457 \u0456\u0434\u0435\u043d\u0442\u0438\u0447\u043d\u043e\u0441\u0442\u0456 \u0442\u0430 \u0456\u0441\u0442\u043e\u0440\u0456\u044e \u043d\u0430\u0441\u0442\u0443\u043f\u043d\u0438\u043a\u0456\u0432\n    merge               \u043e\u0431'\u0454\u0434\u043d\u0430\u0442\u0438 \u0437 \u0456\u043d\u0448\u0438\u043c \u0430\u043a\u0442\u0438\u0432\u043d\u0438\u043c \u043e\u0431'\u0454\u043a\u0442\u043e\u043c \u0442\u043e\u0433\u043e \u0441\u0430\u043c\u043e\u0433\u043e \u043a\u043b\u0430\u0441\u0443\n    split               \u0440\u043e\u0437\u043f\u043e\u0434\u0456\u043b\u0438\u0442\u0438 \u043f\u043e\u0442\u043e\u0447\u043d\u0456 \u0437\u0430\u043f\u0438\u0441\u0438 \u043c\u0456\u0436 \u0434\u0432\u043e\u043c\u0430 \u0430\u0431\u043e \u0431\u0456\u043b\u044c\u0448\u0435\n                        \u043d\u0430\u0441\u0442\u0443\u043f\u043d\u0438\u043a\u0430\u043c\u0438\n    retire              \u0432\u0438\u0432\u0435\u0441\u0442\u0438 \u0430\u043a\u0442\u0438\u0432\u043d\u0438\u0439 \u043e\u0431'\u0454\u043a\u0442 \u0437 \u043e\u0431\u0456\u0433\u0443 \u0442\u0430 \u0437\u0430\u043a\u0440\u0438\u0442\u0438 \u0439\u043e\u0433\u043e\n                        \u0437\u0432'\u044f\u0437\u043a\u0438\n    restore             \u0432\u0456\u0434\u043d\u043e\u0432\u0438\u0442\u0438 \u043e\u0431'\u0454\u043a\u0442, \u0432\u0438\u0432\u0435\u0434\u0435\u043d\u0438\u0439 \u0437 \u043e\u0431\u0456\u0433\u0443, \u0431\u0435\u0437 \u043d\u0430\u0441\u0442\u0443\u043f\u043d\u0438\u043a\u0430\n    reclassify          \u0432\u0438\u0432\u0435\u0441\u0442\u0438 \u043e\u0431'\u0454\u043a\u0442 \u0437 \u043e\u0431\u0456\u0433\u0443 \u0442\u0430 \u0441\u0442\u0432\u043e\u0440\u0438\u0442\u0438 \u043d\u0430\u0441\u0442\u0443\u043f\u043d\u0438\u043a\u0430 \u0456\u043d\u0448\u043e\u0433\u043e\n                        \u043a\u043b\u0430\u0441\u0443\n",
+        "stderr": ""
+      },
+      "id": "identity-help"
+    },
+    {
+      "arguments": [
+        "identity",
+        "show",
+        "--help"
+      ],
+      "expected": {
+        "exit_code": 0,
+        "stdout": "\u0432\u0438\u043a\u043e\u0440\u0438\u0441\u0442\u0430\u043d\u043d\u044f: kn identity show [-h] KN_ID\n\n\u043f\u043e\u043a\u0430\u0437\u0430\u0442\u0438 \u0441\u0442\u0430\u043d \u043e\u0431'\u0454\u043a\u0442\u0430 \u0442\u0430 \u043f\u043e\u0442\u043e\u0447\u043d\u0456 \u0437\u0430\u043f\u0438\u0441\u0438\n\n\u0430\u0440\u0433\u0443\u043c\u0435\u043d\u0442\u0438:\n  KN_ID       \u043a\u0430\u043d\u043e\u043d\u0456\u0447\u043d\u0438\u0439 \u0456\u0434\u0435\u043d\u0442\u0438\u0444\u0456\u043a\u0430\u0442\u043e\u0440 kn: UUIDv7\n\n\u043f\u0430\u0440\u0430\u043c\u0435\u0442\u0440\u0438:\n  -h, --help  \u043f\u043e\u043a\u0430\u0437\u0430\u0442\u0438 \u0446\u044e \u0434\u043e\u0432\u0456\u0434\u043a\u0443 \u0439 \u0432\u0438\u0439\u0442\u0438\n",
+        "stderr": ""
+      },
+      "id": "identity-show-help"
+    },
+    {
+      "arguments": [
+        "identity",
+        "resolve",
+        "--help"
+      ],
+      "expected": {
+        "exit_code": 0,
+        "stdout": "\u0432\u0438\u043a\u043e\u0440\u0438\u0441\u0442\u0430\u043d\u043d\u044f: kn identity resolve [-h] KN_ID\n\n\u0432\u0438\u0437\u043d\u0430\u0447\u0438\u0442\u0438 \u043a\u0456\u043d\u0446\u0435\u0432\u0456 \u0456\u0434\u0435\u043d\u0442\u0438\u0444\u0456\u043a\u0430\u0442\u043e\u0440\u0438 \u0437\u0430 KN ID\n\n\u0430\u0440\u0433\u0443\u043c\u0435\u043d\u0442\u0438:\n  KN_ID       \u043a\u0430\u043d\u043e\u043d\u0456\u0447\u043d\u0438\u0439 \u0456\u0434\u0435\u043d\u0442\u0438\u0444\u0456\u043a\u0430\u0442\u043e\u0440 kn: UUIDv7\n\n\u043f\u0430\u0440\u0430\u043c\u0435\u0442\u0440\u0438:\n  -h, --help  \u043f\u043e\u043a\u0430\u0437\u0430\u0442\u0438 \u0446\u044e \u0434\u043e\u0432\u0456\u0434\u043a\u0443 \u0439 \u0432\u0438\u0439\u0442\u0438\n",
+        "stderr": ""
+      },
+      "id": "identity-resolve-help"
+    },
+    {
+      "arguments": [
+        "identity",
+        "history",
+        "--help"
+      ],
+      "expected": {
+        "exit_code": 0,
+        "stdout": "\u0432\u0438\u043a\u043e\u0440\u0438\u0441\u0442\u0430\u043d\u043d\u044f: kn identity history [-h] KN_ID\n\n\u043f\u043e\u043a\u0430\u0437\u0430\u0442\u0438 \u043f\u043e\u0434\u0456\u0457 \u0456\u0434\u0435\u043d\u0442\u0438\u0447\u043d\u043e\u0441\u0442\u0456 \u0442\u0430 \u0456\u0441\u0442\u043e\u0440\u0456\u044e \u043d\u0430\u0441\u0442\u0443\u043f\u043d\u0438\u043a\u0456\u0432\n\n\u0430\u0440\u0433\u0443\u043c\u0435\u043d\u0442\u0438:\n  KN_ID       \u043a\u0430\u043d\u043e\u043d\u0456\u0447\u043d\u0438\u0439 \u0456\u0434\u0435\u043d\u0442\u0438\u0444\u0456\u043a\u0430\u0442\u043e\u0440 kn: UUIDv7\n\n\u043f\u0430\u0440\u0430\u043c\u0435\u0442\u0440\u0438:\n  -h, --help  \u043f\u043e\u043a\u0430\u0437\u0430\u0442\u0438 \u0446\u044e \u0434\u043e\u0432\u0456\u0434\u043a\u0443 \u0439 \u0432\u0438\u0439\u0442\u0438\n",
+        "stderr": ""
+      },
+      "id": "identity-history-help"
+    },
+    {
+      "arguments": [
+        "identity",
+        "merge",
+        "--help"
+      ],
+      "expected": {
+        "exit_code": 0,
+        "stdout": "\u0432\u0438\u043a\u043e\u0440\u0438\u0441\u0442\u0430\u043d\u043d\u044f: kn identity merge [-h] --request-id REQUEST_ID --performed-at\n                                PERFORMED_AT --reason REASON --evidence\n                                EVIDENCE\n                                KN_ID survivor\n\n\u043e\u0431'\u0454\u0434\u043d\u0430\u0442\u0438 \u0437 \u0456\u043d\u0448\u0438\u043c \u0430\u043a\u0442\u0438\u0432\u043d\u0438\u043c \u043e\u0431'\u0454\u043a\u0442\u043e\u043c \u0442\u043e\u0433\u043e \u0441\u0430\u043c\u043e\u0433\u043e \u043a\u043b\u0430\u0441\u0443\n\n\u0430\u0440\u0433\u0443\u043c\u0435\u043d\u0442\u0438:\n  KN_ID                 \u043a\u0430\u043d\u043e\u043d\u0456\u0447\u043d\u0438\u0439 \u0456\u0434\u0435\u043d\u0442\u0438\u0444\u0456\u043a\u0430\u0442\u043e\u0440 kn: UUIDv7\n  survivor              KN ID \u043e\u0431'\u0454\u043a\u0442\u0430, \u044f\u043a\u0438\u0439 \u0437\u0430\u043b\u0438\u0448\u0438\u0442\u044c\u0441\u044f\n\n\u043f\u0430\u0440\u0430\u043c\u0435\u0442\u0440\u0438:\n  -h, --help            \u043f\u043e\u043a\u0430\u0437\u0430\u0442\u0438 \u0446\u044e \u0434\u043e\u0432\u0456\u0434\u043a\u0443 \u0439 \u0432\u0438\u0439\u0442\u0438\n  --request-id REQUEST_ID\n                        \u0443\u043d\u0456\u043a\u0430\u043b\u044c\u043d\u0438\u0439 \u0456\u0434\u0435\u043d\u0442\u0438\u0444\u0456\u043a\u0430\u0442\u043e\u0440 \u0437\u0430\u043f\u0438\u0442\u0443, \u0442\u043e\u0439 \u0441\u0430\u043c\u0438\u0439 \u0434\u043b\u044f\n                        \u043f\u043e\u0432\u0442\u043e\u0440\u043d\u043e\u0457 \u0441\u043f\u0440\u043e\u0431\u0438\n  --performed-at PERFORMED_AT\n                        \u0447\u0430\u0441 \u043f\u0435\u0440\u0435\u0432\u0456\u0440\u043a\u0438 \u0443 \u0444\u043e\u0440\u043c\u0430\u0442\u0456 ISO 8601 \u0437 \u044f\u0432\u043d\u0438\u043c \u0437\u043c\u0456\u0449\u0435\u043d\u043d\u044f\u043c \u0432\u0456\u0434\n                        UTC\n  --reason REASON       \u043f\u0440\u0438\u0447\u0438\u043d\u0430 \u0437\u043c\u0456\u043d\u0438 \u0456\u0434\u0435\u043d\u0442\u0438\u0447\u043d\u043e\u0441\u0442\u0456\n  --evidence EVIDENCE   \u043f\u043e\u0441\u0438\u043b\u0430\u043d\u043d\u044f \u043d\u0430 \u043f\u0456\u0434\u0442\u0432\u0435\u0440\u0434\u043d\u0456 \u0434\u043e\u043a\u0430\u0437\u0438\n",
+        "stderr": ""
+      },
+      "id": "identity-merge-help"
+    },
+    {
+      "arguments": [
+        "identity",
+        "split",
+        "--help"
+      ],
+      "expected": {
+        "exit_code": 0,
+        "stdout": "\u0432\u0438\u043a\u043e\u0440\u0438\u0441\u0442\u0430\u043d\u043d\u044f: kn identity split [-h] --request-id REQUEST_ID --performed-at\n                                PERFORMED_AT --reason REASON --evidence\n                                EVIDENCE [--assign ASSIGN]\n                                KN_ID successors [successors ...]\n\n\u0440\u043e\u0437\u043f\u043e\u0434\u0456\u043b\u0438\u0442\u0438 \u043f\u043e\u0442\u043e\u0447\u043d\u0456 \u0437\u0430\u043f\u0438\u0441\u0438 \u043c\u0456\u0436 \u0434\u0432\u043e\u043c\u0430 \u0430\u0431\u043e \u0431\u0456\u043b\u044c\u0448\u0435 \u043d\u0430\u0441\u0442\u0443\u043f\u043d\u0438\u043a\u0430\u043c\u0438\n\n\u0430\u0440\u0433\u0443\u043c\u0435\u043d\u0442\u0438:\n  KN_ID                 \u043a\u0430\u043d\u043e\u043d\u0456\u0447\u043d\u0438\u0439 \u0456\u0434\u0435\u043d\u0442\u0438\u0444\u0456\u043a\u0430\u0442\u043e\u0440 kn: UUIDv7\n  successors            KN ID \u0449\u043e\u043d\u0430\u0439\u043c\u0435\u043d\u0448\u0435 \u0434\u0432\u043e\u0445 \u0430\u043a\u0442\u0438\u0432\u043d\u0438\u0445 \u043d\u0430\u0441\u0442\u0443\u043f\u043d\u0438\u043a\u0456\u0432\n\n\u043f\u0430\u0440\u0430\u043c\u0435\u0442\u0440\u0438:\n  -h, --help            \u043f\u043e\u043a\u0430\u0437\u0430\u0442\u0438 \u0446\u044e \u0434\u043e\u0432\u0456\u0434\u043a\u0443 \u0439 \u0432\u0438\u0439\u0442\u0438\n  --request-id REQUEST_ID\n                        \u0443\u043d\u0456\u043a\u0430\u043b\u044c\u043d\u0438\u0439 \u0456\u0434\u0435\u043d\u0442\u0438\u0444\u0456\u043a\u0430\u0442\u043e\u0440 \u0437\u0430\u043f\u0438\u0442\u0443, \u0442\u043e\u0439 \u0441\u0430\u043c\u0438\u0439 \u0434\u043b\u044f\n                        \u043f\u043e\u0432\u0442\u043e\u0440\u043d\u043e\u0457 \u0441\u043f\u0440\u043e\u0431\u0438\n  --performed-at PERFORMED_AT\n                        \u0447\u0430\u0441 \u043f\u0435\u0440\u0435\u0432\u0456\u0440\u043a\u0438 \u0443 \u0444\u043e\u0440\u043c\u0430\u0442\u0456 ISO 8601 \u0437 \u044f\u0432\u043d\u0438\u043c \u0437\u043c\u0456\u0449\u0435\u043d\u043d\u044f\u043c \u0432\u0456\u0434\n                        UTC\n  --reason REASON       \u043f\u0440\u0438\u0447\u0438\u043d\u0430 \u0437\u043c\u0456\u043d\u0438 \u0456\u0434\u0435\u043d\u0442\u0438\u0447\u043d\u043e\u0441\u0442\u0456\n  --evidence EVIDENCE   \u043f\u043e\u0441\u0438\u043b\u0430\u043d\u043d\u044f \u043d\u0430 \u043f\u0456\u0434\u0442\u0432\u0435\u0440\u0434\u043d\u0456 \u0434\u043e\u043a\u0430\u0437\u0438\n  --assign ASSIGN       \u0445\u0435\u0448 \u043f\u043e\u0434\u0456\u0457 \u0437\u0430\u043f\u0438\u0441\u0443 \u0442\u0430 \u0439\u043e\u0433\u043e \u043d\u0430\u0441\u0442\u0443\u043f\u043d\u0438\u043a \u0443 \u0444\u043e\u0440\u043c\u0430\u0442\u0456\n                        ITEM=KN_ID, \u043e\u043a\u0440\u0435\u043c\u043e \u0434\u043b\u044f \u043a\u043e\u0436\u043d\u043e\u0433\u043e \u0437\u0430\u043f\u0438\u0441\u0443\n",
+        "stderr": ""
+      },
+      "id": "identity-split-help"
+    },
+    {
+      "arguments": [
+        "identity",
+        "retire",
+        "--help"
+      ],
+      "expected": {
+        "exit_code": 0,
+        "stdout": "\u0432\u0438\u043a\u043e\u0440\u0438\u0441\u0442\u0430\u043d\u043d\u044f: kn identity retire [-h] --request-id REQUEST_ID --performed-at\n                                 PERFORMED_AT --reason REASON --evidence\n                                 EVIDENCE\n                                 KN_ID\n\n\u0432\u0438\u0432\u0435\u0441\u0442\u0438 \u0430\u043a\u0442\u0438\u0432\u043d\u0438\u0439 \u043e\u0431'\u0454\u043a\u0442 \u0437 \u043e\u0431\u0456\u0433\u0443 \u0442\u0430 \u0437\u0430\u043a\u0440\u0438\u0442\u0438 \u0439\u043e\u0433\u043e \u0437\u0432'\u044f\u0437\u043a\u0438\n\n\u0430\u0440\u0433\u0443\u043c\u0435\u043d\u0442\u0438:\n  KN_ID                 \u043a\u0430\u043d\u043e\u043d\u0456\u0447\u043d\u0438\u0439 \u0456\u0434\u0435\u043d\u0442\u0438\u0444\u0456\u043a\u0430\u0442\u043e\u0440 kn: UUIDv7\n\n\u043f\u0430\u0440\u0430\u043c\u0435\u0442\u0440\u0438:\n  -h, --help            \u043f\u043e\u043a\u0430\u0437\u0430\u0442\u0438 \u0446\u044e \u0434\u043e\u0432\u0456\u0434\u043a\u0443 \u0439 \u0432\u0438\u0439\u0442\u0438\n  --request-id REQUEST_ID\n                        \u0443\u043d\u0456\u043a\u0430\u043b\u044c\u043d\u0438\u0439 \u0456\u0434\u0435\u043d\u0442\u0438\u0444\u0456\u043a\u0430\u0442\u043e\u0440 \u0437\u0430\u043f\u0438\u0442\u0443, \u0442\u043e\u0439 \u0441\u0430\u043c\u0438\u0439 \u0434\u043b\u044f\n                        \u043f\u043e\u0432\u0442\u043e\u0440\u043d\u043e\u0457 \u0441\u043f\u0440\u043e\u0431\u0438\n  --performed-at PERFORMED_AT\n                        \u0447\u0430\u0441 \u043f\u0435\u0440\u0435\u0432\u0456\u0440\u043a\u0438 \u0443 \u0444\u043e\u0440\u043c\u0430\u0442\u0456 ISO 8601 \u0437 \u044f\u0432\u043d\u0438\u043c \u0437\u043c\u0456\u0449\u0435\u043d\u043d\u044f\u043c \u0432\u0456\u0434\n                        UTC\n  --reason REASON       \u043f\u0440\u0438\u0447\u0438\u043d\u0430 \u0437\u043c\u0456\u043d\u0438 \u0456\u0434\u0435\u043d\u0442\u0438\u0447\u043d\u043e\u0441\u0442\u0456\n  --evidence EVIDENCE   \u043f\u043e\u0441\u0438\u043b\u0430\u043d\u043d\u044f \u043d\u0430 \u043f\u0456\u0434\u0442\u0432\u0435\u0440\u0434\u043d\u0456 \u0434\u043e\u043a\u0430\u0437\u0438\n",
+        "stderr": ""
+      },
+      "id": "identity-retire-help"
+    },
+    {
+      "arguments": [
+        "identity",
+        "restore",
+        "--help"
+      ],
+      "expected": {
+        "exit_code": 0,
+        "stdout": "\u0432\u0438\u043a\u043e\u0440\u0438\u0441\u0442\u0430\u043d\u043d\u044f: kn identity restore [-h] --request-id REQUEST_ID --performed-at\n                                  PERFORMED_AT --reason REASON --evidence\n                                  EVIDENCE\n                                  KN_ID\n\n\u0432\u0456\u0434\u043d\u043e\u0432\u0438\u0442\u0438 \u043e\u0431'\u0454\u043a\u0442, \u0432\u0438\u0432\u0435\u0434\u0435\u043d\u0438\u0439 \u0437 \u043e\u0431\u0456\u0433\u0443, \u0431\u0435\u0437 \u043d\u0430\u0441\u0442\u0443\u043f\u043d\u0438\u043a\u0430\n\n\u0430\u0440\u0433\u0443\u043c\u0435\u043d\u0442\u0438:\n  KN_ID                 \u043a\u0430\u043d\u043e\u043d\u0456\u0447\u043d\u0438\u0439 \u0456\u0434\u0435\u043d\u0442\u0438\u0444\u0456\u043a\u0430\u0442\u043e\u0440 kn: UUIDv7\n\n\u043f\u0430\u0440\u0430\u043c\u0435\u0442\u0440\u0438:\n  -h, --help            \u043f\u043e\u043a\u0430\u0437\u0430\u0442\u0438 \u0446\u044e \u0434\u043e\u0432\u0456\u0434\u043a\u0443 \u0439 \u0432\u0438\u0439\u0442\u0438\n  --request-id REQUEST_ID\n                        \u0443\u043d\u0456\u043a\u0430\u043b\u044c\u043d\u0438\u0439 \u0456\u0434\u0435\u043d\u0442\u0438\u0444\u0456\u043a\u0430\u0442\u043e\u0440 \u0437\u0430\u043f\u0438\u0442\u0443, \u0442\u043e\u0439 \u0441\u0430\u043c\u0438\u0439 \u0434\u043b\u044f\n                        \u043f\u043e\u0432\u0442\u043e\u0440\u043d\u043e\u0457 \u0441\u043f\u0440\u043e\u0431\u0438\n  --performed-at PERFORMED_AT\n                        \u0447\u0430\u0441 \u043f\u0435\u0440\u0435\u0432\u0456\u0440\u043a\u0438 \u0443 \u0444\u043e\u0440\u043c\u0430\u0442\u0456 ISO 8601 \u0437 \u044f\u0432\u043d\u0438\u043c \u0437\u043c\u0456\u0449\u0435\u043d\u043d\u044f\u043c \u0432\u0456\u0434\n                        UTC\n  --reason REASON       \u043f\u0440\u0438\u0447\u0438\u043d\u0430 \u0437\u043c\u0456\u043d\u0438 \u0456\u0434\u0435\u043d\u0442\u0438\u0447\u043d\u043e\u0441\u0442\u0456\n  --evidence EVIDENCE   \u043f\u043e\u0441\u0438\u043b\u0430\u043d\u043d\u044f \u043d\u0430 \u043f\u0456\u0434\u0442\u0432\u0435\u0440\u0434\u043d\u0456 \u0434\u043e\u043a\u0430\u0437\u0438\n",
+        "stderr": ""
+      },
+      "id": "identity-restore-help"
+    },
+    {
+      "arguments": [
+        "identity",
+        "reclassify",
+        "--help"
+      ],
+      "expected": {
+        "exit_code": 0,
+        "stdout": "\u0432\u0438\u043a\u043e\u0440\u0438\u0441\u0442\u0430\u043d\u043d\u044f: kn identity reclassify [-h] --request-id REQUEST_ID\n                                     --performed-at PERFORMED_AT --reason\n                                     REASON --evidence EVIDENCE\n                                     --anchor-source ANCHOR_SOURCE\n                                     --anchor-key ANCHOR_KEY\n                                     KN_ID entity_class\n\n\u0432\u0438\u0432\u0435\u0441\u0442\u0438 \u043e\u0431'\u0454\u043a\u0442 \u0437 \u043e\u0431\u0456\u0433\u0443 \u0442\u0430 \u0441\u0442\u0432\u043e\u0440\u0438\u0442\u0438 \u043d\u0430\u0441\u0442\u0443\u043f\u043d\u0438\u043a\u0430 \u0456\u043d\u0448\u043e\u0433\u043e \u043a\u043b\u0430\u0441\u0443\n\n\u0430\u0440\u0433\u0443\u043c\u0435\u043d\u0442\u0438:\n  KN_ID                 \u043a\u0430\u043d\u043e\u043d\u0456\u0447\u043d\u0438\u0439 \u0456\u0434\u0435\u043d\u0442\u0438\u0444\u0456\u043a\u0430\u0442\u043e\u0440 kn: UUIDv7\n  entity_class          \u043a\u043b\u0430\u0441 \u0441\u0443\u0442\u043d\u043e\u0441\u0442\u0456 \u043d\u043e\u0432\u043e\u0433\u043e \u043d\u0430\u0441\u0442\u0443\u043f\u043d\u0438\u043a\u0430\n\n\u043f\u0430\u0440\u0430\u043c\u0435\u0442\u0440\u0438:\n  -h, --help            \u043f\u043e\u043a\u0430\u0437\u0430\u0442\u0438 \u0446\u044e \u0434\u043e\u0432\u0456\u0434\u043a\u0443 \u0439 \u0432\u0438\u0439\u0442\u0438\n  --request-id REQUEST_ID\n                        \u0443\u043d\u0456\u043a\u0430\u043b\u044c\u043d\u0438\u0439 \u0456\u0434\u0435\u043d\u0442\u0438\u0444\u0456\u043a\u0430\u0442\u043e\u0440 \u0437\u0430\u043f\u0438\u0442\u0443, \u0442\u043e\u0439 \u0441\u0430\u043c\u0438\u0439 \u0434\u043b\u044f\n                        \u043f\u043e\u0432\u0442\u043e\u0440\u043d\u043e\u0457 \u0441\u043f\u0440\u043e\u0431\u0438\n  --performed-at PERFORMED_AT\n                        \u0447\u0430\u0441 \u043f\u0435\u0440\u0435\u0432\u0456\u0440\u043a\u0438 \u0443 \u0444\u043e\u0440\u043c\u0430\u0442\u0456 ISO 8601 \u0437 \u044f\u0432\u043d\u0438\u043c \u0437\u043c\u0456\u0449\u0435\u043d\u043d\u044f\u043c \u0432\u0456\u0434\n                        UTC\n  --reason REASON       \u043f\u0440\u0438\u0447\u0438\u043d\u0430 \u0437\u043c\u0456\u043d\u0438 \u0456\u0434\u0435\u043d\u0442\u0438\u0447\u043d\u043e\u0441\u0442\u0456\n  --evidence EVIDENCE   \u043f\u043e\u0441\u0438\u043b\u0430\u043d\u043d\u044f \u043d\u0430 \u043f\u0456\u0434\u0442\u0432\u0435\u0440\u0434\u043d\u0456 \u0434\u043e\u043a\u0430\u0437\u0438\n  --anchor-source ANCHOR_SOURCE\n                        \u0434\u0436\u0435\u0440\u0435\u043b\u043e \u043d\u043e\u0432\u043e\u0433\u043e \u043e\u043f\u043e\u0440\u043d\u043e\u0433\u043e \u0437\u0430\u043f\u0438\u0441\u0443\n  --anchor-key ANCHOR_KEY\n                        \u0432\u043b\u0430\u0441\u043d\u0438\u0439 \u043a\u043b\u044e\u0447 \u043d\u043e\u0432\u043e\u0433\u043e \u043e\u043f\u043e\u0440\u043d\u043e\u0433\u043e \u0437\u0430\u043f\u0438\u0441\u0443\n",
+        "stderr": ""
+      },
+      "id": "identity-reclassify-help"
     }
   ]
 }

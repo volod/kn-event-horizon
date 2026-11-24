@@ -4,7 +4,7 @@ from typing import Literal, Self
 
 from pydantic import Field, model_validator
 
-from kn.identity.model import Payload
+from kn.identity.model import Merge, Payload
 from kn.review.model import Digest, Frozen, Instant, Text, digest
 
 
@@ -24,9 +24,11 @@ class Event(Frozen):
     def integrity(self) -> Self:
         if self.event_id != digest(self.model_dump(mode="json", exclude={"event_id"})):
             raise ValueError("identity event digest mismatch")
-        if (
-            self.payload.kind in {"merged", "split", "restored", "reclassified"}
-            and not self.decision_ref
+        forced = isinstance(self.payload, Merge) and self.payload.authoritative is not None
+        if forced and self.decision_ref:
+            raise ValueError("authoritative merge cannot name a review decision")
+        if self.payload.kind in {"merged", "split", "restored", "reclassified"} and not (
+            self.decision_ref or forced
         ):
             raise ValueError("lifecycle transition requires a decision reference")
         if (

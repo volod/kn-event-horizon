@@ -74,10 +74,29 @@ class Unlink(Frozen):
     kn_id: KnId
 
 
+class Identifier(Frozen):
+    kind: Literal["identifier_recorded"] = "identifier_recorded"
+    kn_id: KnId
+    namespace: Text
+    value: Text
+    issuer: Text
+    authority: Authority
+    valid_from: Instant
+    valid_to: Instant | None = None
+
+    @model_validator(mode="after")
+    def interval(self) -> Self:
+        if self.valid_to is not None and self.valid_to <= self.valid_from:
+            raise ValueError("identifier validity must be a nonempty half-open interval")
+        return self
+
+
 class Merge(Frozen):
     kind: Literal["merged"] = "merged"
     kn_id: KnId
     survivor: KnId
+    # Preserve the canonical representation and hash of earlier v1 reviewed merges.
+    authoritative: Identifier | None = Field(default=None, exclude_if=lambda value: value is None)
 
 
 class Assignment(Frozen):
@@ -106,23 +125,6 @@ class Retire(Frozen):
 class Restore(Frozen):
     kind: Literal["restored"] = "restored"
     kn_id: KnId
-
-
-class Identifier(Frozen):
-    kind: Literal["identifier_recorded"] = "identifier_recorded"
-    kn_id: KnId
-    namespace: Text
-    value: Text
-    issuer: Text
-    authority: Authority
-    valid_from: Instant
-    valid_to: Instant | None = None
-
-    @model_validator(mode="after")
-    def interval(self) -> Self:
-        if self.valid_to is not None and self.valid_to <= self.valid_from:
-            raise ValueError("identifier validity must be a nonempty half-open interval")
-        return self
 
 
 class Attribute(Frozen):

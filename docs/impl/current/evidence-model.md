@@ -51,11 +51,12 @@ this does not claim that all registered rows already expose human verification m
 ## Trusted decision application
 
 `kn.review.store.submit(connection, journal, resolver, request, authenticate, clock)` is the shared
-write entry point for future workflows. `authenticate` supplies a trusted `Reviewer` independently
+write entry point for covered workflows. `authenticate` supplies a trusted `Reviewer` independently
 of request data. It must establish a human principal and authorization for the target purpose;
 agent, import and unauthenticated contexts are refused. Requests cannot supply a reviewer,
-recording time, acceptance stamp or source `verified` attribute. Live operator authentication and
-the review CLI remain later workflow work.
+recording time, acceptance stamp or source `verified` attribute. The
+[identity CLI](object-identity.md#operator-lifecycle-commands) uses local terminal approval for
+its workflow decisions. The general review queue and broader operator authorization remain planned.
 
 Performed times require explicit offsets and normalize to UTC. Date-only, naive, invalid and
 future performed times relative to the trusted recording clock fail. Recording time remains

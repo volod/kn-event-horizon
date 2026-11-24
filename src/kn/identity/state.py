@@ -43,6 +43,7 @@ class State:
     versions: dict[str, Version] = field(default_factory=dict)
     matches: dict[str, Match] = field(default_factory=dict)
     changes: dict[str, ChangeSet] = field(default_factory=dict)
+    redirects: dict[str, tuple[str, ...]] = field(default_factory=dict)
 
     def active(self, kn_id: str) -> Object:
         item = self.objects.get(kn_id)
@@ -64,22 +65,18 @@ class State:
         )
 
     def resolve(self, kn_id: str) -> tuple[str, ...]:
-        pending = [kn_id]
-        visited: set[str] = set()
-        targets: set[str] = set()
-        while pending:
-            key = pending.pop()
-            if key in visited:
-                continue
-            visited.add(key)
-            item = self.objects.get(key)
-            if item is None:
-                raise ValueError("unknown KN ID")
-            if item.successors:
-                pending.extend(item.successors)
-            else:
-                targets.add(key)
-        return tuple(sorted(targets))
+        if kn_id not in self.objects:
+            raise ValueError("unknown KN ID")
+        return self.redirects.get(kn_id, (kn_id,))
+
+    def redirect(self, item: Object, successors: tuple[str, ...]) -> None:
+        item.successors = successors
+        for ancestor, targets in self.redirects.items():
+            if item.kn_id in targets:
+                self.redirects[ancestor] = tuple(
+                    sorted((set(targets) - {item.kn_id}).union(successors))
+                )
+        self.redirects[item.kn_id] = tuple(sorted(successors))
 
     def owned(self, kn_id: str) -> dict[str, Holding]:
         return {
