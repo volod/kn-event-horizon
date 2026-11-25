@@ -32,55 +32,14 @@ archive.
 
 ### Claims, change tracking and lineage -- `object-identity`
 
-#### canonical-fact-selection
-
-Sources declare nothing, so KN must decide by explicit rules how each new claim fills, replaces, or
-leaves an object's value. Arrival order must never decide.
-
-- Serves: `evidence-model` -- [Evidence model](../design/spec.md#evidence-model)
-- Agent status: CLEAR
-- Dependencies: The [reviewed source rank override format and catalogue IDs](current/source-management.md#reviewed-inputs-and-identifiers)
-  and the [canonical fact, outcome and policy shapes](current/evidence-model.md#selection-and-review-shapes).
-- User-visible outcome: The engine projects each field's canonical value through its update
-  policy. The modes are `priority`, `latest_observed`, `accumulate`, and `fixed`. A candidate value
-  ranks by its best supporting claim: source rank, then evidence class, then data time within one
-  source. Every change is explained as filled, replaced, ignored, corroborated, or conflict, with
-  the deciding criterion. Selection flags owner overrides of first-party values for review.
-  Identity redirects are followed. Conflicts, and high-impact facts
-  without primary evidence, go to review.
-- Scope boundary: The `kn.updatePolicy` semantics; the reviewed source rank table
-  `contracts/core/policies/source-ranks.yaml`, with `owner_entered` as the highest class and review
-  decisions ranked through it; evidence classes; verification states derived from support and
-  review; eligibility (minimum rank and evidence class, rights, conditions); empty-claim handling;
-  freshness and `stale` labels; audience-specific selection from eligible evidence. Identity
-  resolution uses the [available matcher](current/object-identity.md#match-resolution).
-  Domain policies come with domain contracts.
-  Only the matching accepted human decision can supply human-verification metadata for the
-  selected claim; timestamps alone never bypass eligibility or resolve a conflict.
-- Data and artifact paths: `src/kn/evidence/`, `contracts/core/policies/`, `tests/evidence/`.
-- Execution path: Write fixture-first tests for each outcome, mode, and verification state in the
-  specification, then the selector.
-- Acceptance gates: An empty field is filled by the first eligible claim. A higher-ranked value
-  replaces it, and a lower-ranked value is ignored and stays visible. An owner-entered value
-  outranks a manufacturer value and is flagged `owner_override`. A value that a higher-ranked
-  source also supports wins, while repeated claims or confirmations from one source add no rank.
-  A newer datasheet revision from the same source replaces the older one. Different values from
-  two sources of equal rank and evidence class conflict. Under `latest_observed`, a newer price
-  wins, and an old winner shows as `stale`. A different value on a `fixed` field opens review, and
-  an outranking empty claim opens review without clearing. Every permutation of arrival order
-  gives identical canonical values. Fixtures keep organization, model, spacecraft, constellation,
-  program, and service distinct, and a contradictory ownership claim stays conflicted. Claims
-  about a merged object are selected under its survivor. Signals never fill canonical fields.
-- Documentation target: `current/evidence-model.md` listed in the [areas index](current.md#areas).
-
 #### object-lineage-lookup
 
 Operators must be able to trace any object or field back to every record and decision behind it.
 
 - Serves: `object-identity` -- [Object identity](../design/spec.md#object-identity)
 - Agent status: CLEAR
-- Requires: `canonical-fact-selection`
-- Dependencies: The [record versions, change sets and claim lineage](current/object-identity.md#partial-update-tracking).
+- Dependencies: The [record versions, change sets and claim lineage](current/object-identity.md#partial-update-tracking)
+  and the [selected facts and explained outcomes](current/evidence-model.md#fact-projection).
 - User-visible outcome: `kn lineage <kn-id|qualified-identifier> [--field <field-id>]` shows, in
   both locales and as JSON, the identity history, identifiers, links with match records, record
   versions and change sets, claims, and the selected canonical fact. Outbound exchange receipts
@@ -127,12 +86,14 @@ lifecycle, or matching is the most expensive kind to fix later.
 
 - Serves: `object-identity` -- [Object identity](../design/spec.md#object-identity)
 - Agent status: CLEAR
-- Requires: `canonical-fact-selection`, `object-lineage-lookup`, `identity-incremental-writes`
+- Requires: `object-lineage-lookup`, `identity-incremental-writes`
 - Dependencies: The accepted task records of the group and the [implementation
   audit](../guide/planning-workflow.md#implementation-audits) checks. `identity-match-calibration`
   stays open and is reviewed for the readiness of its inputs. The [identity resolution
   audit](records/0042-object-identity-identity-resolution-implementation-audit.md) lists the
-  accepted matching limitations to recheck.
+  accepted matching limitations to recheck, and the [evidence model
+  limitations](current/evidence-model.md#known-limitations) name facts stored under a KN ID that
+  was later merged.
 - User-visible outcome: Every later group resolves objects through a verified identity registry. The
   audit record gives every check a result and every finding a disposition. The current-state page
   lists known limitations, and each scheduled finding is a plan task.
@@ -212,6 +173,8 @@ Human decisions on conflicts and candidates need a bilingual workflow that survi
   Record/field verification items reuse the shared log and target/version protocol. Resolve the
   authorized human reviewer at the operator boundary, show the reviewed scope/version, and expose
   acceptance, rejection and revocation without accepting actor identity from source data.
+  Derive the selector's [accepted reviews](current/evidence-model.md#canonical-selection) from
+  applied decisions, and report each source's dispute rate to support rank overrides.
 - Data and artifact paths: `src/kn/review/`, `src/kn/cli.py`, `$DATA_DIR/decisions/`,
   `tests/review/`.
 - Execution path: Write an append-only JSON Lines log with the reviewer, reason, and time, and
@@ -457,7 +420,9 @@ Most source-specific behavior must live in configuration, not code.
   relations, identifiers and identity attributes, time semantics, and source record keys with
   field-level change sets. Quality rules quarantine records or stop batches as declared.
 - Scope boundary: The general mapping and quality engine, with no source-specific branches. The
-  units table covers the dimensions that contracts declare.
+  units table covers the dimensions that contracts declare. Loads project the canonical facts of
+  the subjects they touch through the [fact projection](current/evidence-model.md#fact-projection)
+  and each field's declared policy.
 - Data and artifact paths: `src/kn/engine/mapping/`, `src/kn/engine/quality/`, `tests/engine/`.
 - Execution path: Fixture configurations exercise every mapping and rule type, plus the failure
   modes from the specification.
@@ -477,7 +442,9 @@ Facts without a permitted machine-readable source need a disciplined manual path
 - User-visible outcome: Analysts add rows to `domains/<domain>/curation/` files, each with the cited
   URI, capture time, and curator. `kn source run` loads them through the same mapping and
   validation, and stores WARC captures of cited pages where permitted.
-- Scope boundary: The curated file format, its validation, and evidence capture. No editing UI.
+- Scope boundary: The curated file format, its validation, and evidence capture. A curated claim
+  takes the rank of the source it cites in [canonical selection](current/evidence-model.md#canonical-selection).
+  No editing UI.
 - Data and artifact paths: `src/kn/engine/curated/`, `domains/fixture/curation/`,
   `tests/engine/`.
 - Execution path: Fixture curated files with valid, missing-evidence, and conflicting rows.

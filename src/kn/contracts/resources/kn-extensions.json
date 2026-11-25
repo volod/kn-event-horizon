@@ -154,6 +154,9 @@
             "review",
             "allow_clear"
           ]
+        },
+        "highImpact": {
+          "type": "boolean"
         }
       },
       "required": [

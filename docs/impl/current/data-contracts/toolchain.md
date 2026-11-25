@@ -76,7 +76,7 @@ name; tests place each value at its declared scope and plant invalid types and m
 | `kn.relation` | `type`, `sourceClass`, `targetClass` references | table |
 | `kn.fieldId` | Stable field reference | field |
 | `kn.identity` | `strategy`, `externalKeys`, `sourceRecordKey`, `attributes`, `matchProfile`; optional `sourceVersionField` | table |
-| `kn.updatePolicy` | `mode`, `priorityCriteria`, `minimumSourceRank`, `minimumEvidenceClass`, `timeBasis`, `valueTolerance`, `freshnessSeconds`, `emptyValueHandling` | field |
+| `kn.updatePolicy` | `mode`, `priorityCriteria`, `minimumSourceRank`, `minimumEvidenceClass`, `timeBasis`, `valueTolerance`, `freshnessSeconds`, `emptyValueHandling`; optional `highImpact` | field |
 | `kn.interchange` | `exposed`, `compatibility`; optional `aliases`, `counterpartMappingRefs` | contract, table, field |
 | `kn.units` | `originalUnit`, `normalizedUnit`, `quantityType`, `conversionRule` | field |
 | `kn.comparisonProfile` | Comparison profile reference | table, field |

@@ -2,7 +2,7 @@
 
 The `kn.updatePolicy` field extension declares a policy; its canonical digest is stored on each
 fact version. `Criteria` is the recorded form of a candidate's ranking inputs, for the winner,
-the runner-up and every evaluated claim. Selection semantics come with the selector.
+the runner-up and every evaluated claim. `kn.evidence.selection` applies them.
 """
 
 from decimal import Decimal
@@ -35,6 +35,8 @@ class UpdatePolicy(Frozen):
     value_tolerance: Annotated[Decimal, Field(ge=0)] = Field(alias="valueTolerance")
     freshness_seconds: Annotated[int, Field(ge=0)] = Field(alias="freshnessSeconds")
     empty_value_handling: Literal["review", "allow_clear"] = Field(alias="emptyValueHandling")
+    # Rule 6: ownership, contracts, availability and performance need primary evidence or review.
+    high_impact: bool = Field(default=False, alias="highImpact")
 
     @property
     def digest(self) -> str:

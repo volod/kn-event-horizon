@@ -46,7 +46,8 @@ The reviewed [source rank policy](../../../contracts/core/policies/source-ranks.
 with an empty `overrides` list. Each override has an exact qualified `source_id`, a
 [rank class](../../design/spec.md#update-policy) in `rank`, and an optional `field_group`.
 Rebuild refuses unknown IDs, invalid classes, and duplicate scopes before inserting candidates.
-Claim ranking and field-group resolution belong to `canonical-fact-selection`.
+[Canonical selection](evidence-model.md#canonical-selection) resolves a `field_group` as a stable
+field ID prefix at a dot boundary; the longest matching group wins over a source-wide override.
 
 Reapplying reviewed seeds preserves identical rows. A conflicting row aborts the catalogue
 seed load and rolls back any partial insert.

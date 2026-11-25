@@ -4,8 +4,9 @@ The evidence contracts and the shared human verification protocol are implemente
 evidence, confirmations, aliases, translations, relation assertions, canonical fact versions,
 selection outcomes, review items and review decisions have registered storage, deterministic keys,
 database constraints and as-of views. [Partial-update tracking](object-identity.md#partial-update-tracking)
-writes claims and confirmations into these shapes. Canonical selection, the review queue and
-dataset-wide verification projections remain planned.
+writes claims and confirmations into these shapes, and [canonical selection](#canonical-selection)
+projects each field's value from them through its update policy. The review queue, engine wiring
+and dataset-wide verification projections remain planned.
 Existing source verification labels retain their meanings and grant no human timestamp.
 
 ## Evidence contracts
@@ -122,8 +123,79 @@ a selected claim. `SelectionOutcome` records every evaluated claim, including `i
 `kn.evidence.policy` reads a field's `kn.updatePolicy` as `UpdatePolicy` with a canonical
 `digest`, gives rank and evidence-class orders from their vocabularies, and records ranking inputs
 as `Criteria`. `kn.evidence.relations` and `kn.evidence.reviews` define assertions, supports,
-review items and decision events; decision IDs bind the canonical event. Selection semantics,
-review authentication and decision journals come with their plan tasks.
+review items and decision events; decision IDs bind the canonical event. Review authentication
+and decision journals come with their plan tasks.
+
+## Canonical selection
+
+`kn.evidence.selection.select(subject, claims, policy, context, knowledge_from, previous)` returns
+the fact version, its review items and one explained outcome per evaluated claim, or None when no
+claim is eligible. A `Subject` is a KN ID, stable field ID and canonical condition set; the
+`Context` supplies the rank table, audience, accepted reviews and an optional redirect resolver.
+Selection evaluates every claim of the subject at once with total orders over claim content, so
+the input or arrival order never changes a value. Claims that a recorded claim supersedes are
+history; they are not evaluated.
+
+Ranks come from `kn.evidence.ranking.RankTable.read()`, which reads the reviewed
+[rank table](../../../contracts/core/policies/source-ranks.yaml). A `field_group` override applies
+to the stable field IDs equal to it or below it at a dot boundary (`microelectronics.offer` covers
+`microelectronics.offer.unit_price`). The longest matching group wins over a source-wide override,
+and an unlisted source is `unranked`. A claim named by an accepted review selection, or a
+`decided` claim whose decision is accepted, ranks `owner_entered`.
+
+A claim is eligible when its evidence rights are permitted for the `Audience` (`internal` permits
+all), it is not a signal (`gdelt:` sources) or an `extracted_candidate`, whatever the policy
+minimums say, it is not rejected, a `decided` claim has its accepted decision, and it meets the
+minimum rank and evidence class. A missing reason other than `source_empty` is not a value.
+Ineligible claims are explained as `ignored` with the criterion that excluded them; claims the
+audience may not see are left out of the explanation entirely. A fact key includes the audience.
+
+Claims whose values agree within `valueTolerance` (numbers in one normalized unit, other values
+when equal) support one candidate. A candidate ranks by its best claim, so repetition and
+confirmations add no rank. Object values follow merge redirects before they are compared.
+
+| Mode | Rule as implemented |
+| --- | --- |
+| `priority` | Declared `priorityCriteria` order of source rank and evidence class. Data time decides tied candidates only when one source states all of them and every time is known. Otherwise the tie is a `conflict` with a `fact_conflict` item and no selected claim. |
+| `latest_observed` | Newest data time on the policy's `timeBasis` first, then the declared criteria; an unknown time sorts last. `stale(fact, policy, at)` returns the winner's age once it exceeds `freshnessSeconds`; zero declares no limit. |
+| `accumulate` | Every eligible candidate is a member (`Selection.members`); the fact row names the best one and each member's outcome is `filled`. A record's newer version supersedes its own earlier item, and an item leaves when no current claim supports it or it is rejected. |
+| `fixed` | The candidate with the earliest data time, or observed time, holds. A different value is `conflict` with a `fixed_value_change` item naming the challengers, and the held claim stays selected. An accepted review selection holds instead and settles claims recorded by the decision. |
+
+An empty claim never fills. When an eligible `source_empty` claim outranks the current leader, or
+no other value exists, its predecessor stays a candidate and an `empty_claim` item opens, unless
+`emptyValueHandling: allow_clear` or an accepting review gives `unresolved_reason: cleared`. A
+rejected empty claim restores its predecessor without review; a lower-ranked one is ignored.
+
+The optional `kn.updatePolicy` member `highImpact` marks rule-6 fields. Their value needs a
+primary claim or an accepted review; otherwise the fact is `review_pending` with a `high_impact`
+item. An owner-entered winner over a differing first-party candidate sets `owner_override` and
+opens an `owner_override` item until a review accepts the owner claim. The fact names the most
+urgent open item: conflict, fixed change, empty claim, then high impact.
+
+Verification is `disputed` for an open conflict, fixed change or empty-claim review, `verified` for
+a winner backed by an accepted review of that exact claim, `corroborated` for support from two or
+more sources, and `unreviewed` otherwise. Source labels and human verification timestamps never
+rank, verify or resolve a claim.
+
+`previous` explains the change: `filled` when the previous version had no selected value,
+`replaced` when the new value differs, `corroborated` when it agrees, and `conflict` for open
+conflicts, fixed changes and empty-claim reviews. Clearing is `replaced`. Under `accumulate` a new
+member fills and a departed one replaces.
+
+## Fact projection
+
+`kn.evidence.projection.subjects(claims, resolve)` groups claims by subject under their terminal
+survivor, using `State.resolve` from the identity registry. A claim about a split object names no
+single subject and is returned as unattributed. `history(subject, claims, policy, context)`
+replays selection at every claim and decision recording time, using only decisions recorded by
+then, and returns `Version`s with half-open knowledge intervals. A claim that changes nothing a
+version states, such as an ignored claim or a new runner-up, adds its outcome to that version and
+leaves no new version. Review item keys stay stable while their candidates do not change.
+
+`write(connection, versions, tables)` stores the history in a savepoint of the caller's
+transaction: it sets `knowledge_to` on stored versions, then writes items, facts and outcomes
+idempotently. A stored version of the same fact that the history does not contain, for example
+after a policy change, refuses the write; the projection is rebuilt rather than patched.
 
 ## Human verification of claims and facts
 
@@ -230,7 +302,14 @@ Automatic all-target rebuild integration and pending/orphan/stale reports remain
   changed content under a stored key.
 - Condition and qualifier objects are canonical JSON; approved condition field IDs arrive with
   domain contracts.
-- Canonical selection, review queue journals and the lineage command are open plan tasks.
+- Review queue journals, the lineage command and engine wiring of the projection are open plan
+  tasks. Callers derive `Reviews` from decisions until `review-queue-cli` applies them.
+- Fact history uses current identity resolution for every version; facts stored under a KN ID
+  that was later merged are not closed automatically. Rebuild the projection after a merge.
+- A curated claim ranks by its own `source_id`; ranking it as the source it cites, and
+  per-source dispute rates, are not implemented yet.
+- Corroboration counts distinct `source_id` values; syndicated copies under different source IDs
+  are not detected.
 
 ## Verification
 
@@ -243,6 +322,13 @@ Automatic all-target rebuild integration and pending/orphan/stale reports remain
   relation. `test_evidence_verification.py` checks stored-claim targets, stale content and
   unreviewed changed or labeled claims. The combined model baseline loads every evidence table as
   the evidence loader.
+- `tests/evidence/test_selection.py`, `test_selection_modes.py` and `test_projection.py` check
+  every outcome, mode and verification state of the update policy: fill, replace, ignore,
+  owner override, support by a higher-ranked source, repetition, same-source revisions, equal-rank
+  conflict, stale prices, fixed-field review, empty claims, high-impact gating, eligibility,
+  audiences, tolerance, merge survivors, distinct entity classes and every arrival permutation of
+  a five-claim set in three modes. `tests/integration/test_evidence_selection.py` writes histories
+  to PostgreSQL, checks as-of views and closed versions, idempotent rewrites and drift refusal.
 - `tests/review/` checks typed composite and locale targets, scope/purpose separation, key types,
   null completeness, UTC and clock errors, actor refusal, event digests, graph conflicts,
   revocation, retry identity, wire schemas and ODCS coverage validation.
@@ -254,5 +340,6 @@ Automatic all-target rebuild integration and pending/orphan/stale reports remain
   `make ci-local` adds database service and other local acceptance checks.
 
 Acceptance evidence and task counts are retained in
-[record 0032](../records/0032-evidence-model-human-verification-contracts.md) and
-[record 0044](../records/0044-evidence-model-evidence-claim-contracts.md).
+[record 0032](../records/0032-evidence-model-human-verification-contracts.md),
+[record 0044](../records/0044-evidence-model-evidence-claim-contracts.md) and
+[record 0046](../records/0046-object-identity-canonical-fact-selection.md).

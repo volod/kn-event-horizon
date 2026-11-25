@@ -17,6 +17,7 @@ from kn.evidence.policy import (
     UpdatePolicy,
     field_policy,
 )
+from kn.evidence.ranking import RankTable
 from tests.contracts.test_references import EXAMPLES, semantic_fixture
 
 
@@ -80,3 +81,16 @@ def test_criteria_need_a_ranked_source_and_an_exact_time() -> None:
         )
     with pytest.raises(pydantic.ValidationError):
         Criteria(source_id="space:x", source_rank="vendor", evidence_class="primary")
+
+
+def test_high_impact_is_optional_and_part_of_the_digest() -> None:
+    declared = UpdatePolicy.model_validate(EXAMPLES["kn.updatePolicy"])
+    assert declared.high_impact is False
+    marked = UpdatePolicy.model_validate({**EXAMPLES["kn.updatePolicy"], "highImpact": True})
+    assert marked.high_impact and marked.digest != declared.digest
+
+
+def test_the_reviewed_rank_table_ranks_unlisted_sources_unranked() -> None:
+    table = RankTable.read()
+    assert table.overrides == ()
+    assert table.rank("space:row-4", "space.launch.date") == "unranked"
