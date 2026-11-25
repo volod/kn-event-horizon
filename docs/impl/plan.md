@@ -32,39 +32,6 @@ archive.
 
 ### Claims, change tracking and lineage -- `object-identity`
 
-#### evidence-claim-contracts
-
-Claims, evidence, and canonical facts need contracts that carry every provenance field.
-
-- Serves: `evidence-model` -- [Evidence model](../design/spec.md#evidence-model)
-- Agent status: CLEAR
-- Execution stage: MODEL
-- Dependencies: The [qualified catalogue IDs](current/source-management.md#reviewed-inputs-and-identifiers).
-- User-visible outcome: The `evidence` schema holds alias, claim, claim confirmation, evidence,
-  relation assertion, canonical fact, and review item datasets with value-or-missing-reason
-  constraints. Every claim refers to a KN ID and to its source record version.
-- Scope boundary: Contracts, constraints, deterministic claim keys, and as-of views. Objects and
-  identifiers come from the identity registry. Selection policies come in
-  `canonical-fact-selection`. Claims and canonical fact projections reuse the shared optional,
-  version-bound human verification model instead of defining another timestamp convention.
-  Include the review-item/decision shapes, claim confirmations, field-change lineage, selection
-  outcome/history and source-rank/update-policy formats needed by later writers. Those tasks
-  implement behavior over this model rather than adding another core state layout.
-- Data and artifact paths: `contracts/core/evidence/`, `src/kn/evidence/`, `tests/evidence/`.
-- Execution path: Write the contracts with `kn.temporalProfile` and `kn.evidence` extensions, and
-  compile and test the constraints against the integration database.
-- Acceptance gates: A claim without an origin URI, a fetch time, or a value-or-missing-reason is
-  rejected. Re-inserting the same claim key is a no-op. As-of views are deterministic on fixtures.
-  A claim that cites a deprecated or replaced concept appears in the
-  [lifecycle report](current/ontology-taxonomy.md#lifecycle-report) as an external use, with the
-  concept's successor.
-  Multilingual text projections preserve originals, language tags, and translation provenance under
-  the [localization policy](../design/spec.md#localization), without duplicating facts per locale.
-  A changed claim version has no inherited human verification; an unreviewed claim keeps null
-  metadata, regardless of its imported source verification label.
-- Documentation target: A new `current/evidence-model.md` page listed in the
-  [areas index](current.md#areas).
-
 #### partial-update-tracking
 
 Sources send partial records and declare nothing about completeness. Every change must still be
@@ -72,8 +39,8 @@ detected per field and traced back to its record version.
 
 - Serves: `object-identity` -- [Object identity](../design/spec.md#object-identity)
 - Agent status: CLEAR
-- Requires: `evidence-claim-contracts`
-- Dependencies: The [registry replay and match writer](current/object-identity.md#replay-and-integrity).
+- Dependencies: The [registry replay and match writer](current/object-identity.md#replay-and-integrity)
+  and the [claim, confirmation and idempotent writer contracts](current/evidence-model.md#claims-and-provenance).
 - User-visible outcome: For each mapped record, the engine computes a field-level change set
   (added, changed, unchanged, emptied, or not stated) against the record's previous version. Only
   added, changed, and emptied fields create claims. Unchanged fields record confirmations, and
@@ -105,8 +72,8 @@ leaves an object's value. Arrival order must never decide.
 
 - Serves: `evidence-model` -- [Evidence model](../design/spec.md#evidence-model)
 - Agent status: CLEAR
-- Requires: `evidence-claim-contracts`
-- Dependencies: The [reviewed source rank override format and catalogue IDs](current/source-management.md#reviewed-inputs-and-identifiers).
+- Dependencies: The [reviewed source rank override format and catalogue IDs](current/source-management.md#reviewed-inputs-and-identifiers)
+  and the [canonical fact, outcome and policy shapes](current/evidence-model.md#selection-and-review-shapes).
 - User-visible outcome: The engine projects each field's canonical value through its update
   policy. The modes are `priority`, `latest_observed`, `accumulate`, and `fixed`. A candidate value
   ranks by its best supporting claim: source rank, then evidence class, then data time within one
@@ -193,8 +160,8 @@ lifecycle, or matching is the most expensive kind to fix later.
 
 - Serves: `object-identity` -- [Object identity](../design/spec.md#object-identity)
 - Agent status: CLEAR
-- Requires: `evidence-claim-contracts`, `partial-update-tracking`, `canonical-fact-selection`,
-  `object-lineage-lookup`, `identity-incremental-writes`
+- Requires: `partial-update-tracking`, `canonical-fact-selection`, `object-lineage-lookup`,
+  `identity-incremental-writes`
 - Dependencies: The accepted task records of the group and the [implementation
   audit](../guide/planning-workflow.md#implementation-audits) checks. `identity-match-calibration`
   stays open and is reviewed for the readiness of its inputs. The [identity resolution

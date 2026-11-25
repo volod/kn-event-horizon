@@ -117,6 +117,16 @@
       "recorded_at"
     ]
   },
+  "kn.presence": [
+    {
+      "name": "value_or_reason",
+      "rule": "exactly_one",
+      "fields": [
+        "value",
+        "missing_reason"
+      ]
+    }
+  ],
   "kn.i18nKey": "space.satellite.id",
   "kn.lineageRefs": [
     {

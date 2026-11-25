@@ -97,8 +97,10 @@ explicit tags; `en-US` is not silently relabeled `en`.
 
 Selection changes no fact, original text, tag, or provenance. A missing translation never makes
 source text an unused interface key or a catalog coverage failure. The existing SATCOM archive and
-raw cells remain lossless. Durable multilingual projections belong to `evidence-claim-contracts`
-and `engine-skeleton`; dashboards and exports must apply the same selection policy when built.
+raw cells remain lossless. The evidence model stores
+[text translations](evidence-model.md#multilingual-text) beside the original text claim and
+applies this selector; `engine-skeleton` writes them, and dashboards and exports must apply the
+same selection policy when built.
 The optional inference task may propose derived translations with provenance.
 
 [Vocabulary text integrity](ontology-taxonomy/text.md) applies this selector to reviewed semantic

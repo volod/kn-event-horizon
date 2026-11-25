@@ -46,6 +46,7 @@ SEMANTIC = [
         "kn.scale",
         "kn.index",
         "kn.partition",
+        "kn.presence",
     }
 ]
 
@@ -132,3 +133,31 @@ def test_relation_endpoint_and_catalog_shape_fail_closed(tmp_path: Path) -> None
     refs.write_text('{"entityClass": []}')
     with pytest.raises(ContractError, match="symbol IDs"):
         load_contract(path, references=refs)
+
+
+@pytest.mark.parametrize(
+    ("members", "rule"),
+    [
+        ({"assertionField": "space.example.id"}, None),
+        ({"assertionField": "absent"}, "reference"),
+        ({"assertionType": "declared", "assertionField": "space.example.id"}, "oneOf"),
+        ({}, "oneOf"),
+    ],
+)
+def test_evidence_names_one_assertion_type_or_the_field_that_holds_it(
+    tmp_path: Path, members: dict, rule: str | None
+) -> None:
+    path, refs = semantic_fixture(tmp_path, "kn.evidence")
+    data = json.loads(path.read_text())
+    value = next(item for item in data["customProperties"] if item["property"] == "kn.evidence")[
+        "value"
+    ]
+    del value["assertionType"]
+    value.update(members)
+    path.write_text(json.dumps(data))
+    if rule is None:
+        assert load_contract(path, references=refs).contract_id == "space.example"
+        return
+    with pytest.raises(ContractError) as error:
+        load_contract(path, references=refs)
+    assert error.value.rule == rule

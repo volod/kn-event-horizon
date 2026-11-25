@@ -82,12 +82,13 @@ name; tests place each value at its declared scope and plant invalid types and m
 | `kn.comparisonProfile` | Comparison profile reference | table, field |
 | `kn.temporalProfile` | `asOf`, `nullSemantics`; optional event, published, observed, valid-from, valid-to, and recorded field references | contract, table, field |
 | `kn.spatialProfile` | `geometryType`, `srid` fixed at 4326, `precision`, `coverageSemantics`, `validity` | field |
-| `kn.evidence` | `required`, `assertionType`, `minimumClass`, `referenceFields` | contract, table, field |
+| `kn.evidence` | `required`, `minimumClass`, `referenceFields`, and exactly one of `assertionType` or the per-row `assertionField` | contract, table, field |
 | `kn.licensePolicy` | `policyRef`, `rights`, `exportAllowed`; optional `restrictions` | contract, table, field |
 | `kn.enumRef` | Vocabulary reference | field |
 | `kn.vocabularyRefs` | Allowed scheme references | field |
 | `kn.index` | Array of `name`, `fields`, `method`, `unique` objects; optional nullable-field `whereNull` | table |
 | `kn.partition` | `strategy`, `fields` | table |
+| `kn.presence` | Array of `name`, `rule` (`exactly_one` or `all_or_none`), `fields` (two or more) objects | table |
 | `kn.i18nKey` | Catalog key reference | contract, table, field |
 | `kn.lineageRefs` | Array of `dataset`, `mapping` reference objects | contract, table, field |
 

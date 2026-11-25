@@ -131,16 +131,31 @@ def _verification(node: dict[str, Any], value: dict[str, Any], path: Location) -
         raise ContractError(path, "reference", "include each reviewed field in its content context")
 
 
+LOCAL_FIELD_EXTENSIONS = frozenset({"temporalProfile", "evidence", "presence"})
+
+
+def _local_fields(name: str, value: Any, path: Location) -> list[tuple[str, Location]]:
+    """Field references of the extensions that name fields of their own table."""
+    if name == "temporalProfile":
+        modes = {"asOf", "nullSemantics"}
+        return [(ref, (*path, key)) for key, ref in value.items() if key not in modes]
+    if name == "evidence":
+        refs = [
+            *value["referenceFields"],
+            *[value[key] for key in ("assertionField",) if key in value],
+        ]
+        return [(ref, path) for ref in refs]
+    if name == "presence":
+        return [(ref, path) for rule in value for ref in rule["fields"]]
+    return []
+
+
 def _special(
     name: str, value: Any, fields: set[str], catalog: dict[str, Any], path: Location
 ) -> None:
-    if name == "temporalProfile":
-        for key, ref in value.items():
-            if key not in {"asOf", "nullSemantics"}:
-                _field(ref, fields, (*path, key))
-    elif name == "evidence":
-        for ref in value["referenceFields"]:
-            _field(ref, fields, path)
+    if name in LOCAL_FIELD_EXTENSIONS:
+        for ref, location in _local_fields(name, value, path):
+            _field(ref, fields, location)
     elif name == "identity":
         _identity(value, fields, catalog, path)
     elif name == "interchange":

@@ -101,7 +101,9 @@ opposite view, which `kn.semantic.lifecycle.lifecycle_report(snapshot, external_
 one finding per retired concept that is still in use, with its status, the end of its replacement
 chain and that successor's status, and every use. A use is a child concept, a mapping endpoint, an
 entity tag, a replacement link, or a record of another engine. `external_uses` maps concept IDs to
-such records, for example the claims that cite them; the owning engines supply it. Every seed
+such records, for example the claims that cite them; the owning engines supply it.
+[Claims](evidence-model.md#retired-concepts-in-claims) supply theirs through
+`kn.evidence.concepts`. Every seed
 reconciliation writes the report for the combined reviewed content under `lifecycle`. The reviewed
 seeds hold only `draft` concepts, so the report is empty today.
 

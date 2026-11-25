@@ -362,11 +362,13 @@
         },
         "referenceFields": {
           "$ref": "#/$defs/references"
+        },
+        "assertionField": {
+          "$ref": "#/$defs/reference"
         }
       },
       "required": [
         "required",
-        "assertionType",
         "minimumClass",
         "referenceFields"
       ],
@@ -375,6 +377,18 @@
         "contract",
         "table",
         "field"
+      ],
+      "oneOf": [
+        {
+          "required": [
+            "assertionType"
+          ]
+        },
+        {
+          "required": [
+            "assertionField"
+          ]
+        }
       ]
     },
     "kn.licensePolicy": {
@@ -480,6 +494,44 @@
         "fields"
       ],
       "additionalProperties": false,
+      "x-kn-scopes": [
+        "table"
+      ]
+    },
+    "kn.presence": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string",
+            "pattern": "^[a-z][a-z0-9_]{0,31}$"
+          },
+          "rule": {
+            "type": "string",
+            "enum": [
+              "exactly_one",
+              "all_or_none"
+            ]
+          },
+          "fields": {
+            "type": "array",
+            "items": {
+              "$ref": "#/$defs/reference"
+            },
+            "minItems": 2,
+            "uniqueItems": true
+          }
+        },
+        "required": [
+          "name",
+          "rule",
+          "fields"
+        ],
+        "additionalProperties": false
+      },
+      "minItems": 1,
+      "uniqueItems": true,
       "x-kn-scopes": [
         "table"
       ]

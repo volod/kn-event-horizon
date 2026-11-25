@@ -26,6 +26,7 @@ from kn.semantic import Snapshot, validate_model
 from kn.semantic.seeds import reviewed_snapshot
 from kn.sources.catalogue import TABLE_NAME
 from kn.sources.seeds import reviewed_catalogue
+from tests.integration.evidence_fixtures import seed_evidence_fixture
 from tests.integration.identity_fixtures import seed_identity_fixture
 from tests.integration.review_fixtures import replay_review_fixture
 from tests.integration.semantic_fixtures import native_rows, text_fixture
@@ -39,6 +40,7 @@ FIXTURE_OWNERS = {
     "kn.core.semantic",
     "kn.core.human_verification",
     "kn.core.identity",
+    "kn.core.evidence",
 }
 
 
@@ -139,6 +141,9 @@ def test_registered_model_fixture_rebuild_is_lossless_and_repeatable(
         connection.execute(ResetRole())
         _drain_references(connection, semantic)
         replay_review_fixture(connection, contracts, tmp_path)
+        evidence = next(item for item in contracts if item.contract_id == "kn.core.evidence")
+        assert seed_evidence_fixture(connection) > 0
+        _drain_references(connection, evidence)
         verify(connection, contracts)
         snapshot = _snapshot(connection, contracts)
         _assert_satcom(snapshot, package, satcom)

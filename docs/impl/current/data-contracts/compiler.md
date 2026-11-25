@@ -118,7 +118,8 @@ or rights enforcement. Those remain owned by their respective capability tasks.
 Generated DDL creates tables first, then sorted deferred foreign keys, indexes and comments. This
 supports cyclic references without depending on set iteration order. `src/kn/contracts/names.py`
 derives every constraint name once, for DDL, `postgresql/metadata.json`, and catalog verification:
-`pk_<table>`, `fk_<table>_<every referencing column>`, and `ck_<table>_<field>_<geometry|enum|precision>`.
+`pk_<table>`, `fk_<table>_<every referencing column>`, `ck_<table>_<field>_<geometry|enum|precision>`,
+and `ck_<table>_<rule>_presence`.
 A name over the PostgreSQL limit of 63 bytes keeps its first 54 characters and gains `_` and eight
 hex digits of its SHA-256. Compilation refuses names that coincide: a table named like another
 table's primary key index, an index named like a table, or two references that derive one name.
@@ -141,6 +142,13 @@ reviewed migrations before inserting data. `kn.index` also accepts `whereNull`, 
 nullable field for a bounded `IS NULL` predicate. The compiler emits a SQLAlchemy expression and
 retains it in PostgreSQL metadata; compiled-catalog verification detects predicate drift. Arbitrary
 SQL checks, predicates and operator classes are outside this profile.
+
+`kn.presence` declares bounded table null rules over nullable fields, each with a lowercase name.
+`exactly_one` compiles to `num_nonnulls(...) = 1`, as for a value-or-missing-reason group, and
+`all_or_none` to `num_nonnulls(...) IN (0, n)`, as for a time and its precision. JSON Schema adds
+`oneOf` or `anyOf` clauses, where an absent optional property counts as null, and the Pydantic
+model gains a matching validator. Unknown, required or repeated fields, single-field rules and
+repeated rule names fail compilation; tables without rules keep their previous artifacts.
 
 Pydantic models forbid extra fields and coercion, preserve exact `Decimal`, require aware
 UTC-capable timestamps, bound integers to the `BIGINT` range, and retain nullable versus required

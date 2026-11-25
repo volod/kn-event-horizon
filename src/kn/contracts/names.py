@@ -37,6 +37,11 @@ def check_name(table: Table, field: Field, kind: str) -> str:
     return postgres_name("ck", table.name, field.name, kind)
 
 
+def presence_name(table: Table, rule: str) -> str:
+    """The suffix never equals a field check kind, so table and field checks cannot coincide."""
+    return postgres_name("ck", table.name, rule, "presence")
+
+
 def table_references(table: Table) -> tuple[Reference, ...]:
     """Each composite reference once, in field order, however many of its fields declare it."""
     return tuple(dict.fromkeys(field.reference for field in table.fields if field.reference))

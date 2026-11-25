@@ -7,7 +7,7 @@ from pydantic import BaseModel
 
 from kn.contracts.diagnostics import ContractError
 from kn.contracts.model import Contract, Field, Table
-from kn.contracts.physical import extensions
+from kn.contracts.physical import EXACTLY_ONE, column_names, extensions, presence_rules
 from kn.contracts.sqlalchemy import INTEGER_MAX, INTEGER_MIN, PARTIAL_DATE
 
 
@@ -46,10 +46,11 @@ def pydantic_models(contract: Contract) -> str:
         ]
         for index, field in enumerate(table.fields):
             lines.append(_model_field(table, field, index))
+        lines += _presence_validator(table, name)
     return "\n".join(lines) + "\n"
 
 
-def _model_field(table: Table, field: Field, index: int) -> str:
+def _attribute(table: Table, field: Field, index: int) -> str:
     attribute = field.name
     if (
         keyword.iskeyword(attribute)
@@ -59,6 +60,38 @@ def _model_field(table: Table, field: Field, index: int) -> str:
         attribute = f"kn_field_{index}"
     if attribute != field.name and any(other.name == attribute for other in table.fields):
         raise ContractError((), "model", "rename fields that collide with generated Python aliases")
+    return attribute
+
+
+def _presence_validator(table: Table, name: str) -> list[str]:
+    """The same null rules as the SQL checks and JSON Schema; None is the only absent value."""
+    rules = presence_rules(table)
+    if not rules:
+        return []
+    attributes = {
+        field.name: _attribute(table, field, index) for index, field in enumerate(table.fields)
+    }
+    groups = tuple(
+        (
+            rule["rule"] == EXACTLY_ONE,
+            tuple(attributes[n] for n in column_names(table, rule["fields"])),
+        )
+        for rule in rules
+    )
+    return [
+        "",
+        "    @_kn_pydantic.model_validator(mode='after')",
+        f"    def _kn_presence(self) -> {name!r}:",
+        f"        for _kn_exact, _kn_names in {groups!a}:",
+        "            _kn_count = sum(getattr(self, _kn_n) is not None for _kn_n in _kn_names)",
+        "            if _kn_count not in ((1,) if _kn_exact else (0, len(_kn_names))):",
+        "                raise ValueError('presence rule violated: ' + ', '.join(_kn_names))",
+        "        return self",
+    ]
+
+
+def _model_field(table: Table, field: Field, index: int) -> str:
+    attribute = _attribute(table, field, index)
     annotation = _annotation(field)
     default = "" if field.required else "default=None, "
     if not field.required:

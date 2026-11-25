@@ -94,7 +94,8 @@ schema objects come from SQLAlchemy metadata, and the platform policy from typed
 
 The [shared human verification protocol](evidence-model.md) adds a registered decision-log contract
 and typed record/field targets, UTC/null semantics, authenticated reviewer context, durable history
-and transactional application. The registry now defines 62 tables and 558 fields. Dataset-wide
+and transactional application. With the [evidence contracts](evidence-model.md#evidence-contracts),
+the registry defines 73 tables and 706 fields. Dataset-wide
 coverage and read projections remain open in `human-verification-projections` in the
 [plan](../plan.md).
 
