@@ -38,7 +38,8 @@ make plan-status
 | `make coverage` | Run tests with the coverage gate |
 | `make format` | Apply Ruff formatting |
 | `make ci` | Run required local and CI checks |
-| `make ci-local` | Run `make ci`, every local-only test (database and heavy tests), and `make skos-reference-check` |
+| `make ci-local` | Run `make ci`, every local-only test (database and heavy tests), and `make skos-reference-check`; start `make db-up` first |
+| `make skos-reference-tools` | Install the pinned Java 21 runtime and Apache Jena that `make skos-reference-check` runs |
 | `make skos-reference-check` | Validate every SKOS export with the pinned Apache Jena RIOT |
 | `make quality` | Run CI checks, coverage, Markdown lint, and package build |
 | `make db-up` | Start the local PostgreSQL and PostGIS service on `127.0.0.1:15432` and wait until it is healthy |

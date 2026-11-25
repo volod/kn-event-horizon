@@ -115,10 +115,12 @@ this export.
 - `tests/semantic/test_skos_independent.py`: Oxigraph (`pyoxigraph`, pinned in the development
   extra) parses every exported scheme in strict mode, and its triples equal RDFLib's. It runs in
   `make ci` and on GitHub without network access.
-- `make skos-reference-check`: Apache Jena RIOT 6.3.0, installed by `make bootstrap`, validates a
-  fresh export of every scheme with `riot --validate`; an error or a warning fails the check. The
-  exports and `summary.json` are kept under `$DATA_DIR/skos-reference/<run-id>/`. `make ci-local`
-  runs it.
+- `make skos-reference-check`: Apache Jena RIOT 6.3.0 on the pinned Eclipse Temurin 21 JRE
+  validates a fresh export of every scheme with `riot --validate`; an error or a warning fails the
+  check. `make skos-reference-tools` or `make bootstrap` installs both under `$DATA_DIR/tools/`, so
+  the host needs no system Java. The exports and `summary.json`, which names both tool versions,
+  are kept under `$DATA_DIR/skos-reference/<run-id>/`. `make ci-local` runs it.
+  [Record 0043](../../records/0043-adhoc-skos-reference-tools.md) explains the pinned runtime.
 - `make ci`: formatting, lint, typing, complexity, contracts, documentation, catalogs, and unit tests.
 
 [Task record 0024](../../records/0024-ontology-taxonomy-skos-export.md) records the retained command

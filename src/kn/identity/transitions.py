@@ -29,8 +29,8 @@ def _unlink(state: State, payload: Unlink, event: Event) -> None:
     state.active(payload.kn_id)
     links = [
         item
-        for item in state.owned(payload.kn_id).values()
-        if isinstance(item.event.payload, Link) and item.event.payload.record == payload.record
+        for item in state.links(payload.record)
+        if item.kn_id == payload.kn_id and item.ended_event is None
     ]
     if not links:
         raise ValueError("cannot unlink a record without its active link")

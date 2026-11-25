@@ -22,8 +22,10 @@ Lines entry carries its sequence, predecessor digest, event digest, UTC instant,
 evidence, optional decision reference and discriminated payload. A match event also records the
 profile digest and version, candidates, comparator evidence, weights, score, probability and
 decision. New matches carry a trace with the request digest, source version, route, prior,
-expected follow-up count and minted ID if applicable. Tests compare both schemas with their
-Python models.
+expected follow-up count and minted ID if applicable. Attribute events written by the matcher
+name their contributing source record, so matching keeps one view of evidence per record. Earlier
+events without either optional field keep their canonical bytes and hashes. Tests compare both
+schemas with their Python models.
 
 A forced merge can carry a second authoritative identifier observation in its payload. The
 existing matching identifier must belong to the other active participant and be valid at the

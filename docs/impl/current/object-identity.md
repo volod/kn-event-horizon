@@ -37,7 +37,8 @@ project root. When using a project's `.env`, load it with `scripts/shared/common
 help, confirmation and diagnostics. `--json` returns the same keys and values in either locale.
 Success for a mutation returns the full identity event and `decision_id`. Input or transition
 errors report `E_INPUT`, terminal or owner refusals report `E_IDENTITY_AUTH`, and SQL errors report
-`E_DATABASE`.
+`E_DATABASE`. While a source adapter's interrupted match waits for its retry, a mutation reports
+`E_INPUT` before the confirmation prompt and writes no review decision. Rerun the adapter first.
 
 Merge, split and reclassification preserve the original link ID and source record ID while
 changing link ownership. Later claim lineage can follow that source record through the move.
@@ -66,7 +67,9 @@ Pydantic, wire and engine artifacts under `generated/contracts/kn.core.identity/
 The [wire contracts](../../../contracts/core/identity/README.md) bind immutable Pydantic payloads,
 a closed versioned event envelope and match profiles. New match events carry an optional trace
 field for compatibility with existing v1 event hashes. It records the source version, request
-digest, route, prior, expected follow-up count and minted KN ID when applicable. The SQL match ID
+digest, route, prior, expected follow-up count and minted KN ID when applicable. Attribute events
+that the matcher writes name their contributing source record in another optional field. The SQL
+`attributes` table does not project it; `lifecycle_events.event_json` keeps it. The SQL match ID
 identifies the corresponding `lifecycle_events` row. `kn identity history KN_ID` includes matches
 involving that object as a candidate or mint target.
 
@@ -101,27 +104,34 @@ ownership. Contradictory authoritative targets, an occupied identifier with a mi
 or class, and a conflict with current ownership go to review. A new binding or mint stores the
 match reference in `identity.links`. Existing links retain their original IDs. Successful
 decisions record declared attribute readings and previously unregistered authoritative keys.
-At an observation instant the scorer uses the latest eligible reading for each candidate field.
-Conflicting readings at the same latest time leave that field missing for scoring.
+At an observation instant each candidate has one view per contributing source record, holding
+that record's latest eligible reading of each field. A record keeps its view through merges and
+splits, and one record's newer reading never hides another record's. Conflicting readings of one
+record at the same latest time leave that field missing in its view. Readings recorded without a
+source record form one view of their own.
 
-Scoring uses complete normalized blocking keys and records each comparator's input values,
-outcome and natural-log likelihood weight `ln(m/u)`. Missing or unusable values contribute
+Scoring blocks on complete normalized keys in any view, scores each blocked view and keeps the
+first highest-scoring one. It records that view's comparator input values, outcome and
+natural-log likelihood weight `ln(m/u)`. Missing or unusable values contribute
 zero. The posterior combines the sum and the profile prior. Candidates are ordered by
 descending score and ascending KN ID. A scored link requires a calibrated profile, the link
 threshold, agreement on a discriminating attribute, and a unique lead that meets the margin
 in posterior probability. Candidates reaching the review threshold go to review when these
-gates fail. Alias-only candidates can prompt review. In the absence of a qualifying candidate the
-resolver mints a new UUIDv7. All four supplied profiles are uncalibrated. Name and description
-fields cannot discriminate, and profile validation rejects a link threshold reachable by
-nondiscriminating evidence alone.
+gates fail. Alias-only candidates can prompt review. An alias KN ID follows merge and split
+redirects to its active successors of the profile's class; unknown alias IDs are ignored. In the
+absence of a qualifying candidate the resolver mints a new UUIDv7. All four supplied profiles
+are uncalibrated. Name and description fields cannot discriminate, and profile validation rejects
+a link threshold reachable by nondiscriminating evidence alone.
 
 A receipt returns the match digest, stored match and bound KN ID, with an empty KN ID for
-review. Review decisions are durable match rows available to `review-queue-cli` when that workflow
-ships. For verification, `kn.identity.matching.scoring.verify_match(profile, match)` checks the
-profile digest and version, reruns the comparators on the recorded inputs, and reproduces the
-score and probability. Exact shortcuts record the matched identifier or source key, with a
-weight and score of zero and a probability of one. The pure `matching.resolve.resolve` API
-computes a decision over a supplied state without writing.
+review. A retried observation returns its original receipt, whose KN ID can since have been
+merged or split; resolve it before storing it outside KN. Review decisions are durable match rows
+available to `review-queue-cli` when that workflow ships. For verification,
+`kn.identity.matching.scoring.verify_match(profile, match)` checks the profile digest and
+version, reruns the comparators on the recorded inputs, and reproduces the score and probability.
+Exact shortcuts record the matched identifier or source key, with a weight and score of zero and
+a probability of one. The pure `matching.resolve.resolve` API computes a decision over a supplied
+state without writing.
 
 ## Durable journal and minting
 
@@ -182,13 +192,16 @@ SQL primary/foreign keys, enums, unique anchors/versions and the active-link ind
 checks. Temporal overlap and lifecycle semantics are enforced at the journal/application boundary;
 loaders must use that boundary. Arbitrary direct SQL or filesystem administrator tampering is
 outside the trusted protocol. Replay validates the whole local log and replaces disposable state.
-Candidate lookup scans the active registry holdings.
+Replay keeps indexes of anchors, record links, identifier intervals, record versions, change sets
+and match requests, so validation is linear in the length of the journal. Candidate lookup scans
+the active registry holdings.
 
 Matching validates its full event batch before appending. Retry the same observation and profile
 to reuse the original event digest and KN ID after a SQL rollback. A complete journal prefix of
-an interrupted match can be finished by the same retry. New match requests return a pending
-match error until that retry completes. If another identity operation has already advanced
-the journal, a diverged suffix refuses the retry. The usual torn-line integrity checks apply.
+an interrupted match can be finished by the same retry. New match requests, lifecycle mutations,
+registry mints and other journal appends return a pending match error until that retry completes.
+A journal written before this check could contain another operation after the incomplete batch;
+its retry then refuses as a diverged suffix. The usual torn-line integrity checks apply.
 
 ## Reviewed writes and recovery
 
@@ -226,13 +239,39 @@ pending replay, malformed-log rebuild rollback, SQL/log disagreement and the par
 appends, stale requests and repeat rebuilds with the original decision IDs. `make test-bilingual`
 compares identity lookups and command help with both locale goldens.
 `tests/identity/test_match*.py` cover the labeled match fixtures, profile safety, comparators,
-exact and scored precedence, retries and concurrent writes. The PostgreSQL matching fixture
-checks projection, rollback recovery and rebuild of recorded match receipts.
+exact and scored precedence, retries and concurrent writes. `test_match_registry.py` covers
+per-record views after merges, splits and identifier links, and aliases of merged objects. The
+PostgreSQL matching fixture checks projection, rollback recovery and rebuild of recorded match
+receipts. `tests/integration/test_identity_resolution.py` merges, splits and submits a name-only
+match, then compares every identity row and review decision across two rebuilds and a schema drop.
+It also refuses a lifecycle mutation while a match batch is incomplete. The `heavy`
+`tests/identity/test_replay_scale.py` check, run by `make ci-local`, fails when replay and row
+projection grow faster than linearly.
 `make model-baseline` now includes identity history before SATCOM import and compares every
 registered column after two rebuilds. Run `make ci` and `make test-integration` against local PostGIS;
 `make ci-local` also includes the existing local SKOS gate.
 
+## Known limitations
+
+These are accepted or scheduled findings of the
+[identity resolution audit](../records/0042-object-identity-identity-resolution-implementation-audit.md#findings).
+
+- Each write rereads and replays the whole journal and rewrites every identity table. One submit
+  took 0.11 seconds at 1,000 organizations and 0.28 seconds at 2,000, so a large source ingests in
+  quadratic time. `identity-incremental-writes` in the [plan](../plan.md) owns this limit.
+- An object minted without a source link, such as a reclassification successor, sends its
+  re-delivered anchor record to review after a merge instead of following the redirect. Reopen
+  this when an adapter mints objects without links.
+- Legal-name normalization removes only common trailing legal forms such as `Ltd`, `Inc` and
+  `GmbH`. A leading form, such as the Ukrainian abbreviation for a limited liability company,
+  stays in the name. Names never discriminate, so this affects only review recall. Reopen this
+  when an organization calibration report shows missed held-out pairs that differ only by legal
+  form.
+- The matcher never merges by itself. A shared authoritative identifier on two records goes to
+  review. A trusted adapter or review workflow appends the merge.
+
 Acceptance evidence is retained in
-[record 0033](../records/0033-object-identity-identity-registry-contracts.md) and
-[record 0039](../records/0039-object-identity-object-lifecycle-operations.md) and
-[record 0040](../records/0040-object-identity-identity-match-engine.md).
+[record 0033](../records/0033-object-identity-identity-registry-contracts.md),
+[record 0039](../records/0039-object-identity-object-lifecycle-operations.md),
+[record 0040](../records/0040-object-identity-identity-match-engine.md) and
+[record 0042](../records/0042-object-identity-identity-resolution-implementation-audit.md).

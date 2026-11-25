@@ -12,7 +12,7 @@ from uuid import UUID
 from kn.contracts.model import canonical
 from kn.identity.events import Event, event
 from kn.identity.model import Mint, SourceKey
-from kn.identity.state import State, replay
+from kn.identity.state import PENDING_MATCH, State, record_key, replay
 from kn.review.journal import _sync_directory
 from kn.review.model import Instant
 
@@ -37,10 +37,14 @@ class LockedJournal:
             if self.events[value.sequence - 1] == value:
                 return False
             raise ValueError("identity event sequence already contains different content")
+        if self.state.pending_match() is not None:
+            # Only the match retry may finish its recorded follow-up events.
+            raise ValueError(PENDING_MATCH)
         self._extend((value,))
         return True
 
     def append_batch(self, values: tuple[Event, ...]) -> None:
+        """Append one match decision or the rest of its follow-ups; the matcher checks order."""
         if values:
             self._extend(
                 tuple(Event.model_validate_json(item.model_dump_json()) for item in values)
@@ -68,9 +72,8 @@ class LockedJournal:
         reason: str,
         evidence: str,
     ) -> str:
-        existing = next(
-            (item for item in self.state.objects.values() if item.anchor == anchor), None
-        )
+        known = self.state.anchors.get(record_key(anchor))
+        existing = self.state.objects[known] if known is not None else None
         if existing is not None:
             if existing.entity_class != entity_class:
                 raise ValueError("anchor already minted a different entity class")

@@ -55,15 +55,23 @@ def pytest_collection_modifyitems(items: list[pytest.Item]) -> None:
 
 @pytest.fixture(scope="session")
 def integration_database() -> IntegrationDatabase:
-    """The configured database, checked once per session. Skips when none is configured."""
+    """The configured database, checked once per session. Skips when none is configured.
+
+    A configured database that cannot be used stops the whole run with one message: every later
+    integration test would fail at setup with the same error.
+    """
     try:
         database = IntegrationDatabase.from_environment(os.environ)
+        if database is not None:
+            database.check()
+    except HarnessError as error:
+        problem = str(error)
+    else:
         if database is None:
             pytest.skip(NOT_CONFIGURED)
-        database.check()
-    except HarnessError as error:
-        pytest.fail(str(error), pytrace=False)
-    return database
+        return database
+    # Outside the handler, so pytest prints no chained exception.
+    pytest.exit(f"ERROR: {problem}", returncode=pytest.ExitCode.TESTS_FAILED)
 
 
 @pytest.fixture(scope="session")

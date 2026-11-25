@@ -145,6 +145,8 @@ class Attribute(Frozen):
     normalized: Text
     normalizer: Text
     profile_digest: Digest
+    # The contributing source record. Earlier v1 events omit it and keep their hashes.
+    record: SourceKey | None = Field(default=None, exclude_if=lambda value: value is None)
 
 
 class FieldHash(Frozen):

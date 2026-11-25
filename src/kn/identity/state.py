@@ -4,8 +4,8 @@ from dataclasses import dataclass, field
 from datetime import datetime
 
 from kn.identity.events import Event
+from kn.identity.match_records import check_match, check_match_link
 from kn.identity.model import (
-    MATCH_LINK_METHODS,
     Attribute,
     ChangeSet,
     Identifier,
@@ -15,6 +15,13 @@ from kn.identity.model import (
     SourceKey,
     Version,
 )
+
+PENDING_MATCH = "retry the pending identity match before recording another"
+type RecordKey = tuple[str, str]
+
+
+def record_key(record: SourceKey) -> RecordKey:
+    return record.source, record.key
 
 
 @dataclass
@@ -45,6 +52,14 @@ class State:
     matches: dict[str, Match] = field(default_factory=dict)
     changes: dict[str, ChangeSet] = field(default_factory=dict)
     redirects: dict[str, tuple[str, ...]] = field(default_factory=dict)
+    # Lookup indexes keep validation and resolution linear in the length of the history.
+    anchors: dict[RecordKey, str] = field(default_factory=dict)
+    record_links: dict[RecordKey, list[str]] = field(default_factory=dict)
+    identifier_keys: dict[tuple[str, str], list[str]] = field(default_factory=dict)
+    version_keys: set[tuple[str, str, str]] = field(default_factory=set)
+    changed_versions: set[str] = field(default_factory=set)
+    requests: dict[str, Event] = field(default_factory=dict)
+    last_traced: Event | None = None
 
     def active(self, kn_id: str) -> Object:
         item = self.objects.get(kn_id)
@@ -58,9 +73,10 @@ class State:
     def mint(self, payload: Mint, event: Event) -> None:
         if payload.kn_id in self.objects:
             raise ValueError("KN ID must never be reused")
-        if any(item.anchor == payload.anchor for item in self.objects.values()):
+        if record_key(payload.anchor) in self.anchors:
             raise ValueError("anchoring source record already minted an identity")
         self.record(payload.anchor)
+        self.anchors[record_key(payload.anchor)] = payload.kn_id
         self.objects[payload.kn_id] = Object(
             payload.kn_id, payload.entity_class, payload.anchor, event.event_id
         )
@@ -78,6 +94,22 @@ class State:
                     sorted((set(targets) - {item.kn_id}).union(successors))
                 )
         self.redirects[item.kn_id] = tuple(sorted(successors))
+
+    def links(self, record: SourceKey) -> list[Holding]:
+        """Current and closed links of one source record, in journal order."""
+        return [self.holdings[key] for key in self.record_links.get(record_key(record), ())]
+
+    def identifiers(self, namespace: str, value: str) -> list[Holding]:
+        """Every recorded validity interval of one identifier, in journal order."""
+        return [self.holdings[key] for key in self.identifier_keys.get((namespace, value), ())]
+
+    def pending_match(self) -> Event | None:
+        """The latest traced match while any of its recorded follow-up events is missing."""
+        entry = self.last_traced
+        if entry is None or not isinstance(match := entry.payload, Match) or match.trace is None:
+            return None
+        complete = len(self.events) >= entry.sequence + match.trace.followup_count
+        return None if complete else entry
 
     def owned(self, kn_id: str) -> dict[str, Holding]:
         return {
@@ -101,6 +133,8 @@ class State:
             self._identifier(payload, event)
         elif isinstance(payload, Attribute):
             self.active(payload.kn_id)
+            if payload.record is not None and payload.record.record_id not in self.records:
+                raise ValueError("attribute must cite a known source record")
             self.holdings[event.event_id] = Holding(event, payload.kn_id)
         else:
             self._other(event)
@@ -122,104 +156,56 @@ class State:
     def _changes(self, payload: ChangeSet, event: Event) -> None:
         if payload.version_id not in self.versions:
             raise ValueError("change set requires a known source version")
-        if any(value.version_id == payload.version_id for value in self.changes.values()):
+        if payload.version_id in self.changed_versions:
             raise ValueError("source version already has a change set")
         if len({item.field_id for item in payload.changes}) != len(payload.changes):
             raise ValueError("duplicate field changes")
         self.changes[event.event_id] = payload
+        self.changed_versions.add(payload.version_id)
 
     def _link(self, payload: Link, event: Event) -> None:
         self.active(payload.kn_id)
-        if any(
-            isinstance(item.event.payload, Link)
-            and item.event.payload.record == payload.record
-            and item.ended_event is None
-            for item in self.holdings.values()
-        ):
+        if any(item.ended_event is None for item in self.links(payload.record)):
             raise ValueError("source record already has an active link")
         if payload.match_id is not None:
             match = self.matches.get(payload.match_id)
             if match is None or match.record != payload.record:
                 raise ValueError("link requires a matching stored decision")
-            self._match_link(payload, match)
+            check_match_link(payload, match, self.objects[payload.kn_id].anchor)
         self.record(payload.record)
         self.holdings[event.event_id] = Holding(event, payload.kn_id)
-
-    def _match_link(self, payload: Link, match: Match) -> None:
-        if match.trace is not None and MATCH_LINK_METHODS.get(match.trace.route) != payload.method:
-            raise ValueError("link method must match the recorded resolution route")
-        if payload.method == "minted" and match.decision == "mint" and match.trace is not None:
-            if (
-                match.trace.minted_id != payload.kn_id
-                or self.objects[payload.kn_id].anchor != payload.record
-            ):
-                raise ValueError("minted link must use the recorded source anchor and KN ID")
-            score, probability = None, None
-        else:
-            candidate = next(
-                (item for item in match.candidates if item.kn_id == match.selected), None
-            )
-            if candidate is None or candidate.kn_id != payload.kn_id:
-                raise ValueError("link requires a matching stored decision")
-            score, probability = candidate.score, candidate.probability
-        if (
-            payload.score,
-            payload.probability,
-            payload.profile_digest,
-            payload.profile_version,
-        ) != (
-            score,
-            probability,
-            match.profile_digest,
-            match.profile_version,
-        ):
-            raise ValueError("link score and profile must match the stored decision")
+        self.record_links.setdefault(record_key(payload.record), []).append(event.event_id)
 
     def _identifier(self, payload: Identifier, event: Event) -> None:
         self.active(payload.kn_id)
-        for holding in self.holdings.values():
+        key = (payload.namespace, payload.value)
+        for holding in self.identifiers(*key):
             other = holding.event.payload
-            if not isinstance(other, Identifier):
-                continue
-            if (other.namespace, other.value) == (payload.namespace, payload.value) and (
-                (other.valid_to is None or payload.valid_from < other.valid_to)
-                and (payload.valid_to is None or other.valid_from < payload.valid_to)
+            assert isinstance(other, Identifier)
+            if (other.valid_to is None or payload.valid_from < other.valid_to) and (
+                payload.valid_to is None or other.valid_from < payload.valid_to
             ):
                 raise ValueError("identifier validity overlaps in its namespace")
         self.holdings[event.event_id] = Holding(event, payload.kn_id)
+        self.identifier_keys.setdefault(key, []).append(event.event_id)
 
     def _version(self, payload: Version, event: Event) -> None:
-        if any(
-            (item.record, item.version) == (payload.record, payload.version)
-            for item in self.versions.values()
-        ):
+        version_key = (*record_key(payload.record), payload.version)
+        if version_key in self.version_keys:
             raise ValueError("source record version already exists")
         self.record(payload.record)
         self.versions[event.event_id] = payload
+        self.version_keys.add(version_key)
         key = payload.record.record_id
         self.last_seen[key] = max(payload.observed_at, self.last_seen.get(key, payload.observed_at))
 
     def _match(self, payload: Match, event: Event) -> None:
-        keys = [item.kn_id for item in payload.candidates]
-        if len(keys) != len(set(keys)):
-            raise ValueError("duplicate match candidates")
-        for key in keys:
-            self.active(key)
-        if (payload.decision == "link") != (payload.selected is not None):
-            raise ValueError("only link decisions select a candidate")
-        if payload.selected is not None and payload.selected not in keys:
-            raise ValueError("selected match must be a candidate")
-        if payload.trace is not None and (payload.decision == "mint") != (
-            payload.trace.minted_id is not None
-        ):
-            raise ValueError("persisted mint decisions require exactly one new KN ID")
-        if payload.trace is not None and (
-            (payload.decision == "review" and payload.trace.followup_count != 0)
-            or (payload.decision == "mint" and payload.trace.followup_count < 2)
-        ):
-            raise ValueError("match followup count contradicts the decision")
+        check_match(payload, self.active)
         self.record(payload.record)
         self.matches[event.event_id] = payload
+        if payload.trace is not None:
+            self.requests.setdefault(payload.trace.request_digest, event)
+            self.last_traced = event
 
 
 def replay(events: tuple[Event, ...]) -> State:

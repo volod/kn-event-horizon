@@ -4,28 +4,27 @@ from collections import defaultdict
 from datetime import datetime
 
 from kn.identity.matching.observe import Key
-from kn.identity.model import Attribute, Identifier, Link, SourceKey
-from kn.identity.state import Holding, State
+from kn.identity.model import Attribute, Identifier, SourceKey
+from kn.identity.state import Holding, RecordKey, State, record_key
+
+type View = dict[str, str]
 
 
 def source_links(state: State, record: SourceKey) -> list[Holding]:
-    return [
-        item
-        for item in state.holdings.values()
-        if isinstance(item.event.payload, Link) and item.event.payload.record == record
-    ]
+    return state.links(record)
 
 
 def anchor(state: State, record: SourceKey) -> str | None:
-    return next((obj.kn_id for obj in state.objects.values() if obj.anchor == record), None)
+    return state.anchors.get(record_key(record))
 
 
-def known_identifiers(state: State) -> dict[tuple[str, str], list[tuple[str, Identifier]]]:
-    result: dict[tuple[str, str], list[tuple[str, Identifier]]] = defaultdict(list)
-    for item in state.holdings.values():
-        if isinstance(payload := item.event.payload, Identifier) and item.ended_event is None:
-            result[payload.namespace, payload.value].append((item.kn_id, payload))
-    return result
+def identifiers(state: State, key: Key) -> list[tuple[str, Identifier]]:
+    """Current owner and interval of each recorded validity interval of one identifier."""
+    return [
+        (item.kn_id, payload)
+        for item in state.identifiers(key.namespace, key.value)
+        if isinstance(payload := item.event.payload, Identifier) and item.ended_event is None
+    ]
 
 
 def authoritative_targets(
@@ -34,13 +33,12 @@ def authoritative_targets(
     active: set[str],
     at: datetime,
 ) -> tuple[dict[str, tuple[Key, ...]], bool]:
-    known = known_identifiers(state)
     matches: dict[str, tuple[Key, ...]] = {}
     conflict = False
     for key in sorted(keys, key=lambda item: item.parts):
         intervals = [
             (owner, identifier)
-            for owner, identifier in known.get((key.namespace, key.value), ())
+            for owner, identifier in identifiers(state, key)
             if identifier.valid_to is None or at < identifier.valid_to
         ]
         current = next((item for item in intervals if item[1].valid_from <= at), None)
@@ -62,8 +60,13 @@ def authoritative_targets(
 
 def current_attributes(
     state: State, candidates: set[str], at: datetime
-) -> dict[str, dict[str, str]]:
-    readings: dict[tuple[str, str], tuple[datetime, set[str]]] = {}
+) -> dict[str, tuple[View, ...]]:
+    """Latest readings of each candidate, one view per contributing source record.
+
+    Merged and linked records keep their own evidence, so one record's newer reading never hides
+    another record's. Readings recorded without a source record form one view of their own.
+    """
+    readings: dict[tuple[str, RecordKey | None, str], tuple[datetime, set[str]]] = {}
     for item in state.holdings.values():
         payload, when = item.event.payload, item.event.occurred_at
         if (
@@ -73,16 +76,25 @@ def current_attributes(
             or when > at
         ):
             continue
-        key = (item.kn_id, payload.field_id)
+        origin = record_key(payload.record) if payload.record is not None else None
+        key = (item.kn_id, origin, payload.field_id)
         latest, values = readings.get(key, (when, set()))
         if when > latest:
             readings[key] = (when, {payload.original})
         elif when == latest:
             values.add(payload.original)
             readings[key] = (latest, values)
-    result: dict[str, dict[str, str]] = defaultdict(dict)
-    for (kn_id, field_id), (_, values) in readings.items():
+    views: dict[str, dict[RecordKey | None, View]] = defaultdict(dict)
+    for (kn_id, origin, field_id), (_, values) in readings.items():
+        view = views[kn_id].setdefault(origin, {})
         if len(values) == 1:
-            (value,) = values
-            result[kn_id][field_id] = value
-    return result
+            (view[field_id],) = values
+    return {
+        kn_id: tuple(view for _, view in sorted(by_origin.items(), key=_origin_order))
+        for kn_id, by_origin in views.items()
+    }
+
+
+def _origin_order(item: tuple[RecordKey | None, View]) -> tuple[bool, RecordKey]:
+    origin = item[0]
+    return origin is not None, origin or ("", "")

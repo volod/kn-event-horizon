@@ -30,26 +30,6 @@ archive.
 
 ## Agent Implementation Tasks
 
-### Identity lifecycle and matching -- `identity-resolution`
-
-#### identity-resolution-implementation-audit
-
-Verify the identity lifecycle and matching handoff against its specification and the next consumer.
-
-- Serves: `object-identity` -- [Object identity](../design/spec.md#object-identity)
-- Agent status: CLEAR
-- Dependencies: The [lifecycle acceptance record](records/0039-object-identity-object-lifecycle-operations.md),
-  the [matching acceptance record](records/0040-object-identity-identity-match-engine.md),
-  and the [audit procedure](../guide/planning-workflow.md#implementation-audits).
-- User-visible outcome: The group has reproducible acceptance evidence and owned follow-up work.
-- Scope boundary: Verify this group's outputs, failure paths and downstream compatibility.
-- Data and artifact paths: Group fixtures, the numbered audit record and the forward plan.
-- Execution path: Replay a merge followed by a split and submit a name-only match. Compare IDs and
-  decisions across rebuilds and check the review boundary.
-- Acceptance gates: Reproduce the member gates, run the six audit checks and record each finding
-  with evidence, severity and disposition. Fix blockers before handoff and run `make ci`.
-- Documentation target: `current/object-identity.md` listed in the [areas index](current.md#areas).
-
 ### Claims, change tracking and lineage -- `object-identity`
 
 #### evidence-claim-contracts
@@ -92,8 +72,8 @@ detected per field and traced back to its record version.
 
 - Serves: `object-identity` -- [Object identity](../design/spec.md#object-identity)
 - Agent status: CLEAR
-- Requires: `identity-resolution-implementation-audit`, `evidence-claim-contracts`
-- Dependencies: none.
+- Requires: `evidence-claim-contracts`
+- Dependencies: The [registry replay and match writer](current/object-identity.md#replay-and-integrity).
 - User-visible outcome: For each mapped record, the engine computes a field-level change set
   (added, changed, unchanged, emptied, or not stated) against the record's previous version. Only
   added, changed, and emptied fields create claims. Unchanged fields record confirmations, and
@@ -125,7 +105,7 @@ leaves an object's value. Arrival order must never decide.
 
 - Serves: `evidence-model` -- [Evidence model](../design/spec.md#evidence-model)
 - Agent status: CLEAR
-- Requires: `evidence-claim-contracts`, `identity-resolution-implementation-audit`
+- Requires: `evidence-claim-contracts`
 - Dependencies: The [reviewed source rank override format and catalogue IDs](current/source-management.md#reviewed-inputs-and-identifiers).
 - User-visible outcome: The engine projects each field's canonical value through its update
   policy. The modes are `priority`, `latest_observed`, `accumulate`, and `fixed`. A candidate value
@@ -180,6 +160,32 @@ Operators must be able to trace any object or field back to every record and dec
   Golden outputs exist in both locales.
 - Documentation target: `current/object-identity.md` listed in the [areas index](current.md#areas).
 
+#### identity-incremental-writes
+
+Each identity write rereads and validates the whole journal and rewrites every identity table, so
+one submit slows as the registry grows and a large source ingests in quadratic time.
+
+- Serves: `object-identity` -- [Object identity](../design/spec.md#object-identity)
+- Agent status: CLEAR
+- Dependencies: Finding IDRES-05 and its measurements in the
+  [identity resolution audit](records/0042-object-identity-identity-resolution-implementation-audit.md#findings).
+- User-visible outcome: A source adapter submits observations at a cost that stays flat as the
+  registry grows. Each write appends its events and updates only the rows they change, and a
+  rebuild still reproduces every row.
+- Scope boundary: Reuse of the validated journal state under the writer lock, incremental SQL
+  projection of new events and their ownership changes, and indexed candidate and attribute
+  lookup. Event formats, match decisions, recovery and rebuild semantics stay unchanged. Profile
+  values and calibration are out of scope.
+- Data and artifact paths: `src/kn/identity/`, `tests/identity/`, `tests/integration/`,
+  `$DATA_DIR/identity/`.
+- Execution path: Extend the replay growth check to journal-backed submits and PostgreSQL
+  projection, measure the current curve, then change the writer.
+- Acceptance gates: On a synthetic organization registry, one PostgreSQL submit at 50,000 objects
+  costs at most twice as much as at 5,000 objects. Rows after incremental writes equal the rows of
+  a rebuild after dropping the database. Interrupted, retried and concurrent writes keep their
+  current recovery results. `make ci` and the local integration suite pass.
+- Documentation target: `current/object-identity.md` listed in the [areas index](current.md#areas).
+
 #### object-identity-implementation-audit
 
 Identity is the core model, and KN IDs are stored in counterparts and exports, so a flaw in minting,
@@ -188,10 +194,12 @@ lifecycle, or matching is the most expensive kind to fix later.
 - Serves: `object-identity` -- [Object identity](../design/spec.md#object-identity)
 - Agent status: CLEAR
 - Requires: `evidence-claim-contracts`, `partial-update-tracking`, `canonical-fact-selection`,
-  `object-lineage-lookup`
+  `object-lineage-lookup`, `identity-incremental-writes`
 - Dependencies: The accepted task records of the group and the [implementation
   audit](../guide/planning-workflow.md#implementation-audits) checks. `identity-match-calibration`
-  stays open and is reviewed for the readiness of its inputs.
+  stays open and is reviewed for the readiness of its inputs. The [identity resolution
+  audit](records/0042-object-identity-identity-resolution-implementation-audit.md) lists the
+  accepted matching limitations to recheck.
 - User-visible outcome: Every later group resolves objects through a verified identity registry. The
   audit record gives every check a result and every finding a disposition. The current-state page
   lists known limitations, and each scheduled finding is a plan task.
@@ -260,9 +268,8 @@ Human decisions on conflicts and candidates need a bilingual workflow that survi
 
 - Serves: `evidence-model` -- [Evidence model](../design/spec.md#evidence-model)
 - Agent status: CLEAR
-- Requires: `object-identity-implementation-audit`, `identity-resolution-implementation-audit`,
-  `human-verification-projections`
-- Dependencies: none.
+- Requires: `object-identity-implementation-audit`, `human-verification-projections`
+- Dependencies: The durable [identity review match rows](current/object-identity.md#match-resolution).
 - User-visible outcome: `kn review list` and `kn review decide` work in `en` and `uk` for fact
   conflicts, identity match candidates, and identity drift. Decisions are appended to
   `$DATA_DIR/decisions/<domain>/` and applied to review items.
@@ -402,8 +409,7 @@ The core engine must run end to end on a synthetic source before any real source
 
 - Serves: `ingestion-engine` -- [Ingestion engine](../design/spec.md#ingestion-engine)
 - Agent status: CLEAR
-- Requires: `raw-archive-implementation-audit`,
-  `object-identity-implementation-audit`, `identity-resolution-implementation-audit`,
+- Requires: `raw-archive-implementation-audit`, `object-identity-implementation-audit`,
   `ingestion-state-contracts`
 - Dependencies: The [crawler validator and enablement evidence](current/source-management.md#enablement-evidence).
 - User-visible outcome: `kn source run` and `kn source replay` process a synthetic fixture source

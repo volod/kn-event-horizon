@@ -1,6 +1,6 @@
 """Pure, deterministic resolution over an identity registry snapshot."""
 
-from collections.abc import Mapping
+from collections.abc import Iterable, Mapping
 from dataclasses import dataclass
 
 from kn.contracts.model import canonical
@@ -74,20 +74,44 @@ def _can_link(profile: Profile, ranked: tuple[Candidate, ...]) -> bool:
     )
 
 
+def _best(
+    profile: Profile,
+    kn_id: str,
+    left: Mapping[str, Value],
+    views: Iterable[Mapping[str, Value]],
+) -> Candidate | None:
+    """Score each contributing record's view and keep the first highest-scoring one."""
+    scored = [score(profile, kn_id, left, view) for view in views]
+    return max(scored, key=lambda item: item.score) if scored else None
+
+
+def _blocked(
+    profile: Profile,
+    left: Mapping[str, Value],
+    right: Mapping[str, tuple[dict[str, Value], ...]],
+) -> tuple[Candidate, ...]:
+    """Rank candidates by their best view among the views that share a blocking key."""
+    candidates = (
+        _best(profile, kn_id, left, [view for view in views if blocks(profile, left, view)])
+        for kn_id, views in right.items()
+    )
+    return _rank([item for item in candidates if item is not None])
+
+
+def _aliases(state: State, incoming: Observation, active: set[str]) -> set[str]:
+    """Follow redirects, so an alias that names a merged or split object reaches its successors."""
+    known = (key for key in incoming.aliases if key in state.objects)
+    return active.intersection(successor for key in known for successor in state.resolve(key))
+
+
 def _scored(state: State, profile: Profile, incoming: Observation, active: set[str]) -> Decision:
     left = prepare(profile, {item.field_id: item.value for item in incoming.attributes})
-    aliases = active.intersection(incoming.aliases)
+    aliases = _aliases(state, incoming, active)
     right = {
-        kn_id: prepare(profile, raw)
-        for kn_id, raw in current_attributes(state, active, incoming.observed_at).items()
+        kn_id: tuple(prepare(profile, raw) for raw in views)
+        for kn_id, views in current_attributes(state, active, incoming.observed_at).items()
     }
-    blocked = _rank(
-        [
-            score(profile, kn_id, left, values)
-            for kn_id, values in right.items()
-            if blocks(profile, left, values)
-        ]
-    )
+    blocked = _blocked(profile, left, right)
     if blocked and _can_link(profile, blocked):
         return Decision("scored_match", "link", blocked, blocked[0].kn_id)
     if aliases:
@@ -103,11 +127,12 @@ def _scored(state: State, profile: Profile, incoming: Observation, active: set[s
 def _with_aliases(
     profile: Profile,
     left: Mapping[str, Value],
-    right: Mapping[str, dict[str, Value]],
+    right: Mapping[str, tuple[dict[str, Value], ...]],
     blocked: tuple[Candidate, ...],
     aliases: set[str],
 ) -> tuple[Candidate, ...]:
-    return _rank([*blocked, *(score(profile, key, left, right.get(key, {})) for key in aliases)])
+    scored = [_best(profile, key, left, right.get(key) or ({},)) for key in aliases]
+    return _rank([*blocked, *(item for item in scored if item is not None)])
 
 
 def resolve(state: State, profile: Profile, incoming: Observation) -> Match:

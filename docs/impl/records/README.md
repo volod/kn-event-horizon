@@ -56,5 +56,7 @@ decision. A record can name a plan task by ID because plan headings disappear on
 | 0039 | `object-lifecycle-operations` | [Object lifecycle operations](0039-object-identity-object-lifecycle-operations.md) |
 | 0040 | `identity-match-engine` | [Identity match engine](0040-object-identity-identity-match-engine.md) |
 | 0041 | `decide-vocabulary-uri-namespace` | [Vocabulary URI namespace decision](0041-ontology-taxonomy-decide-vocabulary-uri-namespace.md) |
+| 0042 | `identity-resolution-implementation-audit` | [Identity resolution implementation audit](0042-object-identity-identity-resolution-implementation-audit.md) |
+| 0043 | `adhoc` SKOS reference tools | [SKOS reference tools](0043-adhoc-skos-reference-tools.md) |
 
-Next unused sequence is `0042`.
+Next unused sequence is `0044`.

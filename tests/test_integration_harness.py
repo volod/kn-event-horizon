@@ -133,22 +133,31 @@ def test_integration_tests_skip_with_a_reason_without_a_database() -> None:
     assert NO_DATABASE_REASON in result.stdout
 
 
-def test_integration_tests_fail_when_the_configured_database_is_unreachable(
-    tmp_path: Path,
+@pytest.mark.parametrize(
+    ("password", "message"),
+    [
+        (SECRET, "cannot connect to the integration database"),
+        (None, "is missing or empty"),
+    ],
+)
+def test_an_unusable_configured_database_stops_the_run_with_one_message(
+    tmp_path: Path, password: str | None, message: str
 ) -> None:
     secret = tmp_path / "password"
-    secret.write_text(SECRET)
+    if password is not None:
+        secret.write_text(password)
 
     result = _pytest(
         "tests/integration",
         **{DATABASE_URL_VARIABLE: _missing_socket(tmp_path), PASSWORD_FILE_VARIABLE: str(secret)},
     )
 
-    assert result.returncode == 1, result.stdout + result.stderr
-    assert " error" in result.stdout
-    assert "cannot connect to the integration database" in result.stdout
-    assert "make db-up" in result.stdout
-    assert SECRET not in result.stdout + result.stderr
+    output = result.stdout + result.stderr
+    assert result.returncode == 1, output
+    assert output.count(message) == 1, output
+    assert output.count("make db-up") == 1
+    assert "During handling" not in output and " error" not in result.stdout
+    assert SECRET not in output
 
 
 def test_a_test_elsewhere_that_uses_the_database_is_an_integration_test(tmp_path: Path) -> None:
