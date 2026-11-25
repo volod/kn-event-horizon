@@ -1,15 +1,16 @@
 """Validate every reviewed SKOS export with the pinned Apache Jena RIOT, an independent parser.
 
-RIOT runs in strict mode (`--validate`): a non-zero exit or any warning fails the check. The
-exports and a summary are kept under `DATA_DIR/skos-reference/<run-id>/`.
+RIOT runs in strict mode (`--validate`) on the pinned Java runtime: a non-zero exit or any warning
+fails the check. The exports and a summary are kept under `DATA_DIR/skos-reference/<run-id>/`.
 """
 
 import argparse
 import json
 import logging
+import os
 import subprocess
 import sys
-from collections.abc import Callable, Sequence
+from collections.abc import Callable, Mapping, Sequence
 from pathlib import Path
 from uuid import uuid4
 
@@ -18,30 +19,36 @@ from kn.semantic.seeds import reviewed_snapshot
 from kn.semantic.skos import export_scheme
 
 TOOL = "apache_jena"
+RUNTIME = "temurin_jre"
 TIMEOUT_SECONDS = 300
 _LOG = logging.getLogger("kn.skos_reference")
 
-type Run = Callable[[list[str]], subprocess.CompletedProcess[str]]
+type Run = Callable[[list[str], Mapping[str, str]], subprocess.CompletedProcess[str]]
 
 
-def _riot(command: list[str]) -> subprocess.CompletedProcess[str]:
+def _riot(command: list[str], env: Mapping[str, str]) -> subprocess.CompletedProcess[str]:
     return subprocess.run(
-        command, capture_output=True, text=True, timeout=TIMEOUT_SECONDS, check=False
+        command, capture_output=True, text=True, timeout=TIMEOUT_SECONDS, check=False, env=env
     )
 
 
 def check(root: Path, data_dir: Path, run: Run = _riot) -> tuple[Path, list[dict[str, object]]]:
     """Export each scheme, validate it, and return the summary path and the failed schemes."""
-    tool = load_manifest(root)["downloaded_tools"][TOOL]
-    if not installed(tool, data_dir):
-        raise ValueError("Apache Jena is not installed; run make bootstrap")
+    tools = load_manifest(root)["downloaded_tools"]
+    tool, runtime = tools[TOOL], tools[RUNTIME]
+    if not (installed(tool, data_dir) and installed(runtime, data_dir)):
+        raise ValueError(
+            "Apache Jena or its Java runtime is missing; run make skos-reference-tools"
+        )
     riot = tool_path(tool, data_dir) / tool["executable"]
+    # The riot launcher prefers JAVA over JAVA_HOME and PATH, so a host Java never takes over.
+    env = {**os.environ, "JAVA": str(tool_path(runtime, data_dir) / runtime["executable"])}
     destination = data_dir / "skos-reference" / uuid4().hex
     destination.mkdir(parents=True)
     results: list[dict[str, object]] = []
     for scheme_id in sorted(row["id"] for row in reviewed_snapshot()["concept_schemes"]):
         path = Path(str(export_scheme(scheme_id, destination)["path"]))
-        completed = run([str(riot), "--validate", str(path)])
+        completed = run([str(riot), "--validate", str(path)], env)
         messages = (completed.stdout + completed.stderr).strip()
         results.append(
             {
@@ -52,7 +59,11 @@ def check(root: Path, data_dir: Path, run: Run = _riot) -> tuple[Path, list[dict
             }
         )
     summary = destination / "summary.json"
-    document = {"tool": f"Apache Jena RIOT {tool['version']}", "schemes": results}
+    document = {
+        "tool": f"Apache Jena RIOT {tool['version']}",
+        "runtime": f"Eclipse Temurin JRE {runtime['version']}",
+        "schemes": results,
+    }
     summary.write_text(json.dumps(document, indent=2, sort_keys=True) + "\n", encoding="utf-8")
     failed = [item for item in results if item["exit_code"] != 0 or item["messages"]]
     return summary, failed

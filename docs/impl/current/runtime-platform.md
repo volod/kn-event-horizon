@@ -134,8 +134,11 @@ Selection, skips, and failures:
   `no integration database configured: KN_TEST_DATABASE_URL is not set`. The pytest options include
   `-rfEs`, which prints skip reasons, and `--strict-markers`.
 - With the variable set, a missing or empty password file, an invalid connection string, or a
-  database that does not answer fails every integration test. The message names the server as
-  `user@host:port/database` and gives the `make db-up` hint. No message contains the password.
+  database that does not answer stops the run at the first integration test with exit code 1 and
+  one message. The message names the server as `user@host:port/database` and gives the
+  `make db-up` hint. No message contains the password.
+  `tests/test_integration_harness.py` checks that the message appears once without a chained
+  exception.
 
 | Fixture | Scope | Provides |
 | --- | --- | --- |

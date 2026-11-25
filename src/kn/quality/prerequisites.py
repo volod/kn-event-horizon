@@ -3,13 +3,15 @@
 `deploy/versions.yaml` declares both. System packages are never installed: a missing or too-old
 command fails with its install hint. A downloaded tool is installed under `DATA_DIR/tools/` only
 when its archive matches the pinned SHA-512, through a staging directory and one rename, and an
-installation is trusted only with the marker that records that checksum.
+installation is trusted only with the marker that records that checksum. A tool that declares a
+platform installs only on that platform. `--tool` selects tools and skips the host checks.
 """
 
 import argparse
 import hashlib
 import io
 import logging
+import platform
 import re
 import shutil
 import subprocess
@@ -29,6 +31,8 @@ VERSION = re.compile(r"\d+(?:\.\d+)*")
 MARKER = ".kn-sha512"
 MAX_ARCHIVE_BYTES = 256 * 1024 * 1024
 TIMEOUT_SECONDS = 120
+# platform.machine() names mapped to the OCI architecture names used in the manifest.
+ARCHITECTURES = {"x86_64": "amd64", "amd64": "amd64", "aarch64": "arm64", "arm64": "arm64"}
 _LOG = logging.getLogger("kn.prerequisites")
 
 type Fetch = Callable[[str], bytes]
@@ -70,6 +74,18 @@ def host_problems(
             version = found.group() if found else "an unknown version"
             problems.append(f"{command} {version} is older than {item['minimum']}; install {hint}")
     return problems
+
+
+def host_platform() -> str:
+    machine = platform.machine().lower()
+    return f"{sys.platform}/{ARCHITECTURES.get(machine, machine)}"
+
+
+def platform_problem(name: str, tool: dict[str, Any], host: str) -> str | None:
+    required = tool.get("platform")
+    if required is None or required == host:
+        return None
+    return f"{name} {tool['version']} is pinned for {required}, not {host}; install it manually"
 
 
 def tool_path(tool: dict[str, Any], data_dir: Path) -> Path:
@@ -130,28 +146,43 @@ def main(argv: Sequence[str] | None = None) -> int:
     parser.add_argument("--root", type=Path, required=True)
     parser.add_argument("--data-dir", type=Path, required=True)
     parser.add_argument("--install", action="store_true", help="install missing pinned tools")
+    parser.add_argument(
+        "--tool", action="append", default=[], help="only this downloaded tool; skip host checks"
+    )
     args = parser.parse_args(argv)
     manifest = load_manifest(args.root)
-    host = host_problems(manifest["host_prerequisites"])
-    problems = list(host)
-    for name, tool in manifest["downloaded_tools"].items():
-        if installed(tool, args.data_dir):
-            continue
-        if not args.install or host:
-            problems.append(f"{name} {tool['version']} is not installed; run make bootstrap")
-            continue
-        try:
-            ensure_tool(tool, args.data_dir)
-            _LOG.info(
-                "Installed %s %s in %s.", name, tool["version"], tool_path(tool, args.data_dir)
-            )
-        except (OSError, ValueError, tarfile.TarError) as error:
-            problems.append(f"{name} {tool['version']}: {error}")
+    tools: dict[str, dict[str, Any]] = manifest["downloaded_tools"]
+    unknown = sorted(set(args.tool) - tools.keys())
+    if unknown:
+        _LOG.error("ERROR: unknown downloaded tool %s", ", ".join(unknown))
+        return 2
+    host = [] if args.tool else host_problems(manifest["host_prerequisites"])
+    selected = {name: tools[name] for name in args.tool} if args.tool else tools
+    problems = [*host, *_tool_problems(selected, args.data_dir, args.install and not host)]
     for problem in problems:
         _LOG.error("ERROR: %s", problem)
     if not problems:
         _LOG.info("Host prerequisites and pinned tools are ready.")
     return 1 if problems else 0
+
+
+def _tool_problems(tools: dict[str, dict[str, Any]], data_dir: Path, install: bool) -> list[str]:
+    problems = []
+    for name, tool in tools.items():
+        if installed(tool, data_dir):
+            continue
+        if (mismatch := platform_problem(name, tool, host_platform())) is not None:
+            problems.append(mismatch)
+            continue
+        if not install:
+            problems.append(f"{name} {tool['version']} is not installed; run make bootstrap")
+            continue
+        try:
+            ensure_tool(tool, data_dir)
+            _LOG.info("Installed %s %s in %s.", name, tool["version"], tool_path(tool, data_dir))
+        except (OSError, ValueError, tarfile.TarError) as error:
+            problems.append(f"{name} {tool['version']}: {error}")
+    return problems
 
 
 if __name__ == "__main__":

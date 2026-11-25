@@ -44,18 +44,23 @@ def tool(data: bytes) -> dict[str, Any]:
     }
 
 
-def test_the_manifest_declares_the_prerequisites_and_a_pinned_https_jena() -> None:
+def test_the_manifest_declares_the_prerequisites_and_pinned_https_tools() -> None:
     manifest = load_manifest(ROOT)
     assert [item["command"] for item in manifest["host_prerequisites"]] == [
         "git",
         "make",
         "uv",
         "docker",
-        "java",
     ]
-    jena = manifest["downloaded_tools"]["apache_jena"]
+    tools = manifest["downloaded_tools"]
+    jena, runtime = tools["apache_jena"], tools["temurin_jre"]
     assert jena["archive"].startswith("https://archive.apache.org/")
     assert len(jena["sha512"]) == 128 and jena["install_dir"].endswith(jena["version"])
+    assert jena["requires"] == "temurin_jre"
+    assert runtime["archive"].startswith("https://github.com/adoptium/temurin21-binaries/")
+    assert len(runtime["sha512"]) == 128 and runtime["version"].startswith("21.")
+    assert runtime["install_dir"] == f"tools/jdk-{runtime['version']}-jre"
+    assert (runtime["executable"], runtime["platform"]) == ("bin/java", "linux/amd64")
 
 
 @pytest.mark.parametrize(
@@ -127,4 +132,34 @@ def test_main_reports_host_problems_and_missing_tools(
     messages = [record.getMessage() for record in caplog.records]
     assert "ERROR: java is missing; install x" in messages
     assert any("apache_jena 6.3.0 is not installed" in message for message in messages)
+    assert not (tmp_path / "tools").exists()
+
+
+def test_selected_tools_install_without_host_checks(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    def host(items: object) -> list[str]:
+        raise AssertionError("selected tools skip the host prerequisites")
+
+    names: list[str] = []
+    monkeypatch.setattr(prerequisites, "host_problems", host)
+    monkeypatch.setattr(prerequisites, "host_platform", lambda: "linux/amd64")
+    monkeypatch.setattr(
+        prerequisites, "ensure_tool", lambda tool, data_dir: names.append(tool["executable"])
+    )
+    arguments = ["--root", str(ROOT), "--data-dir", str(tmp_path), "--install"]
+    selected = [*arguments, "--tool", "temurin_jre", "--tool", "apache_jena"]
+    assert prerequisites.main(selected) == 0
+    assert names == ["bin/java", "bin/riot"]
+    assert prerequisites.main([*arguments, "--tool", "unknown"]) == 2
+
+
+def test_a_tool_pinned_for_another_platform_installs_nothing(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch, caplog: pytest.LogCaptureFixture
+) -> None:
+    monkeypatch.setattr(prerequisites, "host_platform", lambda: "linux/arm64")
+    monkeypatch.setattr(prerequisites, "_fetch", lambda url: pytest.fail("no download"))
+    arguments = ["--root", str(ROOT), "--data-dir", str(tmp_path), "--install"]
+    assert prerequisites.main([*arguments, "--tool", "temurin_jre"]) == 1
+    assert "pinned for linux/amd64, not linux/arm64" in caplog.text
     assert not (tmp_path / "tools").exists()

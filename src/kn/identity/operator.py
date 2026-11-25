@@ -12,6 +12,7 @@ from kn.i18n import Translator
 from kn.identity.journal import Journal
 from kn.identity.lifecycle import submit
 from kn.identity.lifecycle_reviews import PURPOSE, REVIEW_REF, Change, ReviewDetails
+from kn.identity.state import PENDING_MATCH
 from kn.review.journal import Journal as ReviewJournal
 from kn.review.protocol import Reviewer
 
@@ -28,6 +29,8 @@ def apply_change(
 ) -> dict[str, object]:
     snapshot = journal.state()
     snapshot.resolve(change.kn_id)
+    if snapshot.pending_match() is not None:
+        raise ValueError(PENDING_MATCH)
     head = snapshot.events[-1].event_id
     reviewer = local_reviewer(translator, journal, change, details, head)
     engine = engine_from_env()

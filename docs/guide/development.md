@@ -7,8 +7,7 @@ under [current implementation](../impl/current.md).
 ## Setup
 
 The development host needs the commands that `deploy/versions.yaml` lists under
-`host_prerequisites`: Git, Make, uv, Docker Engine with the Compose v2 plugin, and a Java 21 or
-newer runtime. On Ubuntu, Java is `openjdk-21-jre-headless`. Then run:
+`host_prerequisites`: Git, Make, uv, and Docker Engine with the Compose v2 plugin. Then run:
 
 ```bash
 make bootstrap
@@ -19,14 +18,24 @@ make run
 `make bootstrap` (alias `make venv`) syncs `.venv` from `uv.lock` with the development extra,
 then checks every prerequisite and fails with one message per missing command or too-old version
 and its install hint; it never installs system packages. It also installs each archive listed under
-`downloaded_tools`, today Apache Jena 6.3.0, into `DATA_DIR/tools/`, only when the download matches
-the pinned SHA-512. A marker file records that checksum, and a directory without it is never
-reused. `make doctor` repeats the checks without installing anything. GitHub Actions installs with
-`uv sync` and runs only the unit gate, so it needs neither Docker nor Java.
+`downloaded_tools` into `DATA_DIR/tools/`, only when the download matches the pinned SHA-512.
+Today these are the Eclipse Temurin 21 JRE and Apache Jena 6.3.0, which
+`make skos-reference-check` runs. A marker file records that checksum, and a directory without it
+is never reused. `make doctor` repeats the checks without installing anything. GitHub Actions
+installs with `uv sync` and runs only the unit gate, so it needs neither Docker nor Java.
+
+`make skos-reference-tools` installs only the JRE and Jena, without the host checks, after
+`make bootstrap` has created `.venv`. A rerun with both installed downloads nothing. The JRE
+archive is pinned for `linux/amd64`. On another platform the installer reports the mismatch and
+installs nothing. The reference check always runs RIOT on the pinned JRE, whatever Java the host
+has.
 
 To move Jena to a new release, verify the new archive against the release manager's key in
-`https://downloads.apache.org/jena/KEYS` and its `.sha512` file, then change `version`, `archive`,
-`sha512`, `install_dir` and `pinned` together and run `make bootstrap`.
+`https://downloads.apache.org/jena/KEYS` and its `.sha512` file. To move the JRE, take the
+release from the Adoptium API (`https://api.adoptium.net/v3/assets/latest/21/hotspot`). Verify
+its `.sha256.txt` file and its `.sig` signature against the Adoptium GPG key
+`3B04D753C9050D9A5D343F39843C48A565F8F04B`. Then change `version`, `archive`, `sha512`,
+`install_dir` and `pinned` together and run `make skos-reference-tools`.
 
 The lockfile is committed. After changing dependencies in `pyproject.toml`, run `make lock` and
 include the resulting `uv.lock` change.
@@ -41,8 +50,10 @@ CLI literals. See the [localization verification](../impl/current/localization.m
 GitHub Actions runs only lightweight unit tests: no test there needs a service endpoint, large
 memory, or a long run time. Tests that do carry the `integration` or `heavy` marker and run only on
 the development host, through `make test-integration` or `make ci-local`, which runs `make ci` and
-then every local-only test against the database from `make db-up`. A plan gate that names CI for
-such a test is met by `make ci-local`. See
+then every local-only test against the database from `make db-up`. Run `make db-up` first. If the
+configured database has no password file or does not answer, the run stops at the first
+integration test with one message that names the fix. A plan gate that names CI for such a test
+is met by `make ci-local`. See
 [where tests run](../impl/current/runtime-platform.md#where-tests-run).
 
 `make fixture-check` scans fixture directories under `tests/` for credentials and personal data.

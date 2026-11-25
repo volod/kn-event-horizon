@@ -20,7 +20,7 @@ from kn.identity.lifecycle_reviews import (
     target,
 )
 from kn.identity.model import Merge, Mint, Reclassify, Restore, Retire, Split
-from kn.identity.state import replay
+from kn.identity.state import PENDING_MATCH, replay
 from kn.review import store as review_store
 from kn.review.journal import Journal as ReviewJournal
 from kn.review.model import Decision, Request, Target
@@ -118,6 +118,9 @@ def _write(
     check_binding(value, decision)
     if prior is not None:
         return prior
+    if locked.state.pending_match() is not None:
+        # Refuse before the decision is written; the matcher retry finishes its batch first.
+        raise ValueError(PENDING_MATCH)
 
     replay((*locked.events, value))
     _require_acceptance(project((*history, decision), reviewed_target).heads, decision)

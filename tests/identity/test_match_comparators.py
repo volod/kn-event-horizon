@@ -15,6 +15,16 @@ from kn.identity.matching.normalizers import normalize
         ("identifier-v1", "  00042 ", "00042"),
         ("identifier-v1", " a:B/7 ", "a:B/7"),
         ("legal-name-v1", " Fixture-\u00dcber GmbH ", "fixture \u00fcber"),
+        (
+            "legal-name-v1",
+            "\u0422\u041e\u0412 \u00ab\u0424\u0406\u041a\u0421\u0422\u0423\u0420\u0410\u00bb",
+            "\u0442\u043e\u0432 \u0444\u0456\u043a\u0441\u0442\u0443\u0440\u0430",
+        ),
+        (
+            "registrable-domain-v1",
+            "https://\u043f\u0440\u0438\u043a\u043b\u0430\u0434.\u0443\u043a\u0440/x",
+            "xn--80aikifvh.xn--j1amh",
+        ),
         ("registrable-domain-v1", "https://a.B.example.co.uk./parts", "example.co.uk"),
         ("registrable-domain-v1", "x.alice.github.io", "alice.github.io"),
         ("registrable-domain-v1", "stra\u00dfe.de", "xn--strae-oqa.de"),

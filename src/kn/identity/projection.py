@@ -143,8 +143,8 @@ def _holdings(state: State, result: Rows) -> None:
 
 
 def _decisions(state: State, result: Rows) -> None:
+    references = {event.event_id: event.decision_ref for event in state.events}
     for key, match in state.matches.items():
-        decision = next(event for event in state.events if event.event_id == key)
         result["matches"].append(
             {
                 "match_id": key,
@@ -156,7 +156,7 @@ def _decisions(state: State, result: Rows) -> None:
                 ),
                 "decision": match.decision,
                 "selected": match.selected,
-                "decision_ref": decision.decision_ref,
+                "decision_ref": references[key],
             }
         )
     for key, change in state.changes.items():

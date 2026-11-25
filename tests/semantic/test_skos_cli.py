@@ -5,7 +5,7 @@ import logging
 from pathlib import Path
 
 import pytest
-from rdflib import Graph
+from rdflib import Graph, URIRef
 from rdflib.namespace import SKOS
 
 from kn import cli
@@ -73,6 +73,66 @@ def test_skos_cli_unknown_scheme_and_unwritable_output(
     (tmp_path / "skos").write_text("blocked", encoding="ascii")
     assert cli.main([*arguments, "--scheme", SCHEME]) == 1
     assert json.loads(caplog.records[-1].message) == {"error": {"code": "E_INPUT"}}
+
+
+def test_skos_cli_uses_configured_namespace(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    scheme = "microelectronics.oecd_2024.scheme"
+    monkeypatch.setenv("KN_VOCABULARY_DOMAIN", "Vocabulary.Example.Test.")
+    assert (
+        cli.main(
+            [
+                "vocabulary",
+                "export",
+                "--scheme",
+                scheme,
+                "--format",
+                "skos",
+                "--data-dir",
+                str(tmp_path),
+            ]
+        )
+        == 0
+    )
+    path = next(tmp_path.glob("skos/*/vocabulary.ttl"))
+    graph = Graph().parse(path, format="turtle")
+    base = "urn:publicid:%2B:IDN+vocabulary.example.test:NONSGML+KN+Event+Horizon+Vocabulary:EN"
+    assert len(list(graph.subjects(SKOS.inScheme, URIRef(f"{base}#term/{scheme}")))) == 29
+    project_iris = {
+        node
+        for triple in graph
+        for node in triple
+        if isinstance(node, URIRef) and node.startswith("urn:publicid:")
+    }
+    assert all(node.startswith(f"{base}#") for node in project_iris)
+    assert URIRef(f"{base}#semantic/analystCrosswalk") in project_iris
+    assert URIRef(f"{base}#label-selection/{scheme}:uk") in project_iris
+
+
+@pytest.mark.parametrize("domain", ["", "https://example.test", "127.0.0.1", "x..example.test"])
+def test_skos_cli_rejects_invalid_namespace_domain(
+    domain: str, tmp_path: Path, monkeypatch: pytest.MonkeyPatch, caplog: pytest.LogCaptureFixture
+) -> None:
+    monkeypatch.setenv("KN_VOCABULARY_DOMAIN", domain)
+    assert (
+        cli.main(
+            [
+                "--json",
+                "vocabulary",
+                "export",
+                "--scheme",
+                SCHEME,
+                "--format",
+                "skos",
+                "--data-dir",
+                str(tmp_path),
+            ]
+        )
+        == 1
+    )
+    assert json.loads(caplog.records[-1].message) == {"error": {"code": "E_INPUT"}}
+    assert not list(tmp_path.iterdir())
 
 
 @pytest.mark.parametrize(

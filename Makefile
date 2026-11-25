@@ -29,7 +29,7 @@ export MYPY_CACHE_DIR := $(DATA_ROOT)/cache/mypy
 .DEFAULT_GOAL := help
 
 .PHONY: help bootstrap venv lock run doctor format format-check lint typecheck test coverage \
-	test-integration ci-local skos-reference-check \
+	test-integration ci-local skos-reference-tools skos-reference-check \
 	complexity-gate shell-lint-gate fixture-check lint-md lint-doc-links lint-spec-plan plan-status \
 	ci-checks ci ci-github build quality code-quality quality-report \
 	db-up db-down db-reset db-verify
@@ -132,9 +132,15 @@ ci-local: ci ## Run make ci, every local-only test (make db-up first) and the Je
 	@$(LOCAL_PYTEST) -m "$(LOCAL_TESTS)"
 	@$(MAKE) --no-print-directory skos-reference-check
 
+skos-reference-tools: ## Install the pinned Java 21 runtime and Apache Jena for skos-reference-check
+	@test -x "$(PY)" || { echo "ERROR: run 'make bootstrap' first"; exit 1; }
+	@"$(PY)" -m kn.quality.prerequisites --root "$(PROJECT_ROOT)" --data-dir "$(DATA_ROOT)" \
+		--install --tool temurin_jre --tool apache_jena
+
 skos-reference-check: ## Validate every SKOS export with the pinned Apache Jena RIOT (local only)
 	@test -x "$(PY)" || { echo "ERROR: run 'make bootstrap' first"; exit 1; }
-	@"$(PY)" -m kn.quality.skos_reference --root "$(PROJECT_ROOT)" --data-dir "$(DATA_ROOT)"
+	@source "$(PROJECT_ROOT)/scripts/shared/common.sh" && kn_load_env && \
+		"$(PY)" -m kn.quality.skos_reference --root "$(PROJECT_ROOT)" --data-dir "$$DATA_DIR"
 
 build: ## Build source and wheel distributions
 	@source "$(PROJECT_ROOT)/scripts/shared/common.sh"; kn_load_env; uv build

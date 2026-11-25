@@ -21,6 +21,12 @@ Scheme IDs include the `.scheme` suffix. For an internal vocabulary, use for exa
 The available schemes and publication boundaries are listed in the
 [verification reference](verification.md#decisions-and-boundaries).
 
+Set `KN_VOCABULARY_DOMAIN` in `.env` or the process environment to use another domain you
+control. The default is `summa.dev`. Use an ASCII DNS domain name, such as `vocab.example.org`.
+The exporter lowercases the domain and removes a trailing dot. An invalid domain returns
+`E_INPUT` before creating an export. Keep the same domain across publications to preserve the
+public IRIs that consumers store.
+
 Each invocation writes `$DATA_DIR/skos/<run-id>/vocabulary.ttl`. A unique run directory keeps earlier
 exports intact. `--data-dir` overrides the CLI's `DATA_DIR` environment default, otherwise `.data`.
 The shared environment resolves relative `DATA_DIR` from the project root; an explicitly supplied
@@ -40,11 +46,21 @@ unwritable destination returns 1 with `E_INPUT`. Invalid semantic content retain
 `src/kn/semantic/skos.py` provides `skos_graph(snapshot, scheme_id, references=...)` for an explicitly
 validated complete snapshot and `export_scheme(scheme_id, data_dir)` for packaged reviewed content.
 Callers supply the owning external-reference registry when a snapshot contains evidence or entity
-references. Both functions validate the full semantic model before export.
+references. Both functions validate the full semantic model before export. In-memory callers may
+pass `VocabularyNamespace.for_domain(domain)` from `kn.semantic.skos_namespace` as `namespace` to
+`skos_graph` and `term_uri`.
 
-Term URIs are `urn:kn:term:<qualified-id>`, independent of run IDs, ordering, publication URLs, and
-working directory. The extension prefix `kn:` is `urn:kn:semantic:`. It records KN metadata without
-assigning publisher identities to local codes.
+The vocabulary base IRI uses the IANA-registered `publicid` URN namespace. With the default
+configuration, `summa.dev` supplies the domain in the [RFC 3151 owner identifier](https://www.rfc-editor.org/rfc/rfc3151.html#section-2).
+
+```text
+urn:publicid:%2B:IDN+summa.dev:NONSGML+KN+Event+Horizon+Vocabulary:EN
+```
+
+Term IRIs append `#term/<qualified-id>` to this base. The qualified ID is also exported verbatim as
+`dcterms:identifier`. The extension prefix `kn:` appends `#semantic/` to the same base. RDF
+consumers compare the full IRI, including its fragment. IRIs are independent of run IDs, row
+ordering, publication URLs, working directory, and label language. Export and parsing work offline.
 
 | Semantic content | RDF output |
 | --- | --- |
@@ -77,9 +93,9 @@ does not imply verified status or complete dictionary coverage. Local extensions
 scheme membership. The [text integrity rules](text.md) retain only real language-tagged labels and
 prose definitions. Missing Ukrainian text selects English with explicit language and fallback
 metadata. There are currently no reviewed `uk` labels or concept definitions; proposal columns
-remain in provenance. Label selection resources use
-`urn:kn:label-selection:<qualified-id>:<requested-language>`. Each file contains both display
-choices, independently of interface locale.
+remain in provenance. Label selection resources append
+`#label-selection/<qualified-id>:<requested-language>` to the vocabulary base. Each file contains
+both display choices, independently of interface locale.
 
 The file is ASCII using Turtle `\u` and `\U` escapes for Unicode. Parsed labels retain accents,
 Ukrainian text, quotes, backslashes, newlines, and characters outside the basic multilingual plane.
@@ -89,20 +105,24 @@ this export.
 
 ## Verification
 
-- `tests/semantic/test_skos*.py`: all 16 reviewed schemes parse with RDFLib; preferred labels,
-  hierarchy, definitions, alternatives, notations, lifecycle, mappings and publication metadata
-  survive. Fixtures cover empty schemes, reordered input, malformed models, unknown schemes,
-  Unicode escapes, both locales, JSON errors, output failures, and repeated exports.
+- `tests/semantic/test_skos*.py`: all 16 reviewed schemes parse with RDFLib; qualified IDs, the
+  public namespace, preferred labels, hierarchy, definitions, alternatives, notations, lifecycle,
+  mappings and publication metadata survive. Fixtures cover empty schemes, reordered input,
+  malformed models, unknown schemes, configurable and invalid domains, Unicode escapes,
+  both locales, JSON errors, output failures, and repeated exports.
 - `tests/e2e/test_skos.py`: real subprocesses in both locales produce identical Turtle and retain
   the verified OECD scheme's boundary. `make test-bilingual` includes this path.
 - `tests/semantic/test_skos_independent.py`: Oxigraph (`pyoxigraph`, pinned in the development
   extra) parses every exported scheme in strict mode, and its triples equal RDFLib's. It runs in
   `make ci` and on GitHub without network access.
-- `make skos-reference-check`: Apache Jena RIOT 6.3.0, installed by `make bootstrap`, validates a
-  fresh export of every scheme with `riot --validate`; an error or a warning fails the check. The
-  exports and `summary.json` are kept under `$DATA_DIR/skos-reference/<run-id>/`. `make ci-local`
-  runs it.
+- `make skos-reference-check`: Apache Jena RIOT 6.3.0 on the pinned Eclipse Temurin 21 JRE
+  validates a fresh export of every scheme with `riot --validate`; an error or a warning fails the
+  check. `make skos-reference-tools` or `make bootstrap` installs both under `$DATA_DIR/tools/`, so
+  the host needs no system Java. The exports and `summary.json`, which names both tool versions,
+  are kept under `$DATA_DIR/skos-reference/<run-id>/`. `make ci-local` runs it.
+  [Record 0043](../../records/0043-adhoc-skos-reference-tools.md) explains the pinned runtime.
 - `make ci`: formatting, lint, typing, complexity, contracts, documentation, catalogs, and unit tests.
 
 [Task record 0024](../../records/0024-ontology-taxonomy-skos-export.md) records the retained command
-runs and acceptance evidence.
+runs for the original export. [Task record 0041](../../records/0041-ontology-taxonomy-decide-vocabulary-uri-namespace.md)
+records the URI namespace decision and verification.

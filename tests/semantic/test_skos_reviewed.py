@@ -3,13 +3,30 @@
 from pathlib import Path
 
 import pytest
-from rdflib import Graph, Literal
-from rdflib.namespace import RDF, SKOS
+from rdflib import Graph, Literal, URIRef
+from rdflib.namespace import DCTERMS, RDF, SKOS
 
 from kn.semantic.seeds import reviewed_snapshot
 from kn.semantic.skos import KN, export_scheme, term_uri
 
 SCHEMES = sorted(row["id"] for row in reviewed_snapshot()["concept_schemes"])
+VOCABULARY_IRI = "urn:publicid:%2B:IDN+summa.dev:NONSGML+KN+Event+Horizon+Vocabulary:EN"
+
+
+def assert_public_namespace(graph: Graph, term_ids: set[str]) -> None:
+    term_prefix = f"{VOCABULARY_IRI}#term/"
+    for subject, identifier in graph.subject_objects(DCTERMS.identifier):
+        assert str(identifier) in term_ids
+        assert str(subject) == term_prefix + str(identifier)
+    label_selection = URIRef(f"{VOCABULARY_IRI}#semantic/labelSelection")
+    for subject in graph.subjects(SKOS.prefLabel, unique=True):
+        identifier = graph.value(subject, DCTERMS.identifier)
+        assert set(graph.objects(subject, label_selection)) == {
+            URIRef(f"{VOCABULARY_IRI}#label-selection/{identifier}:{locale}")
+            for locale in ("en", "uk")
+        }
+    iris = {node for triple in graph for node in triple if isinstance(node, URIRef)}
+    assert not any(node.startswith("urn:kn:") for node in iris)
 
 
 @pytest.mark.parametrize("scheme_id", SCHEMES)
@@ -20,6 +37,7 @@ def test_reviewed_scheme_export(scheme_id: str, tmp_path: Path) -> None:
     assert path.parent.parent == tmp_path / "skos"
     assert path.read_bytes().isascii()
     graph = Graph().parse(path, format="turtle")
+    assert_public_namespace(graph, {str(row["id"]) for row in snapshot["terms"]})
     selected = {row["id"] for row in snapshot["concepts"] if row["scheme_id"] == scheme_id}
     assert result["concepts"] == len(selected)
     assert set(graph.subjects(SKOS.inScheme, term_uri(scheme_id))) == {

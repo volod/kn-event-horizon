@@ -9,12 +9,12 @@ from kn.identity import store
 from kn.identity.events import Event, event
 from kn.identity.journal import Journal, LockedJournal, new_id
 from kn.identity.matching.observe import Observation
-from kn.identity.matching.registry import known_identifiers, source_links
+from kn.identity.matching.registry import identifiers, source_links
 from kn.identity.matching.resolve import resolve
 from kn.identity.matching.scoring import prepare
 from kn.identity.model import MATCH_LINK_METHODS, Attribute, Identifier, Link, Match, Mint, Payload
 from kn.identity.profiles import Profile
-from kn.identity.state import State, replay
+from kn.identity.state import PENDING_MATCH, State, replay
 
 
 @dataclass(frozen=True)
@@ -61,14 +61,11 @@ def record(
     evidence: str,
 ) -> Receipt:
     """Record a decision and any binding under the existing identity writer lock."""
-    request = incoming.fingerprint(profile.digest)
-    for entry in reversed(locked.events):
-        if not isinstance(saved := entry.payload, Match) or saved.trace is None:
-            continue
-        if saved.trace.request_digest == request:
-            return _resume(locked, entry, saved, profile, incoming)
-        if len(locked.events) < entry.sequence + saved.trace.followup_count:
-            raise ValueError("retry the pending identity match before recording another")
+    entry = locked.state.requests.get(incoming.fingerprint(profile.digest))
+    if entry is not None and isinstance(saved := entry.payload, Match):
+        return _resume(locked, entry, saved, profile, incoming)
+    if locked.state.pending_match() is not None:
+        raise ValueError(PENDING_MATCH)
     match = resolve(locked.state, profile, incoming)
     trace = match.trace
     assert trace is not None
@@ -162,11 +159,10 @@ def _plan(
 def _observed(
     state: State, profile: Profile, incoming: Observation, target: str
 ) -> Iterator[Identifier | Attribute]:
-    known = known_identifiers(state)
     for key in sorted(incoming.authoritative, key=lambda item: item.parts):
         registered = any(
             item.valid_to is None or incoming.observed_at < item.valid_to
-            for _, item in known.get((key.namespace, key.value), ())
+            for _, item in identifiers(state, key)
         )
         if not registered:
             yield Identifier(
@@ -188,4 +184,5 @@ def _observed(
             normalized=value.normalized,
             normalizer=fields[field_id],
             profile_digest=profile.digest,
+            record=incoming.record,
         )
