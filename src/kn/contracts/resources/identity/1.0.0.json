@@ -130,7 +130,8 @@
                 "attribute_recorded",
                 "version_recorded",
                 "match_recorded",
-                "changes_recorded"
+                "changes_recorded",
+                "record_seen"
               ]
             }
           ]

@@ -210,17 +210,46 @@ class Match(Frozen):
     trace: MatchTrace | None = Field(default=None, exclude_if=lambda value: value is None)
 
 
+Change = Literal["added", "changed", "unchanged", "emptied", "not_stated"]
+
+
 class FieldChange(Frozen):
+    """One field of a record version against the record's previous statement of that field."""
+
     field_id: Text
-    change: Literal["added", "changed", "unchanged", "emptied", "not_stated"]
+    change: Change
     previous_hash: Digest | None = None
     current_hash: Digest | None = None
+
+    @model_validator(mode="after")
+    def hashes(self) -> Self:
+        previous, current = self.previous_hash is not None, self.current_hash is not None
+        expected = {
+            "added": not previous and current,
+            "changed": previous and current and self.previous_hash != self.current_hash,
+            "emptied": previous and current and self.previous_hash != self.current_hash,
+            "unchanged": current and self.previous_hash == self.current_hash,
+            "not_stated": not current,
+        }
+        if not expected[self.change]:
+            raise ValueError(f"field change {self.change} has inconsistent hashes")
+        return self
 
 
 class ChangeSet(Frozen):
     kind: Literal["changes_recorded"] = "changes_recorded"
     version_id: Digest
     changes: tuple[FieldChange, ...]
+
+
+class Seen(Frozen):
+    """A later fetch of an already recorded version with identical content."""
+
+    kind: Literal["record_seen"] = "record_seen"
+    version_id: Digest
+    fetch_id: Text
+    archive_record_id: Text
+    observed_at: Instant
 
 
 Payload = Annotated[
@@ -236,6 +265,7 @@ Payload = Annotated[
     | Attribute
     | Version
     | Match
-    | ChangeSet,
+    | ChangeSet
+    | Seen,
     Field(discriminator="kind"),
 ]

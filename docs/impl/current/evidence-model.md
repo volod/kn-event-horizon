@@ -3,8 +3,9 @@
 The evidence contracts and the shared human verification protocol are implemented. Claims,
 evidence, confirmations, aliases, translations, relation assertions, canonical fact versions,
 selection outcomes, review items and review decisions have registered storage, deterministic keys,
-database constraints and as-of views. Partial-update tracking, canonical selection, the review
-queue and dataset-wide verification projections remain planned and write into these shapes.
+database constraints and as-of views. [Partial-update tracking](object-identity.md#partial-update-tracking)
+writes claims and confirmations into these shapes. Canonical selection, the review queue and
+dataset-wide verification projections remain planned.
 Existing source verification labels retain their meanings and grant no human timestamp.
 
 ## Evidence contracts
@@ -229,8 +230,7 @@ Automatic all-target rebuild integration and pending/orphan/stale reports remain
   changed content under a stored key.
 - Condition and qualifier objects are canonical JSON; approved condition field IDs arrive with
   domain contracts.
-- Partial-update tracking, canonical selection, review queue journals and the lineage command are
-  open plan tasks.
+- Canonical selection, review queue journals and the lineage command are open plan tasks.
 
 ## Verification
 

@@ -44,7 +44,10 @@ class LockedJournal:
         return True
 
     def append_batch(self, values: tuple[Event, ...]) -> None:
-        """Append one match decision or the rest of its follow-ups; the matcher checks order."""
+        """Append a validated batch: a match decision with its follow-ups, or a tracked version.
+
+        Callers check for a pending match first and own the order of their events.
+        """
         if values:
             self._extend(
                 tuple(Event.model_validate_json(item.model_dump_json()) for item in values)

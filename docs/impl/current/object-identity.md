@@ -1,8 +1,8 @@
 # Object Identity
 
-The identity storage contract, durable journal, deterministic replay, reviewed lifecycle commands
-and profile-driven matcher are available. Change detection, claim lineage and real-record
-calibration remain in the [plan](../plan.md).
+The identity storage contract, durable journal, deterministic replay, reviewed lifecycle commands,
+profile-driven matcher and field-level partial-update tracking are available. Claim lineage and
+real-record calibration remain in the [plan](../plan.md).
 
 ## Operator lifecycle commands
 
@@ -63,6 +63,9 @@ Pydantic, wire and engine artifacts under `generated/contracts/kn.core.identity/
 | `change_sets` | Record-version reference and per-field added/changed/unchanged/emptied/not-stated classifications and hashes |
 | `lifecycle_events` | Ordered immutable event projection with actor, reason, evidence, time, decision reference and complete canonical payload |
 | `redirects` | Flattened terminal successors; a split can have several |
+
+A `record_seen` event has no table of its own. Its `lifecycle_events` row keeps the sighting, and
+`source_records.last_seen` is the latest observed time of the record's versions and sightings.
 
 The [wire contracts](../../../contracts/core/identity/README.md) bind immutable Pydantic payloads,
 a closed versioned event envelope and match profiles. New match events carry an optional trace
@@ -133,6 +136,61 @@ Exact shortcuts record the matched identifier or source key, with a weight and s
 a probability of one. The pure `matching.resolve.resolve` API computes a decision over a supplied
 state without writing.
 
+## Partial-update tracking
+
+Use `kn.identity.tracking.writer.track(connection, journal, delivery, actor=..., clock=...)` from a
+trusted source adapter in a caller-owned PostgreSQL READ COMMITTED transaction, after the record
+or its parent is linked. A `Delivery` names the `SourceKey`, an optional parent record of the same
+source, the source version and updated time, the `ordering`, the fetch ID, archive record ID,
+fetch time, origin URI, locator kind, rights, code and contract digests, assertion type, evidence
+class and one `Statement` per stated field. A statement holds a typed claim value, or null when the
+source stated the field empty, with the original value and unit, conditions and its locator. A
+field the delivery omits is not stated. Blank text and `source_empty` are refused as values,
+because tracking owns emptiness.
+
+`kn.identity.tracking.mapping` reads a reviewed crawler mapping. `record_key` keeps one key field's
+exact text, or joins several as a canonical JSON array, and reports `record_key_missing`.
+`version` and `updated_at` read the version field and the `updated_at` time field; a naive time
+needs the field's declared zone and otherwise reports `time_invalid`. `stated` returns the mapped
+fields a record states, with null, blank, empty list and empty object values marked empty.
+`ordering` chooses `version` for a version field that is not the updated time, `updated` for an
+updated time field, and `fetch` otherwise.
+
+Versions of one record order by the numeric source version or the source updated time, then fetch
+time, then version text. A source without a version gets one version per fetch. Each field hash
+covers the typed value, original value, original unit and conditions; an empty statement hashes
+alike whatever its original text. Each field compares with the record's latest claim for it, so a
+partial version changes only what it states:
+
+| Class | Condition | Evidence rows |
+| --- | --- | --- |
+| `added` | No earlier claim for the field | New claim |
+| `changed` | A different value, or a value after an emptied claim | New claim superseding the record's previous claim |
+| `unchanged` | The same hash as the previous claim | Confirmation of that claim with the new version, fetch and observed time |
+| `emptied` | Stated empty after a value | New `source_empty` claim superseding the previous one; nothing is cleared |
+| `not_stated` | Omitted, or first stated empty with nothing to clear | None |
+
+The change set lists every field the record has claimed or the delivery states. It is a journal
+event citing its version, which carries the fetch ID, archive record ID and code digest; claims
+cite the version and change set. A delivery whose content equals the current version without a
+new source version, or a repeat of a recorded source version in another fetch, appends a
+`record_seen` event instead of a version. It advances `last_seen` and confirms the current claims.
+A version that orders before the current one is kept as history: it records its hashes and
+advances `last_seen`, but has no change set, claims or confirmations. A record that stops
+appearing keeps its claims, its `last_seen` stops advancing and nothing is deleted.
+
+A record with an active link claims about its owner, following merges and splits; a weak-key
+fragment without one uses its parent record's link. Tracking never runs the matcher, and an
+unlinked record is refused. Claims and confirmations are validated before the journal append. The
+same delivery retried after a rollback reuses its journaled version and change set and completes
+the evidence rows. A rerun writes nothing new and keeps claims the version already made, even after
+a merge. A recorded source version delivered again with different content is refused, as is a
+missing previous claim.
+
+Replay checks that change-set hashes are consistent with their class and equal their version's
+field hashes, and that a sighting cites a known version in a new fetch.
+`kn.identity.tracking.changes.prepare` plans a delivery against a locked journal without writing.
+
 ## Durable journal and minting
 
 `kn.identity.journal.Journal(data_dir)` owns `$DATA_DIR/identity/events-v1.jsonl`. Files and directories
@@ -185,8 +243,9 @@ The pure replay validator in `state.py` and `transitions.py` enforces:
   authoritative and valid at the event instant. The merge carries the new evidence without
   inserting a duplicate identifier interval.
 - Record versions are unique per source key. Older observations remain history without reducing
-  `last_seen`. Change sets cite an existing version once. Scored links cite a stored match with the
-  same record, selected candidate, score, probability and profile version/digest.
+  `last_seen`. Change sets cite an existing version once with consistent field hashes. Sightings
+  cite a known version once per other fetch. Scored links cite a stored match with the same record,
+  selected candidate, score, probability and profile version/digest.
 
 SQL primary/foreign keys, enums, unique anchors/versions and the active-link index supplement these
 checks. Temporal overlap and lifecycle semantics are enforced at the journal/application boundary;
@@ -247,6 +306,12 @@ match, then compares every identity row and review decision across two rebuilds 
 It also refuses a lifecycle mutation while a match batch is incomplete. The `heavy`
 `tests/identity/test_replay_scale.py` check, run by `make ci-local`, fails when replay and row
 projection grow faster than linearly.
+`tests/identity/test_tracking*.py` cover every change class, partial, emptied, omitted and
+first-empty fields, records that stop appearing, identical re-deliveries, late versions, numeric
+and updated ordering, fragments, retries, interrupted versions, reruns after a merge, mapping
+inputs and replay checks. `tests/integration/test_identity_tracking.py` tracks a delivery sequence
+through PostgreSQL after a rolled-back first attempt, checks current claims, confirmations,
+`last_seen` and change-set rows, and compares identity rows after a schema drop and rebuild.
 `make model-baseline` now includes identity history before SATCOM import and compares every
 registered column after two rebuilds. Run `make ci` and `make test-integration` against local PostGIS;
 `make ci-local` also includes the existing local SKOS gate.
@@ -267,11 +332,22 @@ These are accepted or scheduled findings of the
   stays in the name. Names never discriminate, so this affects only review recall. Reopen this
   when an organization calibration report shows missed held-out pairs that differ only by legal
   form.
+- Tracking writes inherit the full-journal rewrite cost above; `identity-incremental-writes` owns
+  it.
+- Claims and confirmations live in the evidence tables, which rebuild drops and does not restore
+  from the identity journal. Tracking the same deliveries again in their original order reproduces
+  the same claims and confirmations from the journaled change sets. Until the raw replay of
+  `rebuild-from-raw` does this, a delivery whose previous claim is missing refuses.
+- A late version stays history even for fields that newer partial versions never stated. Its
+  hashes and raw record remain, and replay in version order would claim them.
+- Ordering by source version requires numeric versions. A source with an opaque version string
+  orders by its updated time or by fetch time.
 - The matcher never merges by itself. A shared authoritative identifier on two records goes to
   review. A trusted adapter or review workflow appends the merge.
 
 Acceptance evidence is retained in
 [record 0033](../records/0033-object-identity-identity-registry-contracts.md),
 [record 0039](../records/0039-object-identity-object-lifecycle-operations.md),
-[record 0040](../records/0040-object-identity-identity-match-engine.md) and
-[record 0042](../records/0042-object-identity-identity-resolution-implementation-audit.md).
+[record 0040](../records/0040-object-identity-identity-match-engine.md),
+[record 0042](../records/0042-object-identity-identity-resolution-implementation-audit.md) and
+[record 0045](../records/0045-object-identity-partial-update-tracking.md).

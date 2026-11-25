@@ -21,7 +21,7 @@ The project uses ODCS storage contract version `1.0.0` and a single editable Pyt
 SQLAlchemy/Alembic baseline during development. Rebuild and backfill replace development revision
 chains. First release freezes this baseline and enables subsequent versioned migration history.
 The external interchange contract and counterpart adapters remain
-independently versioned. Object identity, partial-update tracking, interchange, and InvenTree
+independently versioned. Object identity, interchange, and InvenTree
 compatibility are core work and come before the domain pipelines.
 Source tasks follow the [onboarding workflow](../guide/source-onboarding.md) and the
 [TDD growth rule](../design/spec.md#ingestion-engine). Each source adds failing fixtures first, then
@@ -31,39 +31,6 @@ archive.
 ## Agent Implementation Tasks
 
 ### Claims, change tracking and lineage -- `object-identity`
-
-#### partial-update-tracking
-
-Sources send partial records and declare nothing about completeness. Every change must still be
-detected per field and traced back to its record version.
-
-- Serves: `object-identity` -- [Object identity](../design/spec.md#object-identity)
-- Agent status: CLEAR
-- Dependencies: The [registry replay and match writer](current/object-identity.md#replay-and-integrity)
-  and the [claim, confirmation and idempotent writer contracts](current/evidence-model.md#claims-and-provenance).
-- User-visible outcome: For each mapped record, the engine computes a field-level change set
-  (added, changed, unchanged, emptied, or not stated) against the record's previous version. Only
-  added, changed, and emptied fields create claims. Unchanged fields record confirmations, and
-  omitted fields have no effect. Each record keeps a `last_seen` time, and absence never clears or
-  deletes anything.
-- Scope boundary: Record keys and version fields from the crawler mapping, version ordering by
-  source version or `updated` time and then fetch time, per-field hashes, confirmations, late
-  older versions kept as history, weak-key fragments resolved through existing or parent links,
-  and change-set lineage (record version, fetch ID, archive record ID, code digest). How a claim
-  changes the object belongs to `canonical-fact-selection`. Engine wiring comes in
-  `mapping-and-quality-rules`.
-  Consume registered source/version/change-set and confirmation contracts; no parallel
-  tracker-owned definition of these records is introduced.
-- Data and artifact paths: `src/kn/identity/tracking/`, `contracts/core/identity/`,
-  `contracts/core/evidence/`, `tests/identity/`.
-- Execution path: Write one fixture per row of the specification's change table, plus a record
-  that stops appearing and an out-of-order version, before the tracker.
-- Acceptance gates: A price-only record leaves parameter claims untouched. An emptied field creates
-  a `source_empty` claim and no clearing. An omitted field changes nothing. A record that stops
-  appearing keeps its claims, its `last_seen` time stops advancing, and nothing is deleted. An
-  identical re-delivery adds a confirmation and no claim. An older version that arrives late does
-  not become current.
-- Documentation target: `current/object-identity.md` listed in the [areas index](current.md#areas).
 
 #### canonical-fact-selection
 
@@ -112,8 +79,8 @@ Operators must be able to trace any object or field back to every record and dec
 
 - Serves: `object-identity` -- [Object identity](../design/spec.md#object-identity)
 - Agent status: CLEAR
-- Requires: `partial-update-tracking`, `canonical-fact-selection`
-- Dependencies: none.
+- Requires: `canonical-fact-selection`
+- Dependencies: The [record versions, change sets and claim lineage](current/object-identity.md#partial-update-tracking).
 - User-visible outcome: `kn lineage <kn-id|qualified-identifier> [--field <field-id>]` shows, in
   both locales and as JSON, the identity history, identifiers, links with match records, record
   versions and change sets, claims, and the selected canonical fact. Outbound exchange receipts
@@ -160,8 +127,7 @@ lifecycle, or matching is the most expensive kind to fix later.
 
 - Serves: `object-identity` -- [Object identity](../design/spec.md#object-identity)
 - Agent status: CLEAR
-- Requires: `partial-update-tracking`, `canonical-fact-selection`, `object-lineage-lookup`,
-  `identity-incremental-writes`
+- Requires: `canonical-fact-selection`, `object-lineage-lookup`, `identity-incremental-writes`
 - Dependencies: The accepted task records of the group and the [implementation
   audit](../guide/planning-workflow.md#implementation-audits) checks. `identity-match-calibration`
   stays open and is reviewed for the readiness of its inputs. The [identity resolution
@@ -485,7 +451,7 @@ Most source-specific behavior must live in configuration, not code.
 - Serves: `ingestion-engine` -- [Ingestion engine](../design/spec.md#ingestion-engine)
 - Agent status: CLEAR
 - Requires: `http-fetch-safety`, `object-identity-implementation-audit`
-- Dependencies: none.
+- Dependencies: The [partial-update tracker and its crawler mapping helpers](current/object-identity.md#partial-update-tracking).
 - User-visible outcome: Crawler configurations map native fields to contract field IDs. They also
   map units with logged conversions, native codes to concepts with mapping types, classes and
   relations, identifiers and identity attributes, time semantics, and source record keys with

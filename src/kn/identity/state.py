@@ -12,6 +12,7 @@ from kn.identity.model import (
     Link,
     Match,
     Mint,
+    Seen,
     SourceKey,
     Version,
 )
@@ -56,8 +57,12 @@ class State:
     anchors: dict[RecordKey, str] = field(default_factory=dict)
     record_links: dict[RecordKey, list[str]] = field(default_factory=dict)
     identifier_keys: dict[tuple[str, str], list[str]] = field(default_factory=dict)
-    version_keys: set[tuple[str, str, str]] = field(default_factory=set)
-    changed_versions: set[str] = field(default_factory=set)
+    version_keys: dict[tuple[str, str, str], str] = field(default_factory=dict)
+    record_versions: dict[str, list[str]] = field(default_factory=dict)
+    version_changes: dict[str, str] = field(default_factory=dict)
+    # Journal sequence of each sighting, version and change set, for as-of comparisons.
+    sightings: dict[tuple[str, str], int] = field(default_factory=dict)
+    positions: dict[str, int] = field(default_factory=dict)
     requests: dict[str, Event] = field(default_factory=dict)
     last_traced: Event | None = None
 
@@ -148,20 +153,45 @@ class State:
             self._match(payload, event)
         elif isinstance(payload, ChangeSet):
             self._changes(payload, event)
+        elif isinstance(payload, Seen):
+            self._seen(payload, event)
         else:
             from kn.identity.transitions import transition
 
             transition(self, event)
 
     def _changes(self, payload: ChangeSet, event: Event) -> None:
-        if payload.version_id not in self.versions:
+        version = self.versions.get(payload.version_id)
+        if version is None:
             raise ValueError("change set requires a known source version")
-        if payload.version_id in self.changed_versions:
+        if payload.version_id in self.version_changes:
             raise ValueError("source version already has a change set")
         if len({item.field_id for item in payload.changes}) != len(payload.changes):
             raise ValueError("duplicate field changes")
+        hashes = {item.field_id: item.digest for item in version.field_hashes}
+        if any(
+            item.current_hash is not None and hashes.get(item.field_id) != item.current_hash
+            for item in payload.changes
+        ):
+            raise ValueError("change set hashes must equal its version's field hashes")
         self.changes[event.event_id] = payload
-        self.changed_versions.add(payload.version_id)
+        self.version_changes[payload.version_id] = event.event_id
+        self.positions[event.event_id] = event.sequence
+
+    def _seen(self, payload: Seen, event: Event) -> None:
+        version = self.versions.get(payload.version_id)
+        if version is None:
+            raise ValueError("a sighting requires a known source version")
+        sighting = (payload.version_id, payload.fetch_id)
+        if payload.fetch_id == version.fetch_id or sighting in self.sightings:
+            raise ValueError("source version was already seen in this fetch")
+        self.sightings[sighting] = event.sequence
+        self._saw(version.record, payload.observed_at)
+
+    def _saw(self, record: SourceKey, observed_at: datetime) -> None:
+        """Older observations remain history without reducing `last_seen`."""
+        key = record.record_id
+        self.last_seen[key] = max(observed_at, self.last_seen.get(key, observed_at))
 
     def _link(self, payload: Link, event: Event) -> None:
         self.active(payload.kn_id)
@@ -195,9 +225,10 @@ class State:
             raise ValueError("source record version already exists")
         self.record(payload.record)
         self.versions[event.event_id] = payload
-        self.version_keys.add(version_key)
-        key = payload.record.record_id
-        self.last_seen[key] = max(payload.observed_at, self.last_seen.get(key, payload.observed_at))
+        self.version_keys[version_key] = event.event_id
+        self.record_versions.setdefault(payload.record.record_id, []).append(event.event_id)
+        self.positions[event.event_id] = event.sequence
+        self._saw(payload.record, payload.observed_at)
 
     def _match(self, payload: Match, event: Event) -> None:
         check_match(payload, self.active)

@@ -27,6 +27,12 @@ name their contributing source record, so matching keeps one view of evidence pe
 events without either optional field keep their canonical bytes and hashes. Tests compare both
 schemas with their Python models.
 
+Partial-update tracking appends a version and its change set, or a `record_seen` sighting of an
+already recorded version in a later fetch. Each field change's hashes must agree with its class:
+`added` has only a current hash, `changed` and `emptied` have two different hashes, `unchanged`
+has two equal hashes and `not_stated` has no current hash. Replay also checks current hashes
+against the version's field hashes.
+
 A forced merge can carry a second authoritative identifier observation in its payload. The
 existing matching identifier must belong to the other active participant and be valid at the
 merge time. Reviewed merge payloads preserve the original v1 representation.

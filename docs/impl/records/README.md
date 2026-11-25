@@ -59,5 +59,6 @@ decision. A record can name a plan task by ID because plan headings disappear on
 | 0042 | `identity-resolution-implementation-audit` | [Identity resolution implementation audit](0042-object-identity-identity-resolution-implementation-audit.md) |
 | 0043 | `adhoc` SKOS reference tools | [SKOS reference tools](0043-adhoc-skos-reference-tools.md) |
 | 0044 | `evidence-claim-contracts` | [Evidence claim contracts](0044-evidence-model-evidence-claim-contracts.md) |
+| 0045 | `partial-update-tracking` | [Partial-update tracking](0045-object-identity-partial-update-tracking.md) |
 
-Next unused sequence is `0045`.
+Next unused sequence is `0046`.
