@@ -23,10 +23,15 @@ def active(events: Iterable[Decision]) -> tuple[Decision, ...]:
 
 
 def _snapshot(events: Iterable[Decision], instant: datetime) -> ReviewSnapshot:
+    """Accepted outcomes at the instant; a claim keeps the time of the latest decision about it.
+
+    Events apply in recording order, so the order in which storage returns them never matters.
+    """
     selected: dict[str, datetime] = {}
     rejected: dict[str, datetime] = {}
     decisions: dict[str, datetime] = {}
-    for event in active(event for event in events if event.recorded_at <= instant):
+    heads = active(event for event in events if event.recorded_at <= instant)
+    for event in sorted(heads, key=lambda each: (each.recorded_at, each.decision_id)):
         choice = event.queue
         if choice is None or choice.kind not in FACT_REVIEW_KINDS or choice.selected is None:
             continue

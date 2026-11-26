@@ -21,6 +21,7 @@ PRICE = "microelectronics.offer.unit_price"
 OWNER = "micro:owner"
 MAKER = "micro:maker"
 MAKER_TWO = "micro:maker-two"
+MAKER_THREE = "micro:maker-three"
 DISTRIBUTOR = "micro:distributor"
 AGGREGATOR = "micro:aggregator"
 AGGREGATOR_TWO = "micro:aggregator-two"
@@ -31,6 +32,7 @@ RANKS = RankTable(
         Override(source_id=OWNER, rank="owner_entered"),
         Override(source_id=MAKER, rank="first_party"),
         Override(source_id=MAKER_TWO, rank="first_party"),
+        Override(source_id=MAKER_THREE, rank="first_party"),
         Override(source_id=DISTRIBUTOR, rank="authorized_channel"),
         Override(source_id=DISTRIBUTOR, rank="first_party", field_group="microelectronics.offer"),
         Override(source_id=AGGREGATOR, rank="third_party"),
@@ -57,6 +59,11 @@ def policy(**changes: Any) -> UpdatePolicy:
 
 def kg(number: str) -> NumberValue:
     return NumberValue(number=Decimal(number), normalized_unit="kg", conversion_rule="identity")
+
+
+def tonnes(number: str) -> NumberValue:
+    """A mass the mapping left in another normalized unit, which never agrees with kilograms."""
+    return NumberValue(number=Decimal(number), normalized_unit="t", conversion_rule="identity")
 
 
 def stated(

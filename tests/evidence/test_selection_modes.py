@@ -97,6 +97,53 @@ def test_a_fixed_field_review_settles_the_claims_it_saw() -> None:
     assert [item.candidates for item in reopened.items] == [(newcomer.key,)]
 
 
+def test_equal_first_values_on_a_fixed_field_stay_unresolved() -> None:
+    first = stated(MAKER, name("Acme"), fetched_at=T0 - 3 * DAY)
+    other = stated(MAKER_TWO, name("Acme Corp"), fetched_at=T0 - 3 * DAY)
+    for claims in ([first, other], [other, first]):
+        selection = choose(claims, FIXED)
+        assert selection is not None
+        fact = selection.fact
+        assert fact.claim_key is None and fact.unresolved_reason == "conflict"
+        assert fact.deciding_criterion == "tie" and fact.verification_state == "disputed"
+        (item,) = selection.items
+        assert item.kind == "fixed_value_change"
+        assert set(item.candidates) == {first.key, other.key}
+
+
+def test_a_challenger_accepted_after_the_held_value_holds_the_fixed_field() -> None:
+    held = stated(AGGREGATOR, name("Acme"), fetched_at=T0 - 3 * DAY, at=T0)
+    challenger = stated(MAKER, name("Acme Corp"), fetched_at=T0 - DAY, at=T0 + DAY)
+    context = reviewed(selected={held.key: T0 + DAY / 2, challenger.key: T0 + 2 * DAY})
+    chosen = choose([held, challenger], FIXED, context, at=T0 + 3 * DAY)
+    assert chosen is not None and chosen.fact.claim_key == challenger.key
+    assert chosen.items == () and chosen.fact.verification_state == "verified"
+    assert outcome_of(chosen, held) == ("ignored", "review_decision")
+
+
+def test_an_equal_rank_retraction_never_settles_a_conflict_silently() -> None:
+    value, other = stated(MAKER, "1250"), stated(MAKER_TWO, "1280")
+    retracted = choose([value, other, emptied(value, T0 + DAY)])
+    assert retracted is not None and retracted.fact.unresolved_reason == "conflict"
+    assert {item.kind for item in retracted.items} == {"fact_conflict", "empty_claim"}
+    # The newest revision of a source is retracted: the older revision does not return silently.
+    older = stated(MAKER, "1250", record="rev-a", valid=T0 - 9 * DAY)
+    newest = stated(MAKER, "1300", record="rev-b", valid=T0 - DAY)
+    kept = choose([older, newest, emptied(newest, T0 + DAY)])
+    assert kept is not None and kept.fact.claim_key == newest.key
+    assert [item.kind for item in kept.items] == ["empty_claim"]
+    # A retraction that leaves the value unchanged, or of an outranked revision, stays quiet.
+    agreeing = choose([value, stated(MAKER_TWO, "1250"), emptied(value, T0 + DAY)])
+    assert agreeing is not None and agreeing.items == ()
+    outdated = choose([older, newest, emptied(older, T0 + DAY)])
+    assert outdated is not None and outdated.fact.claim_key == newest.key and outdated.items == ()
+    # A policy that allows clearing lets the retraction take effect: the other value stands.
+    allowed = choose(
+        [value, other, emptied(value, T0 + DAY)], policy(emptyValueHandling="allow_clear")
+    )
+    assert allowed is not None and allowed.fact.claim_key == other.key and allowed.items == ()
+
+
 def test_an_outranking_empty_claim_opens_review_and_does_not_clear() -> None:
     value = stated(MAKER, "1250")
     empty = emptied(value, T0 + DAY)

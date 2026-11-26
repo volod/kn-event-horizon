@@ -407,8 +407,9 @@ commands and measurements. `make ci-local` also includes the local SKOS gate.
 ## Known limitations
 
 These are accepted or scheduled findings of the
-[identity resolution audit](../records/0042-object-identity-identity-resolution-implementation-audit.md#findings)
-and the [object identity audit](../records/0049-object-identity-object-identity-implementation-audit.md#findings).
+[identity resolution audit](../records/0042-object-identity-identity-resolution-implementation-audit.md#findings),
+the [object identity audit](../records/0049-object-identity-object-identity-implementation-audit.md#findings)
+and the [evidence model audit](../records/0053-evidence-model-evidence-model-implementation-audit.md#findings).
 
 - A new `Journal` instance or a write by another instance requires full file validation. The
   first scored request for each field and normalizer builds its blocking index. Broad blocking
@@ -447,6 +448,10 @@ and the [object identity audit](../records/0049-object-identity-object-identity-
 - A weak-key fragment has no link of its own, so a split cannot assign the claims it made before
   the split. Lineage reports them as `claim_successor_missing`, and the fact projection leaves
   them unattributed until `fragment-claims-follow-splits`.
+- A statement carries no event, published or valid time, so a tracked claim has none, and a
+  delivery states each field once. Two revisions kept as separate records of one source therefore
+  conflict under `priority` instead of the newer replacing the older, and a record can claim only
+  one item of an `accumulate` field. `tracked-claim-times-and-sets` adds both.
 
 Acceptance evidence is retained in
 [record 0033](../records/0033-object-identity-identity-registry-contracts.md),

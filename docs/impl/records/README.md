@@ -67,5 +67,6 @@ decision. A record can name a plan task by ID because plan headings disappear on
 | 0050 | CLI golden tests and localization scope | [CLI localization scope](0050-adhoc-cli-localization-scope.md) |
 | 0051 | All-table human verification projections and replay | [Human verification projections](0051-evidence-model-human-verification-projections.md) |
 | 0052 | `review-queue-cli` | [Review queue CLI](0052-evidence-model-review-queue-cli.md) |
+| 0053 | `evidence-model-implementation-audit` | [Evidence model implementation audit](0053-evidence-model-evidence-model-implementation-audit.md) |
 
-Next unused sequence is `0053`.
+Next unused sequence is `0054`.

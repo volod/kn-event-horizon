@@ -8,7 +8,7 @@ from sqlalchemy.engine import Connection
 from kn.contracts.model import Contract
 from kn.contracts.physical import extensions
 from kn.evidence.policy import UpdatePolicy
-from kn.evidence.projection import history, subjects, write
+from kn.evidence.projection import history, subjects, successors, write
 from kn.evidence.ranking import Context, RankTable
 from kn.evidence.read import claims
 from kn.evidence.store import evidence_tables
@@ -41,9 +41,12 @@ def refresh(
     if not policies:
         return
     state = identity.state()
-    grouped, _ = subjects(claims(connection, tables), state.resolve)
+    stored = list(claims(connection, tables))
+    grouped, _ = subjects(stored, state.resolve)
+    superseded = successors(stored)
     reviews = accepted_reviews(applied(connection))
     context = Context(ranks=RankTable.read(), reviews=reviews, resolve=state.resolve)
     for subject, values in grouped.items():
         if subject.field_id in policies:
-            write(connection, history(subject, values, policies[subject.field_id], context), tables)
+            policy = policies[subject.field_id]
+            write(connection, history(subject, values, policy, context, superseded), tables)

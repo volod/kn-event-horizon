@@ -1,15 +1,17 @@
 """Selection plans for one claim set: empty claims, high-impact facts and owner overrides.
 
 An empty claim that outranks the current value keeps its predecessor as a candidate and opens
-review, unless the policy or an accepting review decision allows clearing. A rejected empty claim
-restores its predecessor quietly. A high-impact value without primary evidence or review stays
-unresolved, and an owner-entered value that beats a differing first-party value is flagged.
+review, unless the policy or an accepting review decision allows clearing. Under review handling,
+so does one that retracts a value the current value neither outranks nor agrees with. A rejected
+empty claim restores its predecessor quietly. A high-impact value without primary evidence or
+review stays unresolved, and an owner-entered value that beats a differing first-party value is
+flagged.
 """
 
 from dataclasses import dataclass, field
 from typing import Literal
 
-from kn.evidence.candidates import Candidate, difference, group, outranks, rank
+from kn.evidence.candidates import Candidate, agree, difference, group, outranks, rank
 from kn.evidence.model import Claim
 from kn.evidence.modes import Opened, Plan, accumulate, fixed, ranked
 from kn.evidence.policy import UpdatePolicy
@@ -70,9 +72,10 @@ def _empties(
 ) -> _Empties:
     result = _Empties()
     for empty in (item for item in visible if item.empty):
-        effect, criterion = _effect(empty, leader, policy)
+        retracted = _predecessor(empty, known, policy, context)
+        effect, criterion = _effect(empty, leader, retracted, policy)
         if effect in {"restore", "hold"}:
-            result.restored += _predecessor(empty, known, policy, context)
+            result.restored += retracted
         if effect == "hold":
             result.held.append((empty, criterion))
         elif effect == "lose":
@@ -83,9 +86,15 @@ def _empties(
 
 
 def _effect(
-    empty: Assessed, leader: Assessed | None, policy: UpdatePolicy
+    empty: Assessed, leader: Assessed | None, retracted: list[Assessed], policy: UpdatePolicy
 ) -> tuple[Effect, Criterion]:
-    """A rejected empty claim restores its predecessor; an outranking one clears or holds."""
+    """What an empty claim does to its predecessor: restore, skip, lose, clear or hold it.
+
+    A rejected empty claim restores its predecessor. An eligible one can change the value when it
+    outranks the leader; it then clears or holds. Under review handling it also holds when the
+    value it retracts still competes with the leader, so an equal-rank retraction never settles a
+    conflict. A policy that allows clearing lets such a retraction take effect instead.
+    """
     if empty.exclusion == "rejected":
         return "restore", "review_decision"
     if empty.exclusion is not None:
@@ -94,11 +103,24 @@ def _effect(
     if leader is not None:
         beaten = outranks(empty, leader, policy)
         if beaten is None:
-            return "lose", difference(leader, empty, policy) or "data_time"
+            allowed = policy.empty_value_handling == "allow_clear" and not empty.reviewed
+            if allowed or not _competes(retracted, leader, policy):
+                return "lose", difference(leader, empty, policy) or "data_time"
+            beaten = outranks(retracted[0], leader, policy) or "tie"
     if empty.reviewed:
         return "clear", "review_decision"
     effect: Effect = "clear" if policy.empty_value_handling == "allow_clear" else "hold"
     return effect, beaten or "first_eligible"
+
+
+def _competes(retracted: list[Assessed], leader: Assessed, policy: UpdatePolicy) -> bool:
+    """The retracted value differs from the leader's and the leader does not outrank it."""
+    if not retracted:
+        return False
+    value = retracted[0]
+    if agree(value.value, leader.value, policy.value_tolerance):
+        return False
+    return outranks(leader, value, policy) is None
 
 
 def _leader(candidates: list[Candidate], policy: UpdatePolicy) -> Assessed | None:

@@ -7,6 +7,7 @@ from pathlib import Path
 import pytest
 
 from kn.evidence.model import Claim
+from kn.evidence.ranking import Context
 from kn.evidence.read import claim as read_claim
 from kn.review.journal import Journal
 from kn.review.model import Choice, Request
@@ -14,6 +15,17 @@ from kn.review.protocol import decide
 from kn.review.queue_model import domain_name
 from kn.review.selection import accepted_reviews, dispute_rates
 from tests.evidence.fixtures import one_of_each
+from tests.evidence.selection_fixtures import (
+    AGGREGATOR,
+    MAKER,
+    MAKER_TWO,
+    RANKS,
+    T0,
+    choose,
+    name,
+    policy,
+    stated,
+)
 from tests.review.test_protocol import NOW, reviewer, target
 
 
@@ -48,6 +60,41 @@ def test_applied_reviews_preserve_history_and_revocation_for_every_replay_order(
         assert result.at(NOW).selected == {"b" * 64: NOW}
         assert result.at(revoked.recorded_at).selected == {}
         assert result.times() == {NOW, revoked.recorded_at}
+
+
+def _kept(item: str, candidates: tuple[str, ...], selected: str, at):
+    """An accepted fixed-value review on its own item that keeps the selected claim."""
+    return decide(
+        Request(
+            request_id=f"keep-{item[:8]}",
+            target=target(version=item),
+            outcome="accept",
+            performed_at=at,
+            reason="Checked fixture",
+            evidence="review:fixture",
+            queue=Choice(
+                item_id=item, kind="fixed_value_change", candidates=candidates, selected=selected
+            ),
+        ),
+        reviewer(),
+        at,
+    )
+
+
+def test_a_claim_accepted_in_two_items_settles_the_same_challengers_in_every_order():
+    hour = timedelta(hours=1)
+    held = stated(AGGREGATOR, name("Acme"), at=T0)
+    early = stated(MAKER, name("Acme Corp"), at=T0 + hour)
+    late = stated(MAKER_TWO, name("ACME Inc"), at=T0 + 3 * hour)
+    first = _kept("a" * 64, (held.key, early.key), held.key, T0 + 2 * hour)
+    second = _kept("e" * 64, (held.key, late.key), held.key, T0 + 4 * hour)
+    for events in permutations((first, second)):
+        reviews = accepted_reviews(events)
+        assert reviews.selected == {held.key: second.recorded_at}
+        context = Context(ranks=RANKS, reviews=reviews)
+        chosen = choose([held, early, late], policy(mode="fixed"), context, T0 + 5 * hour)
+        assert chosen is not None and chosen.fact.claim_key == held.key
+        assert chosen.items == ()
 
 
 def test_independent_decisions_conflict_instead_of_last_writer_winning():

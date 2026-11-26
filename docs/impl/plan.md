@@ -30,38 +30,6 @@ archive.
 
 ## Agent Implementation Tasks
 
-### Verification and review -- `evidence-model`
-
-#### evidence-model-implementation-audit
-
-Claims and canonical selection decide what KN states as true, so an order-dependent or ambiguous
-rule would surface only after many sources depend on it.
-
-- Serves: `evidence-model` -- [Evidence model](../design/spec.md#evidence-model)
-- Agent status: CLEAR
-- Dependencies: The accepted task records of the group, including the
-  [review queue record](records/0052-evidence-model-review-queue-cli.md), and the
-  [implementation audit](../guide/planning-workflow.md#implementation-audits) checks.
-- User-visible outcome: Canonical values are shown to be order-independent and explainable. The
-  audit record gives every check a result and every finding a disposition. The current-state page
-  lists known limitations, and each scheduled finding is a plan task.
-- Scope boundary: Focus: the rank-first update policy as a total order over claims, independent of
-  arrival order; each mode (`priority`, `latest_observed`, `accumulate`, `fixed`); equal-rank
-  conflicts; `owner_override` flags; derived verification states; data time used only within one
-  source; conditions and units that make claims incomparable; review decisions as `owner_entered`
-  claims and their replay; repetition that adds no rank; retraction and correction of a claim. Fixes
-  only; new behavior becomes plan tasks.
-- Data and artifact paths: `contracts/core/evidence/`, `contracts/core/policies/`,
-  `src/kn/evidence/`, `src/kn/review/`, `tests/evidence/`, `docs/impl/plan.md`, and the task record.
-- Execution path: Rerun the group's acceptance commands, then work through the audit checks. Select
-  over every permutation of a planted claim set, replay review decisions after a rebuild, and plant
-  equal-rank disagreement, a unit mismatch, and a retracted claim.
-- Acceptance gates: Every permutation gives the same canonical values and conflicts. Review
-  decisions survive a rebuild. Incomparable conditions never resolve silently. Every finding has a
-  severity, evidence, and a disposition, no `blocker` is accepted, and every fix starts from a
-  failing regression test. `make ci` passes with the scheduled tasks in the plan.
-- Documentation target: `current/evidence-model.md` listed in the [areas index](current.md#areas).
-
 ### Durable raw archive -- `raw-archive`
 
 #### warc-raw-store
@@ -252,13 +220,45 @@ Every fetch must be safe and polite by construction.
 - Documentation target: `current/ingestion-engine.md` listed in the
   [areas index](current.md#areas).
 
+#### tracked-claim-times-and-sets
+
+Partial-update tracking builds every claim without its stated times and accepts one statement per
+field. A tracked source therefore cannot feed two update-policy rules: a newer datasheet revision
+kept as another record conflicts with the older one instead of replacing it, because neither claim
+has a valid-from or published time, and a record that lists several items of an `accumulate`
+field, such as documents or aliases, can claim only one of them.
+
+- Serves: `object-identity` -- [Object identity](../design/spec.md#object-identity)
+- Agent status: CLEAR
+- Dependencies: Finding EMA-10 of the [evidence model
+  audit](records/0053-evidence-model-evidence-model-implementation-audit.md#findings), the
+  [partial-update tracker](current/object-identity.md#partial-update-tracking) and the
+  [update-policy modes](current/evidence-model.md#canonical-selection).
+- User-visible outcome: A mapped statement carries its event, published and valid times with their
+  precision into its claim. A record can state several items of an `accumulate` field, each item
+  claims separately, and an item that a later version drops loses that record's support only.
+- Scope boundary: The statement and delivery shapes, item-level field hashes and change classes
+  for set-valued fields, and the claims and confirmations they imply, added so that existing v1
+  journal events and change sets keep their hashes. Mapping native fields to these shapes stays in
+  `mapping-and-quality-rules`, and the selection rules do not change.
+- Data and artifact paths: `src/kn/identity/tracking/`, `contracts/core/identity/`,
+  `tests/identity/`, `tests/evidence/`.
+- Execution path: Track two datasheet revisions as separate records with valid-from times and
+  project the fact. Track a record whose document list gains and then loses an item across
+  versions and project the `accumulate` fact.
+- Acceptance gates: The newer revision replaces the older one with `data_time` as the deciding
+  criterion. The `accumulate` fact holds the union of current items, and a dropped item leaves it
+  only when no other record still states it. Existing v1 journals replay with unchanged hashes,
+  change sets and claims. `make ci` passes.
+- Documentation target: `current/object-identity.md` listed in the [areas index](current.md#areas).
+
 #### mapping-and-quality-rules
 
 Most source-specific behavior must live in configuration, not code.
 
 - Serves: `ingestion-engine` -- [Ingestion engine](../design/spec.md#ingestion-engine)
 - Agent status: CLEAR
-- Requires: `http-fetch-safety`
+- Requires: `http-fetch-safety`, `tracked-claim-times-and-sets`
 - Dependencies: The [partial-update tracker and its crawler mapping helpers](current/object-identity.md#partial-update-tracking).
 - User-visible outcome: Crawler configurations map native fields to contract field IDs. They also
   map units with logged conversions, native codes to concepts with mapping types, classes and
@@ -282,7 +282,7 @@ Facts without a permitted machine-readable source need a disciplined manual path
 
 - Serves: `ingestion-engine` -- [Ingestion engine](../design/spec.md#ingestion-engine)
 - Agent status: CLEAR
-- Requires: `mapping-and-quality-rules`, `evidence-model-implementation-audit`
+- Requires: `mapping-and-quality-rules`
 - Dependencies: none.
 - User-visible outcome: Analysts add rows to `domains/<domain>/curation/` files, each with the cited
   URI, capture time, and curator. `kn source run` loads them through the same mapping and
@@ -373,8 +373,7 @@ Schema changes during development must cost a rebuild, never a re-fetch or a los
 
 - Serves: `ingestion-engine` -- [Ingestion engine](../design/spec.md#ingestion-engine)
 - Agent status: CLEAR
-- Requires: `curated-source-method`, `prefetched-dataset-method`,
-  `evidence-model-implementation-audit`
+- Requires: `curated-source-method`, `prefetched-dataset-method`
 - Dependencies: none.
 - User-visible outcome: `kn db rebuild` replays the raw ledger, curated files, prefetched datasets,
   and decision logs through current code, and reports orphaned decisions.
@@ -632,7 +631,7 @@ tracking are available.
 
 - Serves: `data-interchange` -- [Data interchange](../design/spec.md#data-interchange)
 - Agent status: CLEAR
-- Requires: `interchange-contract`, `evidence-model-implementation-audit`
+- Requires: `interchange-contract`
 - Dependencies: The accepted interchange schema and manifest definitions.
 - User-visible outcome: `kn interchange export` writes an atomic, verified deterministic ZIP
   from one snapshot; `kn interchange validate` checks a package against its declared version.
@@ -1184,8 +1183,7 @@ The space domain must prove its acceptance criteria on archived samples before d
 
 - Serves: `space-elt` -- [Space ELT](../design/spec.md#space-elt)
 - Agent status: CLEAR
-- Requires: `space-source-operator-disclosures`, `evidence-model-implementation-audit`,
-  `source-management-implementation-audit`
+- Requires: `space-source-operator-disclosures`, `source-management-implementation-audit`
 - Dependencies: Archived authorized samples from every pilot source.
 - User-visible outcome: One command rebuilds the space domain from the archive and runs the
   identity, time, provenance, and conflation checks.
@@ -1456,9 +1454,13 @@ Dashboards must deploy reproducibly from one definition in both locales.
 
 - Serves: `space-dashboards` -- [Space dashboards](../design/spec.md#space-dashboards)
 - Agent status: CLEAR
-- Requires: `space-analytics-marts`, `dashboards-as-code`, `evidence-model-implementation-audit`
+- Requires: `space-analytics-marts`, `dashboards-as-code`
 - Dependencies: The read-only [lineage view](current/object-identity.md#lineage-lookup), which
   counts withheld rows for operators; this view must leave no restricted value, locator or count.
+  A fact version's outcome, deciding criterion and runner-up describe the version when it opened
+  ([finding EMA-06](records/0053-evidence-model-evidence-model-implementation-audit.md#findings)).
+  Competing values come from the claims current at the as-of time, read through the version's
+  selection outcomes without claims superseded by then.
 - User-visible outcome: An analyst can open "Why this fact?" on a selected value and see why
   it won, the evidence, permitted alternatives, and any applicable review decision.
 - Scope boundary: Shared read-only analytics projection and bilingual dashboard detail view.
@@ -1941,9 +1943,9 @@ Release evaluation needs one integrated rebuild and backfill across the complete
 - Serves: `data-contracts` -- [Data contracts](../design/spec.md#data-contracts)
 - Agent status: CLEAR
 - Execution stage: MODEL
-- Requires: `evidence-model-implementation-audit`, `data-interchange-implementation-audit`,
-  `space-elt-implementation-audit`, `gdelt-elt-implementation-audit`,
-  `microelectronics-elt-implementation-audit`, `source-management-implementation-audit`
+- Requires: `data-interchange-implementation-audit`, `space-elt-implementation-audit`,
+  `gdelt-elt-implementation-audit`, `microelectronics-elt-implementation-audit`,
+  `source-management-implementation-audit`
 - Dependencies: The [contract workflow](../guide/schema-first-development.md), registered
   core/domain contracts, reviewed seeds and deterministic fixture data. No live source is needed.
   [Record 0030](records/0030-data-contracts-development-model-baseline.md) prepares the

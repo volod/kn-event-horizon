@@ -133,13 +133,15 @@ review items and decision events; decision IDs bind the canonical event. The
 
 ## Canonical selection
 
-`kn.evidence.selection.select(subject, claims, policy, context, knowledge_from, previous)` returns
-the fact version, its review items and one explained outcome per evaluated claim, or None when no
-claim is eligible. A `Subject` is a KN ID, stable field ID and canonical condition set; the
+`kn.evidence.selection.select(subject, claims, policy, context, knowledge_from, previous, retired)`
+returns the fact version, its review items and one explained outcome per evaluated claim, or None
+when no claim is eligible. A `Subject` is a KN ID, stable field ID and canonical condition set; the
 `Context` supplies the rank table, audience, accepted reviews and an optional redirect resolver.
 Selection evaluates every claim of the subject at once with total orders over claim content, so
 the input or arrival order never changes a value. Claims that a recorded claim supersedes are
-history; they are not evaluated.
+history; they are not evaluated. `retired` names claims that a claim of another subject
+superseded, such as a correction that moved the value to another condition set. An emptied claim
+states no value, so it may carry another condition set than the predecessor it follows.
 
 Ranks come from `kn.evidence.ranking.RankTable.read()`, which reads the reviewed
 [rank table](../../../contracts/core/policies/source-ranks.yaml). A `field_group` override applies
@@ -156,20 +158,30 @@ Ineligible claims are explained as `ignored` with the criterion that excluded th
 audience may not see are left out of the explanation entirely. A fact key includes the audience.
 
 Claims whose values agree within `valueTolerance` (numbers in one normalized unit, other values
-when equal) support one candidate. A candidate ranks by its best claim, so repetition and
-confirmations add no rank. Object values follow merge redirects before they are compared.
+when equal) support one candidate. Agreement within a tolerance is not transitive, so a claim joins
+a candidate only when it agrees with every claim already in it: two equal-rank claims that differ
+by more than the tolerance always conflict, whichever values and dates lie between them. Numbers in
+different normalized units, or without one, never agree; at equal rank they conflict, and on a
+`fixed` field they open review. Text agrees only when it is identical, including its language tag.
+A candidate ranks by its best claim, so repetition and confirmations add no rank. At equal
+strength a reviewed claim represents its candidate. Object values follow merge redirects before
+they are compared.
 
 | Mode | Rule as implemented |
 | --- | --- |
 | `priority` | Declared `priorityCriteria` order of source rank and evidence class. Data time decides tied candidates only when one source states all of them and every time is known. Otherwise the tie is a `conflict` with a `fact_conflict` item and no selected claim. |
 | `latest_observed` | Newest data time on the policy's `timeBasis` first, then the declared criteria; an unknown time sorts last. `stale(fact, policy, at)` returns the winner's age once it exceeds `freshnessSeconds`; zero declares no limit. |
 | `accumulate` | Every eligible candidate is a member (`Selection.members`); the fact row names the best one and each member's outcome is `filled`. A record's newer version supersedes its own earlier item, and an item leaves when no current claim supports it or it is rejected. |
-| `fixed` | The candidate with the earliest data time, or observed time, holds. A different value is `conflict` with a `fixed_value_change` item naming the challengers, and the held claim stays selected. An accepted review selection holds instead and settles claims recorded by the decision. |
+| `fixed` | The candidate with the earliest data time, or observed time, holds. A different value is `conflict` with a `fixed_value_change` item naming the challengers, and the held claim stays selected. An accepted review selection holds instead, the most recently accepted one first, and settles claims recorded by the decision. Different values that share the earliest time, or the latest review, hold nothing: the fact is `conflict` with a `fixed_value_change` item (`fixed_values_tie`) naming every candidate. |
 
 An empty claim never fills. When an eligible `source_empty` claim outranks the current leader, or
 no other value exists, its predecessor stays a candidate and an `empty_claim` item opens, unless
-`emptyValueHandling: allow_clear` or an accepting review gives `unresolved_reason: cleared`. A
-rejected empty claim restores its predecessor without review; a lower-ranked one is ignored.
+`emptyValueHandling: allow_clear` or an accepting review gives `unresolved_reason: cleared`. Under
+the default `review` handling the same holds when it retracts a value that the leader neither
+outranks nor agrees with, so an equal-rank retraction never settles a conflict and a retracted
+newest revision never brings back an older one silently; under `allow_clear` such a retraction
+takes effect and the leader stands. A rejected empty claim restores its predecessor without
+review. An empty claim is ignored when the leader outranks or agrees with the value it retracts.
 
 The optional `kn.updatePolicy` member `highImpact` marks rule-6 fields. Their value needs a
 primary claim or an accepted review; otherwise the fact is `review_pending` with a `high_impact`
@@ -177,10 +189,13 @@ item. An owner-entered winner over a differing first-party candidate sets `owner
 opens an `owner_override` item until a review accepts the owner claim. The fact names the most
 urgent open item: conflict, fixed change, empty claim, then high impact.
 
-Verification is `disputed` for an open conflict, fixed change or empty-claim review, `verified` for
-a winner backed by an accepted review of that exact claim, `corroborated` for support from two or
+Verification is `disputed` for an open conflict, fixed change or empty-claim review, `verified` when
+the selected claim is the one an accepted review chose, `corroborated` for support from two or
 more sources, and `unreviewed` otherwise. Source labels and human verification timestamps never
-rank, verify or resolve a claim.
+rank, verify or resolve a claim. Applied review outcomes give each claim the time of the latest
+active decision about it, whatever order storage returns the events in. A claim rejected in one
+review item stays ineligible, even if another item later accepts it, until that rejection is
+revoked or superseded.
 
 `previous` explains the change: `filled` when the previous version had no selected value,
 `replaced` when the new value differs, `corroborated` when it agrees, and `conflict` for open
@@ -190,12 +205,20 @@ member fills and a departed one replaces.
 ## Fact projection
 
 `kn.evidence.projection.subjects(claims, resolve)` groups claims by subject under their terminal
-survivor, using `State.resolve` from the identity registry. A claim about a split object names no
-single subject and is returned as unattributed. `history(subject, claims, policy, context)`
-replays selection at every claim and decision recording time, using only decisions recorded by
-then, and returns `Version`s with half-open knowledge intervals. A claim that changes nothing a
-version states, such as an ignored claim or a new runner-up, adds its outcome to that version and
-leaves no new version. Review item keys stay stable while their candidates do not change.
+survivor, using `State.resolve` from the identity registry. An emptied claim joins its
+predecessor's subject. A claim about a split object names no single subject and is returned as
+unattributed. `successors(claims)` gives, for each superseded claim, when its first successor was
+recorded, whatever that successor's subject.
+`history(subject, claims, policy, context, superseded)` replays selection at every claim
+recording time of the subject, every time a decision about its claims changes and every time
+`superseded` retires one of them, using only decisions recorded by then. It returns `Version`s with
+half-open knowledge intervals. Decisions about other claims add no replay, so the cost of a
+subject does not grow with the size of the review log. Pass `successors` of every stored claim,
+as the review CLI's refresh does. A claim that changes nothing a version states, such as an
+ignored claim or a new runner-up, adds its outcome to that version and leaves no new version.
+The version's outcome, deciding criterion and runner-up therefore describe the comparison when it
+opened, and its outcome rows include claims evaluated while it stayed current, also those later
+superseded. Review item keys stay stable while their candidates do not change.
 
 `write(connection, versions, tables)` stores the history in a savepoint of the caller's
 transaction: it sets `knowledge_to` on stored versions, then writes items, facts and outcomes
@@ -454,6 +477,9 @@ are in [record 0052](../records/0052-evidence-model-review-queue-cli.md).
 
 ## Known limitations
 
+These include the accepted and scheduled findings of the
+[evidence model audit](../records/0053-evidence-model-evidence-model-implementation-audit.md#findings).
+
 - Cross-contract references are checked by the owning engines, not SQL foreign keys.
 - Legacy identity review events without the original observation/profile cannot register complete
   identity evidence. Resolve a fresh observation before accepting them. Reopen migration support
@@ -473,10 +499,30 @@ are in [record 0052](../records/0052-evidence-model-review-queue-cli.md).
   that was later merged are not closed automatically. Rebuild the projection after a merge. The
   [lineage lookup](object-identity.md#lineage-lookup) reports such a fact as
   `fact_subject_superseded`.
-- A curated claim ranks by its own `source_id`; ranking it as the source it cites, and
-  per-source dispute rates, are not implemented yet.
+- A curated claim ranks by its own `source_id`. Ranking it as the source it cites arrives with
+  `curated-source-method`.
 - Corroboration counts distinct `source_id` values; syndicated copies under different source IDs
   are not detected.
+- A fact version's outcome, deciding criterion and runner-up describe it when it opened, so they
+  can differ between arrival orders that end in the same canonical value, items and members. A
+  later claim that changes nothing else adds an outcome row instead of a new version, so every
+  current claim has a row on the current version. Read competing values from those rows, without
+  claims superseded by the as-of time. Reopen this if an analyst view needs the strongest
+  competitor stored on the fact itself.
+- Text agreement is exact. The same text in another Unicode normalization form, or with a
+  differently cased language tag, opens a conflict instead of corroborating. Reopen this when a
+  source fixture shows such conflicts in review.
+- A rejection of a claim in one review item outlasts a later acceptance of the same claim in
+  another item until the rejection is revoked or superseded. This keeps a rejected claim out of
+  selection; reopen it if operators report accepted choices that have no effect.
+- `kn review decide` and `kn review replay` refresh every subject whose field declares a policy.
+  A subject replays only at its own claim and decision times, about 2 ms per subject with 1,000
+  unrelated decisions in the audit probe. Reopen this when refresh time is measurable against the
+  operator workflow at the declared volume.
+- Tracked claims carry no event, published or valid time, and a delivery states each field once.
+  The `valid_from` and `published` time bases therefore see no data time on a tracked claim, and
+  a record can claim only one item of an `accumulate` field. `tracked-claim-times-and-sets` adds
+  both.
 
 ## Verification
 
@@ -489,13 +535,19 @@ are in [record 0052](../records/0052-evidence-model-review-queue-cli.md).
   relation. `test_evidence_verification.py` checks stored-claim targets, stale content and
   unreviewed changed or labeled claims, including numeric fields with new units or conditions.
   The combined model baseline loads every evidence table as the evidence loader.
-- `tests/evidence/test_selection.py`, `test_selection_modes.py` and `test_projection.py` check
-  every outcome, mode and verification state of the update policy: fill, replace, ignore,
-  owner override, support by a higher-ranked source, repetition, same-source revisions, equal-rank
-  conflict, stale prices, fixed-field review, empty claims, high-impact gating, eligibility,
-  audiences, tolerance, merge survivors, distinct entity classes and every arrival permutation of
-  a five-claim set in three modes. `tests/integration/test_evidence_selection.py` writes histories
-  to PostgreSQL, checks as-of views and closed versions, idempotent rewrites and drift refusal.
+- `tests/evidence/test_selection.py`, `test_candidates.py`, `test_selection_modes.py` and
+  `test_projection.py` check every outcome, mode and verification state of the update policy:
+  fill, replace, ignore, owner override, support by a higher-ranked source, repetition,
+  same-source revisions, equal-rank conflict, stale prices, fixed-field review and ties, accepted
+  challengers, empty claims and equal-rank retractions, high-impact gating, eligibility, audiences,
+  tolerance chains, reviewed representatives, merge survivors, distinct entity classes and every
+  arrival permutation of two five-claim sets in all four modes, one with an equal-rank
+  disagreement, a unit mismatch and a retraction.
+  `test_projection_corrections.py` checks corrections and retractions across condition sets and
+  that decisions about other claims add no replay. `tests/integration/test_evidence_selection.py`
+  writes histories to PostgreSQL, checks as-of views and closed versions, idempotent rewrites and
+  drift refusal. `tests/integration/test_review_refresh.py` checks that applied decisions
+  reproduce every projected fact, outcome, item and decision row after two rebuilds.
 - `tests/review/` checks typed composite and locale targets, scope/purpose separation, key types,
   null completeness, UTC and clock errors, actor refusal, event digests, graph conflicts,
   revocation, retry identity, wire schemas and ODCS coverage validation.
@@ -513,5 +565,8 @@ are in [record 0052](../records/0052-evidence-model-review-queue-cli.md).
 
 Acceptance evidence and task counts are retained in
 [record 0032](../records/0032-evidence-model-human-verification-contracts.md),
-[record 0044](../records/0044-evidence-model-evidence-claim-contracts.md) and
-[record 0046](../records/0046-object-identity-canonical-fact-selection.md).
+[record 0044](../records/0044-evidence-model-evidence-claim-contracts.md),
+[record 0046](../records/0046-object-identity-canonical-fact-selection.md),
+[record 0051](../records/0051-evidence-model-human-verification-projections.md),
+[record 0052](../records/0052-evidence-model-review-queue-cli.md) and the
+[implementation audit, record 0053](../records/0053-evidence-model-evidence-model-implementation-audit.md).

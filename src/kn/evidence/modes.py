@@ -50,8 +50,8 @@ class Plan:
 
 
 def verification_of(candidate: Candidate) -> FactVerification:
-    """Independent support only; repeated claims of one source are one source."""
-    if any(item.reviewed for item in candidate.claims):
+    """Verified only for the reviewed claim version; repeated claims of one source are one."""
+    if candidate.best.reviewed:
         return "verified"
     return "corroborated" if len(candidate.sources) > 1 else "unreviewed"
 
@@ -122,9 +122,15 @@ def accumulate(candidates: list[Candidate]) -> Plan:
 
 
 def fixed(candidates: list[Candidate], reviews: Reviews) -> Plan:
-    """The first authoritative value holds; a different value opens review and never applies."""
-    reviewed = [c for c in candidates if any(item.reviewed for item in c.claims)]
-    holder = min(reviewed or candidates, key=_first)
+    """The first authoritative value holds; a different value opens review and never applies.
+
+    A value a review accepted holds instead, the most recently accepted one first. Different
+    values that share the earliest time, or the latest review, hold nothing until reviewed.
+    """
+    holders = _holders(candidates, reviews)
+    if len(holders) > 1:
+        return _unheld(holders, candidates)
+    (holder,) = holders
     plan = _selected(holder, None, "first_eligible")
     decided = _settled_at(holder, reviews)
     contested: list[Candidate] = []
@@ -135,6 +141,35 @@ def fixed(candidates: list[Candidate], reviews: Reviews) -> Plan:
             contested.append(challenger)
     if contested:
         _contest(plan, contested)
+    return plan
+
+
+def _holders(candidates: list[Candidate], reviews: Reviews) -> list[Candidate]:
+    """The candidates that tie for holding the value: the latest review, else the first time."""
+    accepted = [(time, c) for c in candidates if (time := _settled_at(c, reviews)) is not None]
+    if accepted:
+        latest = max(time for time, _ in accepted)
+        tied = [candidate for time, candidate in accepted if time == latest]
+    else:
+        earliest = min(_first(candidate) for candidate in candidates)
+        tied = [candidate for candidate in candidates if _first(candidate) == earliest]
+    return sorted(tied, key=lambda candidate: candidate.best.key)
+
+
+def _unheld(tied: list[Candidate], candidates: list[Candidate]) -> Plan:
+    """No value holds a fixed field when the holding rule cannot choose between them."""
+    plan = Plan(
+        shown=tied[0].best,
+        outcome="conflict",
+        criterion="tie",
+        runner_up=tied[1].best,
+        unresolved="conflict",
+        verification="disputed",
+    )
+    for candidate in candidates:
+        plan.explain(candidate.claims, "conflict", "tie" if candidate in tied else "fixed_value")
+    keys = tuple(key for candidate in candidates for key in candidate.keys)
+    plan.opened.append(Opened("fixed_value_change", keys, "fixed_values_tie"))
     return plan
 
 
@@ -160,10 +195,9 @@ def _seen(challenger: Candidate, decided: datetime | None) -> bool:
     return all(item.claim.recorded_at <= decided for item in challenger.claims)
 
 
-def _first(candidate: Candidate) -> tuple[datetime, str]:
-    """Earliest stated or observed time; the claim key breaks a tie without arrival order."""
-    first = min(item.criteria.data_time or item.claim.observed_at for item in candidate.claims)
-    return (first, candidate.best.key)
+def _first(candidate: Candidate) -> datetime:
+    """Earliest stated time, or observed time when a claim states none."""
+    return min(item.criteria.data_time or item.claim.observed_at for item in candidate.claims)
 
 
 def _decided_at(item: Assessed, reviews: Reviews) -> datetime | None:
