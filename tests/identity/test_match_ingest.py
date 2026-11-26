@@ -11,7 +11,7 @@ from kn.identity.journal import Journal, LockedJournal
 from kn.identity.matching.ingest import Receipt, record
 from kn.identity.matching.observe import Observation
 from kn.identity.matching.scoring import verify_match
-from kn.identity.model import Link, Match, Mint, Retire, SourceKey
+from kn.identity.model import Link, Match, Mint, Retire, SourceKey, Unlink
 from kn.identity.profiles import Profile
 from kn.identity.queries import inspect
 from tests.identity.fixtures import NOW, A
@@ -192,3 +192,20 @@ def test_observations_refuse_duplicates_and_retry_across_utc_offsets(tmp_path: P
         journal, config, Observation.model_validate(shifted.model_dump())
     )
     assert len(journal.read()) == 3
+
+
+def test_match_retry_uses_the_link_and_identifiers_before_its_decision(tmp_path: Path) -> None:
+    journal = Journal(tmp_path)
+    config = profile()
+    first = observation({}, lei="00000000000000000042")
+    minted = apply(journal, config, first)
+    later = observation({"organization.name": "Fixture"}, version="2")
+    linked = apply(journal, config, later)
+    assert linked.match.trace.route == "existing_link"
+    assert journal.append(
+        append(journal.read(), Unlink(kn_id=minted.kn_id, record=first.record))[-1]
+    )
+    before = journal.path.read_bytes()
+    assert apply(journal, config, first) == minted
+    assert apply(journal, config, later) == linked
+    assert journal.path.read_bytes() == before

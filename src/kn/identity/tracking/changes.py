@@ -147,7 +147,7 @@ def _sighted(state: State, delivery: Delivery) -> str | None:
 class _Planner:
     def __init__(self, locked: LockedJournal, delivery: Delivery, kn_id: str, actor: str) -> None:
         self.state = locked.state
-        self.last = locked.events[-1] if locked.events else None
+        self.last = locked.head
         self.delivery = delivery
         self.kn_id = kn_id
         self.actor = actor

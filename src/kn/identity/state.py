@@ -1,9 +1,11 @@
 """Pure replay validation. Invalid events never reach the durable append boundary."""
 
+from collections.abc import Iterable
 from dataclasses import dataclass, field
 from datetime import datetime
 
-from kn.identity.events import Event
+from kn.identity.attribute_index import AttributeIndex
+from kn.identity.events import REVIEW_REF, Event
 from kn.identity.match_records import check_match, check_match_link
 from kn.identity.model import (
     Attribute,
@@ -16,6 +18,7 @@ from kn.identity.model import (
     SourceKey,
     Version,
 )
+from kn.identity.tracking.replay import record_change_set, record_sighting, record_version
 
 PENDING_MATCH = "retry the pending identity match before recording another"
 type RecordKey = tuple[str, str]
@@ -40,6 +43,22 @@ class Holding:
     event: Event
     kn_id: str
     ended_event: str | None = None
+    ended_sequence: int | None = None
+
+    def was_active(self, before: int) -> bool:
+        return self.event.sequence < before and (
+            self.ended_sequence is None or self.ended_sequence >= before
+        )
+
+
+@dataclass
+class ChangedRows:
+    """Mutable rows touched by a suffix, including redirect ancestors."""
+
+    objects: set[str] = field(default_factory=set)
+    records: set[str] = field(default_factory=set)
+    holdings: set[str] = field(default_factory=set)
+    redirects: set[str] = field(default_factory=set)
 
 
 @dataclass
@@ -65,6 +84,11 @@ class State:
     positions: dict[str, int] = field(default_factory=dict)
     requests: dict[str, Event] = field(default_factory=dict)
     last_traced: Event | None = None
+    reviewed: list[Event] = field(default_factory=list)
+    owner_keys: dict[str, dict[str, None]] = field(default_factory=dict)
+    redirect_sources: dict[str, set[str]] = field(default_factory=dict)
+    attributes: AttributeIndex = field(default_factory=AttributeIndex)
+    dirty: ChangedRows | None = None
 
     def active(self, kn_id: str) -> Object:
         item = self.objects.get(kn_id)
@@ -73,7 +97,11 @@ class State:
         return item
 
     def record(self, key: SourceKey) -> None:
-        self.records[key.record_id] = key
+        record_id = key.record_id
+        if record_id not in self.records:
+            self.records[record_id] = key
+            if self.dirty is not None:
+                self.dirty.records.add(record_id)
 
     def mint(self, payload: Mint, event: Event) -> None:
         if payload.kn_id in self.objects:
@@ -82,23 +110,36 @@ class State:
             raise ValueError("anchoring source record already minted an identity")
         self.record(payload.anchor)
         self.anchors[record_key(payload.anchor)] = payload.kn_id
-        self.objects[payload.kn_id] = Object(
-            payload.kn_id, payload.entity_class, payload.anchor, event.event_id
-        )
+        item = Object(payload.kn_id, payload.entity_class, payload.anchor, event.event_id)
+        self.objects[item.kn_id] = item
+        self.set_status(item, "active")
 
     def resolve(self, kn_id: str) -> tuple[str, ...]:
         if kn_id not in self.objects:
             raise ValueError("unknown KN ID")
         return self.redirects.get(kn_id, (kn_id,))
 
+    def set_status(self, item: Object, value: str) -> None:
+        item.state = value
+        if self.dirty is not None:
+            self.dirty.objects.add(item.kn_id)
+
     def redirect(self, item: Object, successors: tuple[str, ...]) -> None:
         item.successors = successors
-        for ancestor, targets in self.redirects.items():
-            if item.kn_id in targets:
-                self.redirects[ancestor] = tuple(
-                    sorted((set(targets) - {item.kn_id}).union(successors))
-                )
-        self.redirects[item.kn_id] = tuple(sorted(successors))
+        for ancestor in tuple(self.redirect_sources.get(item.kn_id, ())):
+            targets = (set(self.redirects[ancestor]) - {item.kn_id}).union(successors)
+            self._set_redirect(ancestor, targets)
+        self._set_redirect(item.kn_id, set(successors))
+
+    def _set_redirect(self, key: str, targets: set[str]) -> None:
+        for previous in self.redirects.get(key, ()):
+            self.redirect_sources[previous].remove(key)
+        for target in targets:
+            self.redirect_sources.setdefault(target, set()).add(key)
+        self.redirects[key] = tuple(sorted(targets))
+        if self.dirty is not None:
+            self.dirty.objects.add(key)
+            self.dirty.redirects.add(key)
 
     def links(self, record: SourceKey) -> list[Holding]:
         """Current and closed links of one source record, in journal order."""
@@ -117,11 +158,30 @@ class State:
         return None if complete else entry
 
     def owned(self, kn_id: str) -> dict[str, Holding]:
-        return {
-            key: value
-            for key, value in self.holdings.items()
-            if value.kn_id == kn_id and value.ended_event is None
-        }
+        return {key: self.holdings[key] for key in self.owner_keys.get(kn_id, ())}
+
+    def _hold(self, event: Event, kn_id: str) -> None:
+        key = event.event_id
+        self.holdings[key] = Holding(event, kn_id)
+        self.owner_keys.setdefault(kn_id, {})[key] = None
+        if self.dirty is not None:
+            self.dirty.holdings.add(key)
+
+    def end(self, holding: Holding, event: Event) -> None:
+        key = holding.event.event_id
+        del self.owner_keys[holding.kn_id][key]
+        holding.ended_event = event.event_id
+        holding.ended_sequence = event.sequence
+        if self.dirty is not None:
+            self.dirty.holdings.add(key)
+
+    def transfer(self, holding: Holding, target: str) -> None:
+        key = holding.event.event_id
+        del self.owner_keys[holding.kn_id][key]
+        self.owner_keys.setdefault(target, {})[key] = None
+        holding.kn_id = target
+        if self.dirty is not None:
+            self.dirty.holdings.add(key)
 
     def apply(self, event: Event) -> None:
         previous = self.events[-1] if self.events else None
@@ -140,58 +200,37 @@ class State:
             self.active(payload.kn_id)
             if payload.record is not None and payload.record.record_id not in self.records:
                 raise ValueError("attribute must cite a known source record")
-            self.holdings[event.event_id] = Holding(event, payload.kn_id)
+            self._hold(event, payload.kn_id)
+            self.attributes.add(event.event_id, payload)
         else:
             self._other(event)
         self.events.append(event)
+        if event.decision_ref is not None and event.decision_ref.startswith(REVIEW_REF):
+            self.reviewed.append(event)
 
     def _other(self, event: Event) -> None:
         payload = event.payload
         if isinstance(payload, Version):
-            self._version(payload, event)
+            record_version(self, payload, event)
         elif isinstance(payload, Match):
             self._match(payload, event)
         elif isinstance(payload, ChangeSet):
-            self._changes(payload, event)
+            record_change_set(self, payload, event)
         elif isinstance(payload, Seen):
-            self._seen(payload, event)
+            record_sighting(self, payload, event)
         else:
             from kn.identity.transitions import transition
 
             transition(self, event)
 
-    def _changes(self, payload: ChangeSet, event: Event) -> None:
-        version = self.versions.get(payload.version_id)
-        if version is None:
-            raise ValueError("change set requires a known source version")
-        if payload.version_id in self.version_changes:
-            raise ValueError("source version already has a change set")
-        if len({item.field_id for item in payload.changes}) != len(payload.changes):
-            raise ValueError("duplicate field changes")
-        hashes = {item.field_id: item.digest for item in version.field_hashes}
-        if any(
-            item.current_hash is not None and hashes.get(item.field_id) != item.current_hash
-            for item in payload.changes
-        ):
-            raise ValueError("change set hashes must equal its version's field hashes")
-        self.changes[event.event_id] = payload
-        self.version_changes[payload.version_id] = event.event_id
-        self.positions[event.event_id] = event.sequence
-
-    def _seen(self, payload: Seen, event: Event) -> None:
-        version = self.versions.get(payload.version_id)
-        if version is None:
-            raise ValueError("a sighting requires a known source version")
-        sighting = (payload.version_id, payload.fetch_id)
-        if payload.fetch_id == version.fetch_id or sighting in self.sightings:
-            raise ValueError("source version was already seen in this fetch")
-        self.sightings[sighting] = event.sequence
-        self._saw(version.record, payload.observed_at)
-
-    def _saw(self, record: SourceKey, observed_at: datetime) -> None:
+    def saw(self, record: SourceKey, observed_at: datetime) -> None:
         """Older observations remain history without reducing `last_seen`."""
         key = record.record_id
-        self.last_seen[key] = max(observed_at, self.last_seen.get(key, observed_at))
+        previous = self.last_seen.get(key)
+        if previous is None or observed_at > previous:
+            self.last_seen[key] = observed_at
+            if self.dirty is not None:
+                self.dirty.records.add(key)
 
     def _link(self, payload: Link, event: Event) -> None:
         self.active(payload.kn_id)
@@ -203,7 +242,7 @@ class State:
                 raise ValueError("link requires a matching stored decision")
             check_match_link(payload, match, self.objects[payload.kn_id].anchor)
         self.record(payload.record)
-        self.holdings[event.event_id] = Holding(event, payload.kn_id)
+        self._hold(event, payload.kn_id)
         self.record_links.setdefault(record_key(payload.record), []).append(event.event_id)
 
     def _identifier(self, payload: Identifier, event: Event) -> None:
@@ -216,19 +255,8 @@ class State:
                 payload.valid_to is None or other.valid_from < payload.valid_to
             ):
                 raise ValueError("identifier validity overlaps in its namespace")
-        self.holdings[event.event_id] = Holding(event, payload.kn_id)
+        self._hold(event, payload.kn_id)
         self.identifier_keys.setdefault(key, []).append(event.event_id)
-
-    def _version(self, payload: Version, event: Event) -> None:
-        version_key = (*record_key(payload.record), payload.version)
-        if version_key in self.version_keys:
-            raise ValueError("source record version already exists")
-        self.record(payload.record)
-        self.versions[event.event_id] = payload
-        self.version_keys[version_key] = event.event_id
-        self.record_versions.setdefault(payload.record.record_id, []).append(event.event_id)
-        self.positions[event.event_id] = event.sequence
-        self._saw(payload.record, payload.observed_at)
 
     def _match(self, payload: Match, event: Event) -> None:
         check_match(payload, self.active)
@@ -239,8 +267,10 @@ class State:
             self.last_traced = event
 
 
-def replay(events: tuple[Event, ...]) -> State:
+def replay(events: Iterable[Event], *, track_after: int | None = None) -> State:
     state = State()
     for event in events:
+        if track_after is not None and event.sequence == track_after + 1:
+            state.dirty = ChangedRows()
         state.apply(event)
     return state

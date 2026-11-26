@@ -32,32 +32,6 @@ archive.
 
 ### Claims, change tracking and lineage -- `object-identity`
 
-#### identity-incremental-writes
-
-Each identity write rereads and validates the whole journal and rewrites every identity table, so
-one submit slows as the registry grows and a large source ingests in quadratic time.
-
-- Serves: `object-identity` -- [Object identity](../design/spec.md#object-identity)
-- Agent status: CLEAR
-- Dependencies: Finding IDRES-05 and its measurements in the
-  [identity resolution audit](records/0042-object-identity-identity-resolution-implementation-audit.md#findings).
-- User-visible outcome: A source adapter submits observations at a cost that stays flat as the
-  registry grows. Each write appends its events and updates only the rows they change, and a
-  rebuild still reproduces every row.
-- Scope boundary: Reuse of the validated journal state under the writer lock, incremental SQL
-  projection of new events and their ownership changes, and indexed candidate and attribute
-  lookup. Event formats, match decisions, recovery and rebuild semantics stay unchanged. Profile
-  values and calibration are out of scope.
-- Data and artifact paths: `src/kn/identity/`, `tests/identity/`, `tests/integration/`,
-  `$DATA_DIR/identity/`.
-- Execution path: Extend the replay growth check to journal-backed submits and PostgreSQL
-  projection, measure the current curve, then change the writer.
-- Acceptance gates: On a synthetic organization registry, one PostgreSQL submit at 50,000 objects
-  costs at most twice as much as at 5,000 objects. Rows after incremental writes equal the rows of
-  a rebuild after dropping the database. Interrupted, retried and concurrent writes keep their
-  current recovery results. `make ci` and the local integration suite pass.
-- Documentation target: `current/object-identity.md` listed in the [areas index](current.md#areas).
-
 #### object-identity-implementation-audit
 
 Identity is the core model, and KN IDs are stored in counterparts and exports, so a flaw in minting,
@@ -65,7 +39,6 @@ lifecycle, or matching is the most expensive kind to fix later.
 
 - Serves: `object-identity` -- [Object identity](../design/spec.md#object-identity)
 - Agent status: CLEAR
-- Requires: `identity-incremental-writes`
 - Dependencies: The accepted task records of the group and the [implementation
   audit](../guide/planning-workflow.md#implementation-audits) checks. `identity-match-calibration`
   stays open and is reviewed for the readiness of its inputs. The [identity resolution
@@ -74,7 +47,9 @@ lifecycle, or matching is the most expensive kind to fix later.
   limitations](current/evidence-model.md#known-limitations) name facts stored under a KN ID that
   was later merged. The [lineage lookup](current/object-identity.md#lineage-lookup) and its
   [task record](records/0047-object-identity-object-lineage-lookup.md) trace values to raw records
-  and report such facts as gaps.
+  and report such facts as gaps. The
+  [incremental writes record](records/0048-object-identity-identity-incremental-writes.md) gives
+  the PostgreSQL scale, recovery and rebuild parity checks.
 - User-visible outcome: Every later group resolves objects through a verified identity registry. The
   audit record gives every check a result and every finding a disposition. The current-state page
   lists known limitations, and each scheduled finding is a plan task.

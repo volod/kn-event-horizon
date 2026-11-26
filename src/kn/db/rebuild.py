@@ -12,6 +12,7 @@ from kn.db.governance import deployment, upgrade, verify
 from kn.db.platform import SCHEMAS, apply_platform
 from kn.db.seeds import load_reviewed_seeds
 from kn.db.verification import verify_compiled_catalog
+from kn.identity.checkpoint import DropCheckpointInvalidator
 from kn.identity.journal import Journal
 from kn.identity.store import lock as identity_lock
 from kn.identity.store import replay as replay_identity
@@ -70,6 +71,7 @@ def _drop_schemas(connection: Connection) -> None:
     for schema in SCHEMAS:
         old.reflect(connection, schema=schema, resolve_fks=False)
     old.drop_all(connection)
+    connection.execute(DropCheckpointInvalidator())
     for schema in reversed(SCHEMAS):
         # Without CASCADE, PostgreSQL drops only an empty schema (RESTRICT).
         connection.execute(sa.schema.DropSchema(schema))

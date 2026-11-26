@@ -34,22 +34,22 @@ def _unlink(state: State, payload: Unlink, event: Event) -> None:
     ]
     if not links:
         raise ValueError("cannot unlink a record without its active link")
-    links[0].ended_event = event.event_id
+    state.end(links[0], event)
 
 
 def _restore(state: State, payload: Restore) -> None:
     item = state.objects.get(payload.kn_id)
     if item is None or item.state != "retired" or item.successors:
         raise ValueError("only a retired object without a successor can be restored")
-    item.state = "active"
+    state.set_status(item, "active")
 
 
 def _retire(state: State, payload: Retire, event: Event) -> None:
     item = state.active(payload.kn_id)
-    item.state = "retired"
+    state.set_status(item, "retired")
     for holding in state.owned(payload.kn_id).values():
         if isinstance(holding.event.payload, Link):
-            holding.ended_event = event.event_id
+            state.end(holding, event)
 
 
 def _reclassify(state: State, payload: Reclassify, event: Event) -> None:
@@ -57,10 +57,10 @@ def _reclassify(state: State, payload: Reclassify, event: Event) -> None:
     if item.entity_class == payload.successor.entity_class:
         raise ValueError("reclassification requires a different class")
     state.mint(payload.successor, event)
-    item.state = "retired"
+    state.set_status(item, "retired")
     state.redirect(item, (payload.successor.kn_id,))
     for holding in state.owned(payload.kn_id).values():
-        holding.kn_id = payload.successor.kn_id
+        state.transfer(holding, payload.successor.kn_id)
 
 
 def _merge(state: State, payload: Merge, event: Event) -> None:
@@ -69,10 +69,10 @@ def _merge(state: State, payload: Merge, event: Event) -> None:
         raise ValueError("merge requires distinct active objects of the same class")
     if payload.authoritative is not None:
         _require_authority(state, payload, payload.authoritative, event.occurred_at)
-    item.state = "merged"
+    state.set_status(item, "merged")
     state.redirect(item, (target.kn_id,))
     for holding in state.owned(item.kn_id).values():
-        holding.kn_id = target.kn_id
+        state.transfer(holding, target.kn_id)
 
 
 def _require_authority(state: State, merge: Merge, proof: Identifier, at: datetime) -> None:
@@ -111,7 +111,7 @@ def _split(state: State, payload: Split) -> None:
         raise ValueError("split assigns each active link, identifier and attribute exactly once")
     if not set(assignments.values()) <= set(payload.successors):
         raise ValueError("split assignment targets an undeclared successor")
-    item.state = "split"
+    state.set_status(item, "split")
     state.redirect(item, payload.successors)
     for key, holding in owned.items():
-        holding.kn_id = assignments[key]
+        state.transfer(holding, assignments[key])

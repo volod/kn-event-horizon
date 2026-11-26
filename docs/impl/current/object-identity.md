@@ -264,17 +264,29 @@ looking record keys retain leading zeroes, and the source is part of their ident
 ## Replay and integrity
 
 `kn.identity.store.apply(connection, journal, write)` acquires the identity transaction advisory
-lock, validates the SQL event prefix, invokes a journal append/mint callback, then projects its
-history in a savepoint. The callback only writes the locked journal. `store.replay(connection,
-journal)` recovers durable pending history and returns the validated `State`; `State.resolve(id)`
-returns terminal successors, including retired IDs or multiple split successors. Unknown IDs fail.
+lock, validates the SQL event prefix, invokes the append or mint callback, and projects the
+durable suffix in a savepoint. Ordinary writes append event rows and update the affected objects,
+source records, ownership, links and redirects. The writer closes old links before inserting
+replacement active links. Tracking uses the same incremental write path.
 
-Callers own short PostgreSQL READ COMMITTED transactions and commit after application. Append and
-fsync precede SQL, so a caught SQL error or rollback can leave a durable pending event. Replay
-recovers its original ID, actor, time and decision. SQL history that differs from the journal or
-runs ahead of it refuses; replay never silently overwrites conflicting event history. Disposable
-state rows are rebuilt from the validated history, and deferred references are checked before
-return. Replaying the same history produces identical rows.
+Reuse a `Journal` instance across submissions. It retains validated state and matching indexes
+under the file lock. A changed file identity, size or modification stamp triggers full validation
+before reuse. An invalid batch leaves the durable prefix intact. Matching selects candidates
+through indexed authoritative keys, source links, aliases and historical blocking values. It
+checks each candidate's current owner, class and as-of values per contributing record before
+scoring. Retry validation uses the link and identifier history as of the original decision.
+
+Callers own short PostgreSQL READ COMMITTED transactions and commit after application. Appends
+and fsync precede SQL, so a rollback can leave a pending suffix. The next successful write projects
+that suffix with its original IDs, actor, time and decision. The disposable
+`identity.projection_checkpoint` records the validated SQL event prefix in the same transaction.
+SQL updates, deletes and truncation of event rows invalidate it. Unverified SQL rows are compared
+with the journal before a new append. Divergent or ahead SQL history refuses.
+
+`store.replay(connection, journal)` validates the whole journal and SQL event prefix, then
+replaces the disposable projection and checks deferred references. It returns the validated
+`State`. `State.resolve(id)` returns terminal successors, including retired IDs or multiple split
+successors. Unknown IDs fail. Replaying the same history produces identical rows.
 
 The pure replay validator in `state.py` and `transitions.py` enforces:
 
@@ -302,11 +314,9 @@ The pure replay validator in `state.py` and `transitions.py` enforces:
 
 SQL primary/foreign keys, enums, unique anchors/versions and the active-link index supplement these
 checks. Temporal overlap and lifecycle semantics are enforced at the journal/application boundary;
-loaders must use that boundary. Arbitrary direct SQL or filesystem administrator tampering is
-outside the trusted protocol. Replay validates the whole local log and replaces disposable state.
-Replay keeps indexes of anchors, record links, identifier intervals, record versions, change sets
-and match requests, so validation is linear in the length of the journal. Candidate lookup scans
-the active registry holdings.
+loaders must use that boundary. The local journal and database administration remain trusted.
+Explicit replay repairs disposable rows from the durable history. Anchor, ownership, identifier,
+record version, change set and match request indexes support validation during replay.
 
 Matching validates its full event batch before appending. Retry the same observation and profile
 to reuse the original event digest and KN ID after a SQL rollback. A complete journal prefix of
@@ -374,17 +384,22 @@ ambiguous identifiers, reported gaps, and the CLI refusals before any database a
 `tests/integration/test_lineage_cli.py` stores the same fixture in PostgreSQL and checks that the
 CLI returns those goldens in both locales and the same JSON, in a read-only transaction.
 `make model-baseline` now includes identity history before SATCOM import and compares every
-registered column after two rebuilds. Run `make ci` and `make test-integration` against local PostGIS;
-`make ci-local` also includes the existing local SKOS gate.
+registered column after two rebuilds. Run `make ci` and `make test-integration` against local
+PostGIS. The integration suite times warmed PostgreSQL submits against 5,000 and 50,000 synthetic
+organizations and compares incremental writes to two rebuilds after database drops. It covers
+untouched rows, SQL prefix corruption, interrupted writes, retries and concurrent writers. See the
+[incremental writes record](../records/0048-object-identity-identity-incremental-writes.md) for
+commands and measurements. `make ci-local` also includes the local SKOS gate.
 
 ## Known limitations
 
 These are accepted or scheduled findings of the
 [identity resolution audit](../records/0042-object-identity-identity-resolution-implementation-audit.md#findings).
 
-- Each write rereads and replays the whole journal and rewrites every identity table. One submit
-  took 0.11 seconds at 1,000 organizations and 0.28 seconds at 2,000, so a large source ingests in
-  quadratic time. `identity-incremental-writes` in the [plan](../plan.md) owns this limit.
+- A new `Journal` instance or a write by another instance requires full file validation. The
+  first scored request for each field and normalizer builds its blocking index. Broad blocking
+  keys and long attribute histories can still produce expensive candidate sets. Reviewed history
+  still validates and checks its decision projection when a write runs.
 - An object minted without a source link, such as a reclassification successor, sends its
   re-delivered anchor record to review after a merge instead of following the redirect. Reopen
   this when an adapter mints objects without links.
@@ -393,8 +408,6 @@ These are accepted or scheduled findings of the
   stays in the name. Names never discriminate, so this affects only review recall. Reopen this
   when an organization calibration report shows missed held-out pairs that differ only by legal
   form.
-- Tracking writes inherit the full-journal rewrite cost above; `identity-incremental-writes` owns
-  it.
 - Claims and confirmations live in the evidence tables, which rebuild drops and does not restore
   from the identity journal. Tracking the same deliveries again in their original order reproduces
   the same claims and confirmations from the journaled change sets. Until the raw replay of

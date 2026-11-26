@@ -188,13 +188,13 @@ def test_decision_only_interruption_and_retry(
 ) -> None:
     journal = _journal(tmp_path)
     rebuild(rebuild_connection, data_dir=tmp_path)
-    real_append = LockedJournal.append
+    real_write = LockedJournal._write
 
-    def interrupt(log, value):
+    def interrupt(log, encoded):
         raise OSError("fixture interrupted between the two durable appends")
 
     with monkeypatch.context() as interrupted:
-        interrupted.setattr(LockedJournal, "append", interrupt)
+        interrupted.setattr(LockedJournal, "_write", interrupt)
         with pytest.raises(OSError, match="interrupted"):
             _submit(rebuild_connection, journal, Merge(kn_id=A, survivor=B), "retry")
     (decision,) = ReviewJournal(tmp_path).read()
@@ -203,7 +203,7 @@ def test_decision_only_interruption_and_retry(
     value = _submit(rebuild_connection, journal, Merge(kn_id=A, survivor=B), "retry")
     assert value.decision_ref == REVIEW_REF + decision.decision_id
     assert _decision_ids(rebuild_connection) == {decision.decision_id}
-    assert LockedJournal.append is real_append
+    assert LockedJournal._write is real_write
     with pytest.raises(ValueError, match="reused"):
         _submit(rebuild_connection, journal, Retire(kn_id=B), "retry")
 
@@ -215,8 +215,8 @@ def test_sql_failure_after_both_appends_replays_without_duplicate_decision(
     rebuild(rebuild_connection, data_dir=tmp_path)
     real_project = store._project
 
-    def interrupt(connection, locked):
-        real_project(connection, locked)
+    def interrupt(connection, locked, count):
+        real_project(connection, locked, count)
         connection.exec_driver_sql("SELECT 1 / 0")
 
     with monkeypatch.context() as interrupted:
