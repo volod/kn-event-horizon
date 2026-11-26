@@ -63,5 +63,6 @@ decision. A record can name a plan task by ID because plan headings disappear on
 | 0046 | `canonical-fact-selection` | [Canonical fact selection](0046-object-identity-canonical-fact-selection.md) |
 | 0047 | `object-lineage-lookup` | [Object lineage lookup](0047-object-identity-object-lineage-lookup.md) |
 | 0048 | `identity-incremental-writes` | [Identity incremental writes](0048-object-identity-identity-incremental-writes.md) |
+| 0049 | `object-identity-implementation-audit` | [Object identity implementation audit](0049-object-identity-object-identity-implementation-audit.md) |
 
-Next unused sequence is `0049`.
+Next unused sequence is `0050`.

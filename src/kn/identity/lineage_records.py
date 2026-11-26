@@ -69,3 +69,12 @@ def _changes(state: State, change_set_id: str, field_id: str | None) -> dict[str
             if field_id in (None, item.field_id)
         ],
     }
+
+
+def held_by_successor(state: State, record_id: str, kn_id: str) -> bool:
+    """Whether a terminal successor of `kn_id` holds a current link of the record."""
+    record = state.records.get(record_id)
+    successors = state.resolve(kn_id)
+    return record is not None and any(
+        item.ended_event is None and item.kn_id in successors for item in state.links(record)
+    )

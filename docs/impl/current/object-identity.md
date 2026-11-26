@@ -1,8 +1,10 @@
 # Object Identity
 
-The identity storage contract, durable journal, deterministic replay, reviewed lifecycle commands,
-profile-driven matcher, field-level partial-update tracking and the [lineage lookup](#lineage-lookup)
-are available. Incremental writes and real-record calibration remain in the [plan](../plan.md).
+The identity storage contract, durable journal, deterministic replay with incremental writes,
+reviewed lifecycle commands, profile-driven matcher, field-level partial-update tracking and the
+[lineage lookup](#lineage-lookup) are available and passed the
+[object identity audit](../records/0049-object-identity-object-identity-implementation-audit.md).
+Real-record calibration and fragment claims after a split remain in the [plan](../plan.md).
 
 ## Operator lifecycle commands
 
@@ -87,11 +89,13 @@ from evidence the audience may see. Identity attributes and match features carry
 statement, so a restricted audience sees none of their values. `withheld` counts each kind of
 withheld row and never shows its content.
 
-`gaps` reports `claim_record_missing`, `claim_version_missing` and `claim_change_set_missing` for
-a visible claim the identity journal cannot place, `evidence_missing`, `fact_claim_missing`, and
-`fact_subject_superseded` for a current fact stored under an object that was later merged or
-split. A complete chain runs from the fact through its claim and change set to the version's
-fetch and archive record ID. Outbound exchange receipts join the view with the exchange ledger.
+`gaps` reports `claim_record_missing`, `claim_version_missing` and `claim_change_set_missing` for a
+visible claim the identity journal cannot place, `evidence_missing`, `fact_claim_missing`, and
+`fact_subject_superseded` for a current fact stored under an object that was later merged or split.
+For an audience that permits every rights statement, `claim_successor_missing` names a claim about a
+split object whose record no successor holds, such as a weak-key fragment's claim. A complete chain
+runs from the fact through its claim and change set to the version's fetch and archive record ID.
+Outbound exchange receipts join the view with the exchange ledger.
 
 `kn.identity.lineage.lineage(state, rows, reference, field_id=..., audience=...)` builds the same
 view for other read-only callers. `rows` implements `kn.evidence.lineage.EvidenceRows`;
@@ -156,28 +160,31 @@ references. Domains use the pinned local Public Suffix List, including private s
 IDNA normalization without network access. [Match profile files](../../../contracts/core/identity/README.md).
 
 The resolver checks exact current authoritative identifiers first, then the record's existing
-ownership. Contradictory authoritative targets, an occupied identifier with a mismatched issuer
-or class, and a conflict with current ownership go to review. A new binding or mint stores the
-match reference in `identity.links`. Existing links retain their original IDs. Successful
-decisions record declared attribute readings and previously unregistered authoritative keys.
-At an observation instant each candidate has one view per contributing source record, holding
-that record's latest eligible reading of each field. A record keeps its view through merges and
-splits, and one record's newer reading never hides another record's. Conflicting readings of one
-record at the same latest time leave that field missing in its view. Readings recorded without a
-source record form one view of their own.
+ownership. An identifier interval starts at its first observation, so an observation earlier than
+every recorded interval of the identifier belongs to the earliest holder; one that falls between two
+holders goes to review. Contradictory authoritative targets, an occupied identifier with a
+mismatched issuer or class, and a conflict with current ownership go to review. A new binding or
+mint stores the match reference in `identity.links`. Existing links retain their original IDs.
+Successful decisions record declared attribute readings and previously unregistered authoritative
+keys. At an observation instant each candidate has one view per contributing source record, holding
+that record's latest reading of each field at or before the instant. A record whose readings all
+come later contributes its earliest reading, so an older observation that arrives late still finds
+the candidate. A record keeps its view through merges and splits, and one record's newer reading
+never hides another record's. Conflicting readings of one record at the same latest time leave that
+field missing in its view. Readings recorded without a source record form one view of their own.
 
-Scoring blocks on complete normalized keys in any view, scores each blocked view and keeps the
-first highest-scoring one. It records that view's comparator input values, outcome and
-natural-log likelihood weight `ln(m/u)`. Missing or unusable values contribute
-zero. The posterior combines the sum and the profile prior. Candidates are ordered by
-descending score and ascending KN ID. A scored link requires a calibrated profile, the link
-threshold, agreement on a discriminating attribute, and a unique lead that meets the margin
-in posterior probability. Candidates reaching the review threshold go to review when these
-gates fail. Alias-only candidates can prompt review. An alias KN ID follows merge and split
-redirects to its active successors of the profile's class; unknown alias IDs are ignored. In the
-absence of a qualifying candidate the resolver mints a new UUIDv7. All four supplied profiles
-are uncalibrated. Name and description fields cannot discriminate, and profile validation rejects
-a link threshold reachable by nondiscriminating evidence alone.
+Scoring blocks on complete normalized keys in any view, scores each blocked view and keeps the first
+highest-scoring one. It records that view's comparator input values, outcome and natural-log
+likelihood weight `ln(m/u)`. Missing or unusable values contribute zero. The posterior combines the
+sum and the profile prior. Candidates are ordered by descending score and ascending KN ID. A scored
+link requires a calibrated profile, the link threshold, agreement on a discriminating attribute with
+no discriminating attribute disagreeing, and a unique lead that meets the margin in posterior
+probability. Candidates reaching the review threshold go to review when these gates fail. Alias-only
+candidates can prompt review. An alias KN ID follows merge and split redirects to its active
+successors of the profile's class; unknown alias IDs are ignored. In the absence of a qualifying
+candidate the resolver mints a new UUIDv7. All four supplied profiles are uncalibrated. Name and
+description fields cannot discriminate, and profile validation rejects a link threshold reachable by
+nondiscriminating evidence alone.
 
 A receipt returns the match digest, stored match and bound KN ID, with an empty KN ID for
 review. A retried observation returns its original receipt, whose KN ID can since have been
@@ -361,7 +368,10 @@ pending replay, malformed-log rebuild rollback, SQL/log disagreement and the par
 appends, stale requests and repeat rebuilds with the original decision IDs. `make test-bilingual`
 compares identity lookups and command help with both locale goldens.
 `tests/identity/test_match*.py` cover the labeled match fixtures, profile safety, comparators,
-exact and scored precedence, retries and concurrent writes. `test_match_registry.py` covers
+exact and scored precedence, retries and concurrent writes. `test_match_order.py` submits the
+organization, part and variant fixtures in every order and compares objects and decision counts,
+and checks late observations, an identifier seen before or between its holders, and the
+discriminator veto. `test_match_registry.py` covers
 per-record views after merges, splits and identifier links, and aliases of merged objects. The
 PostgreSQL matching fixture checks projection, rollback recovery and rebuild of recorded match
 receipts. `tests/integration/test_identity_resolution.py` merges, splits and submits a name-only
@@ -376,7 +386,8 @@ inputs and replay checks. `tests/integration/test_identity_tracking.py` tracks a
 through PostgreSQL after a rolled-back first attempt, checks current claims, confirmations,
 `last_seen` and change-set rows, and compares identity rows after a schema drop and rebuild.
 `tests/identity/test_lineage*.py` check complete chains to archive record IDs for every fixture
-object, a merged ID against its survivor, a partial update with a sighting, a two-source conflict,
+object, a late version and an omitted field through the selected fact, a fragment claim after a
+split, a merged ID against its survivor, a partial update with a sighting, a two-source conflict,
 split successors, withheld claims, facts, excerpts, attributes and match features, qualified and
 ambiguous identifiers, reported gaps, and the CLI refusals before any database access.
 `tests/e2e/test_lineage_cli.py` compares four lookups with the
@@ -394,7 +405,8 @@ commands and measurements. `make ci-local` also includes the local SKOS gate.
 ## Known limitations
 
 These are accepted or scheduled findings of the
-[identity resolution audit](../records/0042-object-identity-identity-resolution-implementation-audit.md#findings).
+[identity resolution audit](../records/0042-object-identity-identity-resolution-implementation-audit.md#findings)
+and the [object identity audit](../records/0049-object-identity-object-identity-implementation-audit.md#findings).
 
 - A new `Journal` instance or a write by another instance requires full file validation. The
   first scored request for each field and normalizer builds its blocking index. Broad blocking
@@ -422,11 +434,24 @@ These are accepted or scheduled findings of the
   lineage audience still sees record keys and archive IDs, but no attribute or feature values.
 - The matcher never merges by itself. A shared authoritative identifier on two records goes to
   review. A trusted adapter or review workflow appends the merge.
+- Resolution is sequential. Of two similar records without a shared key, the first mints and the
+  second opens review, so arrival order decides which one waits. A record in review registers no
+  identifiers or attributes, and a later record with the same unregistered key can mint. Accepted
+  matches will register them through `review-queue-cli`. Reopen this if reviewed duplicates grow
+  with source count.
+- An alias that names a retired object is ignored, and the record resolves as if it carried no
+  alias. Reopen this when a counterpart import returns retired KN IDs.
+- A weak-key fragment has no link of its own, so a split cannot assign the claims it made before
+  the split. Lineage reports them as `claim_successor_missing`, and the fact projection leaves
+  them unattributed until `fragment-claims-follow-splits`.
 
 Acceptance evidence is retained in
 [record 0033](../records/0033-object-identity-identity-registry-contracts.md),
 [record 0039](../records/0039-object-identity-object-lifecycle-operations.md),
 [record 0040](../records/0040-object-identity-identity-match-engine.md),
 [record 0042](../records/0042-object-identity-identity-resolution-implementation-audit.md),
-[record 0045](../records/0045-object-identity-partial-update-tracking.md) and
-[record 0047](../records/0047-object-identity-object-lineage-lookup.md).
+[record 0045](../records/0045-object-identity-partial-update-tracking.md),
+[record 0046](../records/0046-object-identity-canonical-fact-selection.md),
+[record 0047](../records/0047-object-identity-object-lineage-lookup.md),
+[record 0048](../records/0048-object-identity-identity-incremental-writes.md) and
+[record 0049](../records/0049-object-identity-object-identity-implementation-audit.md).

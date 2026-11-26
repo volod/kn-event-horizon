@@ -2,7 +2,7 @@
 
 from collections import defaultdict
 from collections.abc import Iterable, Mapping
-from datetime import datetime
+from datetime import datetime, timedelta
 
 from kn.identity.matching.observe import Key
 from kn.identity.matching.scoring import Value
@@ -12,7 +12,9 @@ from kn.identity.state import Holding, RecordKey, State, record_key
 
 type View = dict[str, str]
 type ReadingKey = tuple[str, RecordKey | None, str]
-type Readings = dict[ReadingKey, tuple[datetime, set[str]]]
+# A reading after the instant ranks behind every reading at or before it, then by distance.
+type Distance = tuple[bool, timedelta]
+type Readings = dict[ReadingKey, tuple[Distance, set[str]]]
 
 
 def source_links(state: State, record: SourceKey) -> list[Holding]:
@@ -36,6 +38,25 @@ def identifiers(
     ]
 
 
+def holder(state: State, key: Key, at: datetime) -> tuple[tuple[str, Identifier] | None, bool]:
+    """The owner and interval that hold an identifier at an instant, and whether it is reserved.
+
+    An interval starts at its first observation, so an observation earlier than every recorded
+    interval belongs to the earliest holder. An instant between two holders has no holder, and a
+    later interval reserves the identifier: an open-ended new observation would overlap it.
+    """
+    recorded = identifiers(state, key)
+    intervals = [
+        (owner, identifier)
+        for owner, identifier in recorded
+        if identifier.valid_to is None or at < identifier.valid_to
+    ]
+    current = next((item for item in intervals if item[1].valid_from <= at), None)
+    if current is None and all(at < identifier.valid_from for _, identifier in recorded):
+        current = min(intervals, key=lambda item: item[1].valid_from, default=None)
+    return current, current is None and bool(intervals)
+
+
 def authoritative_targets(
     state: State,
     keys: tuple[Key, ...],
@@ -45,15 +66,9 @@ def authoritative_targets(
     matches: dict[str, tuple[Key, ...]] = {}
     conflict = False
     for key in sorted(keys, key=lambda item: item.parts):
-        intervals = [
-            (owner, identifier)
-            for owner, identifier in identifiers(state, key)
-            if identifier.valid_to is None or at < identifier.valid_to
-        ]
-        current = next((item for item in intervals if item[1].valid_from <= at), None)
+        current, reserved = holder(state, key, at)
+        conflict |= reserved
         if current is None:
-            # An open-ended new observation would overlap a reserved interval.
-            conflict |= bool(intervals)
             continue
         owner, identifier = current
         if (
@@ -114,19 +129,24 @@ def current_attributes(
 
 
 def _latest_readings(state: State, candidates: Iterable[str], at: datetime) -> Readings:
+    """Each record's reading of each field closest to the observation instant.
+
+    The latest reading at or before the instant wins. A record whose readings all come later
+    contributes its earliest one, so an older observation that arrives late still finds it.
+    """
     readings: Readings = {}
     for item in (holding for key in candidates for holding in state.owned(key).values()):
         payload, when = item.event.payload, item.event.occurred_at
-        if not isinstance(payload, Attribute) or when > at:
+        if not isinstance(payload, Attribute):
             continue
         origin = record_key(payload.record) if payload.record is not None else None
         key = (item.kn_id, origin, payload.field_id)
-        latest, values = readings.get(key, (when, set()))
-        if when > latest:
-            readings[key] = (when, {payload.original})
-        elif when == latest:
-            values.add(payload.original)
-            readings[key] = (latest, values)
+        distance = (when > at, abs(when - at))
+        closest = readings.get(key)
+        if closest is None or distance < closest[0]:
+            readings[key] = (distance, {payload.original})
+        elif distance == closest[0]:
+            closest[1].add(payload.original)
     return readings
 
 

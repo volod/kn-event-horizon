@@ -30,49 +30,6 @@ archive.
 
 ## Agent Implementation Tasks
 
-### Claims, change tracking and lineage -- `object-identity`
-
-#### object-identity-implementation-audit
-
-Identity is the core model, and KN IDs are stored in counterparts and exports, so a flaw in minting,
-lifecycle, or matching is the most expensive kind to fix later.
-
-- Serves: `object-identity` -- [Object identity](../design/spec.md#object-identity)
-- Agent status: CLEAR
-- Dependencies: The accepted task records of the group and the [implementation
-  audit](../guide/planning-workflow.md#implementation-audits) checks. `identity-match-calibration`
-  stays open and is reviewed for the readiness of its inputs. The [identity resolution
-  audit](records/0042-object-identity-identity-resolution-implementation-audit.md) lists the
-  accepted matching limitations to recheck, and the [evidence model
-  limitations](current/evidence-model.md#known-limitations) name facts stored under a KN ID that
-  was later merged. The [lineage lookup](current/object-identity.md#lineage-lookup) and its
-  [task record](records/0047-object-identity-object-lineage-lookup.md) trace values to raw records
-  and report such facts as gaps. The
-  [incremental writes record](records/0048-object-identity-identity-incremental-writes.md) gives
-  the PostgreSQL scale, recovery and rebuild parity checks.
-- User-visible outcome: Every later group resolves objects through a verified identity registry. The
-  audit record gives every check a result and every finding a disposition. The current-state page
-  lists known limitations, and each scheduled finding is a plan task.
-- Scope boundary: Focus: KN ID minting and the identity event log replayed before raw records;
-  merge, split, retire, and successor chains, including a merge of merged objects and a split after
-  export; resolution of retired IDs; blocking that misses candidates; reproducible match features
-  and probabilities; the rule against merging by name alone; change-set classes for absent, emptied,
-  and unchanged fields; lineage from any value to its raw record; identity drift on rebuild;
-  blocking cost at the target volume. Fixes only; new behavior becomes plan tasks.
-- Data and artifact paths: `contracts/core/identity/`, `src/kn/identity/`, `$DATA_DIR/identity/`,
-  `tests/identity/`, `docs/impl/plan.md`, and the task record.
-- Execution path: Rerun the group's acceptance commands, then work through the audit checks. Rebuild
-  twice from the ordered journal and compare KN IDs, links and match records. Reject reordered
-  events. Shuffle source fixture order separately and compare resolution decisions. Trace a late
-  update and an omitted field through claims, confirmations and the selected fact.
-- Acceptance gates: Rebuilds reproduce every KN ID and lifecycle state. A merge followed by a split
-  leaves every ID resolvable. Objects that differ in a discriminating attribute never link
-  automatically. A late or omitted field preserves history. Every canonical value traces to its
-  source record and evidence locator. Every finding has a severity,
-  evidence, and a disposition, no `blocker` is accepted, and every fix starts from a failing
-  regression test. `make ci` passes with the scheduled tasks in the plan.
-- Documentation target: `current/object-identity.md` listed in the [areas index](current.md#areas).
-
 ### Verification and review -- `evidence-model`
 
 #### human-verification-projections
@@ -83,7 +40,6 @@ adding a column to one domain would leave labels, links and other facts uncovere
 - Serves: `evidence-model` -- [Human verification metadata](../design/spec.md#human-verification-metadata)
 - Agent status: CLEAR
 - Execution stage: MODEL
-- Requires: `object-identity-implementation-audit`
 - Dependencies: The [50-table coverage inventory](records/0028-adhoc-human-verification-model-review.md)
   and [design](../design/human-verification.md), reviewed semantic snapshots and SATCOM fixtures.
 - User-visible outcome: Every current record and addressable field has optional human verification
@@ -118,7 +74,7 @@ Human decisions on conflicts and candidates need a bilingual workflow that survi
 
 - Serves: `evidence-model` -- [Evidence model](../design/spec.md#evidence-model)
 - Agent status: CLEAR
-- Requires: `object-identity-implementation-audit`, `human-verification-projections`
+- Requires: `human-verification-projections`
 - Dependencies: The durable [identity review match rows](current/object-identity.md#match-resolution).
 - User-visible outcome: `kn review list` and `kn review decide` work in `en` and `uk` for fact
   conflicts, identity match candidates, and identity drift. Decisions are appended to
@@ -138,7 +94,9 @@ Human decisions on conflicts and candidates need a bilingual workflow that survi
 - Acceptance gates: Decisions apply idempotently. A decision whose claim key disappears is
   reported as orphaned. Verification timestamps appear only for accepted human decisions on the
   matching scope/version; rejecting or revoking clears the active stamp and keeps history.
-  `kn review list --overrides` lists the flagged owner overrides. Golden outputs cover both locales.
+  `kn review list --overrides` lists the flagged owner overrides. An accepted identity match links
+  the record and records its authoritative keys and identity attributes, as an automatic link
+  does. Golden outputs cover both locales.
 - Documentation target: `current/evidence-model.md` listed in the [areas index](current.md#areas).
 
 #### evidence-model-implementation-audit
@@ -235,8 +193,7 @@ monitoring workflows begin writing them.
 - Serves: `ingestion-engine` -- [Ingestion engine](../design/spec.md#ingestion-engine)
 - Agent status: CLEAR
 - Execution stage: MODEL
-- Requires: `object-identity-implementation-audit`,
-  `raw-archive-implementation-audit`
+- Requires: `raw-archive-implementation-audit`
 - Dependencies: The run, cursor, archive and monitoring fields in the specification and the
   [standard source error codes](current/source-management.md#error-codes-and-pagination).
   Fixtures can supply source IDs, archive IDs and claim keys without executing a crawler.
@@ -261,8 +218,7 @@ The core engine must run end to end on a synthetic source before any real source
 
 - Serves: `ingestion-engine` -- [Ingestion engine](../design/spec.md#ingestion-engine)
 - Agent status: CLEAR
-- Requires: `raw-archive-implementation-audit`, `object-identity-implementation-audit`,
-  `ingestion-state-contracts`
+- Requires: `raw-archive-implementation-audit`, `ingestion-state-contracts`
 - Dependencies: The [crawler validator and enablement evidence](current/source-management.md#enablement-evidence).
 - User-visible outcome: `kn source run` and `kn source replay` process a synthetic fixture source
   served locally. They write WARC records, identity events, claims with evidence linked to KN IDs,
@@ -369,7 +325,7 @@ Most source-specific behavior must live in configuration, not code.
 
 - Serves: `ingestion-engine` -- [Ingestion engine](../design/spec.md#ingestion-engine)
 - Agent status: CLEAR
-- Requires: `http-fetch-safety`, `object-identity-implementation-audit`
+- Requires: `http-fetch-safety`
 - Dependencies: The [partial-update tracker and its crawler mapping helpers](current/object-identity.md#partial-update-tracking).
 - User-visible outcome: Crawler configurations map native fields to contract field IDs. They also
   map units with logged conversions, native codes to concepts with mapping types, classes and
@@ -501,6 +457,33 @@ Schema changes during development must cost a rebuild, never a re-fetch or a los
 - Documentation target: `current/ingestion-engine.md` listed in the
   [areas index](current.md#areas).
 
+#### fragment-claims-follow-splits
+
+A weak-key fragment claims through its parent record's link and has no link of its own, so a split
+cannot assign its claims. They leave lineage and canonical selection until the raw replay tracks
+the fragment again.
+
+- Serves: `object-identity` -- [Object identity](../design/spec.md#object-identity)
+- Agent status: CLEAR
+- Dependencies: Finding OIA-05 of the [object identity
+  audit](records/0049-object-identity-object-identity-implementation-audit.md#findings) and the
+  `claim_successor_missing` gap of the [lineage lookup](current/object-identity.md#lineage-lookup).
+- User-visible outcome: After a split, each claim of a weak-key fragment belongs to the successor
+  that holds its parent record, in `kn lineage` and in the fact projection, without a rebuild.
+- Scope boundary: Durable fragment-to-parent lineage in the identity journal, added as an optional
+  field so existing v1 event hashes stay valid, and its use by the lineage view and the fact
+  projection. Splits still assign links, identifiers and attributes. Tracking never runs the
+  matcher.
+- Data and artifact paths: `src/kn/identity/`, `src/kn/evidence/`, `contracts/core/identity/`,
+  `tests/identity/`, `tests/evidence/`.
+- Execution path: Start from `test_a_fragment_claim_that_no_split_successor_holds_is_a_gap`. Track a
+  parent and a fragment, split the parent's object, then project facts and look up both successors.
+- Acceptance gates: The fragment's claims appear under exactly one successor in lineage and the
+  fact projection, and no `claim_successor_missing` gap remains. A parent record relinked to another
+  object takes later fragment claims with it. Existing v1 journals replay with unchanged hashes.
+  `make ci` passes.
+- Documentation target: `current/object-identity.md` listed in the [areas index](current.md#areas).
+
 #### ingestion-engine-implementation-audit
 
 Every source runs through the engine, so a defect in fetch safety, mapping, or replay would recur in
@@ -509,7 +492,8 @@ every source suite and every rebuild.
 - Serves: `ingestion-engine` -- [Ingestion engine](../design/spec.md#ingestion-engine)
 - Agent status: CLEAR
 - Requires: `http-fetch-safety`, `mapping-and-quality-rules`, `curated-source-method`,
-  `dataset-package-locations`, `prefetched-dataset-method`, `rebuild-from-raw`
+  `dataset-package-locations`, `prefetched-dataset-method`, `rebuild-from-raw`,
+  `fragment-claims-follow-splits`
 - Dependencies: The accepted task records of the group and the [implementation
   audit](../guide/planning-workflow.md#implementation-audits) checks.
 - User-visible outcome: Every source runs on a verified, source-neutral engine. The audit record
@@ -572,7 +556,7 @@ domain and counterpart shares.
 - Serves: `part-supply-model` -- [Part and supply model](../design/spec.md#part-and-supply-model)
 - Agent status: CLEAR
 - Execution stage: MODEL
-- Requires: `vendor-information-coverage`, `object-identity-implementation-audit`
+- Requires: `vendor-information-coverage`
 - Dependencies: none.
 - User-visible outcome: The `supply` schema holds organization roles, product families and models,
   manufacturer parts, orderable variants, and supplier offers. It also holds price, stock, and
@@ -633,7 +617,7 @@ Exchange with any counterpart needs one versioned, documented shape for KN objec
 - Serves: `data-interchange` -- [Data interchange](../design/spec.md#data-interchange)
 - Agent status: CLEAR
 - Execution stage: MODEL
-- Requires: `part-supply-model-implementation-audit`, `object-identity-implementation-audit`
+- Requires: `part-supply-model-implementation-audit`
 - Dependencies: none.
 - User-visible outcome: The versioned interchange record and package-manifest schemas at `0.1.0`
   compile to JSON Schema before a runtime exporter exists. Stable object, field and verification
@@ -715,8 +699,7 @@ tracking are available.
 
 - Serves: `data-interchange` -- [Data interchange](../design/spec.md#data-interchange)
 - Agent status: CLEAR
-- Requires: `interchange-contract`, `object-identity-implementation-audit`,
-  `evidence-model-implementation-audit`
+- Requires: `interchange-contract`, `evidence-model-implementation-audit`
 - Dependencies: The accepted interchange schema and manifest definitions.
 - User-visible outcome: `kn interchange export` writes an atomic, verified deterministic ZIP
   from one snapshot; `kn interchange validate` checks a package against its declared version.
@@ -739,7 +722,7 @@ overwritten unseen.
 
 - Serves: `data-interchange` -- [Data interchange](../design/spec.md#data-interchange)
 - Agent status: CLEAR
-- Requires: `exchange-ledger-contracts`, `object-identity-implementation-audit`
+- Requires: `exchange-ledger-contracts`
 - Dependencies: none.
 - User-visible outcome: The append-only exchange ledger in `$DATA_DIR/exchange/<counterpart>/`
   records bindings, per-field sync state, plans, and receipts, and rebuild replays it into the
@@ -1065,9 +1048,11 @@ Match probabilities mean something only after they are measured on real records.
 - Serves: `object-identity` -- [Object identity](../design/spec.md#object-identity)
 - Agent status: RUN NEEDED
 - Research: yes
-- Requires: `vl-itree-read-acceptance`, `object-identity-implementation-audit`
+- Requires: `vl-itree-read-acceptance`
 - Dependencies: Archived authorized samples that carry authoritative identifiers, starting with the
-  `vl-itree` read import and the first vendor sources. Owner-labeled pairs are optional.
+  `vl-itree` read import and the first vendor sources. Owner-labeled pairs are optional. The
+  [match resolution](current/object-identity.md#match-resolution) gates, including the veto by a
+  disagreeing discriminating attribute, define which held-out pairs count as automatic links.
 - User-visible outcome: A calibration report per class gives precision and recall at both
   thresholds and the calibration error per probability band. Profiles that meet the gate are marked
   `calibrated` and may auto-link.
@@ -1130,7 +1115,6 @@ Canonical space tables must represent the preserved source examples without conf
 - Serves: `space-elt` -- [Space ELT](../design/spec.md#space-elt)
 - Agent status: CLEAR
 - Execution stage: MODEL
-- Requires: `object-identity-implementation-audit`
 - Dependencies: [Space domain model](../design/domains/space.md#domain-model) and the initial
   [space example dataset](current/data-contracts.md#source-preservation-and-import).
 - User-visible outcome: The `space` schema holds every pilot table, with claim links,
@@ -1319,7 +1303,6 @@ Users need a safe, read-only Obsidian subset of the knowledge base.
 
 - Serves: `obsidian-export` -- [Obsidian export](../design/spec.md#obsidian-export)
 - Agent status: CLEAR
-- Requires: `object-identity-implementation-audit`
 - Dependencies: none.
 - User-visible outcome: `kn export obsidian --profile <id> --locale en|uk` writes a verified vault
   ZIP and manifest from one snapshot.
@@ -1540,8 +1523,7 @@ Dashboards must deploy reproducibly from one definition in both locales.
 
 - Serves: `space-dashboards` -- [Space dashboards](../design/spec.md#space-dashboards)
 - Agent status: CLEAR
-- Requires: `space-analytics-marts`, `dashboards-as-code`, `evidence-model-implementation-audit`,
-  `object-identity-implementation-audit`
+- Requires: `space-analytics-marts`, `dashboards-as-code`, `evidence-model-implementation-audit`
 - Dependencies: The read-only [lineage view](current/object-identity.md#lineage-lookup), which
   counts withheld rows for operators; this view must leave no restricted value, locator or count.
 - User-visible outcome: An analyst can open "Why this fact?" on a selected value and see why
@@ -1617,7 +1599,7 @@ GDELT signals need their own schema that never writes canonical domain facts.
 - Serves: `gdelt-elt` -- [GDELT ELT](../design/spec.md#gdelt-elt)
 - Agent status: CLEAR
 - Execution stage: MODEL
-- Requires: `object-identity-implementation-audit`, `source-management-implementation-audit`
+- Requires: `source-management-implementation-audit`
 - Dependencies: [GDELT design](../design/domains/gdelt.md).
 - User-visible outcome: The `gdelt` schema holds watches, query runs, article metadata, native
   dictionaries, story clusters, signals, and candidate links.
@@ -1794,7 +1776,7 @@ Product identity and condition-bound observations need typed contracts.
 - Serves: `microelectronics-elt` -- [Microelectronics ELT](../design/spec.md#microelectronics-elt)
 - Agent status: CLEAR
 - Execution stage: MODEL
-- Requires: `object-identity-implementation-audit`, `part-supply-model-implementation-audit`
+- Requires: `part-supply-model-implementation-audit`
 - Dependencies: [Microelectronics design](../design/domains/microelectronics.md) and the
   [pending seed policies](current/ontology-taxonomy/seeds.md#unmapped-rows-and-ownership).
 - User-visible outcome: The `microelectronics` schema holds families, models, MPNs, dies, IP

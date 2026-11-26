@@ -754,9 +754,10 @@ order:
 2. A record already linked through its source-qualified key keeps that link.
 3. A scored match computes the summed log-likelihood weight and the posterior probability for
    each blocked candidate. It auto-links only when all of these hold: the probability reaches the
-   link threshold, a discriminating attribute agrees, one candidate leads all others by the
-   declared margin, and the profile is `calibrated`. A probability between the thresholds, or two
-   close candidates, opens a review item. A lower probability mints a new object.
+   link threshold, a discriminating attribute agrees and none disagrees, one candidate leads all
+   others by the declared margin, and the profile is `calibrated`. A probability between the
+   thresholds, or two close candidates, opens a review item. A lower probability mints a new
+   object.
 4. Alias candidates without a discriminating attribute never link automatically.
 
 Profile validation rejects a profile whose link threshold can be reached by name or description
@@ -806,7 +807,8 @@ Evaluation:
   lifecycle states, and redirects.
 - Fixtures cover one MPN from two manufacturers (two objects), packaging variants (distinct
   orderables), a renamed organization with a stable LEI (one object), name-only similarity
-  (never auto-links), and permuted input order (same decisions).
+  (never auto-links), and permuted input order (the same objects and decision counts; only which
+  of two similar records waits for review can change).
 - A merge and then a split restores links deterministically with history. A cross-class merge is
   refused. A redirect chain resolves in one step.
 - Partial-update fixtures cover a price-only record, an emptied field, a field a record omits, a

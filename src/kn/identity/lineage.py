@@ -8,13 +8,13 @@ does not permit every rights statement sees no identity attribute or match featu
 """
 
 from collections import Counter
-from collections.abc import Collection, Iterator
+from collections.abc import Callable, Collection, Iterator
 from typing import Any
 
 from kn.evidence.lineage import EvidenceRows, Row, View, evidence_view, gap
 from kn.evidence.ranking import Audience
 from kn.identity.events import Event
-from kn.identity.lineage_records import records
+from kn.identity.lineage_records import held_by_successor, records
 from kn.identity.model import Attribute, Identifier, Link, Match, uuid7
 from kn.identity.queries import participants
 from kn.identity.state import Holding, State
@@ -78,15 +78,14 @@ def lineage(
         if isinstance(payload := holding.event.payload, Link)
     }
 
-    def belongs(row: Row) -> bool:
-        # A split object's claim follows the source record to the successor that holds it.
-        return len(state.resolve(row["kn_id"])) == 1 or row["record_id"] in linked
-
+    belongs, unplaced = _placement(state, linked)
     found = evidence_view(
         rows, scope, terminals, field_id=field_id, audience=audience, belongs=belongs
     )
     claims = found.sections["claims"]
     open_view = audience.rights is None
+    if open_view:
+        found.gaps.extend(gap("claim_successor_missing", key) for key in sorted(unplaced))
     identity = _identity(state, scope, held, linked, field_id, open_view, found.withheld)
     cited = linked | {row["record_id"] for row in claims}
     return {
@@ -103,6 +102,21 @@ def lineage(
         "withheld": {name: count for name, count in sorted(found.withheld.items()) if count},
         "gaps": [*_claim_gaps(state, claims), *found.gaps],
     }
+
+
+def _placement(state: State, linked: set[str]) -> tuple[Callable[[Row], bool], list[str]]:
+    """Which claims the view holds, and the claims no split successor holds, as they are read."""
+    unplaced: list[str] = []
+
+    def belongs(row: Row) -> bool:
+        # A split object's claim follows the source record to the successor that holds it.
+        if len(state.resolve(row["kn_id"])) == 1 or row["record_id"] in linked:
+            return True
+        if not held_by_successor(state, row["record_id"], row["kn_id"]):
+            unplaced.append(row["claim_key"])
+        return False
+
+    return belongs, unplaced
 
 
 def _identity(

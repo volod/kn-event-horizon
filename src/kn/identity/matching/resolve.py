@@ -4,7 +4,7 @@ from collections.abc import Iterable, Mapping
 from dataclasses import dataclass
 
 from kn.contracts.model import canonical
-from kn.identity.matching.comparators import AGREEING_OUTCOMES
+from kn.identity.matching.comparators import AGREEING_OUTCOMES, DISAGREE
 from kn.identity.matching.observe import Observation
 from kn.identity.matching.registry import (
     anchor,
@@ -76,10 +76,9 @@ def _can_link(profile: Profile, ranked: tuple[Candidate, ...]) -> bool:
         if best.probability - runner_up.probability < profile.minimum_margin:
             return False
     discriminators = {item.field_id for item in profile.attributes if item.discriminating}
-    return any(
-        item.field_id in discriminators and item.outcome in AGREEING_OUTCOMES
-        for item in best.features
-    )
+    outcomes = {item.outcome for item in best.features if item.field_id in discriminators}
+    # Objects that differ in a discriminating attribute never link automatically.
+    return DISAGREE not in outcomes and bool(outcomes & AGREEING_OUTCOMES)
 
 
 def _best(
