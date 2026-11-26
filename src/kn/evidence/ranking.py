@@ -95,15 +95,32 @@ class Audience(Frozen):
         return self.rights is None or rights in self.rights
 
 
+class ReviewSnapshot(Frozen):
+    at: Instant
+    selected: dict[Text, Instant]
+    rejected: dict[Text, Instant]
+    decisions: dict[Text, Instant]
+
+
 class Reviews(Frozen):
     """Accepted review outcomes by claim key, each with the time KN recorded the decision."""
 
+    snapshots: tuple[ReviewSnapshot, ...] = ()
     selected: dict[Text, Instant] = Field(default_factory=dict)
     rejected: dict[Text, Instant] = Field(default_factory=dict)
     decisions: dict[Text, Instant] = Field(default_factory=dict)
 
     def at(self, instant: datetime) -> Self:
         """Only decisions recorded by the instant; a later decision never rewrites history."""
+
+        if self.snapshots:
+            visible = [state for state in self.snapshots if state.at <= instant]
+            if not visible:
+                return type(self)()
+            state = visible[-1]
+            return type(self)(
+                selected=state.selected, rejected=state.rejected, decisions=state.decisions
+            )
 
         def known(values: dict[str, datetime]) -> dict[str, datetime]:
             return {key: time for key, time in values.items() if time <= instant}
@@ -115,7 +132,11 @@ class Reviews(Frozen):
         )
 
     def times(self) -> set[datetime]:
-        return {*self.selected.values(), *self.rejected.values(), *self.decisions.values()}
+        return {state.at for state in self.snapshots} | {
+            *self.selected.values(),
+            *self.rejected.values(),
+            *self.decisions.values(),
+        }
 
 
 type Resolve = Callable[[str], tuple[str, ...]]

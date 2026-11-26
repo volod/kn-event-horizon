@@ -15,9 +15,9 @@
       "--help"
     ],
     "expected": {
-      "exit_code": 0,
+      "stdout": "usage: kn [-h] [--json]\n          {info,contract,db,identity,review,lineage,source,space,vocabulary}\n          ...\n\noptions:\n  -h, --help            show this help message and exit\n  --json                emit machine-readable JSON with stable keys\n\ncommands:\n  {info,contract,db,identity,review,lineage,source,space,vocabulary}\n    info                show the installed project identity\n    contract            validate or compile open data contracts\n    db                  apply or verify governed schema revisions\n    identity            inspect and review object identity\n    review              list and decide review items\n    lineage             trace an object or field to its records and decisions\n    source              list and validate sources\n    space               space-domain datasets\n    vocabulary          review and export controlled vocabularies\n",
       "stderr": "",
-      "stdout": "usage: kn [-h] [--json]\n          {info,contract,db,identity,lineage,source,space,vocabulary} ...\n\noptions:\n  -h, --help            show this help message and exit\n  --json                emit machine-readable JSON with stable keys\n\ncommands:\n  {info,contract,db,identity,lineage,source,space,vocabulary}\n    info                show the installed project identity\n    contract            validate or compile open data contracts\n    db                  apply or verify governed schema revisions\n    identity            inspect and review object identity\n    lineage             trace an object or field to its records and decisions\n    source              list and validate sources\n    space               space-domain datasets\n    vocabulary          review and export controlled vocabularies\n"
+      "exit_code": 0
     },
     "id": "root-help"
   },
@@ -165,9 +165,9 @@
       "unknown"
     ],
     "expected": {
-      "exit_code": 2,
+      "stdout": "usage: kn [-h] [--json]\n          {info,contract,db,identity,review,lineage,source,space,vocabulary}\n          ...\n",
       "stderr": "E_ARGUMENTS: invalid arguments for kn; use --help.\n",
-      "stdout": "usage: kn [-h] [--json]\n          {info,contract,db,identity,lineage,source,space,vocabulary} ...\n"
+      "exit_code": 2
     },
     "id": "invalid-command"
   },
@@ -176,7 +176,7 @@
     "expected": {
       "exit_code": 2,
       "stderr": "E_ARGUMENTS: invalid arguments for kn; use --help.\n",
-      "stdout": "usage: kn [-h] [--json]\n          {info,contract,db,identity,lineage,source,space,vocabulary} ...\n"
+      "stdout": "usage: kn [-h] [--json]\n          {info,contract,db,identity,review,lineage,source,space,vocabulary} ...\n"
     },
     "id": "missing-command"
   },
@@ -372,5 +372,30 @@
       "stdout": "usage: kn identity reclassify [-h] --request-id REQUEST_ID --performed-at\n                              PERFORMED_AT --reason REASON --evidence EVIDENCE\n                              --anchor-source ANCHOR_SOURCE --anchor-key\n                              ANCHOR_KEY\n                              KN_ID entity_class\n\nretire the object and mint a successor of a different class\n\narguments:\n  KN_ID                 canonical kn: UUIDv7\n  entity_class          entity class of the new successor\n\noptions:\n  -h, --help            show this help message and exit\n  --request-id REQUEST_ID\n                        unique review request ID, reused on retry\n  --performed-at PERFORMED_AT\n                        review time in ISO 8601 with an explicit UTC offset\n  --reason REASON       reason for the identity change\n  --evidence EVIDENCE   reference to supporting evidence\n  --anchor-source ANCHOR_SOURCE\n                        source of the new anchoring record\n  --anchor-key ANCHOR_KEY\n                        native key of the new anchoring record\n"
     },
     "id": "identity-reclassify-help"
+  },
+  {
+    "id": "review-help",
+    "arguments": [
+      "review",
+      "--help"
+    ],
+    "expected": {
+      "stdout": "usage: kn review [-h] {list,decide,replay} ...\n\narguments:\n  {list,decide,replay}\n\noptions:\n  -h, --help            show this help message and exit\n",
+      "stderr": "",
+      "exit_code": 0
+    }
+  },
+  {
+    "id": "review-decide-help",
+    "arguments": [
+      "review",
+      "decide",
+      "--help"
+    ],
+    "expected": {
+      "stdout": "usage: kn review decide [-h] [--data-dir DATA_DIR] [--domain DOMAIN]\n                        (--item ITEM_ID | --target TARGET) [--select SELECTED]\n                        --outcome {accept,reject,revoke,supersede}\n                        --request-id REQUEST_ID --performed-at PERFORMED_AT\n                        --reason REASON --evidence EVIDENCE\n                        [--predecessor PREDECESSOR]\n\noptions:\n  -h, --help            show this help message and exit\n  --data-dir DATA_DIR\n  --domain DOMAIN\n  --item ITEM_ID\n  --target TARGET\n  --select SELECTED\n  --outcome {accept,reject,revoke,supersede}\n  --request-id REQUEST_ID\n  --performed-at PERFORMED_AT\n  --reason REASON\n  --evidence EVIDENCE\n  --predecessor PREDECESSOR\n",
+      "stderr": "",
+      "exit_code": 0
+    }
   }
 ]

@@ -199,6 +199,8 @@ class MatchTrace(Frozen):
 
 
 class Match(Frozen):
+    review_observation: Text | None = Field(default=None, exclude_if=lambda value: value is None)
+    review_profile: Text | None = Field(default=None, exclude_if=lambda value: value is None)
     kind: Literal["match_recorded"] = "match_recorded"
     record: SourceKey
     profile_digest: Digest

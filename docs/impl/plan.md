@@ -32,36 +32,6 @@ archive.
 
 ### Verification and review -- `evidence-model`
 
-#### review-queue-cli
-
-Human decisions on conflicts and candidates need a workflow that survives rebuilds.
-
-- Serves: `evidence-model` -- [Evidence model](../design/spec.md#evidence-model)
-- Agent status: CLEAR
-- Dependencies: The durable [identity review match rows](current/object-identity.md#match-resolution)
-  and [shared verification projections and replay](current/evidence-model.md#current-verification-reads).
-- User-visible outcome: `kn review list` and `kn review decide` handle fact
-  conflicts, identity match candidates, and identity drift. Decisions are appended to
-  `$DATA_DIR/decisions/<domain>/` and applied to review items.
-- Scope boundary: The CLI, the decision log format, and re-attachment by deterministic keys with an
-  orphan report. Item types are registered, so later capabilities such as exchange conflicts reuse
-  the queue. Rebuild-time replay comes in `rebuild-from-raw`.
-  Record/field verification items reuse the shared log and target/version protocol. Resolve the
-  authorized human reviewer at the operator boundary, show the reviewed scope/version, and expose
-  acceptance, rejection and revocation without accepting actor identity from source data.
-  Derive the selector's [accepted reviews](current/evidence-model.md#canonical-selection) from
-  applied decisions, and report each source's dispute rate to support rank overrides.
-- Data and artifact paths: `src/kn/review/`, `src/kn/cli.py`, `$DATA_DIR/decisions/`,
-  `tests/review/`.
-- Execution path: Write an append-only JSON Lines log with the reviewer, reason, and time.
-- Acceptance gates: Decisions apply idempotently. A decision whose claim key disappears is
-  reported as orphaned. Verification timestamps appear only for accepted human decisions on the
-  matching scope/version; rejecting or revoking clears the active stamp and keeps history.
-  `kn review list --overrides` lists the flagged owner overrides. An accepted identity match links
-  the record and records its authoritative keys and identity attributes, as an automatic link
-  does. Golden outputs cover English text and stable JSON.
-- Documentation target: `current/evidence-model.md` listed in the [areas index](current.md#areas).
-
 #### evidence-model-implementation-audit
 
 Claims and canonical selection decide what KN states as true, so an order-dependent or ambiguous
@@ -69,9 +39,9 @@ rule would surface only after many sources depend on it.
 
 - Serves: `evidence-model` -- [Evidence model](../design/spec.md#evidence-model)
 - Agent status: CLEAR
-- Requires: `review-queue-cli`
-- Dependencies: The accepted task records of the group and the [implementation
-  audit](../guide/planning-workflow.md#implementation-audits) checks.
+- Dependencies: The accepted task records of the group, including the
+  [review queue record](records/0052-evidence-model-review-queue-cli.md), and the
+  [implementation audit](../guide/planning-workflow.md#implementation-audits) checks.
 - User-visible outcome: Canonical values are shown to be order-independent and explainable. The
   audit record gives every check a result and every finding a disposition. The current-state page
   lists known limitations, and each scheduled finding is a plan task.

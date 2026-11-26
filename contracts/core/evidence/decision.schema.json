@@ -1,5 +1,52 @@
 {
   "$defs": {
+    "Choice": {
+      "additionalProperties": false,
+      "properties": {
+        "item_id": {
+          "pattern": "^[0-9a-f]{64}$",
+          "title": "Item Id",
+          "type": "string"
+        },
+        "kind": {
+          "minLength": 1,
+          "pattern": "\\S",
+          "title": "Kind",
+          "type": "string"
+        },
+        "candidates": {
+          "items": {
+            "minLength": 1,
+            "pattern": "\\S",
+            "type": "string"
+          },
+          "minItems": 1,
+          "title": "Candidates",
+          "type": "array"
+        },
+        "selected": {
+          "anyOf": [
+            {
+              "minLength": 1,
+              "pattern": "\\S",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Selected"
+        }
+      },
+      "required": [
+        "item_id",
+        "kind",
+        "candidates"
+      ],
+      "title": "Choice",
+      "type": "object"
+    },
     "KeyPart": {
       "additionalProperties": false,
       "properties": {
@@ -120,6 +167,17 @@
   },
   "additionalProperties": false,
   "properties": {
+    "queue": {
+      "anyOf": [
+        {
+          "$ref": "#/$defs/Choice"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null
+    },
     "request_id": {
       "minLength": 1,
       "pattern": "\\S",

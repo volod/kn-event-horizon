@@ -209,3 +209,17 @@ def test_match_retry_uses_the_link_and_identifiers_before_its_decision(tmp_path:
     assert apply(journal, config, first) == minted
     assert apply(journal, config, later) == linked
     assert journal.path.read_bytes() == before
+
+
+def test_existing_record_identity_attribute_drift_opens_review(tmp_path: Path) -> None:
+    journal = Journal(tmp_path)
+    config = profile()
+    first = apply(journal, config, observation({"organization.domain": "fixture-first.com"}))
+    changed = observation({"organization.domain": "fixture-changed.com"}, version="2")
+    result = apply(journal, config, changed)
+    assert result.match.decision == "review"
+    assert result.match.trace.route == "conflict"
+    assert result.match.selected is None
+    assert [candidate.kn_id for candidate in result.match.candidates] == [first.kn_id]
+    assert result.match.review_observation is not None
+    assert result.match.review_profile is not None

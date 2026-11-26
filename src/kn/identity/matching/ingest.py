@@ -5,6 +5,7 @@ from dataclasses import dataclass
 
 from sqlalchemy.engine import Connection
 
+from kn.contracts.model import canonical
 from kn.identity import store
 from kn.identity.events import Event, event
 from kn.identity.journal import Journal, LockedJournal, new_id
@@ -73,7 +74,17 @@ def record(
     target = match.selected or minted
     planned = _plan(locked.state, profile, incoming, target, minted)
     trace = trace.model_copy(update={"minted_id": minted, "followup_count": planned.count})
-    match = match.model_copy(update={"trace": trace})
+    match = match.model_copy(
+        update={
+            "trace": trace,
+            "review_observation": canonical(incoming.model_dump(mode="json"))
+            if match.decision == "review"
+            else None,
+            "review_profile": canonical(profile.model_dump(mode="json"))
+            if match.decision == "review"
+            else None,
+        }
+    )
     entry = event(
         match,
         previous=locked.head,
@@ -161,11 +172,11 @@ def _plan(
         item.ended_event is None if before is None else item.was_active(before)
         for item in source_links(state, incoming.record)
     )
-    observed = _observed(state, profile, incoming, target, before=before)
+    observed = observations(state, profile, incoming, target, before=before)
     return Followups(mint, not active_link, tuple(observed))
 
 
-def _observed(
+def observations(
     state: State, profile: Profile, incoming: Observation, target: str, *, before: int | None
 ) -> Iterator[Identifier | Attribute]:
     for key in sorted(incoming.authoritative, key=lambda item: item.parts):

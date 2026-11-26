@@ -189,8 +189,9 @@ nondiscriminating evidence alone.
 
 A receipt returns the match digest, stored match and bound KN ID, with an empty KN ID for
 review. A retried observation returns its original receipt, whose KN ID can since have been
-merged or split; resolve it before storing it outside KN. Review decisions are durable match rows
-available to `review-queue-cli` when that workflow ships. For verification,
+merged or split; resolve it before storing it outside KN. Review candidates are durable match rows
+consumed by the [review queue](evidence-model.md#operator-review-queue). New review matches retain
+the original observation and profile for accepted link/key/attribute registration. For verification,
 `kn.identity.matching.scoring.verify_match(profile, match)` checks the profile digest and
 version, reruns the comparators on the recorded inputs, and reproduces the score and probability.
 Exact shortcuts record the matched identifier or source key, with a weight and score of zero and
@@ -438,7 +439,8 @@ and the [object identity audit](../records/0049-object-identity-object-identity-
 - Resolution is sequential. Of two similar records without a shared key, the first mints and the
   second opens review, so arrival order decides which one waits. A record in review registers no
   identifiers or attributes, and a later record with the same unregistered key can mint. Accepted
-  matches will register them through `review-queue-cli`. Reopen this if reviewed duplicates grow
+  matches register them through the [review queue](evidence-model.md#operator-review-queue).
+  Reopen this if reviewed duplicates grow
   with source count.
 - An alias that names a retired object is ignored, and the record resolves as if it carried no
   alias. Reopen this when a counterpart import returns retired KN IDs.

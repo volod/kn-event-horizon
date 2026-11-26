@@ -66,5 +66,6 @@ decision. A record can name a plan task by ID because plan headings disappear on
 | 0049 | `object-identity-implementation-audit` | [Object identity implementation audit](0049-object-identity-object-identity-implementation-audit.md) |
 | 0050 | CLI golden tests and localization scope | [CLI localization scope](0050-adhoc-cli-localization-scope.md) |
 | 0051 | All-table human verification projections and replay | [Human verification projections](0051-evidence-model-human-verification-projections.md) |
+| 0052 | `review-queue-cli` | [Review queue CLI](0052-evidence-model-review-queue-cli.md) |
 
-Next unused sequence is `0052`.
+Next unused sequence is `0053`.

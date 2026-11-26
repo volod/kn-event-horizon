@@ -6,7 +6,7 @@ from pathlib import Path
 
 from jsonschema import Draft202012Validator
 
-from kn.identity.events import Event
+from kn.identity.events import Event, event
 from kn.identity.journal import Journal
 from kn.identity.matching.ingest import Receipt, record
 from kn.identity.matching.observe import Key, Observation, Reading
@@ -136,7 +136,26 @@ def test_blocking_checks_the_latest_reading_at_the_observation_instant(tmp_path:
     journal = Journal(tmp_path)
     config = profile()
     first = _ingest(journal, config, _org("src:known", 0, domain="fixture-alpha.com"))
-    _ingest(journal, config, _org("src:known", 2, version="2", domain="fixture-beta.com"))
+    incoming = _org("src:known", 2, version="2", domain="fixture-beta.com")
+    with journal.locked() as locked:
+        locked.append(
+            event(
+                Attribute(
+                    kn_id=first.kn_id,
+                    field_id="organization.domain",
+                    original="fixture-beta.com",
+                    normalized="fixture-beta.com",
+                    normalizer="registrable-domain-v1",
+                    profile_digest=config.digest,
+                    record=incoming.record,
+                ),
+                previous=locked.head,
+                occurred_at=incoming.observed_at,
+                actor="person:fixture",
+                reason="Accepted drift fixture",
+                evidence="review:fixture",
+            )
+        )
     with journal.locked() as locked:
         before = resolve(locked.state, config, _org("src:new", 1, domain="fixture-alpha.com"))
         after = resolve(locked.state, config, _org("src:new", 3, domain="fixture-alpha.com"))

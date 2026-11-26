@@ -94,8 +94,12 @@ def check_history(
 
 def restore(connection: Connection, locked: LockedJournal) -> None:
     reviewed = references(locked.state.reviewed)
-    if not reviewed:
-        return
-    store.replay_selected(
-        connection, Journal(locked.data_dir), lambda decisions: check_history(reviewed, decisions)
-    )
+    if reviewed:
+        store.replay_selected(
+            connection,
+            Journal(locked.data_dir),
+            lambda decisions: check_history(reviewed, decisions),
+        )
+    from kn.review.queue_replay import restore_identity_reviews
+
+    restore_identity_reviews(connection, locked)

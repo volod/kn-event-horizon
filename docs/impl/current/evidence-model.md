@@ -7,8 +7,9 @@ database constraints and as-of views. [Partial-update tracking](object-identity.
 writes claims and confirmations into these shapes, and [canonical selection](#canonical-selection)
 projects each field's value from them through its update policy. Every registered dataset exposes
 current human verification metadata through the
-[shared read projection](#current-verification-reads). The review queue and ingestion engine
-remain planned.
+[shared read projection](#current-verification-reads). The
+[operator review queue](#operator-review-queue) is available; the ingestion engine remains
+planned.
 The [lineage lookup](object-identity.md#lineage-lookup) reads these rows through
 `kn.evidence.lineage`, withholding and counting what an audience's rights do not permit.
 Existing source verification labels retain their meanings and grant no human timestamp.
@@ -127,8 +128,8 @@ a selected claim. `SelectionOutcome` records every evaluated claim, including `i
 `kn.evidence.policy` reads a field's `kn.updatePolicy` as `UpdatePolicy` with a canonical
 `digest`, gives rank and evidence-class orders from their vocabularies, and records ranking inputs
 as `Criteria`. `kn.evidence.relations` and `kn.evidence.reviews` define assertions, supports,
-review items and decision events; decision IDs bind the canonical event. Review authentication
-and decision journals come with their plan tasks.
+review items and decision events; decision IDs bind the canonical event. The
+[operator queue](#operator-review-queue) authenticates reviewers and journals their decisions.
 
 ## Canonical selection
 
@@ -288,7 +289,8 @@ of request data. It must establish a human principal and authorization for the t
 agent, import and unauthenticated contexts are refused. Requests cannot supply a reviewer,
 recording time, acceptance stamp or source `verified` attribute. The
 [identity CLI](object-identity.md#operator-lifecycle-commands) uses local terminal approval for
-its workflow decisions. The general review queue and broader operator authorization remain planned.
+its workflow decisions. The review CLI uses the same local-account and controlling-terminal
+boundary. Broader service authentication remains outside this local operator workflow.
 
 Performed times require explicit offsets and normalize to UTC. Date-only, naive, invalid and
 future performed times relative to the trusted recording clock fail. Recording time remains
@@ -305,6 +307,9 @@ inserted idempotently, with a unique request key; the API never updates or delet
 
 `Journal(data_dir)` writes private, fsynced, ASCII JSON Lines to
 `$DATA_DIR/decisions/human-verification-v1.jsonl`, independently of disposable SQL schemas.
+`Journal(data_dir, domain)` uses `$DATA_DIR/decisions/<domain>/human-verification-v1.jsonl`;
+new CLI decisions use this path, with `core` as the default domain. Existing root-level logs
+remain readable, and old events retain their hashes. Domain slugs cannot escape this directory.
 File locking covers validation, deduplication and append; the file and directory entry are synced
 before SQL application. Symlink paths, malformed/torn lines, incompatible versions, missing or
 cross-target predecessors and conflicting request IDs fail closed. Restore a damaged journal
@@ -337,15 +342,133 @@ decision-log targets. The normal commands publish nonempty reports after commit 
 each target. The durable journal has the full events. Restoring other inputs can be followed by
 another replay; the raw engine and external exchange paths have their own planned work.
 
+## Operator review queue
+
+`kn review list`, `kn review decide` and `kn review replay` operate on the configured PostgreSQL
+connection (`KN_DATABASE_URL` and its password file) and `DATA_DIR`. A relative `--data-dir` resolves
+from the project root. The queue is an internal operator read surface: its claim values, provenance,
+identity features and reviewers are not an audience-filtered export. English output escapes source
+text; `--json` uses stable, ASCII JSON keys.
+
+```bash
+kn review list --json
+kn review list --overrides
+kn review decide --domain microelectronics --item ITEM_ID --select CLAIM_KEY \
+  --outcome accept --request-id review-42 --performed-at 2026-11-26T12:00:00Z \
+  --reason "Compared the cited evidence" --evidence review:42
+kn review replay --json
+```
+
+`list` includes deterministic item IDs, registered kinds, candidates, exact target scope/version,
+state, current causal heads and verification metadata. Fact items include the reviewed claim rows;
+identity items include scored features and profile versions. Historical settled items remain
+visible. `--overrides` limits queue items to owner overrides and also returns every current
+canonical fact flagged `owner_override`, including one whose item is already settled. Source dispute
+rates count distinct reviewed claims per source: an explicitly rejected candidate or a nonselected
+candidate in an accepted choice is disputed. Revoked and conflicted heads contribute no current
+assessment; duplicate events never inflate counts. Rates support manual rank-table review and do
+not change ranks themselves.
+
+Queue kinds come from the evidence contract's review-kind vocabulary. Fact conflicts, fixed-value
+changes, empty claims, high-impact values and owner overrides consume claim candidates. Identity
+matches and drift consume durable match events. Relation candidates and quarantine can record a
+workflow acceptance or rejection; their future domain producers supply their own operational
+side effects through this registered seam.
+
+`decide` takes an exact item or a verification target, an outcome (`accept`, `reject`, `revoke`, or
+`supersede`), reason, evidence reference, exact performed time and request ID. A fact decision also
+requires `--select`, including when rejecting a candidate. `--predecessor DECISION_ID` is repeatable;
+use it to replace or revoke a decision, or consume all conflicting heads with `supersede`. Subsequent
+decisions on a target stay in its original domain log. Same-reviewer/request-ID retries preserve
+the original event; cross-domain request-ID reuse fails.
+
+The CLI obtains the principal from the local OS account. It requires private operator-owned
+storage and explicit `yes` on `/dev/tty`, displaying the escaped reviewed values and the exact
+request, scope and version before application. Neither source data nor flags can supply a reviewer.
+An agent or redirected stdin cannot approve a human decision. Unavailable or declined local
+approval returns `E_REVIEW_AUTH`; invalid input returns `E_INPUT`, and SQL failures return
+`E_DATABASE`. Listing and replay do not create human acceptance.
+
+Fact decisions append a shared decision and an evidence `review_decisions` row. A selected existing
+claim ranks `owner_entered` through `kn.review.selection.accepted_reviews(applied_events)`;
+rejections exclude the named claim. The result retains historical snapshots for `Reviews.at`, so
+revocation removes current acceptance without rewriting earlier canonical versions. Concurrent
+independent heads grant no selection until resolved. Workflow acceptance stamps the exact review
+item; it does not approve every candidate or manufacture a factual timestamp on its claim rows.
+Record/field factual verification uses the independent exact-target interface below.
+
+An accepted identity choice registers the source link, authoritative keys and normalized identity
+attributes using the original journaled observation and profile. Changed discriminating attributes
+on an existing source link open `identity_drift` review; they do not silently replace identity data.
+Authority already held by another object must be resolved before accepting a conflicting choice.
+Decisions are fsynced before identity effects and SQL projections, and retries recover interrupted
+batches. An unapplied choice for a source record with a newer match observation is stale and
+requires review of that newer observation. Identity effects retain their decision reference and
+are validated on identity replay.
+Rejecting or revoking the workflow acceptance clears its stamp; an already recorded identity link
+remains a historical operation. Correct ownership through a new reviewed choice or the explicit
+identity lifecycle commands, rather than deleting history.
+
+### Record and field verification
+
+Prepare a target with `kn review list --target QUERY.json --json`. The query contains
+`contract_id`, `dataset`, complete typed `key`, `purpose`, and optional stable `field_id`:
+
+```json
+{
+  "contract_id": "kn.core.semantic",
+  "dataset": "namespace_labels",
+  "key": [
+    {"field_id": "semantic.namespace_labels.namespace_id", "kind": "string", "value": "space.demo"},
+    {"field_id": "semantic.namespace_labels.locale", "kind": "string", "value": "en"}
+  ],
+  "purpose": "terminology",
+  "field_id": "semantic.namespace_labels.label"
+}
+```
+
+Omit `field_id` for a record review. Save the returned `target` object as `TARGET.json`; submit it
+with `kn review decide --target TARGET.json` and the same decision options above, without
+`--item` or `--select`. The target carries its exact version; the command refuses changed contents
+instead of approving the latest row implicitly. The result and read projections expose a nullable
+stamp only for active acceptance of this exact purpose, scope and version. Rejection, revocation,
+a content change or competing heads leave the stamp null and retain all events. A field approval
+does not approve the row or sibling fields.
+
+### Reattachment and verification
+
+After restoring claims and their review items, run `kn review replay`. It reads root and domain
+journals, reapplies exact matches idempotently and reports each decision as `applied`, `orphan`,
+`stale`, or `incompatible`. A missing claim candidate is an orphan even if its queue row survives.
+Unresolved events remain in the log. `list` reports unattached events without applying them.
+A decision whose SQL transaction failed can be recovered with replay, retaining its original actor,
+times and ID. Automatic replay after raw restoration remains owned by `rebuild-from-raw`.
+
+Verification is network-free: `tests/review/` covers protocol, causal selection, safe paths and
+English/JSON goldens; `tests/integration/test_review_queue.py`,
+`test_review_recovery.py`, `test_review_refresh.py`, `test_identity_review_recovery.py` and
+`test_review_operator.py` cover SQL effects, rollback recovery,
+two rebuilds, missing claims, scope isolation, actual CLI approval and override listing.
+Run these against `make db-up`, then `make ci`. The acceptance commands and implementation findings
+are in [record 0052](../records/0052-evidence-model-review-queue-cli.md).
+
 ## Known limitations
 
 - Cross-contract references are checked by the owning engines, not SQL foreign keys.
+- Legacy identity review events without the original observation/profile cannot register complete
+  identity evidence. Resolve a fresh observation before accepting them. Reopen migration support
+  if an operational legacy backlog needs it.
+- Queue listing scans stored items, matches and decisions. Pagination and service authentication
+  remain future operator-service work; revisit this when measured queue size makes the local
+  workflow slow.
 - The loader role can still update claim rows; the writer never does, and a re-insert detects
   changed content under a stored key.
 - Condition and qualifier objects are canonical JSON; approved condition field IDs arrive with
   domain contracts.
-- Canonical selection consumes caller-supplied `Reviews` until `review-queue-cli` wires applied
-  decisions into selection.
+- Domain field policies still arrive with domain contracts. No deployed contract currently declares
+  `kn.updatePolicy`; the queue stores decisions and exposes applied `Reviews` without inventing a
+  policy. The CLI refreshes canonical histories for fields with a registered policy. Fixture tests
+  exercise selection with explicit policies.
 - Fact history uses current identity resolution for every version; facts stored under a KN ID
   that was later merged are not closed automatically. Rebuild the projection after a merge. The
   [lineage lookup](object-identity.md#lineage-lookup) reports such a fact as
