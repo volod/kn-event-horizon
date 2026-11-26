@@ -153,6 +153,10 @@ in `make ci`; ordinary CI runs keep their artifacts in pytest's temporary direct
   Archive bytes and raw CSV cells round-trip exactly; typed missing values retain the existing
   contract's null semantics. This check uses SQLite for the portable projection, not PostgreSQL
   service acceptance or a live crawler.
+- `en/lineage/` and `uk/lineage/` contain the text of four lineage lookups: a merged ID, a split
+  successor, a qualified identifier with `--field`, and an audience with restricted rights. The
+  [lineage goldens](../../../tests/e2e/fixtures/lineage-cli.json) come from the in-memory view;
+  the local integration suite checks that the PostgreSQL CLI returns the same text.
 - `machine-parity.json` confirms identical machine output across interface locales.
   `manifest.json` records test exit status, selected and passing tests, available scope, untested
   paths, the Kestra waiver, and explicit release blockers with their owning plan tasks.
@@ -161,7 +165,7 @@ in `make ci`; ordinary CI runs keep their artifacts in pytest's temporary direct
 even when every available test passes. A planted passing-subset test verifies this behavior with
 and without persistent artifacts. A passing `make test-bilingual` or `make ci` is therefore only
 evidence for available paths. The acceptance command currently exits nonzero because dashboards,
-filters, maps, review queue, source status, lineage, InvenTree plans/reports, export README,
+filters, maps, review queue, source status, InvenTree plans/reports, export README,
 date/unit/missing-value presentation, and browser screenshots still need their implementations.
 No screenshot or Cyrillic font-rendering acceptance is claimed. There is no browser dependency
 until a real browser surface can be tested; no other delivered English-only operator screen was

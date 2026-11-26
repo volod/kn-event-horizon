@@ -1,8 +1,8 @@
 # Object Identity
 
 The identity storage contract, durable journal, deterministic replay, reviewed lifecycle commands,
-profile-driven matcher and field-level partial-update tracking are available. Claim lineage and
-real-record calibration remain in the [plan](../plan.md).
+profile-driven matcher, field-level partial-update tracking and the [lineage lookup](#lineage-lookup)
+are available. Incremental writes and real-record calibration remain in the [plan](../plan.md).
 
 ## Operator lifecycle commands
 
@@ -43,6 +43,59 @@ errors report `E_INPUT`, terminal or owner refusals report `E_IDENTITY_AUTH`, an
 Merge, split and reclassification preserve the original link ID and source record ID while
 changing link ownership. Later claim lineage can follow that source record through the move.
 The original link and every move remain in history.
+
+## Lineage lookup
+
+`kn lineage REFERENCE [--field FIELD_ID] [--audience NAME] [--permit RIGHTS ...]` traces an object
+or one field to every record and decision behind it. `REFERENCE` is a KN ID or a qualified
+identifier `NAMESPACE:VALUE`, such as `inventree:vl-itree:part:42`; every colon is tried as the
+separator, and an identifier held by more than one object, or by none, reports `E_INPUT`. The
+command reads the identity journal, resolves the reference before it opens the database, and then
+reads the evidence schema in a PostgreSQL read-only transaction. It needs `KN_DATABASE_URL` and
+its password or password file; an unavailable database reports `E_DATABASE`. `--data-dir`,
+`--locale` and `--json` behave as for `kn identity`. The text output gives localized section
+headings with counts followed by canonical JSON rows; `--json` returns the same keys and values
+in either locale.
+
+A lookup covers the reference's terminal successors and every object that redirects to them, so a
+merged ID shows its survivor's lineage with the merge event, and a split ID shows both
+successors. The view lists, in this order:
+
+| Key | Content |
+| --- | --- |
+| `objects` | Class, state, anchor, mint event, successors and terminal IDs of each covered object |
+| `history` | Mint, unlink, merge, split, reclassify, retire and restore events with actor, reason, evidence and decision reference |
+| `identifiers`, `attributes`, `links` | Holdings of covered objects: the original `kn_id`, the current `owner`, the recording event and, for links, the record, method, score, match ID and closing event |
+| `matches` | Match records for linked records or naming a covered object, with candidates, features, decision and trace |
+| `records` | Linked and claimed source records with `last_seen` and every version: fetch ID, archive record ID, code digest, field hashes, change set and later sightings |
+| `claims`, `confirmations`, `evidence` | Claims about covered objects in field and recording order, their confirmations, and the evidence rows both cite |
+| `facts`, `outcomes`, `review_items`, `review_decisions` | Current fact versions of the audience, the selection outcome of each evaluated claim, and the review items and decisions the facts name |
+| `withheld`, `gaps` | Counts of rows withheld by rights, and broken references in the chain |
+
+A claim about a split object belongs to the successor that now holds its source record, so each
+successor shows only the records and claims it received. `--field` keeps one stable field ID in
+claims, facts, attributes, field hashes and change sets; versions that did not state the field
+stay listed. JSON columns appear parsed, without their `_json` suffix, exact decimals as plain
+strings and times in UTC.
+
+The default audience is `internal`, and without `--permit` every rights statement is visible.
+With `--permit`, a claim or confirmation whose evidence rights are not listed is withheld, and so
+is every fact, outcome, review item or decision that would reveal it. A claim whose evidence row
+is missing, or a fact naming a claim the view does not hold, is shown only to an audience that
+permits every rights statement. An excerpt whose `excerpt_rights` are not permitted is removed
+from evidence the audience may see. Identity attributes and match features carry no rights
+statement, so a restricted audience sees none of their values. `withheld` counts each kind of
+withheld row and never shows its content.
+
+`gaps` reports `claim_record_missing`, `claim_version_missing` and `claim_change_set_missing` for
+a visible claim the identity journal cannot place, `evidence_missing`, `fact_claim_missing`, and
+`fact_subject_superseded` for a current fact stored under an object that was later merged or
+split. A complete chain runs from the fact through its claim and change set to the version's
+fetch and archive record ID. Outbound exchange receipts join the view with the exchange ledger.
+
+`kn.identity.lineage.lineage(state, rows, reference, field_id=..., audience=...)` builds the same
+view for other read-only callers. `rows` implements `kn.evidence.lineage.EvidenceRows`;
+`SqlEvidenceRows(connection)` reads the registered evidence tables in the caller's transaction.
 
 ## Storage and wire contracts
 
@@ -312,6 +365,14 @@ and updated ordering, fragments, retries, interrupted versions, reruns after a m
 inputs and replay checks. `tests/integration/test_identity_tracking.py` tracks a delivery sequence
 through PostgreSQL after a rolled-back first attempt, checks current claims, confirmations,
 `last_seen` and change-set rows, and compares identity rows after a schema drop and rebuild.
+`tests/identity/test_lineage*.py` check complete chains to archive record IDs for every fixture
+object, a merged ID against its survivor, a partial update with a sighting, a two-source conflict,
+split successors, withheld claims, facts, excerpts, attributes and match features, qualified and
+ambiguous identifiers, reported gaps, and the CLI refusals before any database access.
+`tests/e2e/test_lineage_cli.py` compares four lookups with the
+[lineage goldens](../../../tests/e2e/fixtures/lineage-cli.json) in both locales.
+`tests/integration/test_lineage_cli.py` stores the same fixture in PostgreSQL and checks that the
+CLI returns those goldens in both locales and the same JSON, in a read-only transaction.
 `make model-baseline` now includes identity history before SATCOM import and compares every
 registered column after two rebuilds. Run `make ci` and `make test-integration` against local PostGIS;
 `make ci-local` also includes the existing local SKOS gate.
@@ -342,6 +403,10 @@ These are accepted or scheduled findings of the
   hashes and raw record remain, and replay in version order would claim them.
 - Ordering by source version requires numeric versions. A source with an opaque version string
   orders by its updated time or by fetch time.
+- Lineage shows only current fact versions, and matches are found by a scan of the whole journal.
+  Reopen this when an analyst view needs fact history or lookups slow at registry scale.
+- Identity rows, record versions and archive record IDs carry no rights statement; a restricted
+  lineage audience still sees record keys and archive IDs, but no attribute or feature values.
 - The matcher never merges by itself. A shared authoritative identifier on two records goes to
   review. A trusted adapter or review workflow appends the merge.
 
@@ -349,5 +414,6 @@ Acceptance evidence is retained in
 [record 0033](../records/0033-object-identity-identity-registry-contracts.md),
 [record 0039](../records/0039-object-identity-object-lifecycle-operations.md),
 [record 0040](../records/0040-object-identity-identity-match-engine.md),
-[record 0042](../records/0042-object-identity-identity-resolution-implementation-audit.md) and
-[record 0045](../records/0045-object-identity-partial-update-tracking.md).
+[record 0042](../records/0042-object-identity-identity-resolution-implementation-audit.md),
+[record 0045](../records/0045-object-identity-partial-update-tracking.md) and
+[record 0047](../records/0047-object-identity-object-lineage-lookup.md).

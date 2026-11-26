@@ -32,27 +32,6 @@ archive.
 
 ### Claims, change tracking and lineage -- `object-identity`
 
-#### object-lineage-lookup
-
-Operators must be able to trace any object or field back to every record and decision behind it.
-
-- Serves: `object-identity` -- [Object identity](../design/spec.md#object-identity)
-- Agent status: CLEAR
-- Dependencies: The [record versions, change sets and claim lineage](current/object-identity.md#partial-update-tracking)
-  and the [selected facts and explained outcomes](current/evidence-model.md#fact-projection).
-- User-visible outcome: `kn lineage <kn-id|qualified-identifier> [--field <field-id>]` shows, in
-  both locales and as JSON, the identity history, identifiers, links with match records, record
-  versions and change sets, claims, and the selected canonical fact. Outbound exchange receipts
-  join the view once the exchange ledger exists.
-- Scope boundary: A read-only, rights-filtered query layer and CLI over the identity and evidence
-  schemas. The dashboards reuse it in `analyst-fact-explanation`.
-- Data and artifact paths: `src/kn/identity/lineage.py`, `src/kn/cli.py`, `tests/identity/`.
-- Execution path: Use fixture objects with a merge, a split, a partial update, and a conflict.
-- Acceptance gates: Each fixture returns the complete chain down to archive record IDs. A merged ID
-  shows its survivor's lineage with the merge event. Restricted evidence is withheld and counted.
-  Golden outputs exist in both locales.
-- Documentation target: `current/object-identity.md` listed in the [areas index](current.md#areas).
-
 #### identity-incremental-writes
 
 Each identity write rereads and validates the whole journal and rewrites every identity table, so
@@ -86,14 +65,16 @@ lifecycle, or matching is the most expensive kind to fix later.
 
 - Serves: `object-identity` -- [Object identity](../design/spec.md#object-identity)
 - Agent status: CLEAR
-- Requires: `object-lineage-lookup`, `identity-incremental-writes`
+- Requires: `identity-incremental-writes`
 - Dependencies: The accepted task records of the group and the [implementation
   audit](../guide/planning-workflow.md#implementation-audits) checks. `identity-match-calibration`
   stays open and is reviewed for the readiness of its inputs. The [identity resolution
   audit](records/0042-object-identity-identity-resolution-implementation-audit.md) lists the
   accepted matching limitations to recheck, and the [evidence model
   limitations](current/evidence-model.md#known-limitations) name facts stored under a KN ID that
-  was later merged.
+  was later merged. The [lineage lookup](current/object-identity.md#lineage-lookup) and its
+  [task record](records/0047-object-identity-object-lineage-lookup.md) trace values to raw records
+  and report such facts as gaps.
 - User-visible outcome: Every later group resolves objects through a verified identity registry. The
   audit record gives every check a result and every finding a disposition. The current-state page
   lists known limitations, and each scheduled finding is a plan task.
@@ -1586,7 +1567,8 @@ Dashboards must deploy reproducibly from one definition in both locales.
 - Agent status: CLEAR
 - Requires: `space-analytics-marts`, `dashboards-as-code`, `evidence-model-implementation-audit`,
   `object-identity-implementation-audit`
-- Dependencies: none.
+- Dependencies: The read-only [lineage view](current/object-identity.md#lineage-lookup), which
+  counts withheld rows for operators; this view must leave no restricted value, locator or count.
 - User-visible outcome: An analyst can open "Why this fact?" on a selected value and see why
   it won, the evidence, permitted alternatives, and any applicable review decision.
 - Scope boundary: Shared read-only analytics projection and bilingual dashboard detail view.

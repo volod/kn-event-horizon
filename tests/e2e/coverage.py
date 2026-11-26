@@ -7,7 +7,6 @@ from tests.e2e.support import LOCALES, write_json
 BLOCKERS = {
     "review_queue": "review-queue-cli",
     "source_status": "source-status-monitoring",
-    "lineage": "object-lineage-lookup",
     "inventree_plans_and_reports": "inventree-write-export",
     "dashboards_filters_and_map": "microelectronics-comparison-dashboards",
     "export_readme": "obsidian-space-profile",

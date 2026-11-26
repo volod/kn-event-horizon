@@ -7,6 +7,8 @@ database constraints and as-of views. [Partial-update tracking](object-identity.
 writes claims and confirmations into these shapes, and [canonical selection](#canonical-selection)
 projects each field's value from them through its update policy. The review queue, engine wiring
 and dataset-wide verification projections remain planned.
+The [lineage lookup](object-identity.md#lineage-lookup) reads these rows through
+`kn.evidence.lineage`, withholding and counting what an audience's rights do not permit.
 Existing source verification labels retain their meanings and grant no human timestamp.
 
 ## Evidence contracts
@@ -302,10 +304,12 @@ Automatic all-target rebuild integration and pending/orphan/stale reports remain
   changed content under a stored key.
 - Condition and qualifier objects are canonical JSON; approved condition field IDs arrive with
   domain contracts.
-- Review queue journals, the lineage command and engine wiring of the projection are open plan
-  tasks. Callers derive `Reviews` from decisions until `review-queue-cli` applies them.
+- Review queue journals and engine wiring of the projection are open plan tasks. Callers derive
+  `Reviews` from decisions until `review-queue-cli` applies them.
 - Fact history uses current identity resolution for every version; facts stored under a KN ID
-  that was later merged are not closed automatically. Rebuild the projection after a merge.
+  that was later merged are not closed automatically. Rebuild the projection after a merge. The
+  [lineage lookup](object-identity.md#lineage-lookup) reports such a fact as
+  `fact_subject_superseded`.
 - A curated claim ranks by its own `source_id`; ranking it as the source it cites, and
   per-source dispute rates, are not implemented yet.
 - Corroboration counts distinct `source_id` values; syndicated copies under different source IDs

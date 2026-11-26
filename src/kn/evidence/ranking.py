@@ -82,10 +82,13 @@ def is_signal(source_id: str) -> bool:
     return source_id.partition(SOURCE_SEPARATOR)[0] in SIGNAL_DOMAINS
 
 
+DEFAULT_AUDIENCE = "internal"
+
+
 class Audience(Frozen):
     """Whose selection this is; `rights` None permits every rights statement."""
 
-    name: Text = "internal"
+    name: Text = DEFAULT_AUDIENCE
     rights: frozenset[Text] | None = None
 
     def permits(self, rights: str) -> bool:

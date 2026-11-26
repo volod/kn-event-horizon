@@ -25,7 +25,7 @@ def inspect(journal: Journal, action: Query, kn_id: str) -> dict[str, object]:
             "events": [
                 event.model_dump(mode="json")
                 for event in state.events
-                if lineage.intersection(_participants(event))
+                if lineage.intersection(participants(event))
             ],
         }
     return {
@@ -42,7 +42,7 @@ def inspect(journal: Journal, action: Query, kn_id: str) -> dict[str, object]:
     }
 
 
-def _participants(event: Event) -> Iterator[str]:
+def participants(event: Event) -> Iterator[str]:
     payload = event.payload
     if hasattr(payload, "kn_id"):
         yield payload.kn_id

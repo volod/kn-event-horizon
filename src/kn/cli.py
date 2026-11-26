@@ -17,6 +17,7 @@ from sqlalchemy.exc import SQLAlchemyError
 
 from kn.contracts.diagnostics import ContractError
 from kn.db.rebuild import RebuildRefused
+from kn.evidence.ranking import DEFAULT_AUDIENCE, Audience
 from kn.i18n import DEFAULT_LOCALE, Translator
 from kn.i18n.output import render_result
 from kn.i18n.parser import OperatorParser, parse_interface_options
@@ -29,6 +30,7 @@ from kn.metadata import project_info
 from kn.operations import (
     contract_operation,
     database_operation,
+    lineage_operation,
     satcom_operation,
     source_list_operation,
 )
@@ -67,6 +69,18 @@ def build_parser(
     database.add_argument("action", choices=("upgrade", "verify", "rebuild"))
     identity = subcommands.add_parser("identity", help=tr.text("cli.identity_help"))
     _identity_arguments(identity, parser_class, tr)
+    lineage = subcommands.add_parser("lineage", help=tr.text("cli.lineage_help"))
+    lineage.add_argument(
+        "reference", metavar="REFERENCE", help=tr.text("cli.lineage_reference_help")
+    )
+    lineage.add_argument("--field", metavar="FIELD_ID", help=tr.text("cli.lineage_field_help"))
+    lineage.add_argument(
+        "--audience", default=DEFAULT_AUDIENCE, help=tr.text("cli.lineage_audience_help")
+    )
+    lineage.add_argument(
+        "--permit", action="append", metavar="RIGHTS", help=tr.text("cli.lineage_permit_help")
+    )
+    lineage.add_argument("--data-dir", type=Path, help=tr.text("cli.data_dir_help"))
     source = subcommands.add_parser("source", help=tr.text("cli.catalogue_help"))
     source_actions = source.add_subparsers(
         dest="action", required=True, title=tr.text("cli.commands"), parser_class=parser_class
@@ -223,6 +237,10 @@ def _report_error(
 def _run(args: argparse.Namespace, translator: Translator) -> dict[str, object]:
     if args.command == "identity":
         return _identity(args, translator)
+    if args.command == "lineage":
+        rights = None if args.permit is None else frozenset(args.permit)
+        audience = Audience(name=args.audience, rights=rights)
+        return lineage_operation(_journal(args), args.reference, args.field, audience)
     if args.command == "info":
         return asdict(project_info())
     if args.command == "contract":
@@ -242,11 +260,15 @@ def _run(args: argparse.Namespace, translator: Translator) -> dict[str, object]:
     return satcom_operation(args.action, args.source, args.data_dir)
 
 
-def _identity(args: argparse.Namespace, translator: Translator) -> dict[str, object]:
+def _journal(args: argparse.Namespace) -> Journal:
     directory = args.data_dir or Path(os.environ.get("DATA_DIR", ".data"))
     if not directory.is_absolute():
         directory = discover_project_root() / directory
-    journal = Journal(directory)
+    return Journal(directory)
+
+
+def _identity(args: argparse.Namespace, translator: Translator) -> dict[str, object]:
+    journal = _journal(args)
     if args.action in {"show", "resolve", "history"}:
         return inspect(journal, args.action, args.kn_id)
     details = ReviewDetails.model_validate(
