@@ -2,7 +2,7 @@
 
 Version: 1.0.0
 
-Digest: `59cc497a134eca6ae6d877c7d6cbbcb2ad93d93f6de1ff44e6a112a2fdac4a80`
+Digest: `539f354352f7e10de470acd85b9f5c94a26ce11a655144fba7e58fccf7eaae15`
 
 Storage schema: `evidence`
 

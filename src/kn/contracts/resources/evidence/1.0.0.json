@@ -33,7 +33,8 @@
               "evidence.human_verification_decisions.outcome",
               "evidence.human_verification_decisions.event_json"
             ],
-            "fieldContexts": {}
+            "fieldContexts": {},
+            "defaultFieldContext": "record"
           }
         },
         {

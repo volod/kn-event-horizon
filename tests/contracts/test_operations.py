@@ -31,6 +31,9 @@ def test_import_command_archives_and_is_idempotent(
     metadata(contract, "").create_all(engine)
     monkeypatch.setattr(operations, "engine_from_env", lambda: engine)
     monkeypatch.setattr(operations, "verify_contracts", lambda *a: None)
+    # PostgreSQL review coordination is exercised by the committed CLI integration test.
+    monkeypatch.setattr(operations.review_store, "lock", lambda _connection: None)
+    monkeypatch.setattr(operations.review_store, "replay", lambda *_args, **_kwargs: ())
     real_import = operations.import_package
     monkeypatch.setattr(operations, "import_package", lambda c, p, m: real_import(c, p, m, ""))
     # Keep the in-memory database alive across command invocations.
@@ -49,11 +52,17 @@ def test_import_command_archives_and_is_idempotent(
 
 
 def test_database_commands_dispatch_and_dispose_even_on_failure(
-    monkeypatch: pytest.MonkeyPatch,
+    monkeypatch: pytest.MonkeyPatch, tmp_path: Path
 ) -> None:
     engine = MagicMock()
+    resolve_directory = MagicMock(return_value=tmp_path)
     monkeypatch.setattr(operations, "engine_from_env", lambda: engine)
-    upgrade, rebuild, verify = MagicMock(), MagicMock(), MagicMock(return_value="verified")
+    monkeypatch.setattr(operations, "rebuild_data_dir", resolve_directory)
+    upgrade, rebuild, verify = (
+        MagicMock(),
+        MagicMock(return_value=()),
+        MagicMock(return_value="verified"),
+    )
     monkeypatch.setattr(operations, "upgrade", upgrade)
     monkeypatch.setattr(operations, "rebuild", rebuild)
     monkeypatch.setattr(operations, "verify", verify)
@@ -61,6 +70,7 @@ def test_database_commands_dispatch_and_dispose_even_on_failure(
     for action in ("upgrade", "rebuild", "verify"):
         assert cli.main(["db", action]) == 0
     assert upgrade.call_count == rebuild.call_count == 1
+    resolve_directory.assert_called_once_with()
     assert verify.call_count == engine.dispose.call_count == 3
     verify.side_effect = SQLAlchemyError("private-password")
     assert cli.main(["db", "verify"]) == 1

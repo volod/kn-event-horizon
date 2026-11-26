@@ -34,6 +34,7 @@ class Object:
     entity_class: str
     anchor: SourceKey
     mint_event: str
+    revision_event: str
     state: str = "active"
     successors: tuple[str, ...] = ()
 
@@ -110,35 +111,41 @@ class State:
             raise ValueError("anchoring source record already minted an identity")
         self.record(payload.anchor)
         self.anchors[record_key(payload.anchor)] = payload.kn_id
-        item = Object(payload.kn_id, payload.entity_class, payload.anchor, event.event_id)
+        item = Object(
+            payload.kn_id, payload.entity_class, payload.anchor, event.event_id, event.event_id
+        )
         self.objects[item.kn_id] = item
-        self.set_status(item, "active")
+        self.revise(item, event.event_id)
 
     def resolve(self, kn_id: str) -> tuple[str, ...]:
         if kn_id not in self.objects:
             raise ValueError("unknown KN ID")
         return self.redirects.get(kn_id, (kn_id,))
 
-    def set_status(self, item: Object, value: str) -> None:
+    def set_status(self, item: Object, value: str, event_id: str) -> None:
         item.state = value
+        self.revise(item, event_id)
+
+    def revise(self, item: Object, event_id: str) -> None:
+        item.revision_event = event_id
         if self.dirty is not None:
             self.dirty.objects.add(item.kn_id)
 
-    def redirect(self, item: Object, successors: tuple[str, ...]) -> None:
+    def redirect(self, item: Object, successors: tuple[str, ...], event_id: str) -> None:
         item.successors = successors
         for ancestor in tuple(self.redirect_sources.get(item.kn_id, ())):
             targets = (set(self.redirects[ancestor]) - {item.kn_id}).union(successors)
-            self._set_redirect(ancestor, targets)
-        self._set_redirect(item.kn_id, set(successors))
+            self._set_redirect(ancestor, targets, event_id)
+        self._set_redirect(item.kn_id, set(successors), event_id)
 
-    def _set_redirect(self, key: str, targets: set[str]) -> None:
+    def _set_redirect(self, key: str, targets: set[str], event_id: str) -> None:
         for previous in self.redirects.get(key, ()):
             self.redirect_sources[previous].remove(key)
         for target in targets:
             self.redirect_sources.setdefault(target, set()).add(key)
         self.redirects[key] = tuple(sorted(targets))
+        self.revise(self.objects[key], event_id)
         if self.dirty is not None:
-            self.dirty.objects.add(key)
             self.dirty.redirects.add(key)
 
     def links(self, record: SourceKey) -> list[Holding]:

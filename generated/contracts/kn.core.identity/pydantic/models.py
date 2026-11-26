@@ -82,6 +82,7 @@ class Objects(_kn_pydantic.BaseModel):
     anchor_record_id: _kn_builtins.str = _kn_pydantic.Field(alias='anchor_record_id', description='objects: anchor record id.', json_schema_extra={'x-kn': {'fieldId': 'identity.objects.anchor_record_id', 'foreignKey': {'fields': ['anchor_record_id'], 'table': 'source_records', 'targetFields': ['record_id']}}})
     mint_event: _kn_builtins.str = _kn_pydantic.Field(alias='mint_event', description='objects: mint event.', json_schema_extra={'x-kn': {'fieldId': 'identity.objects.mint_event', 'foreignKey': {'fields': ['mint_event'], 'table': 'lifecycle_events', 'targetFields': ['event_id']}}})
     current_redirect: _kn_builtins.str | None = _kn_pydantic.Field(default=None, alias='current_redirect', description='objects: current redirect.', json_schema_extra={'x-kn': {'fieldId': 'identity.objects.current_redirect', 'foreignKey': {'fields': ['current_redirect'], 'table': 'objects', 'targetFields': ['kn_id']}}})
+    revision_event: _kn_builtins.str = _kn_pydantic.Field(alias='revision_event', description='Lifecycle event defining the current object revision.', json_schema_extra={'x-kn': {'fieldId': 'identity.objects.revision_event', 'foreignKey': {'fields': ['revision_event'], 'table': 'lifecycle_events', 'targetFields': ['event_id']}}})
 
 class Redirects(_kn_pydantic.BaseModel):
     model_config = _kn_pydantic.ConfigDict(extra='forbid', strict=True)

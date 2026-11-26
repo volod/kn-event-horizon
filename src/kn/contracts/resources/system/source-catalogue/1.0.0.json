@@ -235,6 +235,33 @@
             }
           ]
         }
+      ],
+      "customProperties": [
+        {
+          "property": "kn.humanVerification",
+          "value": {
+            "strategy": "external",
+            "resolver": "contract-v1",
+            "recordFields": [
+              "system.source_catalogue.source_id",
+              "system.source_catalogue.domain",
+              "system.source_catalogue.original_id",
+              "system.source_catalogue.label",
+              "system.source_catalogue.priority",
+              "system.source_catalogue.cadence",
+              "system.source_catalogue.access_notes_json",
+              "system.source_catalogue.access_verification",
+              "system.source_catalogue.lifecycle_state",
+              "system.source_catalogue.proposal_workbook",
+              "system.source_catalogue.proposal_sheet",
+              "system.source_catalogue.proposal_sha256",
+              "system.source_catalogue.proposal_row",
+              "system.source_catalogue.proposal_values_json"
+            ],
+            "fieldContexts": {},
+            "defaultFieldContext": "record"
+          }
+        }
       ]
     }
   ]

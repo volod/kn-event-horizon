@@ -83,7 +83,6 @@ def test_coverage_requires_registered_fields_and_the_reviewed_value() -> None:
     contract = registered_contracts()[-1]
     coverage = declared_coverage(contract)[0]
     assert ContractResolver([contract], [coverage])
-    assert declared_coverage(registered_contracts()[0]) == ()
     for changed in (
         replace(coverage, contract_id="unknown"),
         replace(coverage, dataset="unknown"),

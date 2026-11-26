@@ -13,7 +13,7 @@ from kn.contracts.registry import registered_contracts
 from kn.contracts.schemas import SATCOM
 from kn.db.connection import engine_from_env
 from kn.db.governance import upgrade, verify, verify_contracts
-from kn.db.rebuild import rebuild, require_development
+from kn.db.rebuild import rebuild, rebuild_data_dir, require_development
 from kn.domains.space.satcom.archive import archive
 from kn.domains.space.satcom.importer import import_package
 from kn.domains.space.satcom.package import read_package
@@ -21,6 +21,10 @@ from kn.evidence.lineage import SqlEvidenceRows
 from kn.evidence.ranking import Audience
 from kn.identity.journal import Journal
 from kn.identity.lineage import lineage, target
+from kn.review import store as review_store
+from kn.review.journal import Journal as ReviewJournal
+from kn.review.reports import ReplayReport, write_report
+from kn.review.targets import ContractResolver
 from kn.sources.catalogue import list_sources
 
 
@@ -65,15 +69,20 @@ def database_operation(action: str) -> dict[str, object]:
         require_development()
     # An invalid registry, such as a contract outside the KN schemas, fails before any connection.
     contracts = registered_contracts()
+    directory = rebuild_data_dir() if action == "rebuild" else None
     engine = engine_from_env()
+    report: ReplayReport = ()
     try:
         with engine.begin() as connection:
             if action == "upgrade":
                 upgrade(connection, contracts)
-            elif action == "rebuild":
-                rebuild(connection, contracts)
+            elif directory is not None:
+                report = rebuild(connection, contracts, data_dir=directory)
             verify(connection, contracts)
-        return {"status": "verified"}
+        result: dict[str, object] = {"status": "verified"}
+        if directory is not None and report:
+            result["verification_replay"] = str(write_report(directory, report))
+        return result
     finally:
         engine.dispose()
 
@@ -83,17 +92,29 @@ def satcom_operation(action: str, source: Path, data_dir: Path) -> dict[str, obj
     package = read_package(source, contract)
     if action == "validate":
         return package.manifest()
+    data_dir = rebuild_data_dir(data_dir)
     destination = archive(package, data_dir)
+    contracts = registered_contracts()
     engine = engine_from_env()
     try:
         with engine.begin() as connection:
-            verify_contracts(connection)
+            review_store.lock(connection)
+            verify_contracts(connection, contracts)
             changed = import_package(connection, package, contract)
-        return {
+            report = review_store.replay(
+                connection,
+                ReviewJournal(data_dir),
+                ContractResolver.registered(contracts),
+                contract_id=contract.contract_id,
+            )
+        result: dict[str, object] = {
             "import_id": package.import_id,
             "status": "imported" if changed else "already_imported",
             "archive": str(destination),
         }
+        if report:
+            result["verification_replay"] = str(write_report(data_dir, report))
+        return result
     finally:
         engine.dispose()
 

@@ -82,6 +82,7 @@ CREATE TABLE identity.objects (
 	anchor_record_id TEXT NOT NULL,
 	mint_event TEXT NOT NULL,
 	current_redirect TEXT,
+	revision_event TEXT NOT NULL,
 	CONSTRAINT pk_objects PRIMARY KEY (kn_id),
 	CONSTRAINT ck_objects_state_enum CHECK (state IN ('active', 'merged', 'split', 'retired'))
 );
@@ -266,6 +267,8 @@ ALTER TABLE identity.objects ADD CONSTRAINT fk_objects_current_redirect FOREIGN 
 
 ALTER TABLE identity.objects ADD CONSTRAINT fk_objects_mint_event FOREIGN KEY(mint_event) REFERENCES identity.lifecycle_events (event_id) DEFERRABLE INITIALLY DEFERRED;
 
+ALTER TABLE identity.objects ADD CONSTRAINT fk_objects_revision_event FOREIGN KEY(revision_event) REFERENCES identity.lifecycle_events (event_id) DEFERRABLE INITIALLY DEFERRED;
+
 CREATE UNIQUE INDEX identity_anchor_idx ON identity.objects USING btree (anchor_record_id);
 
 COMMENT ON TABLE identity.objects IS 'Disposable projection of identity events: objects.';
@@ -281,6 +284,8 @@ COMMENT ON COLUMN identity.objects.anchor_record_id IS 'objects: anchor record i
 COMMENT ON COLUMN identity.objects.mint_event IS 'objects: mint event.';
 
 COMMENT ON COLUMN identity.objects.current_redirect IS 'objects: current redirect.';
+
+COMMENT ON COLUMN identity.objects.revision_event IS 'Lifecycle event defining the current object revision.';
 
 ALTER TABLE identity.redirects ADD CONSTRAINT fk_redirects_kn_id FOREIGN KEY(kn_id) REFERENCES identity.objects (kn_id) DEFERRABLE INITIALLY DEFERRED;
 

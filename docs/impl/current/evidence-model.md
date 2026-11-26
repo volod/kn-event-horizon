@@ -5,8 +5,10 @@ evidence, confirmations, aliases, translations, relation assertions, canonical f
 selection outcomes, review items and review decisions have registered storage, deterministic keys,
 database constraints and as-of views. [Partial-update tracking](object-identity.md#partial-update-tracking)
 writes claims and confirmations into these shapes, and [canonical selection](#canonical-selection)
-projects each field's value from them through its update policy. The review queue, engine wiring
-and dataset-wide verification projections remain planned.
+projects each field's value from them through its update policy. Every registered dataset exposes
+current human verification metadata through the
+[shared read projection](#current-verification-reads). The review queue and ingestion engine
+remain planned.
 The [lineage lookup](object-identity.md#lineage-lookup) reads these rows through
 `kn.evidence.lineage`, withholding and counting what an audience's rights do not permit.
 Existing source verification labels retain their meanings and grant no human timestamp.
@@ -16,7 +18,7 @@ Existing source verification labels retain their meanings and grant no human tim
 The registered `kn.core.evidence` ODCS contract,
 [`resources/evidence/claims/1.0.0.json`](../../../src/kn/contracts/resources/evidence/claims/1.0.0.json),
 shares the `evidence` schema with `kn.core.human_verification`. It adds 11 tables and 148 fields;
-the registry now defines 73 tables and 706 fields at development version `1.0.0`.
+the registry now defines 73 tables and 707 fields at development version `1.0.0`.
 `make contract-compile` writes its reviewed artifacts under
 [`generated/contracts/kn.core.evidence/`](../../../generated/contracts/kn.core.evidence/docs/contract.md).
 
@@ -35,7 +37,7 @@ the registry now defines 73 tables and 706 fields at development version `1.0.0`
 | `review_decisions` | `decision_id` | Append-only outcome, selected claim, predecessor, reviewer, reason, performed and recorded times, shared verification decision and canonical event |
 
 The contract declares `kn.temporalProfile` on claims, evidence, confirmations, relations and facts,
-`kn.evidence` on claims, and record-scope `kn.humanVerification` on every table; review decisions
+`kn.evidence` on claims, and shared `kn.humanVerification` on every table; review decisions
 use the `decision-log` strategy. `kn.evidence` now accepts `assertionField` instead of a single
 `assertionType`, because claim rows carry their own assertion type.
 
@@ -230,26 +232,53 @@ old version retains its original result; it is not a current-version approval.
 
 ## Coverage and target resolvers
 
-The table extension `kn.humanVerification` declares `strategy` (`external` or `decision-log`),
-`resolver` (`contract-v1`), `recordFields` and `fieldContexts`. Fields use stable contract field IDs;
+All 73 deployed tables declare `kn.humanVerification`, including the 50 tables in the
+[original inventory](../records/0028-adhoc-human-verification-model-review.md). The extension
+declares `strategy` (`external` or `decision-log`), `resolver` (`contract-v1`), `recordFields`
+and `fieldContexts`. With
+`defaultFieldContext: record`, every field includes its record's declared content and its own
+value. An explicit `fieldContexts` entry can define a narrower context. Fields use stable IDs;
 a field context must contain its reviewed value plus meaningful units, conditions, locale and
 other context. The compiler rejects unknown IDs or incomplete contexts and retains declarations
-in generated artifacts. A decision-log declaration describes a technical audit record without
-automatically approving the decision or its payload.
+in generated artifacts. Registry validation refuses any table without a strategy and a context
+for every field. The combined baseline requires representative replay fixtures for every owner
+and table. A decision-log declaration enables explicit review of an audit record on its own scope.
 
-`declared_coverage(contract)` reads declarations as `Coverage` values. `ContractResolver` accepts
-explicit coverage and registered contracts, refuses unknown datasets/fields and incomplete or
+`declared_coverage(contract)` reads declarations as `Coverage` values.
+`ContractResolver.registered(contracts)` builds the deployed resolvers from those declarations.
+It refuses unknown datasets/fields and incomplete or
 mistyped keys, locks the target row, then checks `content_version()` against the declared content.
 The digest includes explicit nulls and exact decimal/date/timestamp values. Custom resolvers can
 implement `TargetResolver` for immutable artifacts or derived values, including their model,
 inputs and window. Declared content must include meaningful revision/context fields; the resolver
-cannot infer omitted provenance. Verification annotations and transport counters stay outside
-reviewed content. Missing coverage grants no implicit verification support.
+cannot infer omitted provenance. Verification annotations stay outside the digest. Advancing
+`source_records.last_seen` preserves the record stamp, while an explicit review of that field
+binds its own value.
+An identity object's `revision_event` binds its current lifecycle revision even when a restore
+returns the state to its previous value.
 
-All-table declarations, current metadata joins, invalidation across restore/identity operations,
-rights filtering, exchange trust/loss reporting and coverage registration gates belong to the open
-`human-verification-projections` task. The protocol is available for explicit fixture targets;
-this does not claim that all registered rows already expose human verification metadata.
+## Current verification reads
+
+Use `resolver.dataset(contract_id, table_name)` to get a dataset and
+`dataset.target(stored_row, purpose, field_id=None)` to build a review request for its typed
+content. The known primary key includes locale for semantic labels and the package's
+`import_id` for SATCOM. A changed SATCOM package has a different snapshot key even if some
+cells match the preceding package.
+
+`kn.review.projection.read(connection, dataset, key, purpose, rights=...)` returns
+`VerifiedRow` with column-name `values`, a record `Stamp` and field `Stamp` values keyed by
+stable field ID. The key is a tuple of `KeyPart` values, available from `dataset.key(stored_row)`.
+Choose the review purpose explicitly. A field decision leaves the record and sibling field
+stamps null. The read computes versions from the values it returns and batches exact-target
+decision lookup for the row. Unreviewed fields, including explicit null values, expose the
+three nullable metadata fields.
+
+The trusted application supplies `ReadRights` for the audience. Its `data(dataset, row, field_id)`
+check authorizes the row with `field_id=None` and then authorizes each field. Missing or denied
+rows return `None`; denied fields are omitted. Stamps require access to every field in their
+declared context and access to the reviewer and evidence of every decision in the exact-target
+history via `decision(event)`. The same decision check protects a decision-log row's payload.
+A hidden branch cannot reveal its existence through a timestamp, principal, decision ID or count.
 
 ## Trusted decision application
 
@@ -291,11 +320,22 @@ conservative handling of independent approvals. An explicit `supersede` event ca
 conflicting head and create a new acceptance. Partial supersession leaves a conflict. Revoke and
 supersede require predecessors; an ordinary acceptance cannot consume multiple branches.
 
-A durable append can survive a failed or rolled-back SQL transaction. It represents a pending
-projection, not lost history. `replay_target(connection, journal, resolver, target)` restores one
-known exact target with its original actors, dates and IDs. `projection(connection, target)` is an
-exact-version historical lookup; resolve a current target before exposing it as current metadata.
-Automatic all-target rebuild integration and pending/orphan/stale reports remain projection work.
+A durable append can survive a rolled-back SQL transaction. Run
+`kn.review.store.replay(connection, journal, resolver)` after loading targets in a caller-owned
+transaction. Exact matches replay with their original actors, dates and IDs. Absent records are
+`pending`, or `orphan` when the caller sets `complete=True` after restoring all inputs. Changed
+versions report `stale`, and unknown datasets, fields or key definitions report `incompatible`.
+Unresolved decisions remain in the durable journal. A SQL failure rolls back the replay batch.
+`replay_target` restores a single known target. `projection(connection, target)` is a trusted
+exact-version lookup in the installed SQL history, while the journal retains every prior event.
+
+The development rebuild replays identity history and reviewed seeds before restoring matching
+reviews. SATCOM import then replays reviews for restored SATCOM snapshots and any restored
+decision-log targets. The normal commands publish nonempty reports after commit under
+`$DATA_DIR/human-verification/<run-id>/replay.json`. JSON command output includes its path as
+`verification_replay`. The report carries contract ID, dataset, target digest and replay state for
+each target. The durable journal has the full events. Restoring other inputs can be followed by
+another replay; the raw engine and external exchange paths have their own planned work.
 
 ## Known limitations
 
@@ -304,8 +344,8 @@ Automatic all-target rebuild integration and pending/orphan/stale reports remain
   changed content under a stored key.
 - Condition and qualifier objects are canonical JSON; approved condition field IDs arrive with
   domain contracts.
-- Review queue journals and engine wiring of the projection are open plan tasks. Callers derive
-  `Reviews` from decisions until `review-queue-cli` applies them.
+- Canonical selection consumes caller-supplied `Reviews` until `review-queue-cli` wires applied
+  decisions into selection.
 - Fact history uses current identity resolution for every version; facts stored under a KN ID
   that was later merged are not closed automatically. Rebuild the projection after a merge. The
   [lineage lookup](object-identity.md#lineage-lookup) reports such a fact as
@@ -324,8 +364,8 @@ Automatic all-target rebuild integration and pending/orphan/stale reports remain
 - `tests/integration/test_evidence.py` checks database rejections, no-op re-inserts, tampered
   rows, provenance lookups, permuted as-of views, one current fact and no active duplicate
   relation. `test_evidence_verification.py` checks stored-claim targets, stale content and
-  unreviewed changed or labeled claims. The combined model baseline loads every evidence table as
-  the evidence loader.
+  unreviewed changed or labeled claims, including numeric fields with new units or conditions.
+  The combined model baseline loads every evidence table as the evidence loader.
 - `tests/evidence/test_selection.py`, `test_selection_modes.py` and `test_projection.py` check
   every outcome, mode and verification state of the update policy: fill, replace, ignore,
   owner override, support by a higher-ranked source, repetition, same-source revisions, equal-rank
@@ -336,6 +376,11 @@ Automatic all-target rebuild integration and pending/orphan/stale reports remain
 - `tests/review/` checks typed composite and locale targets, scope/purpose separation, key types,
   null completeness, UTC and clock errors, actor refusal, event digests, graph conflicts,
   revocation, retry identity, wire schemas and ODCS coverage validation.
+- `make model-baseline` tests unreviewed reads across all 73 tables, semantic locale isolation,
+  SATCOM snapshot isolation, unchanged re-import, exact dates, reviewers and decision IDs
+  across two rebuilds, and byte-for-byte preservation of source cells and archived files.
+  PostgreSQL tests additionally cover restricted reviewers/evidence, unresolved replay and
+  identity restoration. [Acceptance record](../records/0051-evidence-model-human-verification-projections.md).
 - `tests/integration/test_human_verification.py` checks PostgreSQL concurrency, repeated requests,
   stale/unknown targets, transaction rollback, caught application failures and exact replay.
 - `tests/integration/review_fixtures.py` adds a composite-key semantic label review to

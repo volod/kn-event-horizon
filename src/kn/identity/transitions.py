@@ -12,13 +12,13 @@ def transition(state: State, event: Event) -> None:
     if isinstance(payload, Unlink):
         _unlink(state, payload, event)
     elif isinstance(payload, Restore):
-        _restore(state, payload)
+        _restore(state, payload, event)
     elif isinstance(payload, Retire):
         _retire(state, payload, event)
     elif isinstance(payload, Merge):
         _merge(state, payload, event)
     elif isinstance(payload, Split):
-        _split(state, payload)
+        _split(state, payload, event)
     elif isinstance(payload, Reclassify):
         _reclassify(state, payload, event)
     else:
@@ -37,16 +37,16 @@ def _unlink(state: State, payload: Unlink, event: Event) -> None:
     state.end(links[0], event)
 
 
-def _restore(state: State, payload: Restore) -> None:
+def _restore(state: State, payload: Restore, event: Event) -> None:
     item = state.objects.get(payload.kn_id)
     if item is None or item.state != "retired" or item.successors:
         raise ValueError("only a retired object without a successor can be restored")
-    state.set_status(item, "active")
+    state.set_status(item, "active", event.event_id)
 
 
 def _retire(state: State, payload: Retire, event: Event) -> None:
     item = state.active(payload.kn_id)
-    state.set_status(item, "retired")
+    state.set_status(item, "retired", event.event_id)
     for holding in state.owned(payload.kn_id).values():
         if isinstance(holding.event.payload, Link):
             state.end(holding, event)
@@ -57,8 +57,8 @@ def _reclassify(state: State, payload: Reclassify, event: Event) -> None:
     if item.entity_class == payload.successor.entity_class:
         raise ValueError("reclassification requires a different class")
     state.mint(payload.successor, event)
-    state.set_status(item, "retired")
-    state.redirect(item, (payload.successor.kn_id,))
+    state.set_status(item, "retired", event.event_id)
+    state.redirect(item, (payload.successor.kn_id,), event.event_id)
     for holding in state.owned(payload.kn_id).values():
         state.transfer(holding, payload.successor.kn_id)
 
@@ -69,8 +69,9 @@ def _merge(state: State, payload: Merge, event: Event) -> None:
         raise ValueError("merge requires distinct active objects of the same class")
     if payload.authoritative is not None:
         _require_authority(state, payload, payload.authoritative, event.occurred_at)
-    state.set_status(item, "merged")
-    state.redirect(item, (target.kn_id,))
+    state.set_status(item, "merged", event.event_id)
+    state.redirect(item, (target.kn_id,), event.event_id)
+    state.revise(target, event.event_id)
     for holding in state.owned(item.kn_id).values():
         state.transfer(holding, target.kn_id)
 
@@ -98,7 +99,7 @@ def _authoritative_at(identifier: Identifier, at: datetime) -> bool:
     )
 
 
-def _split(state: State, payload: Split) -> None:
+def _split(state: State, payload: Split, event: Event) -> None:
     item = state.active(payload.kn_id)
     if len(set(payload.successors)) != len(payload.successors) or item.kn_id in payload.successors:
         raise ValueError("split requires distinct successors")
@@ -111,7 +112,9 @@ def _split(state: State, payload: Split) -> None:
         raise ValueError("split assigns each active link, identifier and attribute exactly once")
     if not set(assignments.values()) <= set(payload.successors):
         raise ValueError("split assignment targets an undeclared successor")
-    state.set_status(item, "split")
-    state.redirect(item, payload.successors)
+    state.set_status(item, "split", event.event_id)
+    state.redirect(item, payload.successors, event.event_id)
+    for key in payload.successors:
+        state.revise(state.objects[key], event.event_id)
     for key, holding in owned.items():
         state.transfer(holding, assignments[key])

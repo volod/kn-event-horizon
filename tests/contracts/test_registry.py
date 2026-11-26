@@ -53,6 +53,22 @@ def test_the_registry_deploys_governance_first_then_domain_contracts() -> None:
 
 
 @pytest.mark.parametrize(
+    "missing", [None, "strategy", "defaultFieldContext"], ids=["declaration", "strategy", "fields"]
+)
+def test_registration_refuses_a_table_without_verification_coverage(missing: str | None) -> None:
+    system = registered_contracts()[0]
+    current = system.tables[0]
+    declarations = json.loads(current.extensions_json)
+    if missing is None:
+        del declarations["humanVerification"]
+    else:
+        del declarations["humanVerification"][missing]
+    table = replace(current, extensions_json=json.dumps(declarations))
+    with pytest.raises(ContractError, match="verification coverage"):
+        validate_registry((replace(system, tables=(table,)),))
+
+
+@pytest.mark.parametrize(
     "entry",
     [
         {"path": "/etc/passwd"},

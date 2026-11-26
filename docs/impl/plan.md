@@ -32,50 +32,14 @@ archive.
 
 ### Verification and review -- `evidence-model`
 
-#### human-verification-projections
-
-All existing datasets and later domains need the same queryable human verification metadata;
-adding a column to one domain would leave labels, links and other facts uncovered.
-
-- Serves: `evidence-model` -- [Human verification metadata](../design/spec.md#human-verification-metadata)
-- Agent status: CLEAR
-- Execution stage: MODEL
-- Dependencies: The [50-table coverage inventory](records/0028-adhoc-human-verification-model-review.md)
-  and [design](../design/human-verification.md), reviewed semantic snapshots and SATCOM fixtures.
-- User-visible outcome: Every current record and addressable field has optional human verification
-  metadata through its KN read projection, including semantic labels/mappings and snapshot-qualified
-  SATCOM data. Unchecked or changed content exposes null; prior human decisions remain available.
-- Scope boundary: Coverage declarations for all current tables, shared projections and target
-  resolvers, content-version invalidation, durable replay and pending/orphan reports, rights
-  filtering, and registration checks for future contracts. Keep source CSV headers, archive bytes
-  and imported verification labels unchanged. Do not auto-approve existing data or add a workflow UI.
-  Apply coverage to the current registry. Require every subsequent domain and exchange contract
-  to supply coverage and replay fixtures at registration. Fixture replay is sufficient;
-  a running engine, review CLI or live source is not a prerequisite.
-- Data and artifact paths: `src/kn/review/`, `src/kn/semantic/`, `src/kn/domains/space/satcom/`,
-  `src/kn/db/`, `src/kn/contracts/resources/`, `tests/review/`, `tests/integration/`,
-  `$DATA_DIR/decisions/` and `$DATA_DIR/human-verification/<run-id>/`.
-- Execution path: Enumerate the deployed registry, apply the common metadata to each projection,
-  and review fixture rows and individual fields. Rebuild twice from seed/source fixtures and the
-  durable log, then re-import unchanged and edited data. Exercise a missing target and denied read.
-- Acceptance gates: All registered tables, including the 50-table review baseline, have coverage;
-  registration without a declared strategy is refused. Each unreviewed row/value returns null.
-  A label/locale, unit/condition, value or
-  target-version change never inherits an unrelated stamp; a field review never approves the row.
-  Unchanged re-delivery preserves matching approval. Two rebuilds preserve exact times, actors
-  and decision IDs; unresolved targets remain pending or reported rather than silently verified.
-  All SATCOM raw cells and files remain exact, legacy verification states create no human dates,
-  and restricted reviewers/evidence do not leak. `make ci` and `make ci-local` pass.
-- Documentation target: `current/evidence-model.md` listed in the [areas index](current.md#areas).
-
 #### review-queue-cli
 
 Human decisions on conflicts and candidates need a workflow that survives rebuilds.
 
 - Serves: `evidence-model` -- [Evidence model](../design/spec.md#evidence-model)
 - Agent status: CLEAR
-- Requires: `human-verification-projections`
-- Dependencies: The durable [identity review match rows](current/object-identity.md#match-resolution).
+- Dependencies: The durable [identity review match rows](current/object-identity.md#match-resolution)
+  and [shared verification projections and replay](current/evidence-model.md#current-verification-reads).
 - User-visible outcome: `kn review list` and `kn review decide` handle fact
   conflicts, identity match candidates, and identity drift. Decisions are appended to
   `$DATA_DIR/decisions/<domain>/` and applied to review items.
@@ -105,7 +69,7 @@ rule would surface only after many sources depend on it.
 
 - Serves: `evidence-model` -- [Evidence model](../design/spec.md#evidence-model)
 - Agent status: CLEAR
-- Requires: `human-verification-projections`, `review-queue-cli`
+- Requires: `review-queue-cli`
 - Dependencies: The accepted task records of the group and the [implementation
   audit](../guide/planning-workflow.md#implementation-audits) checks.
 - User-visible outcome: Canonical values are shown to be order-independent and explainable. The

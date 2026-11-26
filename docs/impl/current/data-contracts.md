@@ -95,9 +95,10 @@ schema objects come from SQLAlchemy metadata, and the platform policy from typed
 The [shared human verification protocol](evidence-model.md) adds a registered decision-log contract
 and typed record/field targets, UTC/null semantics, authenticated reviewer context, durable history
 and transactional application. With the [evidence contracts](evidence-model.md#evidence-contracts),
-the registry defines 73 tables and 706 fields. Dataset-wide
-coverage and read projections remain open in `human-verification-projections` in the
-[plan](../plan.md).
+the registry defines 73 tables and 707 fields. Every table declares coverage for its record and
+fields. The registry validates this at registration, and
+[the shared read projection](evidence-model.md#current-verification-reads) exposes the current
+metadata with audience filtering.
 
 SATCOM `verification_status` is imported source data; semantic `verification_state`, publication
 `reviewed_on` dates and label `review_reference` values retain their specialized meanings. None
@@ -238,7 +239,7 @@ Known limitations, with what would reopen them:
   schema isolation, table/sequence default privileges and PostGIS. Probe tables are rolled back.
 - `make model-baseline`: compile all registered contracts, rebuild and replay combined fixtures
   twice, and compare every stored value and complete marker. This covers the registered subset;
-  the remaining shared/domain models and dataset-wide review projections remain open acceptance work.
+  the remaining shared/domain models and the integrated checkpoint remain open acceptance work.
 - `tests/domains/space/satcom/real_sample.json`: 168 reference-closed rows selected from the owner
   package. Tests mix snapshots and plant missing references, duplicate keys, bad dates, enums and
   numeric values.

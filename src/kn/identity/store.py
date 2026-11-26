@@ -21,7 +21,7 @@ from kn.identity.state import replay as replay_state
 # Distinct from platform/review locks. Rebuild takes this before dropping identity tables.
 IDENTITY_LOCK = 0x4B4E4944
 MUTABLE_COLUMNS = {
-    "objects": ("state", "current_redirect"),
+    "objects": ("state", "current_redirect", "revision_event"),
     "source_records": ("last_seen",),
     "identifiers": ("kn_id",),
     "attributes": ("kn_id",),

@@ -201,7 +201,8 @@ def test_long_redirect_chain_resolves_without_recursion() -> None:
             "core.organization",
             SourceKey(source="fixture:chain", key=str(index)),
             "a" * 64,
+            "a" * 64,
         )
     for source, successor in pairwise(keys):
-        state.redirect(state.objects[source], (successor,))
+        state.redirect(state.objects[source], (successor,), "b" * 64)
     assert state.resolve(keys[0]) == (keys[-1],)

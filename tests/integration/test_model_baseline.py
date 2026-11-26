@@ -3,7 +3,9 @@
 This prepares the checkpoint; missing model owners remain open plan prerequisites.
 """
 
+import csv
 import json
+import shutil
 from collections.abc import Sequence
 from datetime import date, datetime
 from decimal import Decimal
@@ -20,15 +22,31 @@ from kn.db.governance import verify
 from kn.db.platform import role_name
 from kn.db.rebuild import rebuild
 from kn.db.statements import ResetRole, SetConstraints, SetRole
+from kn.domains.space.satcom.archive import archive
 from kn.domains.space.satcom.importer import import_package
-from kn.domains.space.satcom.package import Package, read_package
+from kn.domains.space.satcom.package import CSV_DIRECTORY, Package, read_package
+from kn.review import store as reviews
+from kn.review.journal import Journal
+from kn.review.model import Decision, Stamp
+from kn.review.projection import read
+from kn.review.reports import ReplayReport, write_report
+from kn.review.targets import ContractResolver
 from kn.semantic import Snapshot, validate_model
 from kn.semantic.seeds import reviewed_snapshot
 from kn.sources.catalogue import TABLE_NAME
 from kn.sources.seeds import reviewed_catalogue
 from tests.integration.evidence_fixtures import seed_evidence_fixture
 from tests.integration.identity_fixtures import seed_identity_fixture
-from tests.integration.review_fixtures import replay_review_fixture
+from tests.integration.review_fixtures import (
+    OPEN,
+    SATCOM,
+    TERMINAL,
+    assert_audit_rights,
+    assert_label_isolation,
+    assert_stamps,
+    first,
+    seed_reviews,
+)
 from tests.integration.semantic_fixtures import native_rows, text_fixture
 from tests.semantic.conftest import REFERENCES
 
@@ -108,6 +126,84 @@ def _drain_references(connection: Connection, contract: Contract) -> None:
     connection.execute(SetConstraints(contract.schema, names, deferred=True))
 
 
+def _assert_unreviewed(
+    connection: Connection, contracts: Sequence[Contract], resolver: ContractResolver
+) -> None:
+    for contract in contracts:
+        for table in contract.tables:
+            dataset = resolver.dataset(contract.contract_id, table.name)
+            row = first(connection, dataset)
+            result = read(connection, dataset, dataset.key(row), "terminology", rights=OPEN)
+            assert result is not None and result.values == row
+            assert result.record == Stamp()
+            assert result.fields == dict.fromkeys(dataset.fields, Stamp())
+
+
+def _assert_rebuild_report(report: ReplayReport, decisions: tuple[Decision, ...]) -> None:
+    label, _, terminal, audit, bilingual = decisions
+    states = {entry.target_id: entry.state for entry in report}
+    assert states[label.target.target_id] == "applied"
+    for pending in (terminal, audit, bilingual):
+        assert states[pending.target.target_id] == "pending"
+
+
+def _restore_sources(
+    connection: Connection,
+    package: Package,
+    satcom: Contract,
+    semantic: Contract,
+    fixture: Snapshot,
+) -> None:
+    connection.execute(SetRole(role_name(satcom.schema, "loader")))
+    assert import_package(connection, package, satcom)
+    assert not import_package(connection, package, satcom)
+    connection.execute(ResetRole())
+    _drain_references(connection, satcom)
+    connection.execute(SetRole(role_name(semantic.schema, "loader")))
+    for table in metadata(semantic).tables.values():
+        connection.execute(table.insert(), fixture[table.name])
+    connection.execute(ResetRole())
+    _drain_references(connection, semantic)
+
+
+def _assert_package_bytes(source: Path, archived: Path, package: Package) -> None:
+    for name, content in package.files.items():
+        assert (source / name).read_bytes() == content
+        assert (archived / "package" / name).read_bytes() == content
+
+
+def _assert_edited_delivery(
+    connection: Connection,
+    resolver: ContractResolver,
+    source: Path,
+    satcom: Contract,
+    decision: Decision,
+) -> None:
+    edited = source.with_name("edited")
+    shutil.copytree(source, edited)
+    file = edited / CSV_DIRECTORY / "terminal_models.csv"
+    # Change one source cell while letting the normal package reader derive a new snapshot ID.
+    with file.open(encoding="utf-8", newline="") as stream:
+        reader = csv.DictReader(stream)
+        rows = list(reader)
+        headers = reader.fieldnames
+    terminal = next(row for row in rows if row["terminal_id"] == TERMINAL)
+    assert terminal["mass_antenna_kg"] != "35.0"
+    terminal["mass_antenna_kg"] = "35.0"
+    with file.open("w", encoding="utf-8", newline="") as stream:
+        writer = csv.DictWriter(stream, fieldnames=headers)
+        writer.writeheader()
+        writer.writerows(rows)
+    package = read_package(edited, satcom)
+    dataset = resolver.dataset(SATCOM, "terminal_models")
+    assert import_package(connection, package, satcom)
+    row = first(connection, dataset, import_id=package.import_id, terminal_id=TERMINAL)
+    result = read(connection, dataset, dataset.key(row), "factual", rights=OPEN)
+    assert result is not None and set(result.fields.values()) == {Stamp()}
+    assert result.values["mass_antenna_kg"] == Decimal("35.0")
+    assert_stamps(connection, resolver, (decision,))
+
+
 def test_registered_model_fixture_rebuild_is_lossless_and_repeatable(
     rebuild_connection: Connection, source_package: Path, tmp_path: Path
 ) -> None:
@@ -122,25 +218,27 @@ def test_registered_model_fixture_rebuild_is_lossless_and_repeatable(
         contract for contract in contracts if contract.contract_id == "kn.core.semantic"
     )
     package = read_package(source_package, satcom)
+    archived = archive(package, tmp_path)
     semantic_fixture = text_fixture()
     validate_model(semantic_fixture, REFERENCES)
     semantic_fixture = native_rows(semantic, semantic_fixture)
     connection = rebuild_connection
     seed_identity_fixture(tmp_path)
+    resolver = ContractResolver.registered(contracts)
+    journal = Journal(tmp_path)
+    rebuild(connection, contracts, data_dir=tmp_path)
+    _restore_sources(connection, package, satcom, semantic, semantic_fixture)
+    decisions = seed_reviews(connection, resolver, tmp_path)
     snapshots = []
     for iteration in range(2):
-        rebuild(connection, contracts, data_dir=tmp_path)
-        connection.execute(SetRole(role_name(satcom.schema, "loader")))
-        assert import_package(connection, package, satcom)
-        assert not import_package(connection, package, satcom)
-        connection.execute(ResetRole())
-        _drain_references(connection, satcom)
-        connection.execute(SetRole(role_name(semantic.schema, "loader")))
-        for table in metadata(semantic).tables.values():
-            connection.execute(table.insert(), semantic_fixture[table.name])
-        connection.execute(ResetRole())
-        _drain_references(connection, semantic)
-        replay_review_fixture(connection, contracts, tmp_path)
+        report = rebuild(connection, contracts, data_dir=tmp_path)
+        _assert_rebuild_report(report, decisions)
+        write_report(tmp_path, report)
+        _restore_sources(connection, package, satcom, semantic, semantic_fixture)
+        report = reviews.replay(connection, journal, resolver, complete=True)
+        assert len(report) == len(decisions) and {entry.state for entry in report} == {"applied"}
+        write_report(tmp_path, report)
+        assert_stamps(connection, resolver, decisions)
         evidence = next(item for item in contracts if item.contract_id == "kn.core.evidence")
         assert seed_evidence_fixture(connection) > 0
         _drain_references(connection, evidence)
@@ -152,6 +250,7 @@ def test_registered_model_fixture_rebuild_is_lossless_and_repeatable(
             reviewed_catalogue(), key=lambda row: row["source_id"]
         )
         assert all(snapshot.values()), "provide at least one representative row per table"
+        _assert_unreviewed(connection, contracts, resolver)
         (tmp_path / f"rebuild-{iteration + 1}.json").write_text(
             json.dumps(snapshot, default=_encoded, ensure_ascii=True, sort_keys=True, indent=2)
             + "\n",
@@ -159,3 +258,8 @@ def test_registered_model_fixture_rebuild_is_lossless_and_repeatable(
         )
         snapshots.append(snapshot)
     assert snapshots[0] == snapshots[1]
+    assert tuple(journal.read()) == decisions
+    _assert_package_bytes(source_package, archived, package)
+    assert_audit_rights(connection, resolver, decisions[2])
+    assert_label_isolation(connection, resolver, decisions[-1])
+    _assert_edited_delivery(connection, resolver, source_package, satcom, decisions[2])

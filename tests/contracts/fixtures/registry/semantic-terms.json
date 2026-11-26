@@ -17,7 +17,21 @@
       "logicalType": "object",
       "physicalType": "table",
       "description": "A contract in another schema, for registry tests",
-      "customProperties": [],
+      "customProperties": [
+        {
+          "property": "kn.humanVerification",
+          "value": {
+            "strategy": "external",
+            "resolver": "contract-v1",
+            "recordFields": [
+              "fixture.terms.fixture_terms.term_id",
+              "fixture.terms.fixture_terms.label"
+            ],
+            "fieldContexts": {},
+            "defaultFieldContext": "record"
+          }
+        }
+      ],
       "properties": [
         {
           "name": "term_id",

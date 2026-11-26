@@ -83,6 +83,24 @@
             }
           ]
         }
+      ],
+      "customProperties": [
+        {
+          "property": "kn.humanVerification",
+          "value": {
+            "strategy": "external",
+            "resolver": "contract-v1",
+            "recordFields": [
+              "system.governance.installed_contracts.contract_id",
+              "system.governance.installed_contracts.version",
+              "system.governance.installed_contracts.digest",
+              "system.governance.installed_contracts.storage_schema",
+              "system.governance.installed_contracts.managed_tables_json"
+            ],
+            "fieldContexts": {},
+            "defaultFieldContext": "record"
+          }
+        }
       ]
     }
   ]

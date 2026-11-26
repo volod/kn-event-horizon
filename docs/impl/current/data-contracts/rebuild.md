@@ -17,8 +17,10 @@ All tables inside KN schemas are disposable, including obsolete tables absent fr
 contract. This replaces the earlier SATCOM-only rebuild that kept unmanaged tables inside `space`.
 Separate databases, schemas outside the KN list, PostGIS in `public`, and files under `DATA_DIR`
 are preserved. A rebuild clears imported SATCOM rows; restore them explicitly with the import
-command. Identity events replay automatically before seeds; raw archive replay and all-target human decision
-replay remain planned.
+command. The rebuild replays identity events, loads reviewed seeds, then restores human
+verification for exact targets already present. SATCOM targets can stay pending until the import
+restores their snapshot. See the [replay reports](../evidence-model.md#durable-history-and-conflicts).
+Raw archive replay remains planned.
 
 ## Execution and transaction boundary
 
@@ -31,9 +33,9 @@ rebuild and an upgrade of an empty database therefore use one mechanism. Revisio
 `0002_identity_checkpoint` installs the internal identity checkpoint and its invalidation trigger
 through typed DDL. The generated `postgresql/schema.sql` is a review artifact. Archived source
 `schema.sql` files are never used for deployment. The current set holds governance and source catalogue
-tables in `system`, 31 SATCOM tables in `space`, 18 semantic tables in `semantic`, the human
-decision table in `evidence`, and ten [identity tables](../object-identity.md). The other five
-schemas have no contracted datasets.
+tables in `system`, 31 SATCOM tables in `space`, 18 semantic tables in `semantic`, 12 tables in
+`evidence` including the human decision log, and ten [identity tables](../object-identity.md).
+The other five schemas have no contracted datasets.
 `rebuild()` and `upgrade()` accept another validated set, which the integration tests use for
 fixture contracts in `space` and `semantic`.
 
@@ -42,8 +44,9 @@ references and the migration marker must stay consistent. The shared platform ad
 serializes bootstrap, upgrade and rebuild. Rebuild reflects only KN tables without following
 foreign keys outside them, drops the tables without cascade, then drops the empty schemas with
 SQLAlchemy `DropSchema`, which PostgreSQL applies as `RESTRICT`. The drop also removes the
-migration-owned checkpoint function. Rebuild then replays the durable identity journal, loads
-reviewed seeds and verifies the database before returning.
+migration-owned checkpoint function. Identity replay, reviewed seeds, human verification replay
+and catalog verification all run inside the rebuild transaction. The CLI writes a private report
+for verification targets after commit.
 
 External dependencies refuse instead of being cascaded away. Non-table schema objects that the
 compiler does not manage, such as views, functions or standalone sequences, also refuse if they

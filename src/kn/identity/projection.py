@@ -76,6 +76,7 @@ def _objects(state: State, result: Rows, keys: Iterable[str]) -> None:
                 "state": item.state,
                 "anchor_record_id": item.anchor.record_id,
                 "mint_event": item.mint_event,
+                "revision_event": item.revision_event,
                 "current_redirect": successors[0] if len(successors) == 1 else None,
             }
         )

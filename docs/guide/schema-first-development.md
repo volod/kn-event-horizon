@@ -27,9 +27,11 @@ Keep shared objects and histories in identity, claims and review in evidence, so
 metadata with their registered owners, and common measurements in supply. Domain adapters
 extend these contracts. Preserve original SATCOM snapshot keys and cells alongside canonical
 space facts. Interchange owns its versioned external schemas, binding ledger and loss reporting.
-Each new table must provide fixture replay and verification coverage as those checks become
-available. Changes to keys, units, null meanings or ownership require an explicit compatibility
-decision, backfill evidence and reruns of affected consumers.
+Each new table must declare [verification coverage](../impl/current/evidence-model.md#coverage-and-target-resolvers)
+and provide representative replay fixtures in the
+[combined baseline](../impl/current/data-contracts/model-baseline.md#extending-the-checkpoint).
+Changes to keys, units, null meanings or ownership require an explicit compatibility decision,
+backfill evidence and reruns of affected consumers.
 
 ## Integrated baseline and later changes
 

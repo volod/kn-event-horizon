@@ -2,7 +2,7 @@
 
 Version: 1.0.0
 
-Digest: `5dfdbc18f4452ba7dca18fc5e11738d7b27a75593b38664e3b6c920aab83a760`
+Digest: `0fb9971b4b55742d2c3855f206bc7a8e25de93ea6beb0ba9be80f6c17e566944`
 
 Storage schema: `semantic`
 

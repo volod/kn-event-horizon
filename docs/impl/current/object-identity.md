@@ -103,13 +103,13 @@ view for other read-only callers. `rows` implements `kn.evidence.lineage.Evidenc
 ## Storage and wire contracts
 
 Registered ODCS contract `kn.core.identity` lives in
-`src/kn/contracts/resources/identity/1.0.0.json`. It adds ten tables and 71 stable fields to the
+`src/kn/contracts/resources/identity/1.0.0.json`. It adds ten tables and 72 stable fields to the
 editable `1.0.0` development baseline. `make contract-compile` derives the SQLAlchemy/PostgreSQL,
 Pydantic, wire and engine artifacts under `generated/contracts/kn.core.identity/`.
 
 | Table | Content |
 | --- | --- |
-| `objects` | KN UUIDv7, entity class, lifecycle state, anchoring source record, mint event and current single redirect |
+| `objects` | KN UUIDv7, entity class, lifecycle state, anchoring source record, mint event, revision event and current single redirect |
 | `identifiers` | Namespace/native value, issuer, authority level, half-open validity and evidence |
 | `attributes` | Original and normalized values, field ID, normalizer, profile digest and evidence |
 | `source_records` | Source-qualified key digest, original source/key and last-seen instant |
@@ -135,9 +135,11 @@ involving that object as a candidate or mint target.
 Objects and source records declare `kn.identity`; the local `identity.anchor-v1` reference describes
 exact anchor uniqueness, without supplying a class's scored profile. Every table declares shared
 `kn.humanVerification` coverage. External version-bound review uses the shared resolver; lifecycle
-events declare decision-log coverage. No review timestamp is fabricated by replay, and a lifecycle
-`decision_ref` does not itself prove a human acceptance. Current verification joins and invalidation
-remain owned by `human-verification-projections`.
+events declare decision-log coverage. The current `objects.revision_event` comes from durable
+history. Retire, restore, merge, split and reclassify events revise affected objects, including
+survivors, successors and redirect ancestors when applicable. The shared
+[verification read](evidence-model.md#current-verification-reads) binds reviews to that revision.
+Lifecycle workflow approvals use their own purpose and versions.
 
 ## Match resolution
 
