@@ -1,8 +1,10 @@
 """Bind operator decisions to exact identity operations and recover their SQL rows."""
 
+from collections.abc import Iterable
+
 from sqlalchemy.engine import Connection
 
-from kn.identity.events import Event
+from kn.identity.events import REVIEW_REF, Event
 from kn.identity.journal import LockedJournal
 from kn.identity.model import KnId, Merge, Reclassify, Restore, Retire, SourceKey, Split
 from kn.review import store
@@ -10,7 +12,6 @@ from kn.review.journal import Journal
 from kn.review.model import Decision, Frozen, Instant, KeyPart, Purpose, Target, Text, digest
 
 PURPOSE: Purpose = "workflow"
-REVIEW_REF = "identity-review:"
 
 
 class Reclassification(Frozen):
@@ -70,7 +71,7 @@ def check_binding(value: Event, decision: Decision) -> None:
         raise ValueError("identity event does not match its accepted review decision")
 
 
-def references(events: tuple[Event, ...]) -> list[tuple[Event, str]]:
+def references(events: Iterable[Event]) -> list[tuple[Event, str]]:
     return [
         (value, value.decision_ref.removeprefix(REVIEW_REF))
         for value in events
@@ -92,7 +93,7 @@ def check_history(
 
 
 def restore(connection: Connection, locked: LockedJournal) -> None:
-    reviewed = references(locked.events)
+    reviewed = references(locked.state.reviewed)
     if not reviewed:
         return
     store.replay_selected(

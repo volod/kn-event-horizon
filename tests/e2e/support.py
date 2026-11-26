@@ -2,6 +2,7 @@
 
 import json
 import os
+import re
 import subprocess
 import sys
 from pathlib import Path
@@ -35,3 +36,11 @@ def run_cli(arguments: list[str], **environment: str) -> dict[str, object]:
         check=False,
     )
     return {"exit_code": result.returncode, "stdout": result.stdout, "stderr": result.stderr}
+
+
+def normalize_usage(output: str, prefix: str = "usage: ") -> str:
+    """Ignore argparse synopsis wrapping while retaining the help body."""
+    if not output.startswith(prefix):
+        return output
+    usage, separator, body = output.partition("\n\n")
+    return re.sub(r"\n +", " ", usage) + separator + body

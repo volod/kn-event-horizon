@@ -55,11 +55,11 @@ def test_pending_approval_does_not_apply_against_changed_snapshot(
     rebuild(rebuild_connection, data_dir=tmp_path)
     change = Merge(kn_id=A, survivor=B)
 
-    def interrupt(log, value):
+    def interrupt(log, encoded):
         raise OSError("fixture interrupted between the two durable appends")
 
     with monkeypatch.context() as interrupted:
-        interrupted.setattr(LockedJournal, "append", interrupt)
+        interrupted.setattr(LockedJournal, "_write", interrupt)
         with pytest.raises(OSError, match="interrupted"):
             _submit(rebuild_connection, journal, change, "pending")
     _submit(rebuild_connection, journal, Retire(kn_id=C), "other")

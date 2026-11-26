@@ -188,25 +188,24 @@ def test_evidence_paths_are_checkout_relative(
     assert load_crawler_config(_write(directory, enabled))["approval"]["state"] == "enabled"
 
 
-@pytest.mark.parametrize("locale", ["en", "uk"])
-def test_cli_validates_and_localizes(
-    enabled: dict[str, Any], tmp_path: Path, caplog: pytest.LogCaptureFixture, locale: str
+def test_cli_reports_source_validation(
+    enabled: dict[str, Any], tmp_path: Path, caplog: pytest.LogCaptureFixture
 ) -> None:
     caplog.set_level(logging.INFO, logger="kn.operator")
     path = str(_write(tmp_path, enabled))
     expected = {"source_id": "space:row-4", "state": "enabled", "status": "valid"}
-    assert cli.main(["source", "validate", path, "--locale", locale]) == 0
-    translator = Translator(locale)
+    assert cli.main(["source", "validate", path]) == 0
+    translator = Translator()
     assert caplog.records[-1].message == translator.text(
         "cli.source_config_ok", source_id="space:row-4", state=translator.text("cli.source_enabled")
     )
-    assert cli.main(["--json", "--locale", locale, "source", "validate", path]) == 0
+    assert cli.main(["--json", "source", "validate", path]) == 0
     assert json.loads(caplog.records[-1].message) == expected
 
     del enabled["approval"]["reference"]
     path = str(_write(tmp_path, enabled))
-    assert cli.main(["--locale", locale, "source", "validate", path]) == 1
-    assert caplog.records[-1].message == Translator(locale).text(
+    assert cli.main(["source", "validate", path]) == 1
+    assert caplog.records[-1].message == Translator().text(
         "cli.source_config_diagnostic",
         path="$/approval/reference",
         rule="required",
@@ -234,9 +233,8 @@ def test_cli_redacts_input_and_returns_stable_diagnostic(
 ) -> None:
     config_path = tmp_path / "config.yaml"
     config_path.write_text(body, encoding="ascii")
-    for locale in ("en", "uk"):
-        assert cli.main(["--json", "--locale", locale, "source", "validate", str(config_path)]) == 1
-        message = caplog.records[-1].message
-        assert "secret" not in message
-        error = json.loads(message)["error"]
-        assert (error["code"], error["path"], error["rule"]) == ("E_SOURCE_CONFIG", path, rule)
+    assert cli.main(["--json", "source", "validate", str(config_path)]) == 1
+    message = caplog.records[-1].message
+    assert "secret" not in message
+    error = json.loads(message)["error"]
+    assert (error["code"], error["path"], error["rule"]) == ("E_SOURCE_CONFIG", path, rule)

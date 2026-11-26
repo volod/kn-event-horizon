@@ -7,7 +7,7 @@ from kn.contracts.ddl import postgresql_ddl
 from kn.contracts.diagnostics import ContractError
 from kn.contracts.field_exports import json_field
 from kn.contracts.model import Contract, Field, Table, canonical
-from kn.contracts.physical import extensions
+from kn.contracts.physical import EXACTLY_ONE, column_names, extensions, presence_rules
 from kn.contracts.postgresql import manifest as postgresql_manifest
 from kn.contracts.templates import contract_docs, dbt_sources, pydantic_models
 
@@ -95,7 +95,7 @@ def elasticsearch(contract: Contract, table: Table) -> dict[str, Any]:
 
 def json_schema(table: Table) -> dict[str, Any]:
     """Portable wire validation uses exact decimal strings, never JSON floating point."""
-    return {
+    result = {
         "$schema": "https://json-schema.org/draft/2020-12/schema",
         "type": "object",
         "additionalProperties": False,
@@ -103,6 +103,19 @@ def json_schema(table: Table) -> dict[str, Any]:
         "properties": {field.name: json_field(field) for field in table.fields},
         "x-kn": extensions(table),
     }
+    rules = [_json_presence(table, rule) for rule in presence_rules(table)]
+    return {**result, "allOf": rules} if rules else result
+
+
+def _json_presence(table: Table, rule: dict[str, Any]) -> dict[str, Any]:
+    """An absent optional property is null, as in SQL and the Pydantic models."""
+    present = [
+        {"required": [name], "properties": {name: {"not": {"type": "null"}}}}
+        for name in column_names(table, rule["fields"])
+    ]
+    if rule["rule"] == EXACTLY_ONE:
+        return {"oneOf": present}
+    return {"anyOf": [{"allOf": present}, {"not": {"anyOf": present}}]}
 
 
 def artifacts(contract: Contract) -> dict[str, str]:

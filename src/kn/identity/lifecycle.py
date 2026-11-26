@@ -7,10 +7,9 @@ from datetime import datetime
 from sqlalchemy.engine import Connection
 
 from kn.identity import store
-from kn.identity.events import Event, event
+from kn.identity.events import REVIEW_REF, Event, event
 from kn.identity.journal import Journal, LockedJournal, new_id
 from kn.identity.lifecycle_reviews import (
-    REVIEW_REF,
     Change,
     Reclassification,
     ReviewDetails,
@@ -20,7 +19,6 @@ from kn.identity.lifecycle_reviews import (
     target,
 )
 from kn.identity.model import Merge, Mint, Reclassify, Restore, Retire, Split
-from kn.identity.state import PENDING_MATCH, replay
 from kn.review import store as review_store
 from kn.review.journal import Journal as ReviewJournal
 from kn.review.model import Decision, Request, Target
@@ -63,7 +61,9 @@ def submit(
 
     def write(locked: LockedJournal) -> Event:
         history = review_journal.read()
-        check_history(references(locked.events), {item.decision_id: item for item in history})
+        check_history(
+            references(locked.state.reviewed), {item.decision_id: item for item in history}
+        )
         existing = next(
             (
                 value
@@ -101,11 +101,11 @@ def _write(
     expected_head: str | None,
 ) -> Event:
     prior = (
-        next((item for item in locked.events if item.decision_ref == _ref(existing)), None)
+        next((item for item in locked.state.reviewed if item.decision_ref == _ref(existing)), None)
         if existing
         else None
     )
-    previous = locked.events[-1] if locked.events else None
+    previous = locked.head
     head = previous.event_id if previous else None
     if prior is None and expected_head is not None and expected_head != head:
         raise ValueError("identity history changed after review; inspect and confirm again")
@@ -118,22 +118,20 @@ def _write(
     check_binding(value, decision)
     if prior is not None:
         return prior
-    if locked.state.pending_match() is not None:
-        # Refuse before the decision is written; the matcher retry finishes its batch first.
-        raise ValueError(PENDING_MATCH)
 
-    replay((*locked.events, value))
-    _require_acceptance(project((*history, decision), reviewed_target).heads, decision)
-    saved = review_store.submit(
-        connection,
-        journal,
-        OperationTarget(reviewed_target),
-        request,
-        lambda: reviewer,
-        lambda: decision.recorded_at,
-    )
-    _require_acceptance(review_store.projection(connection, reviewed_target).heads, saved)
-    locked.append(value)
+    def approve() -> None:
+        _require_acceptance(project((*history, decision), reviewed_target).heads, decision)
+        saved = review_store.submit(
+            connection,
+            journal,
+            OperationTarget(reviewed_target),
+            request,
+            lambda: reviewer,
+            lambda: decision.recorded_at,
+        )
+        _require_acceptance(review_store.projection(connection, reviewed_target).heads, saved)
+
+    locked.append(value, before_write=approve)
     return value
 
 

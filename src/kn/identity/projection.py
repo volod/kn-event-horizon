@@ -1,16 +1,22 @@
 """Translate validated history to the registered SQL storage contract."""
 
+from collections.abc import Iterable
 from datetime import datetime
 
 from kn.contracts.model import canonical
-from kn.identity.model import Attribute, Identifier, Link
+from kn.identity.events import Event
+from kn.identity.model import Attribute, ChangeSet, Identifier, Link, Match, Version
 from kn.identity.state import State
 
 type Value = str | int | float | datetime | None
 type Rows = dict[str, list[dict[str, Value]]]
 
 
-def rows(state: State) -> Rows:
+def rows(state: State, after: int | None = None) -> Rows:
+    """Project either the whole registry or the suffix tracked by the state."""
+    dirty = state.dirty if after is not None else None
+    if after is not None and dirty is None:
+        raise ValueError("incremental projection requires tracked state changes")
     result: Rows = {
         name: []
         for name in (
@@ -26,15 +32,23 @@ def rows(state: State) -> Rows:
             "redirects",
         )
     }
-    _lifecycle(state, result)
-    _sources(state, result)
-    _holdings(state, result)
-    _decisions(state, result)
+    events = state.events if after is None else state.events[after:]
+    _events(events, result)
+    _objects(state, result, state.objects if dirty is None else dirty.objects)
+    redirect_keys = state.redirects if dirty is None else dirty.redirects
+    result["redirects"] = [
+        {"kn_id": key, "successor": target}
+        for key in redirect_keys
+        for target in state.redirects[key]
+    ]
+    _sources(state, result, state.records if dirty is None else dirty.records)
+    _holdings(state, result, state.holdings if dirty is None else dirty.holdings)
     return result
 
 
-def _lifecycle(state: State, result: Rows) -> None:
-    for event in state.events:
+def _events(events: Iterable[Event], result: Rows) -> None:
+    for event in events:
+        _event_payload(event, result)
         result["lifecycle_events"].append(
             {
                 "event_id": event.event_id,
@@ -49,7 +63,11 @@ def _lifecycle(state: State, result: Rows) -> None:
                 "event_json": canonical(event.model_dump(mode="json")),
             }
         )
-    for item in state.objects.values():
+
+
+def _objects(state: State, result: Rows, keys: Iterable[str]) -> None:
+    for key in keys:
+        item = state.objects[key]
         successors = state.redirects.get(item.kn_id, ())
         result["objects"].append(
             {
@@ -61,11 +79,11 @@ def _lifecycle(state: State, result: Rows) -> None:
                 "current_redirect": successors[0] if len(successors) == 1 else None,
             }
         )
-        result["redirects"].extend({"kn_id": item.kn_id, "successor": key} for key in successors)
 
 
-def _sources(state: State, result: Rows) -> None:
-    for key, record in state.records.items():
+def _sources(state: State, result: Rows, keys: Iterable[str]) -> None:
+    for key in keys:
+        record = state.records[key]
         result["source_records"].append(
             {
                 "record_id": key,
@@ -74,27 +92,11 @@ def _sources(state: State, result: Rows) -> None:
                 "last_seen": state.last_seen.get(key),
             }
         )
-    for key, version in state.versions.items():
-        result["source_versions"].append(
-            {
-                "version_id": key,
-                "record_id": version.record.record_id,
-                "version": version.version,
-                "content_digest": version.content_digest,
-                "field_hashes_json": canonical(
-                    [item.model_dump(mode="json") for item in version.field_hashes]
-                ),
-                "observed_at": version.observed_at,
-                "source_updated_at": version.source_updated_at,
-                "fetch_id": version.fetch_id,
-                "archive_record_id": version.archive_record_id,
-                "code_digest": version.code_digest,
-            }
-        )
 
 
-def _holdings(state: State, result: Rows) -> None:
-    for key, holding in state.holdings.items():
+def _holdings(state: State, result: Rows, keys: Iterable[str]) -> None:
+    for key in keys:
+        holding = state.holdings[key]
         payload = holding.event.payload
         base: dict[str, Value] = {"kn_id": holding.kn_id}
         if isinstance(payload, Link):
@@ -142,30 +144,47 @@ def _holdings(state: State, result: Rows) -> None:
             )
 
 
-def _decisions(state: State, result: Rows) -> None:
-    references = {event.event_id: event.decision_ref for event in state.events}
-    for key, match in state.matches.items():
-        result["matches"].append(
+def _event_payload(event: Event, result: Rows) -> None:
+    payload = event.payload
+    if isinstance(payload, Version):
+        result["source_versions"].append(
             {
-                "match_id": key,
-                "record_id": match.record.record_id,
-                "profile_digest": match.profile_digest,
-                "profile_version": match.profile_version,
-                "candidates_json": canonical(
-                    [item.model_dump(mode="json") for item in match.candidates]
+                "version_id": event.event_id,
+                "record_id": payload.record.record_id,
+                "version": payload.version,
+                "content_digest": payload.content_digest,
+                "field_hashes_json": canonical(
+                    [item.model_dump(mode="json") for item in payload.field_hashes]
                 ),
-                "decision": match.decision,
-                "selected": match.selected,
-                "decision_ref": references[key],
+                "observed_at": payload.observed_at,
+                "source_updated_at": payload.source_updated_at,
+                "fetch_id": payload.fetch_id,
+                "archive_record_id": payload.archive_record_id,
+                "code_digest": payload.code_digest,
             }
         )
-    for key, change in state.changes.items():
+    elif isinstance(payload, Match):
+        result["matches"].append(
+            {
+                "match_id": event.event_id,
+                "record_id": payload.record.record_id,
+                "profile_digest": payload.profile_digest,
+                "profile_version": payload.profile_version,
+                "candidates_json": canonical(
+                    [item.model_dump(mode="json") for item in payload.candidates]
+                ),
+                "decision": payload.decision,
+                "selected": payload.selected,
+                "decision_ref": event.decision_ref,
+            }
+        )
+    elif isinstance(payload, ChangeSet):
         result["change_sets"].append(
             {
-                "change_set_id": key,
-                "version_id": change.version_id,
+                "change_set_id": event.event_id,
+                "version_id": payload.version_id,
                 "changes_json": canonical(
-                    [item.model_dump(mode="json") for item in change.changes]
+                    [item.model_dump(mode="json") for item in payload.changes]
                 ),
             }
         )

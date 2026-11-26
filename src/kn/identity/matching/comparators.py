@@ -14,7 +14,8 @@ Comparator = Literal[
 ]
 type Outcome = Literal["agree", "similar", "disagree", "missing", "invalid"]
 
-COMPARISON_OUTCOMES = frozenset({"agree", "disagree"})
+DISAGREE: Outcome = "disagree"
+COMPARISON_OUTCOMES = frozenset({"agree", DISAGREE})
 GRADED_OUTCOMES = COMPARISON_OUTCOMES | {"similar"}
 AGREEING_OUTCOMES = frozenset({"agree", "similar"})
 STRING_SIMILARITY = 0.85

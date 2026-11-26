@@ -76,7 +76,7 @@ def test_verification_refuses_wrong_revision_unsafe_roles_and_owners(
     context.get_current_revision.return_value = "old"
     with pytest.raises(ValueError, match="revision"):
         governance.verify(conn)
-    context.get_current_revision.return_value = "0001_baseline"
+    context.get_current_revision.return_value = "0002_identity_checkpoint"
     conn.scalar.return_value = "intruder"
     with pytest.raises(ValueError, match="owner"):
         governance.verify(conn)

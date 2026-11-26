@@ -21,7 +21,7 @@ The project uses ODCS storage contract version `1.0.0` and a single editable Pyt
 SQLAlchemy/Alembic baseline during development. Rebuild and backfill replace development revision
 chains. First release freezes this baseline and enables subsequent versioned migration history.
 The external interchange contract and counterpart adapters remain
-independently versioned. Object identity, partial-update tracking, interchange, and InvenTree
+independently versioned. Object identity, interchange, and InvenTree
 compatibility are core work and come before the domain pipelines.
 Source tasks follow the [onboarding workflow](../guide/source-onboarding.md) and the
 [TDD growth rule](../design/spec.md#ingestion-engine). Each source adds failing fixtures first, then
@@ -29,199 +29,6 @@ general engine changes, and reruns every earlier source suite plus a rebuild fro
 archive.
 
 ## Agent Implementation Tasks
-
-### Claims, change tracking and lineage -- `object-identity`
-
-#### evidence-claim-contracts
-
-Claims, evidence, and canonical facts need contracts that carry every provenance field.
-
-- Serves: `evidence-model` -- [Evidence model](../design/spec.md#evidence-model)
-- Agent status: CLEAR
-- Execution stage: MODEL
-- Dependencies: The [qualified catalogue IDs](current/source-management.md#reviewed-inputs-and-identifiers).
-- User-visible outcome: The `evidence` schema holds alias, claim, claim confirmation, evidence,
-  relation assertion, canonical fact, and review item datasets with value-or-missing-reason
-  constraints. Every claim refers to a KN ID and to its source record version.
-- Scope boundary: Contracts, constraints, deterministic claim keys, and as-of views. Objects and
-  identifiers come from the identity registry. Selection policies come in
-  `canonical-fact-selection`. Claims and canonical fact projections reuse the shared optional,
-  version-bound human verification model instead of defining another timestamp convention.
-  Include the review-item/decision shapes, claim confirmations, field-change lineage, selection
-  outcome/history and source-rank/update-policy formats needed by later writers. Those tasks
-  implement behavior over this model rather than adding another core state layout.
-- Data and artifact paths: `contracts/core/evidence/`, `src/kn/evidence/`, `tests/evidence/`.
-- Execution path: Write the contracts with `kn.temporalProfile` and `kn.evidence` extensions, and
-  compile and test the constraints against the integration database.
-- Acceptance gates: A claim without an origin URI, a fetch time, or a value-or-missing-reason is
-  rejected. Re-inserting the same claim key is a no-op. As-of views are deterministic on fixtures.
-  A claim that cites a deprecated or replaced concept appears in the
-  [lifecycle report](current/ontology-taxonomy.md#lifecycle-report) as an external use, with the
-  concept's successor.
-  Multilingual text projections preserve originals, language tags, and translation provenance under
-  the [localization policy](../design/spec.md#localization), without duplicating facts per locale.
-  A changed claim version has no inherited human verification; an unreviewed claim keeps null
-  metadata, regardless of its imported source verification label.
-- Documentation target: A new `current/evidence-model.md` page listed in the
-  [areas index](current.md#areas).
-
-#### partial-update-tracking
-
-Sources send partial records and declare nothing about completeness. Every change must still be
-detected per field and traced back to its record version.
-
-- Serves: `object-identity` -- [Object identity](../design/spec.md#object-identity)
-- Agent status: CLEAR
-- Requires: `evidence-claim-contracts`
-- Dependencies: The [registry replay and match writer](current/object-identity.md#replay-and-integrity).
-- User-visible outcome: For each mapped record, the engine computes a field-level change set
-  (added, changed, unchanged, emptied, or not stated) against the record's previous version. Only
-  added, changed, and emptied fields create claims. Unchanged fields record confirmations, and
-  omitted fields have no effect. Each record keeps a `last_seen` time, and absence never clears or
-  deletes anything.
-- Scope boundary: Record keys and version fields from the crawler mapping, version ordering by
-  source version or `updated` time and then fetch time, per-field hashes, confirmations, late
-  older versions kept as history, weak-key fragments resolved through existing or parent links,
-  and change-set lineage (record version, fetch ID, archive record ID, code digest). How a claim
-  changes the object belongs to `canonical-fact-selection`. Engine wiring comes in
-  `mapping-and-quality-rules`.
-  Consume registered source/version/change-set and confirmation contracts; no parallel
-  tracker-owned definition of these records is introduced.
-- Data and artifact paths: `src/kn/identity/tracking/`, `contracts/core/identity/`,
-  `contracts/core/evidence/`, `tests/identity/`.
-- Execution path: Write one fixture per row of the specification's change table, plus a record
-  that stops appearing and an out-of-order version, before the tracker.
-- Acceptance gates: A price-only record leaves parameter claims untouched. An emptied field creates
-  a `source_empty` claim and no clearing. An omitted field changes nothing. A record that stops
-  appearing keeps its claims, its `last_seen` time stops advancing, and nothing is deleted. An
-  identical re-delivery adds a confirmation and no claim. An older version that arrives late does
-  not become current.
-- Documentation target: `current/object-identity.md` listed in the [areas index](current.md#areas).
-
-#### canonical-fact-selection
-
-Sources declare nothing, so KN must decide by explicit rules how each new claim fills, replaces, or
-leaves an object's value. Arrival order must never decide.
-
-- Serves: `evidence-model` -- [Evidence model](../design/spec.md#evidence-model)
-- Agent status: CLEAR
-- Requires: `evidence-claim-contracts`
-- Dependencies: The [reviewed source rank override format and catalogue IDs](current/source-management.md#reviewed-inputs-and-identifiers).
-- User-visible outcome: The engine projects each field's canonical value through its update
-  policy. The modes are `priority`, `latest_observed`, `accumulate`, and `fixed`. A candidate value
-  ranks by its best supporting claim: source rank, then evidence class, then data time within one
-  source. Every change is explained as filled, replaced, ignored, corroborated, or conflict, with
-  the deciding criterion. Selection flags owner overrides of first-party values for review.
-  Identity redirects are followed. Conflicts, and high-impact facts
-  without primary evidence, go to review.
-- Scope boundary: The `kn.updatePolicy` semantics; the reviewed source rank table
-  `contracts/core/policies/source-ranks.yaml`, with `owner_entered` as the highest class and review
-  decisions ranked through it; evidence classes; verification states derived from support and
-  review; eligibility (minimum rank and evidence class, rights, conditions); empty-claim handling;
-  freshness and `stale` labels; audience-specific selection from eligible evidence. Identity
-  resolution uses the [available matcher](current/object-identity.md#match-resolution).
-  Domain policies come with domain contracts.
-  Only the matching accepted human decision can supply human-verification metadata for the
-  selected claim; timestamps alone never bypass eligibility or resolve a conflict.
-- Data and artifact paths: `src/kn/evidence/`, `contracts/core/policies/`, `tests/evidence/`.
-- Execution path: Write fixture-first tests for each outcome, mode, and verification state in the
-  specification, then the selector.
-- Acceptance gates: An empty field is filled by the first eligible claim. A higher-ranked value
-  replaces it, and a lower-ranked value is ignored and stays visible. An owner-entered value
-  outranks a manufacturer value and is flagged `owner_override`. A value that a higher-ranked
-  source also supports wins, while repeated claims or confirmations from one source add no rank.
-  A newer datasheet revision from the same source replaces the older one. Different values from
-  two sources of equal rank and evidence class conflict. Under `latest_observed`, a newer price
-  wins, and an old winner shows as `stale`. A different value on a `fixed` field opens review, and
-  an outranking empty claim opens review without clearing. Every permutation of arrival order
-  gives identical canonical values. Fixtures keep organization, model, spacecraft, constellation,
-  program, and service distinct, and a contradictory ownership claim stays conflicted. Claims
-  about a merged object are selected under its survivor. Signals never fill canonical fields.
-- Documentation target: `current/evidence-model.md` listed in the [areas index](current.md#areas).
-
-#### object-lineage-lookup
-
-Operators must be able to trace any object or field back to every record and decision behind it.
-
-- Serves: `object-identity` -- [Object identity](../design/spec.md#object-identity)
-- Agent status: CLEAR
-- Requires: `partial-update-tracking`, `canonical-fact-selection`
-- Dependencies: none.
-- User-visible outcome: `kn lineage <kn-id|qualified-identifier> [--field <field-id>]` shows, in
-  both locales and as JSON, the identity history, identifiers, links with match records, record
-  versions and change sets, claims, and the selected canonical fact. Outbound exchange receipts
-  join the view once the exchange ledger exists.
-- Scope boundary: A read-only, rights-filtered query layer and CLI over the identity and evidence
-  schemas. The dashboards reuse it in `analyst-fact-explanation`.
-- Data and artifact paths: `src/kn/identity/lineage.py`, `src/kn/cli.py`, `tests/identity/`.
-- Execution path: Use fixture objects with a merge, a split, a partial update, and a conflict.
-- Acceptance gates: Each fixture returns the complete chain down to archive record IDs. A merged ID
-  shows its survivor's lineage with the merge event. Restricted evidence is withheld and counted.
-  Golden outputs exist in both locales.
-- Documentation target: `current/object-identity.md` listed in the [areas index](current.md#areas).
-
-#### identity-incremental-writes
-
-Each identity write rereads and validates the whole journal and rewrites every identity table, so
-one submit slows as the registry grows and a large source ingests in quadratic time.
-
-- Serves: `object-identity` -- [Object identity](../design/spec.md#object-identity)
-- Agent status: CLEAR
-- Dependencies: Finding IDRES-05 and its measurements in the
-  [identity resolution audit](records/0042-object-identity-identity-resolution-implementation-audit.md#findings).
-- User-visible outcome: A source adapter submits observations at a cost that stays flat as the
-  registry grows. Each write appends its events and updates only the rows they change, and a
-  rebuild still reproduces every row.
-- Scope boundary: Reuse of the validated journal state under the writer lock, incremental SQL
-  projection of new events and their ownership changes, and indexed candidate and attribute
-  lookup. Event formats, match decisions, recovery and rebuild semantics stay unchanged. Profile
-  values and calibration are out of scope.
-- Data and artifact paths: `src/kn/identity/`, `tests/identity/`, `tests/integration/`,
-  `$DATA_DIR/identity/`.
-- Execution path: Extend the replay growth check to journal-backed submits and PostgreSQL
-  projection, measure the current curve, then change the writer.
-- Acceptance gates: On a synthetic organization registry, one PostgreSQL submit at 50,000 objects
-  costs at most twice as much as at 5,000 objects. Rows after incremental writes equal the rows of
-  a rebuild after dropping the database. Interrupted, retried and concurrent writes keep their
-  current recovery results. `make ci` and the local integration suite pass.
-- Documentation target: `current/object-identity.md` listed in the [areas index](current.md#areas).
-
-#### object-identity-implementation-audit
-
-Identity is the core model, and KN IDs are stored in counterparts and exports, so a flaw in minting,
-lifecycle, or matching is the most expensive kind to fix later.
-
-- Serves: `object-identity` -- [Object identity](../design/spec.md#object-identity)
-- Agent status: CLEAR
-- Requires: `evidence-claim-contracts`, `partial-update-tracking`, `canonical-fact-selection`,
-  `object-lineage-lookup`, `identity-incremental-writes`
-- Dependencies: The accepted task records of the group and the [implementation
-  audit](../guide/planning-workflow.md#implementation-audits) checks. `identity-match-calibration`
-  stays open and is reviewed for the readiness of its inputs. The [identity resolution
-  audit](records/0042-object-identity-identity-resolution-implementation-audit.md) lists the
-  accepted matching limitations to recheck.
-- User-visible outcome: Every later group resolves objects through a verified identity registry. The
-  audit record gives every check a result and every finding a disposition. The current-state page
-  lists known limitations, and each scheduled finding is a plan task.
-- Scope boundary: Focus: KN ID minting and the identity event log replayed before raw records;
-  merge, split, retire, and successor chains, including a merge of merged objects and a split after
-  export; resolution of retired IDs; blocking that misses candidates; reproducible match features
-  and probabilities; the rule against merging by name alone; change-set classes for absent, emptied,
-  and unchanged fields; lineage from any value to its raw record; identity drift on rebuild;
-  blocking cost at the target volume. Fixes only; new behavior becomes plan tasks.
-- Data and artifact paths: `contracts/core/identity/`, `src/kn/identity/`, `$DATA_DIR/identity/`,
-  `tests/identity/`, `docs/impl/plan.md`, and the task record.
-- Execution path: Rerun the group's acceptance commands, then work through the audit checks. Rebuild
-  twice from the ordered journal and compare KN IDs, links and match records. Reject reordered
-  events. Shuffle source fixture order separately and compare resolution decisions. Trace a late
-  update and an omitted field through claims, confirmations and the selected fact.
-- Acceptance gates: Rebuilds reproduce every KN ID and lifecycle state. A merge followed by a split
-  leaves every ID resolvable. Objects that differ in a discriminating attribute never link
-  automatically. A late or omitted field preserves history. Every canonical value traces to its
-  source record and evidence locator. Every finding has a severity,
-  evidence, and a disposition, no `blocker` is accepted, and every fix starts from a failing
-  regression test. `make ci` passes with the scheduled tasks in the plan.
-- Documentation target: `current/object-identity.md` listed in the [areas index](current.md#areas).
 
 ### Verification and review -- `evidence-model`
 
@@ -233,7 +40,6 @@ adding a column to one domain would leave labels, links and other facts uncovere
 - Serves: `evidence-model` -- [Human verification metadata](../design/spec.md#human-verification-metadata)
 - Agent status: CLEAR
 - Execution stage: MODEL
-- Requires: `object-identity-implementation-audit`
 - Dependencies: The [50-table coverage inventory](records/0028-adhoc-human-verification-model-review.md)
   and [design](../design/human-verification.md), reviewed semantic snapshots and SATCOM fixtures.
 - User-visible outcome: Every current record and addressable field has optional human verification
@@ -264,13 +70,13 @@ adding a column to one domain would leave labels, links and other facts uncovere
 
 #### review-queue-cli
 
-Human decisions on conflicts and candidates need a bilingual workflow that survives rebuilds.
+Human decisions on conflicts and candidates need a workflow that survives rebuilds.
 
 - Serves: `evidence-model` -- [Evidence model](../design/spec.md#evidence-model)
 - Agent status: CLEAR
-- Requires: `object-identity-implementation-audit`, `human-verification-projections`
+- Requires: `human-verification-projections`
 - Dependencies: The durable [identity review match rows](current/object-identity.md#match-resolution).
-- User-visible outcome: `kn review list` and `kn review decide` work in `en` and `uk` for fact
+- User-visible outcome: `kn review list` and `kn review decide` handle fact
   conflicts, identity match candidates, and identity drift. Decisions are appended to
   `$DATA_DIR/decisions/<domain>/` and applied to review items.
 - Scope boundary: The CLI, the decision log format, and re-attachment by deterministic keys with an
@@ -279,14 +85,17 @@ Human decisions on conflicts and candidates need a bilingual workflow that survi
   Record/field verification items reuse the shared log and target/version protocol. Resolve the
   authorized human reviewer at the operator boundary, show the reviewed scope/version, and expose
   acceptance, rejection and revocation without accepting actor identity from source data.
+  Derive the selector's [accepted reviews](current/evidence-model.md#canonical-selection) from
+  applied decisions, and report each source's dispute rate to support rank overrides.
 - Data and artifact paths: `src/kn/review/`, `src/kn/cli.py`, `$DATA_DIR/decisions/`,
   `tests/review/`.
-- Execution path: Write an append-only JSON Lines log with the reviewer, reason, and time, and
-  localized messages.
+- Execution path: Write an append-only JSON Lines log with the reviewer, reason, and time.
 - Acceptance gates: Decisions apply idempotently. A decision whose claim key disappears is
   reported as orphaned. Verification timestamps appear only for accepted human decisions on the
   matching scope/version; rejecting or revoking clears the active stamp and keeps history.
-  `kn review list --overrides` lists the flagged owner overrides. Golden outputs cover both locales.
+  `kn review list --overrides` lists the flagged owner overrides. An accepted identity match links
+  the record and records its authoritative keys and identity attributes, as an automatic link
+  does. Golden outputs cover English text and stable JSON.
 - Documentation target: `current/evidence-model.md` listed in the [areas index](current.md#areas).
 
 #### evidence-model-implementation-audit
@@ -383,8 +192,7 @@ monitoring workflows begin writing them.
 - Serves: `ingestion-engine` -- [Ingestion engine](../design/spec.md#ingestion-engine)
 - Agent status: CLEAR
 - Execution stage: MODEL
-- Requires: `object-identity-implementation-audit`,
-  `raw-archive-implementation-audit`
+- Requires: `raw-archive-implementation-audit`
 - Dependencies: The run, cursor, archive and monitoring fields in the specification and the
   [standard source error codes](current/source-management.md#error-codes-and-pagination).
   Fixtures can supply source IDs, archive IDs and claim keys without executing a crawler.
@@ -409,8 +217,7 @@ The core engine must run end to end on a synthetic source before any real source
 
 - Serves: `ingestion-engine` -- [Ingestion engine](../design/spec.md#ingestion-engine)
 - Agent status: CLEAR
-- Requires: `raw-archive-implementation-audit`, `object-identity-implementation-audit`,
-  `ingestion-state-contracts`
+- Requires: `raw-archive-implementation-audit`, `ingestion-state-contracts`
 - Dependencies: The [crawler validator and enablement evidence](current/source-management.md#enablement-evidence).
 - User-visible outcome: `kn source run` and `kn source replay` process a synthetic fixture source
   served locally. They write WARC records, identity events, claims with evidence linked to KN IDs,
@@ -443,7 +250,7 @@ Operators need per-source health and freshness without opening Kestra.
 - Agent status: CLEAR
 - Requires: `engine-skeleton`
 - Dependencies: none.
-- User-visible outcome: `kn source status` shows, in both locales, the last success and attempt,
+- User-visible outcome: `kn source status` shows the last success and attempt,
   state, stale flag, counts, bytes, budget use, cursor lag, and last error code, and feeds the
   operations mart.
   Read the early ingestion-state contracts; monitoring must not create another run/cursor schema.
@@ -452,7 +259,7 @@ Operators need per-source health and freshness without opening Kestra.
 - Data and artifact paths: `src/kn/sources/status.py`, `tests/sources/`.
 - Execution path: Compute status from fixture runs covering every run status and error code.
 - Acceptance gates: Stale detection follows the configured threshold. Every error code renders.
-  Golden outputs exist in both locales.
+  Golden outputs cover English text and stable JSON.
 - Documentation target: `current/source-management.md` listed in the
   [areas index](current.md#areas).
 
@@ -481,7 +288,7 @@ there repeats in every source that follows.
   Validate a crawler file with an unknown key, one without a licence, and a disabled source with a
   schedule, and onboard one fixture source from the templates alone. Interrupt a fixture run before its
   checkpoint, retry it and compare status, history and cursor with an uninterrupted run.
-- Acceptance gates: Each invalid crawler file is refused with a stable error code in both locales. A
+- Acceptance gates: Each invalid crawler file is refused with a stable error code. A
   disabled source cannot run. The templates cover every field the schema requires. Every finding has
   a severity, evidence, and a disposition, no `blocker` is accepted, and every fix starts from a
   failing regression test. `make ci` passes with the scheduled tasks in the plan.
@@ -517,14 +324,16 @@ Most source-specific behavior must live in configuration, not code.
 
 - Serves: `ingestion-engine` -- [Ingestion engine](../design/spec.md#ingestion-engine)
 - Agent status: CLEAR
-- Requires: `http-fetch-safety`, `object-identity-implementation-audit`
-- Dependencies: none.
+- Requires: `http-fetch-safety`
+- Dependencies: The [partial-update tracker and its crawler mapping helpers](current/object-identity.md#partial-update-tracking).
 - User-visible outcome: Crawler configurations map native fields to contract field IDs. They also
   map units with logged conversions, native codes to concepts with mapping types, classes and
   relations, identifiers and identity attributes, time semantics, and source record keys with
   field-level change sets. Quality rules quarantine records or stop batches as declared.
 - Scope boundary: The general mapping and quality engine, with no source-specific branches. The
-  units table covers the dimensions that contracts declare.
+  units table covers the dimensions that contracts declare. Loads project the canonical facts of
+  the subjects they touch through the [fact projection](current/evidence-model.md#fact-projection)
+  and each field's declared policy.
 - Data and artifact paths: `src/kn/engine/mapping/`, `src/kn/engine/quality/`, `tests/engine/`.
 - Execution path: Fixture configurations exercise every mapping and rule type, plus the failure
   modes from the specification.
@@ -544,7 +353,9 @@ Facts without a permitted machine-readable source need a disciplined manual path
 - User-visible outcome: Analysts add rows to `domains/<domain>/curation/` files, each with the cited
   URI, capture time, and curator. `kn source run` loads them through the same mapping and
   validation, and stores WARC captures of cited pages where permitted.
-- Scope boundary: The curated file format, its validation, and evidence capture. No editing UI.
+- Scope boundary: The curated file format, its validation, and evidence capture. A curated claim
+  takes the rank of the source it cites in [canonical selection](current/evidence-model.md#canonical-selection).
+  No editing UI.
 - Data and artifact paths: `src/kn/engine/curated/`, `domains/fixture/curation/`,
   `tests/engine/`.
 - Execution path: Fixture curated files with valid, missing-evidence, and conflicting rows.
@@ -645,6 +456,33 @@ Schema changes during development must cost a rebuild, never a re-fetch or a los
 - Documentation target: `current/ingestion-engine.md` listed in the
   [areas index](current.md#areas).
 
+#### fragment-claims-follow-splits
+
+A weak-key fragment claims through its parent record's link and has no link of its own, so a split
+cannot assign its claims. They leave lineage and canonical selection until the raw replay tracks
+the fragment again.
+
+- Serves: `object-identity` -- [Object identity](../design/spec.md#object-identity)
+- Agent status: CLEAR
+- Dependencies: Finding OIA-05 of the [object identity
+  audit](records/0049-object-identity-object-identity-implementation-audit.md#findings) and the
+  `claim_successor_missing` gap of the [lineage lookup](current/object-identity.md#lineage-lookup).
+- User-visible outcome: After a split, each claim of a weak-key fragment belongs to the successor
+  that holds its parent record, in `kn lineage` and in the fact projection, without a rebuild.
+- Scope boundary: Durable fragment-to-parent lineage in the identity journal, added as an optional
+  field so existing v1 event hashes stay valid, and its use by the lineage view and the fact
+  projection. Splits still assign links, identifiers and attributes. Tracking never runs the
+  matcher.
+- Data and artifact paths: `src/kn/identity/`, `src/kn/evidence/`, `contracts/core/identity/`,
+  `tests/identity/`, `tests/evidence/`.
+- Execution path: Start from `test_a_fragment_claim_that_no_split_successor_holds_is_a_gap`. Track a
+  parent and a fragment, split the parent's object, then project facts and look up both successors.
+- Acceptance gates: The fragment's claims appear under exactly one successor in lineage and the
+  fact projection, and no `claim_successor_missing` gap remains. A parent record relinked to another
+  object takes later fragment claims with it. Existing v1 journals replay with unchanged hashes.
+  `make ci` passes.
+- Documentation target: `current/object-identity.md` listed in the [areas index](current.md#areas).
+
 #### ingestion-engine-implementation-audit
 
 Every source runs through the engine, so a defect in fetch safety, mapping, or replay would recur in
@@ -653,7 +491,8 @@ every source suite and every rebuild.
 - Serves: `ingestion-engine` -- [Ingestion engine](../design/spec.md#ingestion-engine)
 - Agent status: CLEAR
 - Requires: `http-fetch-safety`, `mapping-and-quality-rules`, `curated-source-method`,
-  `dataset-package-locations`, `prefetched-dataset-method`, `rebuild-from-raw`
+  `dataset-package-locations`, `prefetched-dataset-method`, `rebuild-from-raw`,
+  `fragment-claims-follow-splits`
 - Dependencies: The accepted task records of the group and the [implementation
   audit](../guide/planning-workflow.md#implementation-audits) checks.
 - User-visible outcome: Every source runs on a verified, source-neutral engine. The audit record
@@ -716,7 +555,7 @@ domain and counterpart shares.
 - Serves: `part-supply-model` -- [Part and supply model](../design/spec.md#part-and-supply-model)
 - Agent status: CLEAR
 - Execution stage: MODEL
-- Requires: `vendor-information-coverage`, `object-identity-implementation-audit`
+- Requires: `vendor-information-coverage`
 - Dependencies: none.
 - User-visible outcome: The `supply` schema holds organization roles, product families and models,
   manufacturer parts, orderable variants, and supplier offers. It also holds price, stock, and
@@ -777,7 +616,7 @@ Exchange with any counterpart needs one versioned, documented shape for KN objec
 - Serves: `data-interchange` -- [Data interchange](../design/spec.md#data-interchange)
 - Agent status: CLEAR
 - Execution stage: MODEL
-- Requires: `part-supply-model-implementation-audit`, `object-identity-implementation-audit`
+- Requires: `part-supply-model-implementation-audit`
 - Dependencies: none.
 - User-visible outcome: The versioned interchange record and package-manifest schemas at `0.1.0`
   compile to JSON Schema before a runtime exporter exists. Stable object, field and verification
@@ -859,8 +698,7 @@ tracking are available.
 
 - Serves: `data-interchange` -- [Data interchange](../design/spec.md#data-interchange)
 - Agent status: CLEAR
-- Requires: `interchange-contract`, `object-identity-implementation-audit`,
-  `evidence-model-implementation-audit`
+- Requires: `interchange-contract`, `evidence-model-implementation-audit`
 - Dependencies: The accepted interchange schema and manifest definitions.
 - User-visible outcome: `kn interchange export` writes an atomic, verified deterministic ZIP
   from one snapshot; `kn interchange validate` checks a package against its declared version.
@@ -883,7 +721,7 @@ overwritten unseen.
 
 - Serves: `data-interchange` -- [Data interchange](../design/spec.md#data-interchange)
 - Agent status: CLEAR
-- Requires: `exchange-ledger-contracts`, `object-identity-implementation-audit`
+- Requires: `exchange-ledger-contracts`
 - Dependencies: none.
 - User-visible outcome: The append-only exchange ledger in `$DATA_DIR/exchange/<counterpart>/`
   records bindings, per-field sync state, plans, and receipts, and rebuild replays it into the
@@ -1209,9 +1047,11 @@ Match probabilities mean something only after they are measured on real records.
 - Serves: `object-identity` -- [Object identity](../design/spec.md#object-identity)
 - Agent status: RUN NEEDED
 - Research: yes
-- Requires: `vl-itree-read-acceptance`, `object-identity-implementation-audit`
+- Requires: `vl-itree-read-acceptance`
 - Dependencies: Archived authorized samples that carry authoritative identifiers, starting with the
-  `vl-itree` read import and the first vendor sources. Owner-labeled pairs are optional.
+  `vl-itree` read import and the first vendor sources. Owner-labeled pairs are optional. The
+  [match resolution](current/object-identity.md#match-resolution) gates, including the veto by a
+  disagreeing discriminating attribute, define which held-out pairs count as automatic links.
 - User-visible outcome: A calibration report per class gives precision and recall at both
   thresholds and the calibration error per probability band. Profiles that meet the gate are marked
   `calibrated` and may auto-link.
@@ -1274,7 +1114,6 @@ Canonical space tables must represent the preserved source examples without conf
 - Serves: `space-elt` -- [Space ELT](../design/spec.md#space-elt)
 - Agent status: CLEAR
 - Execution stage: MODEL
-- Requires: `object-identity-implementation-audit`
 - Dependencies: [Space domain model](../design/domains/space.md#domain-model) and the initial
   [space example dataset](current/data-contracts.md#source-preservation-and-import).
 - User-visible outcome: The `space` schema holds every pilot table, with claim links,
@@ -1463,9 +1302,8 @@ Users need a safe, read-only Obsidian subset of the knowledge base.
 
 - Serves: `obsidian-export` -- [Obsidian export](../design/spec.md#obsidian-export)
 - Agent status: CLEAR
-- Requires: `object-identity-implementation-audit`
 - Dependencies: none.
-- User-visible outcome: `kn export obsidian --profile <id> --locale en|uk` writes a verified vault
+- User-visible outcome: `kn export obsidian --profile <id>` writes a verified vault
   ZIP and manifest from one snapshot.
 - Scope boundary: Profiles, the snapshot read, deterministic notes and links, rights filtering,
   limits, safe paths, the manifest, and the atomic ZIP. No scheduling and no writeback.
@@ -1513,8 +1351,8 @@ once a vault is shared.
 - Scope boundary: Focus: rights and licence filtering across notes, attachments, and front matter;
   deterministic names and content; stable links when objects merge, split, or retire; file-name
   safety across operating systems, including reserved names, length, case collisions, and Cyrillic;
-  locale parity; vault verification; export after the knowledge base changes; further domain
-  profiles. Fixes only; new behavior becomes plan tasks.
+  text language and fallback metadata; vault verification; export after the knowledge base
+  changes; further domain profiles. Fixes only; new behavior becomes plan tasks.
 - Data and artifact paths: `src/kn/export/obsidian/`, `domains/<domain>/exports/`, `tests/export/`,
   `docs/impl/plan.md`, and the task record.
 - Execution path: Rerun the group's acceptance commands, then work through the audit checks. Export
@@ -1538,8 +1376,8 @@ Scheduled ingestion needs a pinned orchestrator without host-level privileges.
 - Dependencies: A pinned Kestra OSS release whose Process task runner is confirmed.
 - User-visible outcome: Kestra runs with its own `kestra` database. A dedicated non-root image
   holds the pinned `kn` package and runs `kn source run`.
-- Scope boundary: The service, the runner image, and internal networking. The UI stays English-only
-  under the approved waiver. Proxy authentication comes in `reverse-proxy-auth`. No Docker socket.
+- Scope boundary: The service, the runner image, and internal networking. The UI uses English.
+  Proxy authentication comes in `reverse-proxy-auth`. No Docker socket.
 - Data and artifact paths: `deploy/compose.yaml`, `deploy/kestra/`, `deploy/versions.yaml`.
 - Execution path: Pin by digest, check that a smoke flow runs `kn info` through the Process runner,
   and record the confirmed release behavior.
@@ -1684,9 +1522,9 @@ Dashboards must deploy reproducibly from one definition in both locales.
 
 - Serves: `space-dashboards` -- [Space dashboards](../design/spec.md#space-dashboards)
 - Agent status: CLEAR
-- Requires: `space-analytics-marts`, `dashboards-as-code`, `evidence-model-implementation-audit`,
-  `object-identity-implementation-audit`
-- Dependencies: none.
+- Requires: `space-analytics-marts`, `dashboards-as-code`, `evidence-model-implementation-audit`
+- Dependencies: The read-only [lineage view](current/object-identity.md#lineage-lookup), which
+  counts withheld rows for operators; this view must leave no restricted value, locator or count.
 - User-visible outcome: An analyst can open "Why this fact?" on a selected value and see why
   it won, the evidence, permitted alternatives, and any applicable review decision.
 - Scope boundary: Shared read-only analytics projection and bilingual dashboard detail view.
@@ -1760,7 +1598,7 @@ GDELT signals need their own schema that never writes canonical domain facts.
 - Serves: `gdelt-elt` -- [GDELT ELT](../design/spec.md#gdelt-elt)
 - Agent status: CLEAR
 - Execution stage: MODEL
-- Requires: `object-identity-implementation-audit`, `source-management-implementation-audit`
+- Requires: `source-management-implementation-audit`
 - Dependencies: [GDELT design](../design/domains/gdelt.md).
 - User-visible outcome: The `gdelt` schema holds watches, query runs, article metadata, native
   dictionaries, story clusters, signals, and candidate links.
@@ -1937,7 +1775,7 @@ Product identity and condition-bound observations need typed contracts.
 - Serves: `microelectronics-elt` -- [Microelectronics ELT](../design/spec.md#microelectronics-elt)
 - Agent status: CLEAR
 - Execution stage: MODEL
-- Requires: `object-identity-implementation-audit`, `part-supply-model-implementation-audit`
+- Requires: `part-supply-model-implementation-audit`
 - Dependencies: [Microelectronics design](../design/domains/microelectronics.md) and the
   [pending seed policies](current/ontology-taxonomy/seeds.md#unmapped-rows-and-ownership).
 - User-visible outcome: The `microelectronics` schema holds families, models, MPNs, dies, IP
@@ -2222,57 +2060,48 @@ Later engines and counterpart adapters will depend on the shared model boundarie
   `make ci` and the applicable integration checks pass.
 - Documentation target: [Data contracts](current/data-contracts.md).
 
-### Bilingual operator acceptance -- `localization`
+### Bilingual dashboard and map acceptance -- `localization`
 
 #### bilingual-acceptance-suite
 
-Release needs one end-to-end proof that every operator path works in both locales.
+Release needs end-to-end proof that dashboards and maps work in both languages.
 
 - Serves: `localization` -- [Localization](../design/spec.md#localization)
 - Agent status: CLEAR
-- Requires: `obsidian-export-implementation-audit`,
-  `microelectronics-dashboards-implementation-audit`, `inventree-exchange-implementation-audit`
-- Dependencies: A browser automation tool justified as a development dependency when product browser
-  surfaces exist. The available CLI and multilingual data checks are documented in
+- Requires: `space-dashboards-implementation-audit`, `gdelt-dashboards-implementation-audit`,
+  `microelectronics-dashboards-implementation-audit`
+- Dependencies: Browser automation when product browser surfaces exist. The available CLI and
+  multilingual data checks are documented in
   [current acceptance coverage](current/localization.md#bilingual-acceptance); the open
   [task record](records/0013-localization-bilingual-acceptance-suite.md) preserves partial evidence.
-- User-visible outcome: One command produces screenshots and golden outputs for the CLI, the review
-  queue, source status, lineage, InvenTree plans and reports, the dashboards with filters and the
-  map, and the export README, in both locales.
-- Scope boundary: Verification and fixing of missing translations. The Kestra UI is excluded under
-  the approved waiver. Strict bilingual interface keys are independent of optional data
-  translations: requested language, English, then the preserved original with language/provenance.
-  Source-only Russian, Chinese, and other-language messages must survive ingestion and later
-  translation without being counted as untranslated interface strings.
-- Data and artifact paths: `tests/e2e/`, `$DATA_DIR/e2e/<run-id>/` for screenshots, and
-  `locales/`.
-- Execution path: Extend `make test-bilingual` with the real browser paths against multilingual
-  fixture data; compare key coverage and rendered Cyrillic, dates, numbers, and missing-value
-  labels. Run `make bilingual-acceptance` to require all release paths rather than the available
-  subset. Retain screenshots and fallback metadata for both locales.
-- Acceptance gates: Both locales pass with no untranslated critical string. Any remaining
-  English-only operator screen is listed as a release blocker.
+- User-visible outcome: One command verifies dashboard controls, filters, and maps in both languages
+  and saves screenshots.
+- Scope boundary: Dashboard and map interface text, formatting, and fact display. Source text in
+  any language retains its language and provenance through ingestion and later translation.
+- Data and artifact paths: `tests/e2e/`, `$DATA_DIR/e2e/<run-id>/` for screenshots, and `locales/`.
+- Execution path: Extend `make test-bilingual` with browser paths against multilingual fixtures.
+  Check key coverage, Cyrillic rendering, dates, numbers, units, and missing-value labels. Run
+  `make bilingual-acceptance` to require all release paths. Retain screenshots and fallback metadata
+  for both languages.
+- Acceptance gates: Both languages pass on every dashboard and map with no untranslated critical
+  strings. Missing data translations use the documented fallback and retain original metadata.
 - Documentation target: `current/localization.md` listed in the [areas index](current.md#areas).
 
 #### localization-implementation-audit
 
-Message keys, plural rules, and locale fallback serve every operator surface, so a gap found late
-would touch every group.
+Message keys, plural rules, and locale fallback need verification across dashboards and maps.
 
 - Serves: `localization` -- [Localization](../design/spec.md#localization)
 - Agent status: CLEAR
 - Requires: `bilingual-acceptance-suite`
 - Dependencies: The accepted task records of the group and the [implementation
   audit](../guide/planning-workflow.md#implementation-audits) checks.
-- User-visible outcome: Every operator surface is shown to work in `en` and `uk` from one catalog.
-  The audit record gives every check a result and every finding a disposition. The current-state
-  page lists known limitations, and each scheduled finding is a plan task.
-- Scope boundary: Focus: key parity between `en` and `uk`; Ukrainian plural forms and number, date,
-  and unit formatting; missing-interface-key rejection and source-text fallback; precedence among
-  `--locale`, `KN_LOCALE`, and the default; operator text kept out of logs and log text kept out of
-  catalogs; one source for vocabulary labels in the CLI, exports, and dashboards; text expansion
-  and Cyrillic rendering;
-  adding a third locale without code changes. Fixes only; new behavior becomes plan tasks.
+- User-visible outcome: Every dashboard and map works in `en` and `uk`. The audit record gives
+  every check a result and every finding a disposition. The current-state page lists known
+  limitations, and each scheduled finding is a plan task.
+- Scope boundary: Dashboard and map key parity, Ukrainian plurals, number/date/unit formatting,
+  missing-interface-key rejection, text expansion, Cyrillic rendering, and source-text fallback.
+  Verify that the CLI uses English and that its JSON contract is stable.
 - Data and artifact paths: `src/kn/i18n/`, `locales/`, `tests/e2e/`, `docs/impl/plan.md`, and the
   task record.
 - Execution path: Rerun the group's acceptance commands, then work through the audit checks. Remove
@@ -2940,8 +2769,7 @@ Core Ukrainian terminology needs review by a Ukrainian technical speaker.
 - Dependencies: A Ukrainian technical speaker named by the owner. An agent prepares a glossary
   export of every `uk` UI string and every vocabulary label that still falls back to English, with
   context and the [translation review fields](current/ontology-taxonomy/text.md#label-and-review-rules).
-- User-visible outcome: Reviewed Ukrainian terminology for the UI, the vocabularies, and the
-  operator quickstart.
+- User-visible outcome: Reviewed Ukrainian terminology for dashboards, maps, and vocabulary labels.
 - Scope boundary: Review and corrections of catalogs and labels.
 - Data and artifact paths: `locales/uk/`, `domains/<domain>/seeds/`, and the task record.
 - Execution path: The agent exports the glossary. The reviewer annotates it. The agent applies the

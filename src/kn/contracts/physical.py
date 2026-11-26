@@ -9,6 +9,7 @@ from kn.contracts.names import (
     IDENTIFIER,
     check_name,
     foreign_key_name,
+    presence_name,
     primary_key_name,
     table_references,
 )
@@ -17,6 +18,7 @@ UNIQUE_METHOD = "btree"
 GEOMETRY_CHECK = "geometry"
 ENUM_CHECK = "enum"
 PRECISION_CHECK = "precision"
+EXACTLY_ONE = "exactly_one"
 
 
 def extensions(node: Field | Table) -> dict[str, Any]:
@@ -31,6 +33,11 @@ def check_kinds(field: Field) -> tuple[str, ...]:
     if field.partial_date:
         kinds.append(PRECISION_CHECK)
     return tuple(kinds)
+
+
+def presence_rules(table: Table) -> list[dict[str, Any]]:
+    """Table-level null rules; the lint schema bounds them to two closed kinds."""
+    return list(extensions(table).get("presence", []))
 
 
 def column_names(table: Table, refs: list[str], path: Location = ()) -> list[str]:
@@ -94,6 +101,11 @@ def _constraints(table: Table, path: Location) -> None:
             _unique(names, check_name(table, field, kind), location)
         if extensions(field).get("spatialProfile"):
             _spatial(field, location)
+    for rule in presence_rules(table):
+        _unique(names, presence_name(table, rule["name"]), path)
+        columns = column_names(table, rule["fields"], path)
+        if any(field.required for field in table.fields if field.name in columns):
+            raise ContractError(path, "presence", "presence rules require nullable fields")
 
 
 def _index(table: Table, index: dict[str, Any], names: dict[str, Location], path: Location) -> None:

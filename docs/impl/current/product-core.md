@@ -26,7 +26,7 @@ The README and the `pyproject.toml` description use the same project description
   `0.0.0+uninstalled` when distribution metadata is unavailable in a source-only checkout.
 - `src/kn/cli.py` owns argument parsing. `kn info` logs
   `Project: kn-event-horizon <version> (kn)` in English.
-  [Localization](localization.md) describes `--locale`, `KN_LOCALE`, JSON, and bilingual help.
+  [Localization](localization.md) describes English help and diagnostics and the JSON interface.
   Operator subcommands attach to `build_parser()`.
 - `kn-plan --root <path>` prints the same plan summary as `make plan-status`.
 

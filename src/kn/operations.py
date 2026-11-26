@@ -17,6 +17,10 @@ from kn.db.rebuild import rebuild, require_development
 from kn.domains.space.satcom.archive import archive
 from kn.domains.space.satcom.importer import import_package
 from kn.domains.space.satcom.package import read_package
+from kn.evidence.lineage import SqlEvidenceRows
+from kn.evidence.ranking import Audience
+from kn.identity.journal import Journal
+from kn.identity.lineage import lineage, target
 from kn.sources.catalogue import list_sources
 
 
@@ -99,5 +103,25 @@ def source_list_operation() -> dict[str, object]:
     try:
         with engine.connect() as connection:
             return {"sources": list_sources(connection)}
+    finally:
+        engine.dispose()
+
+
+def lineage_operation(
+    journal: Journal, reference: str, field_id: str | None, audience: Audience
+) -> dict[str, object]:
+    """Read the identity journal, then the evidence schema in a read-only transaction.
+
+    The reference resolves first, so an unknown object never opens the database.
+    """
+    state = journal.state()
+    target(state, reference)
+    engine = engine_from_env()
+    try:
+        with engine.connect() as base:
+            connection = base.execution_options(postgresql_readonly=True)
+            with connection.begin():
+                rows = SqlEvidenceRows(connection)
+                return lineage(state, rows, reference, field_id=field_id, audience=audience)
     finally:
         engine.dispose()

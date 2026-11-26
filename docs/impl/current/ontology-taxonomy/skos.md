@@ -32,8 +32,8 @@ exports intact. `--data-dir` overrides the CLI's `DATA_DIR` environment default,
 The shared environment resolves relative `DATA_DIR` from the project root; an explicitly supplied
 relative `--data-dir` follows the invoking working directory, as for proposal import.
 
-Both `--locale en` and `--locale uk` report the scheme, selected concept count, origin, verification
-state, path, and label fallback counts for `en` and `uk`. Add `--json` for stable keys `status`,
+The command reports the scheme, selected concept count, origin, verification state, path, and
+label fallback counts for `en` and `uk`. Add `--json` for stable keys `status`,
 `format`, `scheme_id`, `concepts`, `origin`, `verification_state`, `path`, `fallbacks_en`, and
 `fallbacks_uk`. Counts include all described labels, including mapped counterparts.
 Operator results use the existing logging stream, stderr; the
@@ -99,7 +99,7 @@ both display choices, independently of interface locale.
 
 The file is ASCII using Turtle `\u` and `\U` escapes for Unicode. Parsed labels retain accents,
 Ukrainian text, quotes, backslashes, newlines, and characters outside the basic multilingual plane.
-Unchanged content produces identical Turtle bytes across invocations and interface locales.
+Unchanged content produces identical Turtle bytes across invocations.
 SKOS remains interchange only: typed relations, validation, editing, and reasoning stay outside
 this export.
 
@@ -109,9 +109,9 @@ this export.
   public namespace, preferred labels, hierarchy, definitions, alternatives, notations, lifecycle,
   mappings and publication metadata survive. Fixtures cover empty schemes, reordered input,
   malformed models, unknown schemes, configurable and invalid domains, Unicode escapes,
-  both locales, JSON errors, output failures, and repeated exports.
-- `tests/e2e/test_skos.py`: real subprocesses in both locales produce identical Turtle and retain
-  the verified OECD scheme's boundary. `make test-bilingual` includes this path.
+  language-tagged labels, JSON errors, output failures, and repeated exports.
+- `tests/e2e/test_skos.py`: real subprocesses with text and JSON reports produce identical Turtle
+  and retain the verified OECD scheme's boundary. `make test-bilingual` includes this path.
 - `tests/semantic/test_skos_independent.py`: Oxigraph (`pyoxigraph`, pinned in the development
   extra) parses every exported scheme in strict mode, and its triples equal RDFLib's. It runs in
   `make ci` and on GitHub without network access.

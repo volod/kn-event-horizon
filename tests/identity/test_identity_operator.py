@@ -44,7 +44,7 @@ def test_local_confirmation_uses_os_account_and_escapes_source_text(
 
     def confirm():
         return operator.local_reviewer(
-            Translator("uk"),
+            Translator(),
             Journal(tmp_path),
             Retire(kn_id=A),
             ReviewDetails(request_id="1", performed_at=NOW, reason="Fixture\x1b", evidence="e:1"),

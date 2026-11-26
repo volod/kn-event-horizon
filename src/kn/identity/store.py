@@ -4,20 +4,29 @@ from collections.abc import Callable
 from functools import cache
 
 import sqlalchemy as sa
+from sqlalchemy.dialects.postgresql import insert
 from sqlalchemy.engine import Connection
 
 from kn.contracts import Contract, load_contract
-from kn.contracts.model import canonical
 from kn.contracts.schemas import RESOURCES
 from kn.contracts.sqlalchemy import metadata
 from kn.db.statements import SetConstraints
+from kn.identity.checkpoint import advance, prefix
 from kn.identity.journal import Journal, LockedJournal
 from kn.identity.lifecycle_reviews import restore
-from kn.identity.projection import rows
+from kn.identity.projection import Value, rows
 from kn.identity.state import State
+from kn.identity.state import replay as replay_state
 
 # Distinct from platform/review locks. Rebuild takes this before dropping identity tables.
 IDENTITY_LOCK = 0x4B4E4944
+MUTABLE_COLUMNS = {
+    "objects": ("state", "current_redirect"),
+    "source_records": ("last_seen",),
+    "identifiers": ("kn_id",),
+    "attributes": ("kn_id",),
+    "links": ("kn_id", "ended_event"),
+}
 
 
 @cache
@@ -37,8 +46,23 @@ def lock(connection: Connection) -> None:
 def replay(connection: Connection, journal: Journal) -> State:
     """Replay before any raw imports; a caught error rolls back all projection changes."""
     lock(connection)
-    with journal.locked() as locked, connection.begin_nested():
-        _project(connection, locked)
+    with journal.locked(reuse=False) as locked, connection.begin_nested():
+        model = metadata(contract())
+        events = model.tables["identity.lifecycle_events"]
+        count = prefix(connection, events, locked.state.events, full=True)
+        restore(connection, locked)
+        projected = rows(locked.state)
+        # Explicit replay restores disposable rows even when the SQL event prefix is complete.
+        for table in reversed(model.sorted_tables):
+            if table is not events:
+                connection.execute(table.delete())
+        for table in model.sorted_tables:
+            content = projected[table.name]
+            if table is events:
+                content = content[count:]
+            if content:
+                connection.execute(table.insert(), content)
+        _finish(connection, model, locked)
         return locked.state
 
 
@@ -46,41 +70,57 @@ def apply[T](connection: Connection, journal: Journal, write: Callable[[LockedJo
     """Append/fsync first. A rolled-back SQL transaction leaves recoverable pending history."""
     lock(connection)
     with journal.locked() as locked, connection.begin_nested():
-        _check_prefix(connection, locked)
+        events = metadata(contract()).tables["identity.lifecycle_events"]
+        count = prefix(connection, events, locked.state.events)
         result = write(locked)
-        _project(connection, locked)
+        _project(connection, locked, count)
         return result
 
 
-def _check_prefix(connection: Connection, locked: LockedJournal) -> None:
-    table = metadata(contract()).tables["identity.lifecycle_events"]
-    stored: list[str] = list(
-        connection.scalars(sa.select(table.c.event_json).order_by(table.c.sequence)).all()
-    )
-    expected = [canonical(event.model_dump(mode="json")) for event in locked.events]
-    if stored != expected[: len(stored)]:
-        raise ValueError("SQL identity history is not a prefix of the durable journal")
-
-
-def _project(connection: Connection, locked: LockedJournal) -> None:
-    _check_prefix(connection, locked)
+def _project(connection: Connection, locked: LockedJournal, count: int) -> None:
     # Review writers take the review lock before resolving any target rows.
     restore(connection, locked)
+    if count == len(locked.state.events):
+        return
+    state = locked.state
+    if count != locked.initial_sequence:
+        # A reset or rollback can leave a durable suffix we haven't tracked in this lock.
+        state = replay_state(state.events, track_after=count)
+    assert state.dirty is not None
+    projected = rows(state, count)
     model = metadata(contract())
-    projected = rows(locked.state)
-    events = model.tables["identity.lifecycle_events"]
-    count = connection.scalar(sa.select(sa.func.count()).select_from(events)) or 0
-    # All foreign keys are deferred: replace disposable state in the caller's savepoint.
-    for table in reversed(model.sorted_tables):
-        if table is not events:
-            connection.execute(table.delete())
+    redirects = model.tables["identity.redirects"]
+    if state.dirty.redirects:
+        connection.execute(redirects.delete().where(redirects.c.kn_id.in_(state.dirty.redirects)))
     for table in model.sorted_tables:
         content = projected[table.name]
-        if table is events:
-            content = content[count:]
+        if table.name == "links":
+            # The partial unique index is immediate. Close prior links before new ones.
+            content.sort(key=lambda row: row["ended_event"] is None)
         if content:
-            connection.execute(table.insert(), content)
+            _write_rows(connection, table, content)
+    _finish(connection, model, locked)
+
+
+def _write_rows(connection: Connection, table: sa.Table, content: list[dict[str, Value]]) -> None:
+    columns = MUTABLE_COLUMNS.get(table.name)
+    if columns is None:
+        connection.execute(table.insert(), content)
+        return
+    statement = insert(table)
+    connection.execute(
+        statement.on_conflict_do_update(
+            index_elements=list(table.primary_key),
+            set_={name: statement.excluded[name] for name in columns},
+        ),
+        content,
+    )
+
+
+def _finish(connection: Connection, model: sa.MetaData, locked: LockedJournal) -> None:
     _check_references(connection, model)
+    if locked.head is not None:
+        advance(connection, locked.head)
 
 
 def _check_references(connection: Connection, model: sa.MetaData) -> None:

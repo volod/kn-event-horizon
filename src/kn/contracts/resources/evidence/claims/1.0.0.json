@@ -1,0 +1,3141 @@
+{
+  "apiVersion": "v3.1.0",
+  "kind": "DataContract",
+  "id": "kn.core.evidence",
+  "name": "KN evidence model",
+  "version": "1.0.0",
+  "status": "draft",
+  "customProperties": [
+    {
+      "property": "kn.storageSchema",
+      "value": "evidence"
+    }
+  ],
+  "schema": [
+    {
+      "name": "evidence_records",
+      "logicalType": "object",
+      "physicalType": "table",
+      "description": "Fetch-level provenance of claims: origin, locator, rights and digests.",
+      "properties": [
+        {
+          "name": "evidence_id",
+          "logicalType": "string",
+          "required": true,
+          "primaryKey": true,
+          "customProperties": [
+            {
+              "property": "kn.fieldId",
+              "value": "evidence.evidence_records.evidence_id"
+            }
+          ],
+          "description": "SHA-256 of the canonical provenance content"
+        },
+        {
+          "name": "source_id",
+          "logicalType": "string",
+          "required": true,
+          "primaryKey": false,
+          "customProperties": [
+            {
+              "property": "kn.fieldId",
+              "value": "evidence.evidence_records.source_id"
+            }
+          ],
+          "description": "Qualified source catalogue ID"
+        },
+        {
+          "name": "fetch_id",
+          "logicalType": "string",
+          "required": true,
+          "primaryKey": false,
+          "customProperties": [
+            {
+              "property": "kn.fieldId",
+              "value": "evidence.evidence_records.fetch_id"
+            }
+          ],
+          "description": "Fetch run that retrieved the bytes"
+        },
+        {
+          "name": "archive_record_id",
+          "logicalType": "string",
+          "required": false,
+          "primaryKey": false,
+          "customProperties": [
+            {
+              "property": "kn.fieldId",
+              "value": "evidence.evidence_records.archive_record_id"
+            }
+          ],
+          "description": "Raw archive record; null only for review decisions and curated entries"
+        },
+        {
+          "name": "origin_uri",
+          "logicalType": "string",
+          "required": true,
+          "primaryKey": false,
+          "customProperties": [
+            {
+              "property": "kn.fieldId",
+              "value": "evidence.evidence_records.origin_uri"
+            }
+          ],
+          "description": "Origin URI after credential redaction"
+        },
+        {
+          "name": "fetched_at",
+          "logicalType": "timestamp",
+          "required": true,
+          "primaryKey": false,
+          "customProperties": [
+            {
+              "property": "kn.fieldId",
+              "value": "evidence.evidence_records.fetched_at"
+            }
+          ],
+          "description": "UTC fetch or capture time"
+        },
+        {
+          "name": "locator_kind",
+          "logicalType": "string",
+          "required": true,
+          "primaryKey": false,
+          "customProperties": [
+            {
+              "property": "kn.enum",
+              "value": [
+                "json_pointer",
+                "row",
+                "page",
+                "offset"
+              ]
+            },
+            {
+              "property": "kn.fieldId",
+              "value": "evidence.evidence_records.locator_kind"
+            }
+          ],
+          "description": "Kind of native record locator"
+        },
+        {
+          "name": "locator",
+          "logicalType": "string",
+          "required": true,
+          "primaryKey": false,
+          "customProperties": [
+            {
+              "property": "kn.fieldId",
+              "value": "evidence.evidence_records.locator"
+            }
+          ],
+          "description": "Native locator inside the archived record"
+        },
+        {
+          "name": "excerpt",
+          "logicalType": "string",
+          "required": false,
+          "primaryKey": false,
+          "customProperties": [
+            {
+              "property": "kn.fieldId",
+              "value": "evidence.evidence_records.excerpt"
+            }
+          ],
+          "description": "Original excerpt, stored only when its rights permit"
+        },
+        {
+          "name": "excerpt_rights",
+          "logicalType": "string",
+          "required": false,
+          "primaryKey": false,
+          "customProperties": [
+            {
+              "property": "kn.fieldId",
+              "value": "evidence.evidence_records.excerpt_rights"
+            }
+          ],
+          "description": "Rights reference that permits the stored excerpt"
+        },
+        {
+          "name": "rights",
+          "logicalType": "string",
+          "required": true,
+          "primaryKey": false,
+          "customProperties": [
+            {
+              "property": "kn.fieldId",
+              "value": "evidence.evidence_records.rights"
+            }
+          ],
+          "description": "Rights or license policy reference of the evidence"
+        },
+        {
+          "name": "code_digest",
+          "logicalType": "string",
+          "required": true,
+          "primaryKey": false,
+          "customProperties": [
+            {
+              "property": "kn.fieldId",
+              "value": "evidence.evidence_records.code_digest"
+            }
+          ],
+          "description": "SHA-256 of the parser or mapping code"
+        },
+        {
+          "name": "contract_digest",
+          "logicalType": "string",
+          "required": true,
+          "primaryKey": false,
+          "customProperties": [
+            {
+              "property": "kn.fieldId",
+              "value": "evidence.evidence_records.contract_digest"
+            }
+          ],
+          "description": "Digest of the contract the parser applied"
+        },
+        {
+          "name": "curator",
+          "logicalType": "string",
+          "required": false,
+          "primaryKey": false,
+          "customProperties": [
+            {
+              "property": "kn.fieldId",
+              "value": "evidence.evidence_records.curator"
+            }
+          ],
+          "description": "Curator of a curated observation"
+        },
+        {
+          "name": "recorded_at",
+          "logicalType": "timestamp",
+          "required": true,
+          "primaryKey": false,
+          "customProperties": [
+            {
+              "property": "kn.fieldId",
+              "value": "evidence.evidence_records.recorded_at"
+            }
+          ],
+          "description": "UTC time KN recorded the evidence"
+        }
+      ],
+      "customProperties": [
+        {
+          "property": "kn.humanVerification",
+          "value": {
+            "strategy": "external",
+            "resolver": "contract-v1",
+            "recordFields": [
+              "evidence.evidence_records.evidence_id",
+              "evidence.evidence_records.source_id",
+              "evidence.evidence_records.fetch_id",
+              "evidence.evidence_records.archive_record_id",
+              "evidence.evidence_records.origin_uri",
+              "evidence.evidence_records.fetched_at",
+              "evidence.evidence_records.locator_kind",
+              "evidence.evidence_records.locator",
+              "evidence.evidence_records.excerpt",
+              "evidence.evidence_records.excerpt_rights",
+              "evidence.evidence_records.rights",
+              "evidence.evidence_records.code_digest",
+              "evidence.evidence_records.contract_digest",
+              "evidence.evidence_records.curator",
+              "evidence.evidence_records.recorded_at"
+            ],
+            "fieldContexts": {}
+          }
+        },
+        {
+          "property": "kn.temporalProfile",
+          "value": {
+            "observedTime": "fetched_at",
+            "recordedTime": "recorded_at",
+            "asOf": "knowledge_time",
+            "nullSemantics": "unknown"
+          }
+        },
+        {
+          "property": "kn.presence",
+          "value": [
+            {
+              "name": "licensed_excerpt",
+              "rule": "all_or_none",
+              "fields": [
+                "excerpt",
+                "excerpt_rights"
+              ]
+            }
+          ]
+        },
+        {
+          "property": "kn.index",
+          "value": [
+            {
+              "name": "evidence_fetch_idx",
+              "fields": [
+                "fetch_id"
+              ],
+              "method": "btree",
+              "unique": false
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "claims",
+      "logicalType": "object",
+      "physicalType": "table",
+      "description": "Immutable claims about KN objects with claim-level provenance.",
+      "properties": [
+        {
+          "name": "claim_key",
+          "logicalType": "string",
+          "required": true,
+          "primaryKey": true,
+          "customProperties": [
+            {
+              "property": "kn.fieldId",
+              "value": "evidence.claims.claim_key"
+            }
+          ],
+          "description": "Deterministic SHA-256 of the claim content and its evidence"
+        },
+        {
+          "name": "kn_id",
+          "logicalType": "string",
+          "required": true,
+          "primaryKey": false,
+          "customProperties": [
+            {
+              "property": "kn.fieldId",
+              "value": "evidence.claims.kn_id"
+            }
+          ],
+          "description": "KN ID of the object the claim is about"
+        },
+        {
+          "name": "field_id",
+          "logicalType": "string",
+          "required": true,
+          "primaryKey": false,
+          "customProperties": [
+            {
+              "property": "kn.fieldId",
+              "value": "evidence.claims.field_id"
+            }
+          ],
+          "description": "Stable contract field ID the claim states"
+        },
+        {
+          "name": "conditions_json",
+          "logicalType": "string",
+          "required": true,
+          "primaryKey": false,
+          "customProperties": [
+            {
+              "property": "kn.fieldId",
+              "value": "evidence.claims.conditions_json"
+            }
+          ],
+          "description": "Canonical JSON object of conditions; {} when unconditioned"
+        },
+        {
+          "name": "source_id",
+          "logicalType": "string",
+          "required": true,
+          "primaryKey": false,
+          "customProperties": [
+            {
+              "property": "kn.fieldId",
+              "value": "evidence.claims.source_id"
+            }
+          ],
+          "description": "Qualified source catalogue ID"
+        },
+        {
+          "name": "record_id",
+          "logicalType": "string",
+          "required": true,
+          "primaryKey": false,
+          "customProperties": [
+            {
+              "property": "kn.fieldId",
+              "value": "evidence.claims.record_id"
+            }
+          ],
+          "description": "Identity source record that stated the value"
+        },
+        {
+          "name": "source_version_id",
+          "logicalType": "string",
+          "required": true,
+          "primaryKey": false,
+          "customProperties": [
+            {
+              "property": "kn.fieldId",
+              "value": "evidence.claims.source_version_id"
+            }
+          ],
+          "description": "Identity source record version that stated the value"
+        },
+        {
+          "name": "change_set_id",
+          "logicalType": "string",
+          "required": false,
+          "primaryKey": false,
+          "customProperties": [
+            {
+              "property": "kn.fieldId",
+              "value": "evidence.claims.change_set_id"
+            }
+          ],
+          "description": "Identity change set that produced the claim, when tracked"
+        },
+        {
+          "name": "change_kind",
+          "logicalType": "string",
+          "required": true,
+          "primaryKey": false,
+          "customProperties": [
+            {
+              "property": "kn.enum",
+              "value": [
+                "added",
+                "changed",
+                "emptied",
+                "decided"
+              ]
+            },
+            {
+              "property": "kn.fieldId",
+              "value": "evidence.claims.change_kind"
+            }
+          ],
+          "description": "Change that produced the claim"
+        },
+        {
+          "name": "supersedes",
+          "logicalType": "string",
+          "required": false,
+          "primaryKey": false,
+          "customProperties": [
+            {
+              "property": "kn.foreignKey",
+              "value": {
+                "table": "claims",
+                "fields": [
+                  "supersedes"
+                ],
+                "targetFields": [
+                  "claim_key"
+                ]
+              }
+            },
+            {
+              "property": "kn.fieldId",
+              "value": "evidence.claims.supersedes"
+            }
+          ],
+          "description": "Earlier claim of the same record and field"
+        },
+        {
+          "name": "decision_ref",
+          "logicalType": "string",
+          "required": false,
+          "primaryKey": false,
+          "customProperties": [
+            {
+              "property": "kn.fieldId",
+              "value": "evidence.claims.decision_ref"
+            }
+          ],
+          "description": "Review decision that produced an owner-entered claim"
+        },
+        {
+          "name": "evidence_id",
+          "logicalType": "string",
+          "required": true,
+          "primaryKey": false,
+          "customProperties": [
+            {
+              "property": "kn.foreignKey",
+              "value": {
+                "table": "evidence_records",
+                "fields": [
+                  "evidence_id"
+                ],
+                "targetFields": [
+                  "evidence_id"
+                ]
+              }
+            },
+            {
+              "property": "kn.fieldId",
+              "value": "evidence.claims.evidence_id"
+            }
+          ],
+          "description": "Evidence that carries the full provenance"
+        },
+        {
+          "name": "fetch_id",
+          "logicalType": "string",
+          "required": true,
+          "primaryKey": false,
+          "customProperties": [
+            {
+              "property": "kn.fieldId",
+              "value": "evidence.claims.fetch_id"
+            }
+          ],
+          "description": "Fetch ID of the evidence"
+        },
+        {
+          "name": "origin_uri",
+          "logicalType": "string",
+          "required": true,
+          "primaryKey": false,
+          "customProperties": [
+            {
+              "property": "kn.fieldId",
+              "value": "evidence.claims.origin_uri"
+            }
+          ],
+          "description": "Redacted origin URI of the evidence"
+        },
+        {
+          "name": "fetched_at",
+          "logicalType": "timestamp",
+          "required": true,
+          "primaryKey": false,
+          "customProperties": [
+            {
+              "property": "kn.fieldId",
+              "value": "evidence.claims.fetched_at"
+            }
+          ],
+          "description": "UTC fetch time of the evidence"
+        },
+        {
+          "name": "original_value",
+          "logicalType": "string",
+          "required": false,
+          "primaryKey": false,
+          "customProperties": [
+            {
+              "property": "kn.fieldId",
+              "value": "evidence.claims.original_value"
+            }
+          ],
+          "description": "Value exactly as the source states it"
+        },
+        {
+          "name": "original_unit",
+          "logicalType": "string",
+          "required": false,
+          "primaryKey": false,
+          "customProperties": [
+            {
+              "property": "kn.fieldId",
+              "value": "evidence.claims.original_unit"
+            }
+          ],
+          "description": "Unit exactly as the source states it"
+        },
+        {
+          "name": "value_text",
+          "logicalType": "string",
+          "required": false,
+          "primaryKey": false,
+          "customProperties": [
+            {
+              "property": "kn.fieldId",
+              "value": "evidence.claims.value_text"
+            }
+          ],
+          "description": "Normalized text value in its original language"
+        },
+        {
+          "name": "value_language",
+          "logicalType": "string",
+          "required": false,
+          "primaryKey": false,
+          "customProperties": [
+            {
+              "property": "kn.fieldId",
+              "value": "evidence.claims.value_language"
+            }
+          ],
+          "description": "BCP-47 tag of value_text; und when unknown"
+        },
+        {
+          "name": "value_number",
+          "logicalType": "number",
+          "required": false,
+          "primaryKey": false,
+          "customProperties": [
+            {
+              "property": "kn.fieldId",
+              "value": "evidence.claims.value_number"
+            }
+          ],
+          "description": "Exact normalized decimal value"
+        },
+        {
+          "name": "value_boolean",
+          "logicalType": "boolean",
+          "required": false,
+          "primaryKey": false,
+          "customProperties": [
+            {
+              "property": "kn.fieldId",
+              "value": "evidence.claims.value_boolean"
+            }
+          ],
+          "description": "Normalized boolean value"
+        },
+        {
+          "name": "value_date",
+          "logicalType": "string",
+          "required": false,
+          "primaryKey": false,
+          "customProperties": [
+            {
+              "property": "kn.partialDate",
+              "value": true
+            },
+            {
+              "property": "kn.fieldId",
+              "value": "evidence.claims.value_date"
+            }
+          ],
+          "description": "Partial ISO date value"
+        },
+        {
+          "name": "value_concept",
+          "logicalType": "string",
+          "required": false,
+          "primaryKey": false,
+          "customProperties": [
+            {
+              "property": "kn.fieldId",
+              "value": "evidence.claims.value_concept"
+            }
+          ],
+          "description": "Qualified semantic concept ID value"
+        },
+        {
+          "name": "value_kn_id",
+          "logicalType": "string",
+          "required": false,
+          "primaryKey": false,
+          "customProperties": [
+            {
+              "property": "kn.fieldId",
+              "value": "evidence.claims.value_kn_id"
+            }
+          ],
+          "description": "KN ID of a referenced object"
+        },
+        {
+          "name": "missing_reason",
+          "logicalType": "string",
+          "required": false,
+          "primaryKey": false,
+          "customProperties": [
+            {
+              "property": "kn.enum",
+              "value": [
+                "source_empty",
+                "not_found",
+                "not_disclosed",
+                "requires_vendor_quote",
+                "cannot_verify",
+                "not_applicable"
+              ]
+            },
+            {
+              "property": "kn.fieldId",
+              "value": "evidence.claims.missing_reason"
+            }
+          ],
+          "description": "Why no value is stated; exclusive with every value"
+        },
+        {
+          "name": "normalized_unit",
+          "logicalType": "string",
+          "required": false,
+          "primaryKey": false,
+          "customProperties": [
+            {
+              "property": "kn.fieldId",
+              "value": "evidence.claims.normalized_unit"
+            }
+          ],
+          "description": "Unit of value_number after conversion"
+        },
+        {
+          "name": "conversion_rule",
+          "logicalType": "string",
+          "required": false,
+          "primaryKey": false,
+          "customProperties": [
+            {
+              "property": "kn.fieldId",
+              "value": "evidence.claims.conversion_rule"
+            }
+          ],
+          "description": "Rule that converted the original unit"
+        },
+        {
+          "name": "assertion_type",
+          "logicalType": "string",
+          "required": true,
+          "primaryKey": false,
+          "customProperties": [
+            {
+              "property": "kn.enum",
+              "value": [
+                "declared",
+                "observed",
+                "derived",
+                "reported"
+              ]
+            },
+            {
+              "property": "kn.fieldId",
+              "value": "evidence.claims.assertion_type"
+            }
+          ],
+          "description": "How the source asserts the value"
+        },
+        {
+          "name": "evidence_class",
+          "logicalType": "string",
+          "required": true,
+          "primaryKey": false,
+          "customProperties": [
+            {
+              "property": "kn.enum",
+              "value": [
+                "primary",
+                "secondary",
+                "derived",
+                "extracted_candidate"
+              ]
+            },
+            {
+              "property": "kn.fieldId",
+              "value": "evidence.claims.evidence_class"
+            }
+          ],
+          "description": "Evidence class used by selection"
+        },
+        {
+          "name": "extraction_confidence",
+          "logicalType": "number",
+          "required": false,
+          "primaryKey": false,
+          "customProperties": [
+            {
+              "property": "kn.precision",
+              "value": 5
+            },
+            {
+              "property": "kn.scale",
+              "value": 4
+            },
+            {
+              "property": "kn.fieldId",
+              "value": "evidence.claims.extraction_confidence"
+            }
+          ],
+          "description": "Extraction confidence from 0 to 1, never a truth probability"
+        },
+        {
+          "name": "source_verification_label",
+          "logicalType": "string",
+          "required": false,
+          "primaryKey": false,
+          "customProperties": [
+            {
+              "property": "kn.fieldId",
+              "value": "evidence.claims.source_verification_label"
+            }
+          ],
+          "description": "Imported source verification label; never human verification"
+        },
+        {
+          "name": "event_at",
+          "logicalType": "timestamp",
+          "required": false,
+          "primaryKey": false,
+          "customProperties": [
+            {
+              "property": "kn.fieldId",
+              "value": "evidence.claims.event_at"
+            }
+          ],
+          "description": "Time the described event happened (UTC); null when unknown"
+        },
+        {
+          "name": "event_precision",
+          "logicalType": "string",
+          "required": false,
+          "primaryKey": false,
+          "customProperties": [
+            {
+              "property": "kn.enum",
+              "value": [
+                "year",
+                "month",
+                "day",
+                "hour",
+                "minute",
+                "second",
+                "subsecond"
+              ]
+            },
+            {
+              "property": "kn.fieldId",
+              "value": "evidence.claims.event_precision"
+            }
+          ],
+          "description": "Precision of event_at; present exactly when it is"
+        },
+        {
+          "name": "published_at",
+          "logicalType": "timestamp",
+          "required": false,
+          "primaryKey": false,
+          "customProperties": [
+            {
+              "property": "kn.fieldId",
+              "value": "evidence.claims.published_at"
+            }
+          ],
+          "description": "Time the source published the value (UTC); null when unknown"
+        },
+        {
+          "name": "published_precision",
+          "logicalType": "string",
+          "required": false,
+          "primaryKey": false,
+          "customProperties": [
+            {
+              "property": "kn.enum",
+              "value": [
+                "year",
+                "month",
+                "day",
+                "hour",
+                "minute",
+                "second",
+                "subsecond"
+              ]
+            },
+            {
+              "property": "kn.fieldId",
+              "value": "evidence.claims.published_precision"
+            }
+          ],
+          "description": "Precision of published_at; present exactly when it is"
+        },
+        {
+          "name": "valid_from",
+          "logicalType": "timestamp",
+          "required": false,
+          "primaryKey": false,
+          "customProperties": [
+            {
+              "property": "kn.fieldId",
+              "value": "evidence.claims.valid_from"
+            }
+          ],
+          "description": "Inclusive start of validity (UTC); null when unknown"
+        },
+        {
+          "name": "valid_from_precision",
+          "logicalType": "string",
+          "required": false,
+          "primaryKey": false,
+          "customProperties": [
+            {
+              "property": "kn.enum",
+              "value": [
+                "year",
+                "month",
+                "day",
+                "hour",
+                "minute",
+                "second",
+                "subsecond"
+              ]
+            },
+            {
+              "property": "kn.fieldId",
+              "value": "evidence.claims.valid_from_precision"
+            }
+          ],
+          "description": "Precision of valid_from; present exactly when it is"
+        },
+        {
+          "name": "valid_to",
+          "logicalType": "timestamp",
+          "required": false,
+          "primaryKey": false,
+          "customProperties": [
+            {
+              "property": "kn.fieldId",
+              "value": "evidence.claims.valid_to"
+            }
+          ],
+          "description": "Exclusive end of validity (UTC); null when unknown"
+        },
+        {
+          "name": "valid_to_precision",
+          "logicalType": "string",
+          "required": false,
+          "primaryKey": false,
+          "customProperties": [
+            {
+              "property": "kn.enum",
+              "value": [
+                "year",
+                "month",
+                "day",
+                "hour",
+                "minute",
+                "second",
+                "subsecond"
+              ]
+            },
+            {
+              "property": "kn.fieldId",
+              "value": "evidence.claims.valid_to_precision"
+            }
+          ],
+          "description": "Precision of valid_to; present exactly when it is"
+        },
+        {
+          "name": "observed_at",
+          "logicalType": "timestamp",
+          "required": true,
+          "primaryKey": false,
+          "customProperties": [
+            {
+              "property": "kn.fieldId",
+              "value": "evidence.claims.observed_at"
+            }
+          ],
+          "description": "UTC time the value was observed"
+        },
+        {
+          "name": "recorded_at",
+          "logicalType": "timestamp",
+          "required": true,
+          "primaryKey": false,
+          "customProperties": [
+            {
+              "property": "kn.fieldId",
+              "value": "evidence.claims.recorded_at"
+            }
+          ],
+          "description": "UTC knowledge time KN recorded the claim"
+        }
+      ],
+      "customProperties": [
+        {
+          "property": "kn.humanVerification",
+          "value": {
+            "strategy": "external",
+            "resolver": "contract-v1",
+            "recordFields": [
+              "evidence.claims.claim_key",
+              "evidence.claims.kn_id",
+              "evidence.claims.field_id",
+              "evidence.claims.conditions_json",
+              "evidence.claims.source_id",
+              "evidence.claims.record_id",
+              "evidence.claims.source_version_id",
+              "evidence.claims.change_set_id",
+              "evidence.claims.change_kind",
+              "evidence.claims.supersedes",
+              "evidence.claims.decision_ref",
+              "evidence.claims.evidence_id",
+              "evidence.claims.fetch_id",
+              "evidence.claims.origin_uri",
+              "evidence.claims.fetched_at",
+              "evidence.claims.original_value",
+              "evidence.claims.original_unit",
+              "evidence.claims.value_text",
+              "evidence.claims.value_language",
+              "evidence.claims.value_number",
+              "evidence.claims.value_boolean",
+              "evidence.claims.value_date",
+              "evidence.claims.value_concept",
+              "evidence.claims.value_kn_id",
+              "evidence.claims.missing_reason",
+              "evidence.claims.normalized_unit",
+              "evidence.claims.conversion_rule",
+              "evidence.claims.assertion_type",
+              "evidence.claims.evidence_class",
+              "evidence.claims.extraction_confidence",
+              "evidence.claims.source_verification_label",
+              "evidence.claims.event_at",
+              "evidence.claims.event_precision",
+              "evidence.claims.published_at",
+              "evidence.claims.published_precision",
+              "evidence.claims.valid_from",
+              "evidence.claims.valid_from_precision",
+              "evidence.claims.valid_to",
+              "evidence.claims.valid_to_precision",
+              "evidence.claims.observed_at",
+              "evidence.claims.recorded_at"
+            ],
+            "fieldContexts": {}
+          }
+        },
+        {
+          "property": "kn.temporalProfile",
+          "value": {
+            "eventTime": "event_at",
+            "publishedTime": "published_at",
+            "observedTime": "observed_at",
+            "validFrom": "valid_from",
+            "validTo": "valid_to",
+            "recordedTime": "recorded_at",
+            "asOf": "bitemporal",
+            "nullSemantics": "unknown"
+          }
+        },
+        {
+          "property": "kn.evidence",
+          "value": {
+            "required": true,
+            "assertionField": "assertion_type",
+            "minimumClass": "extracted_candidate",
+            "referenceFields": [
+              "evidence_id",
+              "fetch_id",
+              "origin_uri",
+              "fetched_at"
+            ]
+          }
+        },
+        {
+          "property": "kn.presence",
+          "value": [
+            {
+              "name": "value_or_reason",
+              "rule": "exactly_one",
+              "fields": [
+                "value_text",
+                "value_number",
+                "value_boolean",
+                "value_date",
+                "value_concept",
+                "value_kn_id",
+                "missing_reason"
+              ]
+            },
+            {
+              "name": "text_language",
+              "rule": "all_or_none",
+              "fields": [
+                "value_text",
+                "value_language"
+              ]
+            },
+            {
+              "name": "unit_conversion",
+              "rule": "all_or_none",
+              "fields": [
+                "normalized_unit",
+                "conversion_rule"
+              ]
+            },
+            {
+              "name": "event_time",
+              "rule": "all_or_none",
+              "fields": [
+                "event_at",
+                "event_precision"
+              ]
+            },
+            {
+              "name": "published_time",
+              "rule": "all_or_none",
+              "fields": [
+                "published_at",
+                "published_precision"
+              ]
+            },
+            {
+              "name": "valid_from_time",
+              "rule": "all_or_none",
+              "fields": [
+                "valid_from",
+                "valid_from_precision"
+              ]
+            },
+            {
+              "name": "valid_to_time",
+              "rule": "all_or_none",
+              "fields": [
+                "valid_to",
+                "valid_to_precision"
+              ]
+            }
+          ]
+        },
+        {
+          "property": "kn.index",
+          "value": [
+            {
+              "name": "claims_subject_idx",
+              "fields": [
+                "kn_id",
+                "field_id"
+              ],
+              "method": "btree",
+              "unique": false
+            },
+            {
+              "name": "claims_version_idx",
+              "fields": [
+                "source_version_id"
+              ],
+              "method": "btree",
+              "unique": false
+            },
+            {
+              "name": "claims_evidence_idx",
+              "fields": [
+                "evidence_id"
+              ],
+              "method": "btree",
+              "unique": false
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "claim_confirmations",
+      "logicalType": "object",
+      "physicalType": "table",
+      "description": "Re-observations of unchanged claim values.",
+      "properties": [
+        {
+          "name": "confirmation_id",
+          "logicalType": "string",
+          "required": true,
+          "primaryKey": true,
+          "customProperties": [
+            {
+              "property": "kn.fieldId",
+              "value": "evidence.claim_confirmations.confirmation_id"
+            }
+          ],
+          "description": "SHA-256 of the claim key, source version and fetch"
+        },
+        {
+          "name": "claim_key",
+          "logicalType": "string",
+          "required": true,
+          "primaryKey": false,
+          "customProperties": [
+            {
+              "property": "kn.foreignKey",
+              "value": {
+                "table": "claims",
+                "fields": [
+                  "claim_key"
+                ],
+                "targetFields": [
+                  "claim_key"
+                ]
+              }
+            },
+            {
+              "property": "kn.fieldId",
+              "value": "evidence.claim_confirmations.claim_key"
+            }
+          ],
+          "description": "Unchanged claim that was observed again"
+        },
+        {
+          "name": "source_version_id",
+          "logicalType": "string",
+          "required": true,
+          "primaryKey": false,
+          "customProperties": [
+            {
+              "property": "kn.fieldId",
+              "value": "evidence.claim_confirmations.source_version_id"
+            }
+          ],
+          "description": "Source record version that repeated the value"
+        },
+        {
+          "name": "evidence_id",
+          "logicalType": "string",
+          "required": true,
+          "primaryKey": false,
+          "customProperties": [
+            {
+              "property": "kn.foreignKey",
+              "value": {
+                "table": "evidence_records",
+                "fields": [
+                  "evidence_id"
+                ],
+                "targetFields": [
+                  "evidence_id"
+                ]
+              }
+            },
+            {
+              "property": "kn.fieldId",
+              "value": "evidence.claim_confirmations.evidence_id"
+            }
+          ],
+          "description": "Evidence of the re-observation"
+        },
+        {
+          "name": "fetch_id",
+          "logicalType": "string",
+          "required": true,
+          "primaryKey": false,
+          "customProperties": [
+            {
+              "property": "kn.fieldId",
+              "value": "evidence.claim_confirmations.fetch_id"
+            }
+          ],
+          "description": "Fetch ID of the re-observation"
+        },
+        {
+          "name": "observed_at",
+          "logicalType": "timestamp",
+          "required": true,
+          "primaryKey": false,
+          "customProperties": [
+            {
+              "property": "kn.fieldId",
+              "value": "evidence.claim_confirmations.observed_at"
+            }
+          ],
+          "description": "UTC time of the re-observation"
+        },
+        {
+          "name": "recorded_at",
+          "logicalType": "timestamp",
+          "required": true,
+          "primaryKey": false,
+          "customProperties": [
+            {
+              "property": "kn.fieldId",
+              "value": "evidence.claim_confirmations.recorded_at"
+            }
+          ],
+          "description": "UTC time KN recorded the confirmation"
+        }
+      ],
+      "customProperties": [
+        {
+          "property": "kn.humanVerification",
+          "value": {
+            "strategy": "external",
+            "resolver": "contract-v1",
+            "recordFields": [
+              "evidence.claim_confirmations.confirmation_id",
+              "evidence.claim_confirmations.claim_key",
+              "evidence.claim_confirmations.source_version_id",
+              "evidence.claim_confirmations.evidence_id",
+              "evidence.claim_confirmations.fetch_id",
+              "evidence.claim_confirmations.observed_at",
+              "evidence.claim_confirmations.recorded_at"
+            ],
+            "fieldContexts": {}
+          }
+        },
+        {
+          "property": "kn.temporalProfile",
+          "value": {
+            "observedTime": "observed_at",
+            "recordedTime": "recorded_at",
+            "asOf": "knowledge_time",
+            "nullSemantics": "unknown"
+          }
+        },
+        {
+          "property": "kn.index",
+          "value": [
+            {
+              "name": "confirmations_claim_idx",
+              "fields": [
+                "claim_key"
+              ],
+              "method": "btree",
+              "unique": false
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "aliases",
+      "logicalType": "object",
+      "physicalType": "table",
+      "description": "Weak, non-unique alias identifiers of objects.",
+      "properties": [
+        {
+          "name": "alias_id",
+          "logicalType": "string",
+          "required": true,
+          "primaryKey": true,
+          "customProperties": [
+            {
+              "property": "kn.fieldId",
+              "value": "evidence.aliases.alias_id"
+            }
+          ],
+          "description": "SHA-256 of the object, text, language and claim"
+        },
+        {
+          "name": "kn_id",
+          "logicalType": "string",
+          "required": true,
+          "primaryKey": false,
+          "customProperties": [
+            {
+              "property": "kn.fieldId",
+              "value": "evidence.aliases.kn_id"
+            }
+          ],
+          "description": "Object the alias weakly identifies"
+        },
+        {
+          "name": "alias",
+          "logicalType": "string",
+          "required": true,
+          "primaryKey": false,
+          "customProperties": [
+            {
+              "property": "kn.fieldId",
+              "value": "evidence.aliases.alias"
+            }
+          ],
+          "description": "Alias text exactly as stated"
+        },
+        {
+          "name": "language",
+          "logicalType": "string",
+          "required": true,
+          "primaryKey": false,
+          "customProperties": [
+            {
+              "property": "kn.fieldId",
+              "value": "evidence.aliases.language"
+            }
+          ],
+          "description": "BCP-47 tag of the alias; und when unknown"
+        },
+        {
+          "name": "normalized_key",
+          "logicalType": "string",
+          "required": true,
+          "primaryKey": false,
+          "customProperties": [
+            {
+              "property": "kn.fieldId",
+              "value": "evidence.aliases.normalized_key"
+            }
+          ],
+          "description": "Normalized lookup key; not unique"
+        },
+        {
+          "name": "normalizer",
+          "logicalType": "string",
+          "required": true,
+          "primaryKey": false,
+          "customProperties": [
+            {
+              "property": "kn.fieldId",
+              "value": "evidence.aliases.normalizer"
+            }
+          ],
+          "description": "Normalizer that produced the key"
+        },
+        {
+          "name": "claim_key",
+          "logicalType": "string",
+          "required": true,
+          "primaryKey": false,
+          "customProperties": [
+            {
+              "property": "kn.foreignKey",
+              "value": {
+                "table": "claims",
+                "fields": [
+                  "claim_key"
+                ],
+                "targetFields": [
+                  "claim_key"
+                ]
+              }
+            },
+            {
+              "property": "kn.fieldId",
+              "value": "evidence.aliases.claim_key"
+            }
+          ],
+          "description": "Claim that states the alias"
+        },
+        {
+          "name": "recorded_at",
+          "logicalType": "timestamp",
+          "required": true,
+          "primaryKey": false,
+          "customProperties": [
+            {
+              "property": "kn.fieldId",
+              "value": "evidence.aliases.recorded_at"
+            }
+          ],
+          "description": "UTC time KN recorded the alias"
+        }
+      ],
+      "customProperties": [
+        {
+          "property": "kn.humanVerification",
+          "value": {
+            "strategy": "external",
+            "resolver": "contract-v1",
+            "recordFields": [
+              "evidence.aliases.alias_id",
+              "evidence.aliases.kn_id",
+              "evidence.aliases.alias",
+              "evidence.aliases.language",
+              "evidence.aliases.normalized_key",
+              "evidence.aliases.normalizer",
+              "evidence.aliases.claim_key",
+              "evidence.aliases.recorded_at"
+            ],
+            "fieldContexts": {}
+          }
+        },
+        {
+          "property": "kn.index",
+          "value": [
+            {
+              "name": "aliases_key_idx",
+              "fields": [
+                "normalized_key"
+              ],
+              "method": "btree",
+              "unique": false
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "text_translations",
+      "logicalType": "object",
+      "physicalType": "table",
+      "description": "Derived translations of text claims; originals stay unchanged.",
+      "properties": [
+        {
+          "name": "translation_id",
+          "logicalType": "string",
+          "required": true,
+          "primaryKey": true,
+          "customProperties": [
+            {
+              "property": "kn.fieldId",
+              "value": "evidence.text_translations.translation_id"
+            }
+          ],
+          "description": "SHA-256 of the claim, language, text and provenance"
+        },
+        {
+          "name": "claim_key",
+          "logicalType": "string",
+          "required": true,
+          "primaryKey": false,
+          "customProperties": [
+            {
+              "property": "kn.foreignKey",
+              "value": {
+                "table": "claims",
+                "fields": [
+                  "claim_key"
+                ],
+                "targetFields": [
+                  "claim_key"
+                ]
+              }
+            },
+            {
+              "property": "kn.fieldId",
+              "value": "evidence.text_translations.claim_key"
+            }
+          ],
+          "description": "Text claim whose original stays unchanged"
+        },
+        {
+          "name": "language",
+          "logicalType": "string",
+          "required": true,
+          "primaryKey": false,
+          "customProperties": [
+            {
+              "property": "kn.fieldId",
+              "value": "evidence.text_translations.language"
+            }
+          ],
+          "description": "BCP-47 tag of the translation"
+        },
+        {
+          "name": "text",
+          "logicalType": "string",
+          "required": true,
+          "primaryKey": false,
+          "customProperties": [
+            {
+              "property": "kn.fieldId",
+              "value": "evidence.text_translations.text"
+            }
+          ],
+          "description": "Derived translated text"
+        },
+        {
+          "name": "method",
+          "logicalType": "string",
+          "required": true,
+          "primaryKey": false,
+          "customProperties": [
+            {
+              "property": "kn.enum",
+              "value": [
+                "source",
+                "human",
+                "machine"
+              ]
+            },
+            {
+              "property": "kn.fieldId",
+              "value": "evidence.text_translations.method"
+            }
+          ],
+          "description": "Who produced the translation"
+        },
+        {
+          "name": "provenance",
+          "logicalType": "string",
+          "required": true,
+          "primaryKey": false,
+          "customProperties": [
+            {
+              "property": "kn.fieldId",
+              "value": "evidence.text_translations.provenance"
+            }
+          ],
+          "description": "Source record, review or model and prompt reference"
+        },
+        {
+          "name": "recorded_at",
+          "logicalType": "timestamp",
+          "required": true,
+          "primaryKey": false,
+          "customProperties": [
+            {
+              "property": "kn.fieldId",
+              "value": "evidence.text_translations.recorded_at"
+            }
+          ],
+          "description": "UTC time KN recorded the translation"
+        }
+      ],
+      "customProperties": [
+        {
+          "property": "kn.humanVerification",
+          "value": {
+            "strategy": "external",
+            "resolver": "contract-v1",
+            "recordFields": [
+              "evidence.text_translations.translation_id",
+              "evidence.text_translations.claim_key",
+              "evidence.text_translations.language",
+              "evidence.text_translations.text",
+              "evidence.text_translations.method",
+              "evidence.text_translations.provenance",
+              "evidence.text_translations.recorded_at"
+            ],
+            "fieldContexts": {}
+          }
+        },
+        {
+          "property": "kn.index",
+          "value": [
+            {
+              "name": "translations_language_idx",
+              "fields": [
+                "claim_key",
+                "language"
+              ],
+              "method": "btree",
+              "unique": true
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "relation_assertions",
+      "logicalType": "object",
+      "physicalType": "table",
+      "description": "Typed relations between objects with no active duplicates.",
+      "properties": [
+        {
+          "name": "assertion_id",
+          "logicalType": "string",
+          "required": true,
+          "primaryKey": true,
+          "customProperties": [
+            {
+              "property": "kn.fieldId",
+              "value": "evidence.relation_assertions.assertion_id"
+            }
+          ],
+          "description": "SHA-256 of the relation key and the claim that opened it"
+        },
+        {
+          "name": "relation_key",
+          "logicalType": "string",
+          "required": true,
+          "primaryKey": false,
+          "customProperties": [
+            {
+              "property": "kn.fieldId",
+              "value": "evidence.relation_assertions.relation_key"
+            }
+          ],
+          "description": "SHA-256 of subject, type, object, qualifiers and validity"
+        },
+        {
+          "name": "subject_kn_id",
+          "logicalType": "string",
+          "required": true,
+          "primaryKey": false,
+          "customProperties": [
+            {
+              "property": "kn.fieldId",
+              "value": "evidence.relation_assertions.subject_kn_id"
+            }
+          ],
+          "description": "Subject object"
+        },
+        {
+          "name": "relation_type",
+          "logicalType": "string",
+          "required": true,
+          "primaryKey": false,
+          "customProperties": [
+            {
+              "property": "kn.fieldId",
+              "value": "evidence.relation_assertions.relation_type"
+            }
+          ],
+          "description": "Ontology relation type ID"
+        },
+        {
+          "name": "object_kn_id",
+          "logicalType": "string",
+          "required": true,
+          "primaryKey": false,
+          "customProperties": [
+            {
+              "property": "kn.fieldId",
+              "value": "evidence.relation_assertions.object_kn_id"
+            }
+          ],
+          "description": "Object at the other endpoint"
+        },
+        {
+          "name": "qualifiers_json",
+          "logicalType": "string",
+          "required": true,
+          "primaryKey": false,
+          "customProperties": [
+            {
+              "property": "kn.fieldId",
+              "value": "evidence.relation_assertions.qualifiers_json"
+            }
+          ],
+          "description": "Canonical JSON object of qualifiers; {} when none"
+        },
+        {
+          "name": "valid_from",
+          "logicalType": "timestamp",
+          "required": false,
+          "primaryKey": false,
+          "customProperties": [
+            {
+              "property": "kn.fieldId",
+              "value": "evidence.relation_assertions.valid_from"
+            }
+          ],
+          "description": "Inclusive start of validity (UTC); null when unknown"
+        },
+        {
+          "name": "valid_from_precision",
+          "logicalType": "string",
+          "required": false,
+          "primaryKey": false,
+          "customProperties": [
+            {
+              "property": "kn.enum",
+              "value": [
+                "year",
+                "month",
+                "day",
+                "hour",
+                "minute",
+                "second",
+                "subsecond"
+              ]
+            },
+            {
+              "property": "kn.fieldId",
+              "value": "evidence.relation_assertions.valid_from_precision"
+            }
+          ],
+          "description": "Precision of valid_from; present exactly when it is"
+        },
+        {
+          "name": "valid_to",
+          "logicalType": "timestamp",
+          "required": false,
+          "primaryKey": false,
+          "customProperties": [
+            {
+              "property": "kn.fieldId",
+              "value": "evidence.relation_assertions.valid_to"
+            }
+          ],
+          "description": "Exclusive end of validity (UTC); null when unknown"
+        },
+        {
+          "name": "valid_to_precision",
+          "logicalType": "string",
+          "required": false,
+          "primaryKey": false,
+          "customProperties": [
+            {
+              "property": "kn.enum",
+              "value": [
+                "year",
+                "month",
+                "day",
+                "hour",
+                "minute",
+                "second",
+                "subsecond"
+              ]
+            },
+            {
+              "property": "kn.fieldId",
+              "value": "evidence.relation_assertions.valid_to_precision"
+            }
+          ],
+          "description": "Precision of valid_to; present exactly when it is"
+        },
+        {
+          "name": "review_state",
+          "logicalType": "string",
+          "required": true,
+          "primaryKey": false,
+          "customProperties": [
+            {
+              "property": "kn.enum",
+              "value": [
+                "unreviewed",
+                "accepted",
+                "disputed",
+                "rejected"
+              ]
+            },
+            {
+              "property": "kn.fieldId",
+              "value": "evidence.relation_assertions.review_state"
+            }
+          ],
+          "description": "Review state of the assertion"
+        },
+        {
+          "name": "decision_ref",
+          "logicalType": "string",
+          "required": false,
+          "primaryKey": false,
+          "customProperties": [
+            {
+              "property": "kn.fieldId",
+              "value": "evidence.relation_assertions.decision_ref"
+            }
+          ],
+          "description": "Review decision behind the review state"
+        },
+        {
+          "name": "opened_by",
+          "logicalType": "string",
+          "required": true,
+          "primaryKey": false,
+          "customProperties": [
+            {
+              "property": "kn.foreignKey",
+              "value": {
+                "table": "claims",
+                "fields": [
+                  "opened_by"
+                ],
+                "targetFields": [
+                  "claim_key"
+                ]
+              }
+            },
+            {
+              "property": "kn.fieldId",
+              "value": "evidence.relation_assertions.opened_by"
+            }
+          ],
+          "description": "Claim that first asserted the relation"
+        },
+        {
+          "name": "opened_at",
+          "logicalType": "timestamp",
+          "required": true,
+          "primaryKey": false,
+          "customProperties": [
+            {
+              "property": "kn.fieldId",
+              "value": "evidence.relation_assertions.opened_at"
+            }
+          ],
+          "description": "UTC knowledge time the assertion became active"
+        },
+        {
+          "name": "closed_at",
+          "logicalType": "timestamp",
+          "required": false,
+          "primaryKey": false,
+          "customProperties": [
+            {
+              "property": "kn.fieldId",
+              "value": "evidence.relation_assertions.closed_at"
+            }
+          ],
+          "description": "UTC knowledge time the assertion stopped being active"
+        },
+        {
+          "name": "close_reason",
+          "logicalType": "string",
+          "required": false,
+          "primaryKey": false,
+          "customProperties": [
+            {
+              "property": "kn.enum",
+              "value": [
+                "rejected",
+                "retracted",
+                "superseded"
+              ]
+            },
+            {
+              "property": "kn.fieldId",
+              "value": "evidence.relation_assertions.close_reason"
+            }
+          ],
+          "description": "Why the assertion closed"
+        }
+      ],
+      "customProperties": [
+        {
+          "property": "kn.humanVerification",
+          "value": {
+            "strategy": "external",
+            "resolver": "contract-v1",
+            "recordFields": [
+              "evidence.relation_assertions.assertion_id",
+              "evidence.relation_assertions.relation_key",
+              "evidence.relation_assertions.subject_kn_id",
+              "evidence.relation_assertions.relation_type",
+              "evidence.relation_assertions.object_kn_id",
+              "evidence.relation_assertions.qualifiers_json",
+              "evidence.relation_assertions.valid_from",
+              "evidence.relation_assertions.valid_from_precision",
+              "evidence.relation_assertions.valid_to",
+              "evidence.relation_assertions.valid_to_precision",
+              "evidence.relation_assertions.review_state",
+              "evidence.relation_assertions.decision_ref",
+              "evidence.relation_assertions.opened_by",
+              "evidence.relation_assertions.opened_at"
+            ],
+            "fieldContexts": {}
+          }
+        },
+        {
+          "property": "kn.temporalProfile",
+          "value": {
+            "validFrom": "valid_from",
+            "validTo": "valid_to",
+            "recordedTime": "opened_at",
+            "asOf": "bitemporal",
+            "nullSemantics": "unknown"
+          }
+        },
+        {
+          "property": "kn.presence",
+          "value": [
+            {
+              "name": "closure",
+              "rule": "all_or_none",
+              "fields": [
+                "closed_at",
+                "close_reason"
+              ]
+            },
+            {
+              "name": "valid_from_time",
+              "rule": "all_or_none",
+              "fields": [
+                "valid_from",
+                "valid_from_precision"
+              ]
+            },
+            {
+              "name": "valid_to_time",
+              "rule": "all_or_none",
+              "fields": [
+                "valid_to",
+                "valid_to_precision"
+              ]
+            }
+          ]
+        },
+        {
+          "property": "kn.index",
+          "value": [
+            {
+              "name": "relations_active_idx",
+              "fields": [
+                "relation_key"
+              ],
+              "method": "btree",
+              "unique": true,
+              "whereNull": "closed_at"
+            },
+            {
+              "name": "relations_subject_idx",
+              "fields": [
+                "subject_kn_id",
+                "relation_type"
+              ],
+              "method": "btree",
+              "unique": false
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "relation_supports",
+      "logicalType": "object",
+      "physicalType": "table",
+      "description": "Claims that support a relation assertion.",
+      "properties": [
+        {
+          "name": "assertion_id",
+          "logicalType": "string",
+          "required": true,
+          "primaryKey": true,
+          "customProperties": [
+            {
+              "property": "kn.foreignKey",
+              "value": {
+                "table": "relation_assertions",
+                "fields": [
+                  "assertion_id"
+                ],
+                "targetFields": [
+                  "assertion_id"
+                ]
+              }
+            },
+            {
+              "property": "kn.fieldId",
+              "value": "evidence.relation_supports.assertion_id"
+            }
+          ],
+          "description": "Supported relation assertion"
+        },
+        {
+          "name": "claim_key",
+          "logicalType": "string",
+          "required": true,
+          "primaryKey": true,
+          "customProperties": [
+            {
+              "property": "kn.foreignKey",
+              "value": {
+                "table": "claims",
+                "fields": [
+                  "claim_key"
+                ],
+                "targetFields": [
+                  "claim_key"
+                ]
+              }
+            },
+            {
+              "property": "kn.fieldId",
+              "value": "evidence.relation_supports.claim_key"
+            }
+          ],
+          "description": "Claim that supports the assertion"
+        },
+        {
+          "name": "recorded_at",
+          "logicalType": "timestamp",
+          "required": true,
+          "primaryKey": false,
+          "customProperties": [
+            {
+              "property": "kn.fieldId",
+              "value": "evidence.relation_supports.recorded_at"
+            }
+          ],
+          "description": "UTC time KN recorded the support"
+        }
+      ],
+      "customProperties": [
+        {
+          "property": "kn.humanVerification",
+          "value": {
+            "strategy": "external",
+            "resolver": "contract-v1",
+            "recordFields": [
+              "evidence.relation_supports.assertion_id",
+              "evidence.relation_supports.claim_key",
+              "evidence.relation_supports.recorded_at"
+            ],
+            "fieldContexts": {}
+          }
+        }
+      ]
+    },
+    {
+      "name": "canonical_facts",
+      "logicalType": "object",
+      "physicalType": "table",
+      "description": "Bitemporal projection of selected claims and unresolved fields.",
+      "properties": [
+        {
+          "name": "fact_version_id",
+          "logicalType": "string",
+          "required": true,
+          "primaryKey": true,
+          "customProperties": [
+            {
+              "property": "kn.fieldId",
+              "value": "evidence.canonical_facts.fact_version_id"
+            }
+          ],
+          "description": "SHA-256 of the fact key, selection content and knowledge start"
+        },
+        {
+          "name": "fact_key",
+          "logicalType": "string",
+          "required": true,
+          "primaryKey": false,
+          "customProperties": [
+            {
+              "property": "kn.fieldId",
+              "value": "evidence.canonical_facts.fact_key"
+            }
+          ],
+          "description": "SHA-256 of object, field, conditions and audience"
+        },
+        {
+          "name": "kn_id",
+          "logicalType": "string",
+          "required": true,
+          "primaryKey": false,
+          "customProperties": [
+            {
+              "property": "kn.fieldId",
+              "value": "evidence.canonical_facts.kn_id"
+            }
+          ],
+          "description": "Object of the fact; a survivor after merges"
+        },
+        {
+          "name": "field_id",
+          "logicalType": "string",
+          "required": true,
+          "primaryKey": false,
+          "customProperties": [
+            {
+              "property": "kn.fieldId",
+              "value": "evidence.canonical_facts.field_id"
+            }
+          ],
+          "description": "Stable contract field ID"
+        },
+        {
+          "name": "conditions_json",
+          "logicalType": "string",
+          "required": true,
+          "primaryKey": false,
+          "customProperties": [
+            {
+              "property": "kn.fieldId",
+              "value": "evidence.canonical_facts.conditions_json"
+            }
+          ],
+          "description": "Canonical JSON condition set; {} when unconditioned"
+        },
+        {
+          "name": "audience",
+          "logicalType": "string",
+          "required": true,
+          "primaryKey": false,
+          "customProperties": [
+            {
+              "property": "kn.fieldId",
+              "value": "evidence.canonical_facts.audience"
+            }
+          ],
+          "description": "Audience whose eligible evidence was selected"
+        },
+        {
+          "name": "claim_key",
+          "logicalType": "string",
+          "required": false,
+          "primaryKey": false,
+          "customProperties": [
+            {
+              "property": "kn.foreignKey",
+              "value": {
+                "table": "claims",
+                "fields": [
+                  "claim_key"
+                ],
+                "targetFields": [
+                  "claim_key"
+                ]
+              }
+            },
+            {
+              "property": "kn.fieldId",
+              "value": "evidence.canonical_facts.claim_key"
+            }
+          ],
+          "description": "Selected claim; null when unresolved"
+        },
+        {
+          "name": "unresolved_reason",
+          "logicalType": "string",
+          "required": false,
+          "primaryKey": false,
+          "customProperties": [
+            {
+              "property": "kn.enum",
+              "value": [
+                "no_eligible_claim",
+                "conflict",
+                "review_pending",
+                "cleared"
+              ]
+            },
+            {
+              "property": "kn.fieldId",
+              "value": "evidence.canonical_facts.unresolved_reason"
+            }
+          ],
+          "description": "Why no claim is selected"
+        },
+        {
+          "name": "mode",
+          "logicalType": "string",
+          "required": true,
+          "primaryKey": false,
+          "customProperties": [
+            {
+              "property": "kn.enum",
+              "value": [
+                "priority",
+                "latest_observed",
+                "accumulate",
+                "fixed"
+              ]
+            },
+            {
+              "property": "kn.fieldId",
+              "value": "evidence.canonical_facts.mode"
+            }
+          ],
+          "description": "Update policy mode"
+        },
+        {
+          "name": "policy_digest",
+          "logicalType": "string",
+          "required": true,
+          "primaryKey": false,
+          "customProperties": [
+            {
+              "property": "kn.fieldId",
+              "value": "evidence.canonical_facts.policy_digest"
+            }
+          ],
+          "description": "SHA-256 of the canonical update policy"
+        },
+        {
+          "name": "outcome",
+          "logicalType": "string",
+          "required": true,
+          "primaryKey": false,
+          "customProperties": [
+            {
+              "property": "kn.enum",
+              "value": [
+                "filled",
+                "replaced",
+                "corroborated",
+                "conflict"
+              ]
+            },
+            {
+              "property": "kn.fieldId",
+              "value": "evidence.canonical_facts.outcome"
+            }
+          ],
+          "description": "Outcome of the change that produced this version; ignored claims leave no version"
+        },
+        {
+          "name": "deciding_criterion",
+          "logicalType": "string",
+          "required": true,
+          "primaryKey": false,
+          "customProperties": [
+            {
+              "property": "kn.enum",
+              "value": [
+                "first_eligible",
+                "source_rank",
+                "evidence_class",
+                "data_time",
+                "tie",
+                "fixed_value",
+                "review_decision"
+              ]
+            },
+            {
+              "property": "kn.fieldId",
+              "value": "evidence.canonical_facts.deciding_criterion"
+            }
+          ],
+          "description": "Criterion that decided the outcome"
+        },
+        {
+          "name": "winner_criteria_json",
+          "logicalType": "string",
+          "required": true,
+          "primaryKey": false,
+          "customProperties": [
+            {
+              "property": "kn.fieldId",
+              "value": "evidence.canonical_facts.winner_criteria_json"
+            }
+          ],
+          "description": "Canonical criteria values of the winner"
+        },
+        {
+          "name": "runner_up_criteria_json",
+          "logicalType": "string",
+          "required": false,
+          "primaryKey": false,
+          "customProperties": [
+            {
+              "property": "kn.fieldId",
+              "value": "evidence.canonical_facts.runner_up_criteria_json"
+            }
+          ],
+          "description": "Canonical criteria values of the runner-up"
+        },
+        {
+          "name": "verification_state",
+          "logicalType": "string",
+          "required": true,
+          "primaryKey": false,
+          "customProperties": [
+            {
+              "property": "kn.enum",
+              "value": [
+                "unreviewed",
+                "corroborated",
+                "verified",
+                "disputed"
+              ]
+            },
+            {
+              "property": "kn.fieldId",
+              "value": "evidence.canonical_facts.verification_state"
+            }
+          ],
+          "description": "Derived verification label"
+        },
+        {
+          "name": "owner_override",
+          "logicalType": "boolean",
+          "required": true,
+          "primaryKey": false,
+          "customProperties": [
+            {
+              "property": "kn.fieldId",
+              "value": "evidence.canonical_facts.owner_override"
+            }
+          ],
+          "description": "An owner-entered value outranks a differing first-party value"
+        },
+        {
+          "name": "review_item_id",
+          "logicalType": "string",
+          "required": false,
+          "primaryKey": false,
+          "customProperties": [
+            {
+              "property": "kn.foreignKey",
+              "value": {
+                "table": "review_items",
+                "fields": [
+                  "review_item_id"
+                ],
+                "targetFields": [
+                  "item_id"
+                ]
+              }
+            },
+            {
+              "property": "kn.fieldId",
+              "value": "evidence.canonical_facts.review_item_id"
+            }
+          ],
+          "description": "Open review item for this version"
+        },
+        {
+          "name": "valid_from",
+          "logicalType": "timestamp",
+          "required": false,
+          "primaryKey": false,
+          "customProperties": [
+            {
+              "property": "kn.fieldId",
+              "value": "evidence.canonical_facts.valid_from"
+            }
+          ],
+          "description": "Inclusive start of validity (UTC); null when unknown"
+        },
+        {
+          "name": "valid_from_precision",
+          "logicalType": "string",
+          "required": false,
+          "primaryKey": false,
+          "customProperties": [
+            {
+              "property": "kn.enum",
+              "value": [
+                "year",
+                "month",
+                "day",
+                "hour",
+                "minute",
+                "second",
+                "subsecond"
+              ]
+            },
+            {
+              "property": "kn.fieldId",
+              "value": "evidence.canonical_facts.valid_from_precision"
+            }
+          ],
+          "description": "Precision of valid_from; present exactly when it is"
+        },
+        {
+          "name": "valid_to",
+          "logicalType": "timestamp",
+          "required": false,
+          "primaryKey": false,
+          "customProperties": [
+            {
+              "property": "kn.fieldId",
+              "value": "evidence.canonical_facts.valid_to"
+            }
+          ],
+          "description": "Exclusive end of validity (UTC); null when unknown"
+        },
+        {
+          "name": "valid_to_precision",
+          "logicalType": "string",
+          "required": false,
+          "primaryKey": false,
+          "customProperties": [
+            {
+              "property": "kn.enum",
+              "value": [
+                "year",
+                "month",
+                "day",
+                "hour",
+                "minute",
+                "second",
+                "subsecond"
+              ]
+            },
+            {
+              "property": "kn.fieldId",
+              "value": "evidence.canonical_facts.valid_to_precision"
+            }
+          ],
+          "description": "Precision of valid_to; present exactly when it is"
+        },
+        {
+          "name": "knowledge_from",
+          "logicalType": "timestamp",
+          "required": true,
+          "primaryKey": false,
+          "customProperties": [
+            {
+              "property": "kn.fieldId",
+              "value": "evidence.canonical_facts.knowledge_from"
+            }
+          ],
+          "description": "Inclusive UTC knowledge time of this version"
+        },
+        {
+          "name": "knowledge_to",
+          "logicalType": "timestamp",
+          "required": false,
+          "primaryKey": false,
+          "customProperties": [
+            {
+              "property": "kn.fieldId",
+              "value": "evidence.canonical_facts.knowledge_to"
+            }
+          ],
+          "description": "Exclusive UTC knowledge end; null while current"
+        }
+      ],
+      "customProperties": [
+        {
+          "property": "kn.humanVerification",
+          "value": {
+            "strategy": "external",
+            "resolver": "contract-v1",
+            "recordFields": [
+              "evidence.canonical_facts.fact_key",
+              "evidence.canonical_facts.kn_id",
+              "evidence.canonical_facts.field_id",
+              "evidence.canonical_facts.conditions_json",
+              "evidence.canonical_facts.audience",
+              "evidence.canonical_facts.claim_key",
+              "evidence.canonical_facts.unresolved_reason",
+              "evidence.canonical_facts.mode",
+              "evidence.canonical_facts.policy_digest",
+              "evidence.canonical_facts.outcome",
+              "evidence.canonical_facts.deciding_criterion",
+              "evidence.canonical_facts.winner_criteria_json",
+              "evidence.canonical_facts.runner_up_criteria_json",
+              "evidence.canonical_facts.verification_state",
+              "evidence.canonical_facts.owner_override",
+              "evidence.canonical_facts.review_item_id",
+              "evidence.canonical_facts.valid_from",
+              "evidence.canonical_facts.valid_from_precision",
+              "evidence.canonical_facts.valid_to",
+              "evidence.canonical_facts.valid_to_precision",
+              "evidence.canonical_facts.knowledge_from"
+            ],
+            "fieldContexts": {}
+          }
+        },
+        {
+          "property": "kn.temporalProfile",
+          "value": {
+            "validFrom": "valid_from",
+            "validTo": "valid_to",
+            "recordedTime": "knowledge_from",
+            "asOf": "bitemporal",
+            "nullSemantics": "open_interval"
+          }
+        },
+        {
+          "property": "kn.presence",
+          "value": [
+            {
+              "name": "claim_or_reason",
+              "rule": "exactly_one",
+              "fields": [
+                "claim_key",
+                "unresolved_reason"
+              ]
+            },
+            {
+              "name": "valid_from_time",
+              "rule": "all_or_none",
+              "fields": [
+                "valid_from",
+                "valid_from_precision"
+              ]
+            },
+            {
+              "name": "valid_to_time",
+              "rule": "all_or_none",
+              "fields": [
+                "valid_to",
+                "valid_to_precision"
+              ]
+            }
+          ]
+        },
+        {
+          "property": "kn.index",
+          "value": [
+            {
+              "name": "facts_current_idx",
+              "fields": [
+                "fact_key"
+              ],
+              "method": "btree",
+              "unique": true,
+              "whereNull": "knowledge_to"
+            },
+            {
+              "name": "facts_subject_idx",
+              "fields": [
+                "kn_id",
+                "field_id"
+              ],
+              "method": "btree",
+              "unique": false
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "selection_outcomes",
+      "logicalType": "object",
+      "physicalType": "table",
+      "description": "Explained outcome of each claim evaluated by selection.",
+      "properties": [
+        {
+          "name": "outcome_id",
+          "logicalType": "string",
+          "required": true,
+          "primaryKey": true,
+          "customProperties": [
+            {
+              "property": "kn.fieldId",
+              "value": "evidence.selection_outcomes.outcome_id"
+            }
+          ],
+          "description": "SHA-256 of the fact version and evaluated claim"
+        },
+        {
+          "name": "fact_key",
+          "logicalType": "string",
+          "required": true,
+          "primaryKey": false,
+          "customProperties": [
+            {
+              "property": "kn.fieldId",
+              "value": "evidence.selection_outcomes.fact_key"
+            }
+          ],
+          "description": "Fact whose selection evaluated the claim"
+        },
+        {
+          "name": "claim_key",
+          "logicalType": "string",
+          "required": true,
+          "primaryKey": false,
+          "customProperties": [
+            {
+              "property": "kn.foreignKey",
+              "value": {
+                "table": "claims",
+                "fields": [
+                  "claim_key"
+                ],
+                "targetFields": [
+                  "claim_key"
+                ]
+              }
+            },
+            {
+              "property": "kn.fieldId",
+              "value": "evidence.selection_outcomes.claim_key"
+            }
+          ],
+          "description": "Evaluated claim"
+        },
+        {
+          "name": "fact_version_id",
+          "logicalType": "string",
+          "required": true,
+          "primaryKey": false,
+          "customProperties": [
+            {
+              "property": "kn.foreignKey",
+              "value": {
+                "table": "canonical_facts",
+                "fields": [
+                  "fact_version_id"
+                ],
+                "targetFields": [
+                  "fact_version_id"
+                ]
+              }
+            },
+            {
+              "property": "kn.fieldId",
+              "value": "evidence.selection_outcomes.fact_version_id"
+            }
+          ],
+          "description": "Fact version current after the evaluation"
+        },
+        {
+          "name": "outcome",
+          "logicalType": "string",
+          "required": true,
+          "primaryKey": false,
+          "customProperties": [
+            {
+              "property": "kn.enum",
+              "value": [
+                "filled",
+                "replaced",
+                "ignored",
+                "corroborated",
+                "conflict"
+              ]
+            },
+            {
+              "property": "kn.fieldId",
+              "value": "evidence.selection_outcomes.outcome"
+            }
+          ],
+          "description": "Explained outcome for the claim"
+        },
+        {
+          "name": "criterion",
+          "logicalType": "string",
+          "required": true,
+          "primaryKey": false,
+          "customProperties": [
+            {
+              "property": "kn.enum",
+              "value": [
+                "first_eligible",
+                "source_rank",
+                "evidence_class",
+                "data_time",
+                "tie",
+                "fixed_value",
+                "review_decision"
+              ]
+            },
+            {
+              "property": "kn.fieldId",
+              "value": "evidence.selection_outcomes.criterion"
+            }
+          ],
+          "description": "Deciding criterion"
+        },
+        {
+          "name": "criteria_json",
+          "logicalType": "string",
+          "required": true,
+          "primaryKey": false,
+          "customProperties": [
+            {
+              "property": "kn.fieldId",
+              "value": "evidence.selection_outcomes.criteria_json"
+            }
+          ],
+          "description": "Canonical criteria values of the evaluated claim"
+        },
+        {
+          "name": "recorded_at",
+          "logicalType": "timestamp",
+          "required": true,
+          "primaryKey": false,
+          "customProperties": [
+            {
+              "property": "kn.fieldId",
+              "value": "evidence.selection_outcomes.recorded_at"
+            }
+          ],
+          "description": "UTC time of the evaluation"
+        }
+      ],
+      "customProperties": [
+        {
+          "property": "kn.humanVerification",
+          "value": {
+            "strategy": "external",
+            "resolver": "contract-v1",
+            "recordFields": [
+              "evidence.selection_outcomes.outcome_id",
+              "evidence.selection_outcomes.fact_key",
+              "evidence.selection_outcomes.claim_key",
+              "evidence.selection_outcomes.fact_version_id",
+              "evidence.selection_outcomes.outcome",
+              "evidence.selection_outcomes.criterion",
+              "evidence.selection_outcomes.criteria_json",
+              "evidence.selection_outcomes.recorded_at"
+            ],
+            "fieldContexts": {}
+          }
+        },
+        {
+          "property": "kn.index",
+          "value": [
+            {
+              "name": "outcomes_fact_idx",
+              "fields": [
+                "fact_key"
+              ],
+              "method": "btree",
+              "unique": false
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "review_items",
+      "logicalType": "object",
+      "physicalType": "table",
+      "description": "Candidates, conflicts and quarantine awaiting human review.",
+      "properties": [
+        {
+          "name": "item_id",
+          "logicalType": "string",
+          "required": true,
+          "primaryKey": true,
+          "customProperties": [
+            {
+              "property": "kn.fieldId",
+              "value": "evidence.review_items.item_id"
+            }
+          ],
+          "description": "SHA-256 of the kind, subject and sorted candidates"
+        },
+        {
+          "name": "kind",
+          "logicalType": "string",
+          "required": true,
+          "primaryKey": false,
+          "customProperties": [
+            {
+              "property": "kn.enum",
+              "value": [
+                "fact_conflict",
+                "fixed_value_change",
+                "empty_claim",
+                "high_impact",
+                "owner_override",
+                "relation_candidate",
+                "quarantine",
+                "identity_match",
+                "identity_drift"
+              ]
+            },
+            {
+              "property": "kn.fieldId",
+              "value": "evidence.review_items.kind"
+            }
+          ],
+          "description": "Registered review item kind"
+        },
+        {
+          "name": "kn_id",
+          "logicalType": "string",
+          "required": false,
+          "primaryKey": false,
+          "customProperties": [
+            {
+              "property": "kn.fieldId",
+              "value": "evidence.review_items.kn_id"
+            }
+          ],
+          "description": "Object under review, when the item has one"
+        },
+        {
+          "name": "field_id",
+          "logicalType": "string",
+          "required": false,
+          "primaryKey": false,
+          "customProperties": [
+            {
+              "property": "kn.fieldId",
+              "value": "evidence.review_items.field_id"
+            }
+          ],
+          "description": "Field under review, when the item has one"
+        },
+        {
+          "name": "fact_key",
+          "logicalType": "string",
+          "required": false,
+          "primaryKey": false,
+          "customProperties": [
+            {
+              "property": "kn.fieldId",
+              "value": "evidence.review_items.fact_key"
+            }
+          ],
+          "description": "Fact under review, when the item has one"
+        },
+        {
+          "name": "candidates_json",
+          "logicalType": "string",
+          "required": true,
+          "primaryKey": false,
+          "customProperties": [
+            {
+              "property": "kn.fieldId",
+              "value": "evidence.review_items.candidates_json"
+            }
+          ],
+          "description": "Canonical sorted array of candidate claim keys or references"
+        },
+        {
+          "name": "reason_code",
+          "logicalType": "string",
+          "required": true,
+          "primaryKey": false,
+          "customProperties": [
+            {
+              "property": "kn.fieldId",
+              "value": "evidence.review_items.reason_code"
+            }
+          ],
+          "description": "Stable reason code"
+        },
+        {
+          "name": "opened_by",
+          "logicalType": "string",
+          "required": true,
+          "primaryKey": false,
+          "customProperties": [
+            {
+              "property": "kn.fieldId",
+              "value": "evidence.review_items.opened_by"
+            }
+          ],
+          "description": "Selection, run or match record that opened the item"
+        },
+        {
+          "name": "opened_at",
+          "logicalType": "timestamp",
+          "required": true,
+          "primaryKey": false,
+          "customProperties": [
+            {
+              "property": "kn.fieldId",
+              "value": "evidence.review_items.opened_at"
+            }
+          ],
+          "description": "UTC time the item opened"
+        }
+      ],
+      "customProperties": [
+        {
+          "property": "kn.humanVerification",
+          "value": {
+            "strategy": "external",
+            "resolver": "contract-v1",
+            "recordFields": [
+              "evidence.review_items.item_id",
+              "evidence.review_items.kind",
+              "evidence.review_items.kn_id",
+              "evidence.review_items.field_id",
+              "evidence.review_items.fact_key",
+              "evidence.review_items.candidates_json",
+              "evidence.review_items.reason_code",
+              "evidence.review_items.opened_by",
+              "evidence.review_items.opened_at"
+            ],
+            "fieldContexts": {}
+          }
+        },
+        {
+          "property": "kn.index",
+          "value": [
+            {
+              "name": "review_items_subject_idx",
+              "fields": [
+                "kn_id",
+                "field_id"
+              ],
+              "method": "btree",
+              "unique": false
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "review_decisions",
+      "logicalType": "object",
+      "physicalType": "table",
+      "description": "Append-only review decisions with reviewer, reason and times.",
+      "properties": [
+        {
+          "name": "decision_id",
+          "logicalType": "string",
+          "required": true,
+          "primaryKey": true,
+          "customProperties": [
+            {
+              "property": "kn.fieldId",
+              "value": "evidence.review_decisions.decision_id"
+            }
+          ],
+          "description": "SHA-256 of the canonical decision event"
+        },
+        {
+          "name": "item_id",
+          "logicalType": "string",
+          "required": true,
+          "primaryKey": false,
+          "customProperties": [
+            {
+              "property": "kn.foreignKey",
+              "value": {
+                "table": "review_items",
+                "fields": [
+                  "item_id"
+                ],
+                "targetFields": [
+                  "item_id"
+                ]
+              }
+            },
+            {
+              "property": "kn.fieldId",
+              "value": "evidence.review_decisions.item_id"
+            }
+          ],
+          "description": "Decided review item"
+        },
+        {
+          "name": "outcome",
+          "logicalType": "string",
+          "required": true,
+          "primaryKey": false,
+          "customProperties": [
+            {
+              "property": "kn.enum",
+              "value": [
+                "select",
+                "reject",
+                "accept",
+                "defer",
+                "dismiss"
+              ]
+            },
+            {
+              "property": "kn.fieldId",
+              "value": "evidence.review_decisions.outcome"
+            }
+          ],
+          "description": "Append-only decision outcome"
+        },
+        {
+          "name": "selected_claim_key",
+          "logicalType": "string",
+          "required": false,
+          "primaryKey": false,
+          "customProperties": [
+            {
+              "property": "kn.foreignKey",
+              "value": {
+                "table": "claims",
+                "fields": [
+                  "selected_claim_key"
+                ],
+                "targetFields": [
+                  "claim_key"
+                ]
+              }
+            },
+            {
+              "property": "kn.fieldId",
+              "value": "evidence.review_decisions.selected_claim_key"
+            }
+          ],
+          "description": "Claim selected by a select decision"
+        },
+        {
+          "name": "predecessor",
+          "logicalType": "string",
+          "required": false,
+          "primaryKey": false,
+          "customProperties": [
+            {
+              "property": "kn.foreignKey",
+              "value": {
+                "table": "review_decisions",
+                "fields": [
+                  "predecessor"
+                ],
+                "targetFields": [
+                  "decision_id"
+                ]
+              }
+            },
+            {
+              "property": "kn.fieldId",
+              "value": "evidence.review_decisions.predecessor"
+            }
+          ],
+          "description": "Earlier decision this one supersedes"
+        },
+        {
+          "name": "reviewer",
+          "logicalType": "string",
+          "required": true,
+          "primaryKey": false,
+          "customProperties": [
+            {
+              "property": "kn.fieldId",
+              "value": "evidence.review_decisions.reviewer"
+            }
+          ],
+          "description": "Authenticated reviewer principal"
+        },
+        {
+          "name": "reason",
+          "logicalType": "string",
+          "required": true,
+          "primaryKey": false,
+          "customProperties": [
+            {
+              "property": "kn.fieldId",
+              "value": "evidence.review_decisions.reason"
+            }
+          ],
+          "description": "Reviewer's reason"
+        },
+        {
+          "name": "performed_at",
+          "logicalType": "timestamp",
+          "required": true,
+          "primaryKey": false,
+          "customProperties": [
+            {
+              "property": "kn.fieldId",
+              "value": "evidence.review_decisions.performed_at"
+            }
+          ],
+          "description": "UTC time of the human decision"
+        },
+        {
+          "name": "recorded_at",
+          "logicalType": "timestamp",
+          "required": true,
+          "primaryKey": false,
+          "customProperties": [
+            {
+              "property": "kn.fieldId",
+              "value": "evidence.review_decisions.recorded_at"
+            }
+          ],
+          "description": "Separate UTC journal recording time"
+        },
+        {
+          "name": "human_verification_decision_id",
+          "logicalType": "string",
+          "required": false,
+          "primaryKey": false,
+          "customProperties": [
+            {
+              "property": "kn.fieldId",
+              "value": "evidence.review_decisions.human_verification_decision_id"
+            }
+          ],
+          "description": "Shared human verification decision, when the decision also verifies"
+        },
+        {
+          "name": "event_json",
+          "logicalType": "string",
+          "required": true,
+          "primaryKey": false,
+          "customProperties": [
+            {
+              "property": "kn.fieldId",
+              "value": "evidence.review_decisions.event_json"
+            }
+          ],
+          "description": "Canonical decision event; authoritative replay payload"
+        }
+      ],
+      "customProperties": [
+        {
+          "property": "kn.humanVerification",
+          "value": {
+            "strategy": "decision-log",
+            "resolver": "contract-v1",
+            "recordFields": [
+              "evidence.review_decisions.decision_id",
+              "evidence.review_decisions.item_id",
+              "evidence.review_decisions.outcome",
+              "evidence.review_decisions.selected_claim_key",
+              "evidence.review_decisions.predecessor",
+              "evidence.review_decisions.reviewer",
+              "evidence.review_decisions.reason",
+              "evidence.review_decisions.performed_at",
+              "evidence.review_decisions.recorded_at",
+              "evidence.review_decisions.human_verification_decision_id",
+              "evidence.review_decisions.event_json"
+            ],
+            "fieldContexts": {}
+          }
+        },
+        {
+          "property": "kn.index",
+          "value": [
+            {
+              "name": "review_decisions_item_idx",
+              "fields": [
+                "item_id"
+              ],
+              "method": "btree",
+              "unique": false
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

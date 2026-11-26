@@ -18,6 +18,9 @@
     {
       "path": "identity/1.0.0.json",
       "references": "identity/references.json"
+    },
+    {
+      "path": "evidence/claims/1.0.0.json"
     }
   ]
 }

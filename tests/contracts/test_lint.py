@@ -59,16 +59,14 @@ def test_each_registered_extension_accepts_its_documented_value_and_rejects_bad_
         ("bad-type.yaml", "type", "/value", "string"),
     ],
 )
-@pytest.mark.parametrize("locale", ["en", "uk"])
 def test_invalid_fixtures_report_paths_and_rules_without_input_values(
     fixture: str,
     rule: str,
     location: str,
     hint: str,
-    locale: str,
     caplog: pytest.LogCaptureFixture,
 ) -> None:
-    args = ["contract", "lint", str(FIXTURES / fixture), "--locale", locale]
+    args = ["contract", "lint", str(FIXTURES / fixture)]
     assert cli.main(args) == 1
     assert rule in caplog.records[-1].message and hint in caplog.records[-1].message
     assert cli.main([*args, "--json"]) == 1

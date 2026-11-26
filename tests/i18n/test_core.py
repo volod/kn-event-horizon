@@ -5,20 +5,46 @@ from decimal import Decimal
 import pytest
 
 from kn.i18n import Translator
+from kn.i18n.catalog import CatalogValue, load_catalog
 from kn.i18n.data import SourceText, TextVariant, select_text
 
 
-def test_interface_keys_are_strict_and_locales_do_not_leak() -> None:
-    en, uk = Translator("en"), Translator("uk")
-    assert en.text("cli.info", distribution="kn", version="1", package="kn") == "Project: kn 1 (kn)"
-    assert uk.text("cli.info", distribution="kn", version="1", package="kn").startswith(
-        "\u041f\u0440\u043e\u0454\u043a\u0442:"
+@pytest.fixture
+def dashboard_messages(monkeypatch: pytest.MonkeyPatch) -> None:
+    messages: dict[str, dict[str, CatalogValue]] = {
+        "en": {
+            "dashboard.title": "Sources",
+            "dashboard.tables": {"one": "{count} table", "other": "{count} tables"},
+        },
+        "uk": {
+            "dashboard.title": "\u0414\u0436\u0435\u0440\u0435\u043b\u0430",
+            "dashboard.tables": {
+                "one": "{count} \u0442\u0430\u0431\u043b\u0438\u0446\u044f",
+                "few": "{count} \u0442\u0430\u0431\u043b\u0438\u0446\u0456",
+                "many": "{count} \u0442\u0430\u0431\u043b\u0438\u0446\u044c",
+                "other": "{count} \u0442\u0430\u0431\u043b\u0438\u0446\u0456",
+            },
+        },
+    }
+    monkeypatch.setattr(
+        "kn.i18n.load_catalog", lambda locale: load_catalog(locale) | messages[locale]
     )
+
+
+def test_interface_keys_are_strict_and_locales_do_not_leak(dashboard_messages: None) -> None:
+    en, uk = Translator("en"), Translator("uk")
+    selected = select_text(SourceText(TextVariant("Source text", "zh", "raw:1")), "uk")
+    assert selected.variant.language == "zh" and selected.fallback
+    assert uk.text("dashboard.title") == "\u0414\u0436\u0435\u0440\u0435\u043b\u0430"
+    assert en.text("dashboard.title") == "Sources"
     with pytest.raises(ValueError, match="missing interface key"):
-        uk.text("absent")
+        uk.text("cli.help")
+    assert en.text("cli.help") == "show this help message and exit"
+
+
+def test_unsupported_interface_locale_is_rejected() -> None:
     with pytest.raises(ValueError, match="unsupported interface locale"):
         Translator("ru")
-    assert en.text("cli.help") == "show this help message and exit"
 
 
 @pytest.mark.parametrize(
@@ -41,15 +67,16 @@ def test_ukrainian_cldr_categories(count: int | Decimal, category: str) -> None:
     assert Translator("uk").plural_category(count) == category
 
 
-def test_numbers_and_plural_messages_preserve_fraction_precision() -> None:
+def test_numbers_and_plural_messages_preserve_fraction_precision(dashboard_messages: None) -> None:
     en, uk = Translator("en"), Translator("uk")
     assert en.number(Decimal("12345.67891")) == "12,345.67891"
     assert uk.number(Decimal("12345.67891")) == "12\u00a0345,67891"
-    assert en.plural("cli.tables", 1) == "1 table"
-    assert en.plural("cli.tables", 2) == "2 tables"
-    assert uk.plural("cli.tables", 2) == "2 \u0442\u0430\u0431\u043b\u0438\u0446\u0456"
+    assert en.plural("dashboard.tables", 1) == "1 table"
+    assert en.plural("dashboard.tables", 2) == "2 tables"
+    assert uk.plural("dashboard.tables", 2) == "2 \u0442\u0430\u0431\u043b\u0438\u0446\u0456"
     assert (
-        uk.plural("cli.tables", Decimal("1.5")) == "1,5 \u0442\u0430\u0431\u043b\u0438\u0446\u0456"
+        uk.plural("dashboard.tables", Decimal("1.5"))
+        == "1,5 \u0442\u0430\u0431\u043b\u0438\u0446\u0456"
     )
 
 
@@ -99,11 +126,11 @@ def test_ambiguous_translations_and_missing_provenance_are_rejected() -> None:
         TextVariant("text", "not a tag", "raw:1")
 
 
-def test_visible_fraction_digits_agree_with_the_plural_category() -> None:
-    assert Translator("uk").plural("cli.tables", Decimal("1.0")) == (
+def test_visible_fraction_digits_agree_with_the_plural_category(dashboard_messages: None) -> None:
+    assert Translator("uk").plural("dashboard.tables", Decimal("1.0")) == (
         "1,0 \u0442\u0430\u0431\u043b\u0438\u0446\u0456"
     )
-    assert Translator("en").plural("cli.tables", Decimal("1.0")) == "1.0 tables"
+    assert Translator("en").plural("dashboard.tables", Decimal("1.0")) == "1.0 tables"
 
 
 def test_message_kind_must_match_the_rendering_method() -> None:

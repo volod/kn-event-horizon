@@ -27,9 +27,10 @@ replay remain planned.
 `0001_baseline`. The baseline creates every contract of the
 [deployment set](../data-contracts.md#deployment-set) from its SQLAlchemy metadata as its schema
 owner, in registry order, and records one row per contract in `system.installed_contracts`. A
-rebuild and an upgrade of an empty database therefore use one mechanism. No SQL text is executed;
-the generated `postgresql/schema.sql` is a review artifact only, and an archived source
-`schema.sql` is evidence that nothing reads. The current set holds governance and source catalogue
+rebuild and an upgrade of an empty database therefore use one mechanism. Revision
+`0002_identity_checkpoint` installs the internal identity checkpoint and its invalidation trigger
+through typed DDL. The generated `postgresql/schema.sql` is a review artifact. Archived source
+`schema.sql` files are never used for deployment. The current set holds governance and source catalogue
 tables in `system`, 31 SATCOM tables in `space`, 18 semantic tables in `semantic`, the human
 decision table in `evidence`, and ten [identity tables](../object-identity.md). The other five
 schemas have no contracted datasets.
@@ -40,8 +41,9 @@ The caller owns the transaction. A nested transaction groups all KN schemas, bec
 references and the migration marker must stay consistent. The shared platform advisory lock
 serializes bootstrap, upgrade and rebuild. Rebuild reflects only KN tables without following
 foreign keys outside them, drops the tables without cascade, then drops the empty schemas with
-SQLAlchemy `DropSchema`, which PostgreSQL applies as `RESTRICT`. It then replays the durable
-identity journal, loads reviewed seeds and verifies the database before returning.
+SQLAlchemy `DropSchema`, which PostgreSQL applies as `RESTRICT`. The drop also removes the
+migration-owned checkpoint function. Rebuild then replays the durable identity journal, loads
+reviewed seeds and verifies the database before returning.
 
 External dependencies refuse instead of being cascaded away. Non-table schema objects that the
 compiler does not manage, such as views, functions or standalone sequences, also refuse if they

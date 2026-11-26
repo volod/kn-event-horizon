@@ -7,6 +7,8 @@ from pydantic import Field, model_validator
 from kn.identity.model import Merge, Payload
 from kn.review.model import Digest, Frozen, Instant, Text, digest
 
+REVIEW_REF = "identity-review:"
+
 
 class Event(Frozen):
     schema_version: Literal[1] = 1

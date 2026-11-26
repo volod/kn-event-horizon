@@ -25,9 +25,10 @@ def inspect(journal: Journal, action: Query, kn_id: str) -> dict[str, object]:
             "events": [
                 event.model_dump(mode="json")
                 for event in state.events
-                if lineage.intersection(_participants(event))
+                if lineage.intersection(participants(event))
             ],
         }
+    holdings = sorted(state.owned(kn_id).values(), key=lambda holding: holding.event.sequence)
     return {
         "action": action,
         "kn_id": kn_id,
@@ -36,13 +37,11 @@ def inspect(journal: Journal, action: Query, kn_id: str) -> dict[str, object]:
         "anchor": item.anchor.model_dump(mode="json"),
         "mint_event": item.mint_event,
         "successors": list(state.redirects.get(kn_id, ())),
-        "holdings": [
-            holding.event.model_dump(mode="json") for holding in state.owned(kn_id).values()
-        ],
+        "holdings": [holding.event.model_dump(mode="json") for holding in holdings],
     }
 
 
-def _participants(event: Event) -> Iterator[str]:
+def participants(event: Event) -> Iterator[str]:
     payload = event.payload
     if hasattr(payload, "kn_id"):
         yield payload.kn_id

@@ -13,7 +13,7 @@ from kn import cli, operations
 from kn.db.rebuild import rebuild
 from kn.identity import store
 from kn.identity.journal import Journal
-from tests.identity.fixtures import KEY, NOW, A
+from tests.identity.fixtures import KEY, NOW, A, history
 from tests.identity.test_journal import mint
 from tests.integration.harness import IntegrationDatabase
 from tests.integration.identity_fixtures import seed_identity_fixture
@@ -26,25 +26,44 @@ def test_cli_after_database_drop_preserves_complete_identity_projection(
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
     name = f"kn_identity_drop_{secrets.token_hex(8)}"
-    journal = seed_identity_fixture(tmp_path)
+    journal = Journal(tmp_path)
     monkeypatch.setenv("KN_ENVIRONMENT", "development")
     monkeypatch.setenv("DATA_DIR", str(tmp_path))
     snapshots = []
     with integration_database.connect(autocommit=True) as admin:
-        for locale in ("en", "uk"):
+        for run in range(3):
             admin.execute(sql.SQL("CREATE DATABASE {}").format(sql.Identifier(name)))
             engine = sa.create_engine(
                 "postgresql+psycopg://", creator=lambda: integration_database.connect(dbname=name)
             )
             try:
-                monkeypatch.setattr(operations, "engine_from_env", lambda engine=engine: engine)
-                assert cli.main(["--locale", locale, "--json", "db", "rebuild"]) == 0
+                if run == 0:
+                    with engine.begin() as connection:
+                        rebuild(connection, data_dir=tmp_path)
+                    events = history()
+                    # Append the unlink and its replacement in one batch to exercise the
+                    # immediate active-link index. Every other event uses a separate write.
+                    for batch in (
+                        *(events[i : i + 1] for i in range(12)),
+                        events[12:14],
+                        *(events[i : i + 1] for i in range(14, len(events))),
+                    ):
+                        with engine.begin() as connection:
+                            store.apply(
+                                connection,
+                                journal,
+                                lambda locked, batch=batch: locked.append_batch(batch),
+                            )
+                else:
+                    monkeypatch.setattr(operations, "engine_from_env", lambda engine=engine: engine)
+                    command = ["db", "rebuild"] if run == 1 else ["--json", "db", "rebuild"]
+                    assert cli.main(command) == 0
                 with engine.connect() as connection:
                     snapshots.append(_snapshot(connection, [store.contract()]))
             finally:
                 engine.dispose()
                 admin.execute(sql.SQL("DROP DATABASE {} WITH (FORCE)").format(sql.Identifier(name)))
-    assert snapshots[0] == snapshots[1]
+    assert snapshots[0] == snapshots[1] == snapshots[2]
     assert len(journal.read()) == 20
 
 
@@ -108,8 +127,8 @@ def test_caught_sql_failure_restores_projection_and_pending_mint_replays(
     rebuild(connection, data_dir=tmp_path)
     real_project = store._project
 
-    def fail(conn, locked):
-        real_project(conn, locked)
+    def fail(conn, locked, count):
+        real_project(conn, locked, count)
         conn.exec_driver_sql("SELECT 1 / 0")
 
     monkeypatch.setattr(store, "_project", fail)

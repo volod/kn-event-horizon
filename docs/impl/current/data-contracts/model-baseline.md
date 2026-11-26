@@ -1,8 +1,8 @@
 # Registered Model Baseline Check
 
 `make model-baseline` provides combined-registry fixture validation for governance, the source
-catalogue, SATCOM, semantic, human verification and identity contracts. These define 62 tables
-and 558 fields. The full checkpoint in the [plan](../../plan.md) also requires claims, dataset-wide
+catalogue, SATCOM, semantic, human verification, identity and evidence contracts. These define 73
+tables and 706 fields. The full checkpoint in the [plan](../../plan.md) also requires dataset-wide
 verification, supply, ingestion run, exchange and canonical domain fixtures. Each delivery group
 extends the subset check. The integrated result and its audit gate release approval.
 
@@ -31,11 +31,12 @@ The check also runs as part of `make test-integration` and `make ci-local`.
 performs two all-schema rebuilds through the normal Alembic path. Each rebuild loads the
 reviewed source catalogue and vocabulary seeds, imports the reference-closed 168-row real SATCOM
 mixture as the space loader, and loads the synthetic semantic fixture as the semantic loader.
-Reimporting SATCOM must be a no-op. The fixture supplies decimal weights, condition values,
+The evidence loader writes one consistent row of every evidence table. Reimporting SATCOM and
+rewriting the evidence rows must be no-ops. The fixture supplies decimal weights, condition values,
 aware timestamps, multilingual labels, nulls and a translation review reference alongside the
 reviewed seeds.
 
-All 62 tables must contain representative data. Every typed SATCOM row and original CSV cell must
+All 73 tables must contain representative data. Every typed SATCOM row and original CSV cell must
 equal the source fixture, and every semantic field must equal the reviewed seed or native fixture
 value. All 119 catalogue rows must equal the reviewed seeds. The test reads every column and
 orders rows by the contract's primary keys. The two rebuilds must yield identical snapshots,

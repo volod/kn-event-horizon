@@ -6,7 +6,7 @@ from pathlib import Path
 
 from babel.core import UnknownLocaleError
 
-from kn.i18n.catalog import CatalogValue, compare_catalogs, read_catalog
+from kn.i18n.catalog import DEFAULT_LOCALE, CatalogValue, compare_catalogs, read_catalog
 from kn.quality.catalog_usage import inspect_source
 from kn.quality.project_root import discover_project_root
 
@@ -26,9 +26,11 @@ def check_catalogs(root: Path) -> list[str]:
             findings.append(f"{path.relative_to(root)}: {error}")
     for locale in sorted(REQUIRED_LOCALES - catalogs.keys()):
         findings.append(f"missing or invalid required catalog: {locale}")
-    reference = catalogs.get("en", {})
+    reference = catalogs.get(DEFAULT_LOCALE, {})
     for locale, catalog in catalogs.items():
-        findings.extend(f"{locale}: {item}" for item in compare_catalogs(reference, catalog))
+        findings.extend(
+            f"{locale}: {item}" for item in compare_catalogs(reference, catalog, locale)
+        )
     used, source_findings = _inspect_sources(root)
     findings.extend(source_findings)
     for key in sorted(reference.keys() - used.keys()):

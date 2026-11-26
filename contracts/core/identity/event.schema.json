@@ -219,6 +219,7 @@
     },
     "FieldChange": {
       "additionalProperties": false,
+      "description": "One field of a record version against the record's previous statement of that field.",
       "properties": {
         "field_id": {
           "minLength": 1,
@@ -749,6 +750,48 @@
       "title": "Retire",
       "type": "object"
     },
+    "Seen": {
+      "additionalProperties": false,
+      "description": "A later fetch of an already recorded version with identical content.",
+      "properties": {
+        "kind": {
+          "const": "record_seen",
+          "default": "record_seen",
+          "title": "Kind",
+          "type": "string"
+        },
+        "version_id": {
+          "pattern": "^[0-9a-f]{64}$",
+          "title": "Version Id",
+          "type": "string"
+        },
+        "fetch_id": {
+          "minLength": 1,
+          "pattern": "\\S",
+          "title": "Fetch Id",
+          "type": "string"
+        },
+        "archive_record_id": {
+          "minLength": 1,
+          "pattern": "\\S",
+          "title": "Archive Record Id",
+          "type": "string"
+        },
+        "observed_at": {
+          "format": "date-time",
+          "title": "Observed At",
+          "type": "string"
+        }
+      },
+      "required": [
+        "version_id",
+        "fetch_id",
+        "archive_record_id",
+        "observed_at"
+      ],
+      "title": "Seen",
+      "type": "object"
+    },
     "SourceKey": {
       "additionalProperties": false,
       "properties": {
@@ -997,6 +1040,7 @@
           "merged": "#/$defs/Merge",
           "minted": "#/$defs/Mint",
           "reclassified": "#/$defs/Reclassify",
+          "record_seen": "#/$defs/Seen",
           "restored": "#/$defs/Restore",
           "retired": "#/$defs/Retire",
           "split": "#/$defs/Split",
@@ -1044,6 +1088,9 @@
         },
         {
           "$ref": "#/$defs/ChangeSet"
+        },
+        {
+          "$ref": "#/$defs/Seen"
         }
       ],
       "title": "Payload"

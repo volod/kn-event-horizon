@@ -1,5 +1,7 @@
 import logging
 
+import pytest
+
 from kn.cli import build_parser, main
 
 
@@ -13,3 +15,13 @@ def test_info_command_logs_the_project_identity(caplog) -> None:  # type: ignore
     assert main(["info"]) == 0
     assert "kn-event-horizon" in caplog.text
     assert "(kn)" in caplog.text
+
+
+def test_cli_info_uses_english_with_legacy_locale_environment(
+    monkeypatch: pytest.MonkeyPatch, caplog: pytest.LogCaptureFixture
+) -> None:
+    monkeypatch.setenv("KN_LOCALE", "uk")
+    caplog.set_level(logging.INFO, logger="kn.operator")
+
+    assert main(["info"]) == 0
+    assert caplog.records[-1].message.startswith("Project: ")

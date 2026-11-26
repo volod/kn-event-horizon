@@ -14,6 +14,7 @@ from babel.messages.catalog import Catalog
 from babel.messages.mofile import write_mo
 
 CatalogValue = str | dict[str, str]
+DEFAULT_LOCALE = "en"
 _KEY = re.compile(r"[a-z][a-z0-9_]*(?:\.[a-z][a-z0-9_]*)+")
 _FIELD = re.compile(r"[a-z][a-z0-9_]*")
 
@@ -45,8 +46,8 @@ def categories(locale: str) -> set[str]:
 def read_catalog(source: str, locale: str) -> dict[str, CatalogValue]:
     """Validate shape, CLDR categories, nonempty translations, and interpolation fields."""
     raw = json.loads(source, object_pairs_hook=_unique_pairs)
-    if not isinstance(raw, dict) or not raw:
-        raise ValueError("catalog must be a nonempty object")
+    if not isinstance(raw, dict):
+        raise ValueError("catalog must be an object")
     result: dict[str, CatalogValue] = {}
     for key, value in raw.items():
         if not _KEY.fullmatch(key):
@@ -82,8 +83,10 @@ def catalog_fields(value: CatalogValue) -> set[str]:
 
 
 def compare_catalogs(
-    reference: dict[str, CatalogValue], candidate: dict[str, CatalogValue]
+    reference: dict[str, CatalogValue], candidate: dict[str, CatalogValue], locale: str
 ) -> Iterable[str]:
+    if locale != DEFAULT_LOCALE:
+        reference = {key: value for key, value in reference.items() if not key.startswith("cli.")}
     for key in sorted(reference.keys() - candidate.keys()):
         yield f"missing key: {key}"
     for key in sorted(candidate.keys() - reference.keys()):

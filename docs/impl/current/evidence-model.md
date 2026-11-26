@@ -1,8 +1,211 @@
 # Evidence Model
 
-The shared human verification protocol is implemented. Claims, canonical selection, review queues
-and dataset-wide verification projections remain planned. Existing source verification labels
-retain their meanings and grant no human timestamp.
+The evidence contracts and the shared human verification protocol are implemented. Claims,
+evidence, confirmations, aliases, translations, relation assertions, canonical fact versions,
+selection outcomes, review items and review decisions have registered storage, deterministic keys,
+database constraints and as-of views. [Partial-update tracking](object-identity.md#partial-update-tracking)
+writes claims and confirmations into these shapes, and [canonical selection](#canonical-selection)
+projects each field's value from them through its update policy. The review queue, engine wiring
+and dataset-wide verification projections remain planned.
+The [lineage lookup](object-identity.md#lineage-lookup) reads these rows through
+`kn.evidence.lineage`, withholding and counting what an audience's rights do not permit.
+Existing source verification labels retain their meanings and grant no human timestamp.
+
+## Evidence contracts
+
+The registered `kn.core.evidence` ODCS contract,
+[`resources/evidence/claims/1.0.0.json`](../../../src/kn/contracts/resources/evidence/claims/1.0.0.json),
+shares the `evidence` schema with `kn.core.human_verification`. It adds 11 tables and 148 fields;
+the registry now defines 73 tables and 706 fields at development version `1.0.0`.
+`make contract-compile` writes its reviewed artifacts under
+[`generated/contracts/kn.core.evidence/`](../../../generated/contracts/kn.core.evidence/docs/contract.md).
+
+| Table | Key | Holds |
+| --- | --- | --- |
+| `evidence_records` | `evidence_id` | Source, fetch and archive record IDs, redacted origin URI, fetch time, locator kind and locator, rights, licensed excerpt, code and contract digests, curator |
+| `claims` | `claim_key` | KN ID, stable field ID, conditions, source record and version, change set and kind, predecessor, decision reference, provenance copy, original value and unit, one typed value or missing reason, unit conversion, assertion type, evidence class, extraction confidence, imported source label, event/published/valid times with precision, observed and recorded times |
+| `claim_confirmations` | `confirmation_id` | Re-observation of an unchanged claim: source version, evidence, fetch, observed time |
+| `aliases` | `alias_id` | Weak alias with language, normalized key and normalizer, citing its claim; not unique |
+| `text_translations` | `translation_id` | Derived translation of a text claim with method and provenance; one per language |
+| `relation_assertions` | `assertion_id` | Subject, relation type, object, qualifiers, validity, review state, opening claim, knowledge interval |
+| `relation_supports` | `assertion_id`, `claim_key` | Claims supporting an assertion |
+| `canonical_facts` | `fact_version_id` | Knowledge-time version of a field's selected claim or unresolved reason, with mode, policy digest, outcome, deciding criterion, winner and runner-up criteria, verification label, owner override and validity |
+| `selection_outcomes` | `outcome_id` | Outcome and criterion of each evaluated claim against the resulting fact version |
+| `review_items` | `item_id` | Registered kind, subject, sorted candidates, reason code and opening reference |
+| `review_decisions` | `decision_id` | Append-only outcome, selected claim, predecessor, reviewer, reason, performed and recorded times, shared verification decision and canonical event |
+
+The contract declares `kn.temporalProfile` on claims, evidence, confirmations, relations and facts,
+`kn.evidence` on claims, and record-scope `kn.humanVerification` on every table; review decisions
+use the `decision-log` strategy. `kn.evidence` now accepts `assertionField` instead of a single
+`assertionType`, because claim rows carry their own assertion type.
+
+PostgreSQL enforces the rules that a row can check on its own. Generated JSON Schema and Pydantic
+models enforce the same null rules through the bounded
+[`kn.presence` extension](data-contracts/compiler.md#postgresql-and-native-model-templates):
+
+- exactly one of the six value columns or `missing_reason` per claim, and exactly one selected
+  claim or `unresolved_reason` per fact version;
+- complete pairs: text and language, normalized unit and conversion rule, each time and its
+  precision, an excerpt and its rights, and a relation's close time and reason;
+- `NOT NULL` origin URI, fetch time and fetch ID on every claim and evidence row, and enums for
+  every closed vocabulary;
+- one current version per fact key (`facts_current_idx`, `knowledge_to IS NULL`) and one active
+  assertion per relation key (`relations_active_idx`, `closed_at IS NULL`).
+
+Foreign keys within the contract are deferred. KN IDs, source records, source versions, change
+sets and concept IDs belong to other contracts; their owning engines check them, so SQL cannot
+reject an unknown KN ID by itself.
+
+## Claims and provenance
+
+`kn.evidence.model` defines immutable `Evidence`, `Claim`, `Confirmation` and `Alias` rows, and
+`kn.evidence.values` the typed claim values: text with a BCP-47 tag, exact number with optional
+unit conversion, boolean, partial date, concept, object reference, or `Missing` with a reason. A
+claim embeds its evidence, so the claim's origin URI, fetch time and fetch ID always equal the
+evidence row's. Validation refuses:
+
+- missing provenance, naive or date-only times, an evidence record time before its fetch, and
+  origin URIs with userinfo credentials;
+- an excerpt without the rights that permit it, and text containing NUL;
+- decimals PostgreSQL would round or overflow (scale 18, 20 integer digits) and confidences
+  outside 0 to 1 with at most four places;
+- a `source_empty` reason without `change_kind: emptied`, a changed or emptied claim without its
+  predecessor, a decided claim without its review decision, evidence from another source, and an
+  empty or reversed validity interval.
+
+Keys are the shared `content_version` digest of the identifying columns. Recording times are
+first-seen columns outside the key, so rerunning the same raw record with the same code yields the
+same evidence ID and claim key. Any change to code digest, locator, source version, conditions or
+value gives a new key. A confirmation is keyed by claim, source version and fetch.
+
+## Idempotent writes
+
+`kn.evidence.store.record(connection, records, tables=None)` writes rows and the evidence they
+embed inside a savepoint of the caller's transaction and returns the number of new rows. An existing
+key is a no-op; if its stored content differs, excluding first-seen and projection-owned columns,
+the whole batch fails. `evidence_tables(schema)` compiles the tables once per schema. The writer
+inserts and then reads back each row.
+
+## As-of views
+
+`kn.evidence.asof` returns deterministic SQLAlchemy selects:
+
+- `claims_as_of(claims, knowledge_time, valid_time)`: claims recorded by the knowledge time that
+  no successor recorded by then supersedes, ordered by KN ID, field ID and key;
+- `facts_as_of(facts, knowledge_time, valid_time)`: the fact version whose half-open knowledge
+  interval holds the time;
+- `relations_as_of(relations, knowledge_time, valid_time)`: assertions open at the time.
+
+A null knowledge time gives the current view. A null valid time applies no validity filter. A null
+validity bound is unknown or open and never excludes a row.
+
+## Multilingual text
+
+`kn.evidence.text.Translation` attaches derived text to one text claim.
+`source_text(claim_row, translation_rows)` rebuilds a `SourceText` whose original keeps the claim's
+text, language tag and `claim:<key>` provenance; `display(..., locale)` applies the shared
+[selection policy](localization.md#source-data-and-translations). Translations never create claims
+or facts, so a fact key does not depend on the locale. Duplicate languages, including the
+original's, and translations of another claim fail.
+
+## Retired concepts in claims
+
+`kn.evidence.concepts.concept_uses(rows)` maps each concept a claim states as its value to
+`claim:<key>` references. `retired_concept_claims(snapshot, rows)` passes them to the
+[lifecycle report](ontology-taxonomy.md#lifecycle-report), so a claim citing a deprecated or replaced
+concept appears as an external use with the end of the replacement chain. Units and conditions
+keep their own identifiers and are not concept citations.
+
+## Selection and review shapes
+
+`kn.evidence.facts.CanonicalFact` keys a fact by KN ID, field, condition set and audience
+(`fact_key`) and a version by its content and knowledge start. `knowledge_to` is the only column a
+later writer changes. A conflict or pending review names its review item; an owner override needs
+a selected claim. `SelectionOutcome` records every evaluated claim, including `ignored` ones.
+`kn.evidence.policy` reads a field's `kn.updatePolicy` as `UpdatePolicy` with a canonical
+`digest`, gives rank and evidence-class orders from their vocabularies, and records ranking inputs
+as `Criteria`. `kn.evidence.relations` and `kn.evidence.reviews` define assertions, supports,
+review items and decision events; decision IDs bind the canonical event. Review authentication
+and decision journals come with their plan tasks.
+
+## Canonical selection
+
+`kn.evidence.selection.select(subject, claims, policy, context, knowledge_from, previous)` returns
+the fact version, its review items and one explained outcome per evaluated claim, or None when no
+claim is eligible. A `Subject` is a KN ID, stable field ID and canonical condition set; the
+`Context` supplies the rank table, audience, accepted reviews and an optional redirect resolver.
+Selection evaluates every claim of the subject at once with total orders over claim content, so
+the input or arrival order never changes a value. Claims that a recorded claim supersedes are
+history; they are not evaluated.
+
+Ranks come from `kn.evidence.ranking.RankTable.read()`, which reads the reviewed
+[rank table](../../../contracts/core/policies/source-ranks.yaml). A `field_group` override applies
+to the stable field IDs equal to it or below it at a dot boundary (`microelectronics.offer` covers
+`microelectronics.offer.unit_price`). The longest matching group wins over a source-wide override,
+and an unlisted source is `unranked`. A claim named by an accepted review selection, or a
+`decided` claim whose decision is accepted, ranks `owner_entered`.
+
+A claim is eligible when its evidence rights are permitted for the `Audience` (`internal` permits
+all), it is not a signal (`gdelt:` sources) or an `extracted_candidate`, whatever the policy
+minimums say, it is not rejected, a `decided` claim has its accepted decision, and it meets the
+minimum rank and evidence class. A missing reason other than `source_empty` is not a value.
+Ineligible claims are explained as `ignored` with the criterion that excluded them; claims the
+audience may not see are left out of the explanation entirely. A fact key includes the audience.
+
+Claims whose values agree within `valueTolerance` (numbers in one normalized unit, other values
+when equal) support one candidate. A candidate ranks by its best claim, so repetition and
+confirmations add no rank. Object values follow merge redirects before they are compared.
+
+| Mode | Rule as implemented |
+| --- | --- |
+| `priority` | Declared `priorityCriteria` order of source rank and evidence class. Data time decides tied candidates only when one source states all of them and every time is known. Otherwise the tie is a `conflict` with a `fact_conflict` item and no selected claim. |
+| `latest_observed` | Newest data time on the policy's `timeBasis` first, then the declared criteria; an unknown time sorts last. `stale(fact, policy, at)` returns the winner's age once it exceeds `freshnessSeconds`; zero declares no limit. |
+| `accumulate` | Every eligible candidate is a member (`Selection.members`); the fact row names the best one and each member's outcome is `filled`. A record's newer version supersedes its own earlier item, and an item leaves when no current claim supports it or it is rejected. |
+| `fixed` | The candidate with the earliest data time, or observed time, holds. A different value is `conflict` with a `fixed_value_change` item naming the challengers, and the held claim stays selected. An accepted review selection holds instead and settles claims recorded by the decision. |
+
+An empty claim never fills. When an eligible `source_empty` claim outranks the current leader, or
+no other value exists, its predecessor stays a candidate and an `empty_claim` item opens, unless
+`emptyValueHandling: allow_clear` or an accepting review gives `unresolved_reason: cleared`. A
+rejected empty claim restores its predecessor without review; a lower-ranked one is ignored.
+
+The optional `kn.updatePolicy` member `highImpact` marks rule-6 fields. Their value needs a
+primary claim or an accepted review; otherwise the fact is `review_pending` with a `high_impact`
+item. An owner-entered winner over a differing first-party candidate sets `owner_override` and
+opens an `owner_override` item until a review accepts the owner claim. The fact names the most
+urgent open item: conflict, fixed change, empty claim, then high impact.
+
+Verification is `disputed` for an open conflict, fixed change or empty-claim review, `verified` for
+a winner backed by an accepted review of that exact claim, `corroborated` for support from two or
+more sources, and `unreviewed` otherwise. Source labels and human verification timestamps never
+rank, verify or resolve a claim.
+
+`previous` explains the change: `filled` when the previous version had no selected value,
+`replaced` when the new value differs, `corroborated` when it agrees, and `conflict` for open
+conflicts, fixed changes and empty-claim reviews. Clearing is `replaced`. Under `accumulate` a new
+member fills and a departed one replaces.
+
+## Fact projection
+
+`kn.evidence.projection.subjects(claims, resolve)` groups claims by subject under their terminal
+survivor, using `State.resolve` from the identity registry. A claim about a split object names no
+single subject and is returned as unattributed. `history(subject, claims, policy, context)`
+replays selection at every claim and decision recording time, using only decisions recorded by
+then, and returns `Version`s with half-open knowledge intervals. A claim that changes nothing a
+version states, such as an ignored claim or a new runner-up, adds its outcome to that version and
+leaves no new version. Review item keys stay stable while their candidates do not change.
+
+`write(connection, versions, tables)` stores the history in a savepoint of the caller's
+transaction: it sets `knowledge_to` on stored versions, then writes items, facts and outcomes
+idempotently. A stored version of the same fact that the history does not contain, for example
+after a policy change, refuses the write; the projection is rebuilt rather than patched.
+
+## Human verification of claims and facts
+
+`kn.evidence.verification.target(record, purpose)` builds the record-scope target of a row from the
+contract's declared coverage. Its version is the content digest that `ContractResolver` computes
+from the stored row. A changed claim is a new row and target, and a fact that selects another
+claim is a new version, so neither inherits an earlier decision. An imported
+`source_verification_label` such as `verified` is ordinary content and leaves the stamp null.
 
 ## Human verification contracts
 
@@ -94,8 +297,42 @@ known exact target with its original actors, dates and IDs. `projection(connecti
 exact-version historical lookup; resolve a current target before exposing it as current metadata.
 Automatic all-target rebuild integration and pending/orphan/stale reports remain projection work.
 
+## Known limitations
+
+- Cross-contract references are checked by the owning engines, not SQL foreign keys.
+- The loader role can still update claim rows; the writer never does, and a re-insert detects
+  changed content under a stored key.
+- Condition and qualifier objects are canonical JSON; approved condition field IDs arrive with
+  domain contracts.
+- Review queue journals and engine wiring of the projection are open plan tasks. Callers derive
+  `Reviews` from decisions until `review-queue-cli` applies them.
+- Fact history uses current identity resolution for every version; facts stored under a KN ID
+  that was later merged are not closed automatically. Rebuild the projection after a merge. The
+  [lineage lookup](object-identity.md#lineage-lookup) reports such a fact as
+  `fact_subject_superseded`.
+- A curated claim ranks by its own `source_id`; ranking it as the source it cites, and
+  per-source dispute rates, are not implemented yet.
+- Corroboration counts distinct `source_id` values; syndicated copies under different source IDs
+  are not detected.
+
 ## Verification
 
+- `tests/evidence/` checks contract enums against the Python vocabularies, wire validators for a
+  row of every table, deterministic keys, refused provenance and value cases, multilingual
+  fallback without fact duplication, retired-concept reporting, policy digests and
+  version-bound verification.
+- `tests/integration/test_evidence.py` checks database rejections, no-op re-inserts, tampered
+  rows, provenance lookups, permuted as-of views, one current fact and no active duplicate
+  relation. `test_evidence_verification.py` checks stored-claim targets, stale content and
+  unreviewed changed or labeled claims. The combined model baseline loads every evidence table as
+  the evidence loader.
+- `tests/evidence/test_selection.py`, `test_selection_modes.py` and `test_projection.py` check
+  every outcome, mode and verification state of the update policy: fill, replace, ignore,
+  owner override, support by a higher-ranked source, repetition, same-source revisions, equal-rank
+  conflict, stale prices, fixed-field review, empty claims, high-impact gating, eligibility,
+  audiences, tolerance, merge survivors, distinct entity classes and every arrival permutation of
+  a five-claim set in three modes. `tests/integration/test_evidence_selection.py` writes histories
+  to PostgreSQL, checks as-of views and closed versions, idempotent rewrites and drift refusal.
 - `tests/review/` checks typed composite and locale targets, scope/purpose separation, key types,
   null completeness, UTC and clock errors, actor refusal, event digests, graph conflicts,
   revocation, retry identity, wire schemas and ODCS coverage validation.
@@ -107,4 +344,6 @@ Automatic all-target rebuild integration and pending/orphan/stale reports remain
   `make ci-local` adds database service and other local acceptance checks.
 
 Acceptance evidence and task counts are retained in
-[record 0032](../records/0032-evidence-model-human-verification-contracts.md).
+[record 0032](../records/0032-evidence-model-human-verification-contracts.md),
+[record 0044](../records/0044-evidence-model-evidence-claim-contracts.md) and
+[record 0046](../records/0046-object-identity-canonical-fact-selection.md).

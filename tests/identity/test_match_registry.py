@@ -130,3 +130,30 @@ def test_aliases_follow_merge_and_split_redirects() -> None:
     assert [item.kn_id for item in result.candidates] == [B]
     unknown = "kn:019b76da-a800-7000-8000-000000009999"
     assert resolve(merged, config, observation({}, aliases=(unknown,))).decision == "mint"
+
+
+def test_blocking_checks_the_latest_reading_at_the_observation_instant(tmp_path: Path) -> None:
+    journal = Journal(tmp_path)
+    config = profile()
+    first = _ingest(journal, config, _org("src:known", 0, domain="fixture-alpha.com"))
+    _ingest(journal, config, _org("src:known", 2, version="2", domain="fixture-beta.com"))
+    with journal.locked() as locked:
+        before = resolve(locked.state, config, _org("src:new", 1, domain="fixture-alpha.com"))
+        after = resolve(locked.state, config, _org("src:new", 3, domain="fixture-alpha.com"))
+        assert [candidate.kn_id for candidate in before.candidates] == [first.kn_id]
+        assert after.candidates == ()
+
+
+def test_blocking_requires_a_composite_key_within_one_origin(tmp_path: Path) -> None:
+    journal = Journal(tmp_path)
+    config = profile()
+    first = _ingest(journal, config, _org("src:alpha", 0, LEI, tax_id="ORG-42"))
+    _ingest(journal, config, _org("src:beta", 1, LEI, country="UA"))
+    incoming = _org("src:new", 3, tax_id="ORG-42", country="UA")
+    with journal.locked() as locked:
+        assert resolve(locked.state, config, incoming).candidates == ()
+    _ingest(journal, config, _org("src:gamma", 2, LEI, tax_id="ORG-42", country="UA"))
+    with journal.locked() as locked:
+        assert [item.kn_id for item in resolve(locked.state, config, incoming).candidates] == [
+            first.kn_id
+        ]

@@ -14,7 +14,7 @@ from kn.identity.matching.resolve import resolve
 from kn.identity.matching.scoring import prepare
 from kn.identity.model import MATCH_LINK_METHODS, Attribute, Identifier, Link, Match, Mint, Payload
 from kn.identity.profiles import Profile
-from kn.identity.state import PENDING_MATCH, State, replay
+from kn.identity.state import PENDING_MATCH, State
 
 
 @dataclass(frozen=True)
@@ -76,7 +76,7 @@ def record(
     match = match.model_copy(update={"trace": trace})
     entry = event(
         match,
-        previous=locked.events[-1] if locked.events else None,
+        previous=locked.head,
         occurred_at=incoming.observed_at,
         actor=actor,
         reason=f"Identity resolution: {trace.route}",
@@ -91,13 +91,12 @@ def _resume(
 ) -> Receipt:
     trace = match.trace
     assert trace is not None
-    before = replay(locked.events[: entry.sequence - 1])
     target = match.selected or trace.minted_id
-    planned = _plan(before, profile, incoming, target, trace.minted_id)
+    planned = _plan(locked.state, profile, incoming, target, trace.minted_id, before=entry.sequence)
     if trace.followup_count != planned.count:
         raise ValueError("identity match followups cannot be reproduced")
     effects = _effect_events(entry, match, planned)
-    prefix = locked.events[entry.sequence : entry.sequence + len(effects)]
+    prefix = tuple(locked.state.events[entry.sequence : entry.sequence + len(effects)])
     if prefix != effects[: len(prefix)]:
         raise ValueError("identity history diverged from the pending match; inspect the journal")
     locked.append_batch(effects[len(prefix) :])
@@ -143,7 +142,13 @@ def _effects(match_id: str, match: Match, planned: Followups) -> Iterator[Payloa
 
 
 def _plan(
-    state: State, profile: Profile, incoming: Observation, target: str | None, minted: str | None
+    state: State,
+    profile: Profile,
+    incoming: Observation,
+    target: str | None,
+    minted: str | None,
+    *,
+    before: int | None = None,
 ) -> Followups:
     if target is None:
         return Followups()
@@ -152,17 +157,21 @@ def _plan(
         if minted is not None
         else None
     )
-    active_link = any(item.ended_event is None for item in source_links(state, incoming.record))
-    return Followups(mint, not active_link, tuple(_observed(state, profile, incoming, target)))
+    active_link = any(
+        item.ended_event is None if before is None else item.was_active(before)
+        for item in source_links(state, incoming.record)
+    )
+    observed = _observed(state, profile, incoming, target, before=before)
+    return Followups(mint, not active_link, tuple(observed))
 
 
 def _observed(
-    state: State, profile: Profile, incoming: Observation, target: str
+    state: State, profile: Profile, incoming: Observation, target: str, *, before: int | None
 ) -> Iterator[Identifier | Attribute]:
     for key in sorted(incoming.authoritative, key=lambda item: item.parts):
         registered = any(
             item.valid_to is None or incoming.observed_at < item.valid_to
-            for _, item in identifiers(state, key)
+            for _, item in identifiers(state, key, before=before)
         )
         if not registered:
             yield Identifier(

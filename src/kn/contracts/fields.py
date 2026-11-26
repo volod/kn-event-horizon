@@ -22,6 +22,7 @@ SEMANTIC_EXTENSIONS = {
     "vocabularyRefs",
     "index",
     "partition",
+    "presence",
     "i18nKey",
     "lineageRefs",
 }

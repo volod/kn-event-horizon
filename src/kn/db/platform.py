@@ -20,7 +20,7 @@ POLICY = platform_policy()
 SCHEMAS: tuple[str, ...] = tuple(POLICY["schemas"])
 ROLE_KINDS: tuple[str, ...] = tuple(POLICY["roleKinds"])
 LOCK_NAMESPACE = 0x4B4E4253
-# The Alembic version table lives here; it is the one KN table that no contract defines.
+# The Alembic version table lives here.
 MIGRATION_SCHEMA = "system"
 VERSION_TABLE = "alembic_version"
 EXTENSION = "postgis"

@@ -50,9 +50,9 @@ any reference, and `kn db upgrade|verify|rebuild` load the registry before openi
 Alembic baseline and record each marker row. `kn db verify`, every upgrade and rebuild, and every
 import check that the marker rows equal the registry (no missing, extra or drifted contract), that
 the structure of every registered table matches its contract, and that every table in a KN schema
-belongs to a registered contract. The Alembic version table `system.alembic_version` is the one
-exception, and partitions count with their parent. To register a contract, add its file and its
-entry, run `make contract-compile`, and rebuild the development database.
+belongs to a registered contract or is one of the internal tables, `system.alembic_version` and
+`identity.projection_checkpoint`. Partitions count with their parent. To register a contract, add
+its file and entry, run `make contract-compile`, and rebuild the development database.
 
 Contracts refer to each other only by stable field IDs, which the registry keeps unique, and by KN
 IDs that the owning engines check. SQL foreign keys stay within one contract. A cross-schema
@@ -94,7 +94,8 @@ schema objects come from SQLAlchemy metadata, and the platform policy from typed
 
 The [shared human verification protocol](evidence-model.md) adds a registered decision-log contract
 and typed record/field targets, UTC/null semantics, authenticated reviewer context, durable history
-and transactional application. The registry now defines 62 tables and 558 fields. Dataset-wide
+and transactional application. With the [evidence contracts](evidence-model.md#evidence-contracts),
+the registry defines 73 tables and 706 fields. Dataset-wide
 coverage and read projections remain open in `human-verification-projections` in the
 [plan](../plan.md).
 
@@ -111,9 +112,11 @@ first consumer. `make model-baseline` checks the registered subset and preserves
 The [baseline reference](data-contracts/model-baseline.md) describes its current coverage.
 The full integrated check and its audit remain release prerequisites.
 
-Development keeps contract version `1.0.0` and one Python Alembic baseline, `0001_baseline`,
-editable in place; it creates every registered contract. A contract edit changes its digest. Refresh
-the committed `generated/` output after reviewing it. Normal `make db-upgrade` verifies the
+Development keeps contract version `1.0.0` and an editable Python Alembic baseline,
+`0001_baseline`, that creates every registered contract. Revision `0002_identity_checkpoint`
+adds the internal identity prefix checkpoint and its invalidation trigger to existing and fresh
+identity deployments. A contract edit changes its digest. Refresh the committed `generated/`
+output after reviewing it. Normal `make db-upgrade` verifies the
 installed digest and structure; it does not silently alter an existing projection to match edited
 development definitions.
 

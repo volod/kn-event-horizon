@@ -8,6 +8,7 @@ statement is assembled from free text. Keywords come from fixed sets and are che
 
 from typing import Any, Literal
 
+from sqlalchemy import Table
 from sqlalchemy.ext.compiler import compiles
 from sqlalchemy.schema import ExecutableDDLElement
 from sqlalchemy.sql.compiler import DDLCompiler
@@ -96,6 +97,19 @@ class SetConstraints(_Statement):
         if not schema or not names or any(not name for name in names):
             raise ValueError("name at least one constraint in a schema")
         self.schema, self.names, self.deferred = schema, names, deferred
+
+
+class LockTableForWrite(_Statement):
+    """Exclude other writers and allow reads until the transaction ends."""
+
+    def __init__(self, table: Table) -> None:
+        self.table = table
+
+
+@compiles(LockTableForWrite)
+def _lock_table(element: LockTableForWrite, compiler: DDLCompiler, **kw: Any) -> str:
+    table = compiler.preparer.format_table(element.table)
+    return f"LOCK TABLE {table} IN SHARE ROW EXCLUSIVE MODE"
 
 
 @compiles(CreateExtension)

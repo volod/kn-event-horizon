@@ -6,13 +6,21 @@ from typing import Any
 import sqlalchemy as sa
 
 from kn.contracts.model import Contract, Field, Table
-from kn.contracts.names import check_name, foreign_key_name, primary_key_name, table_references
+from kn.contracts.names import (
+    check_name,
+    foreign_key_name,
+    presence_name,
+    primary_key_name,
+    table_references,
+)
 from kn.contracts.physical import (
     ENUM_CHECK,
+    EXACTLY_ONE,
     GEOMETRY_CHECK,
     check_kinds,
     column_names,
     extensions,
+    presence_rules,
 )
 
 PARTIAL_DATE = r"^[0-9]{4}(-[0-9]{2}(-[0-9]{2})?)?$"
@@ -105,6 +113,8 @@ def _add_tables(result: sa.MetaData, contract: Contract, target: str) -> None:
         for field in model.fields:
             for kind in check_kinds(field):
                 table.append_constraint(_check(table, model, field, kind))
+        for rule in presence_rules(model):
+            table.append_constraint(_presence(table, model, rule))
         for ref in table_references(model):
             table.append_constraint(
                 sa.ForeignKeyConstraint(
@@ -147,3 +157,12 @@ def _check(table: sa.Table, model: Table, field: Field, kind: str) -> sa.CheckCo
     if kind == ENUM_CHECK:
         return sa.CheckConstraint(column.in_(field.enum), name=name)
     return sa.CheckConstraint(column.op("~")(PARTIAL_DATE), name=name).ddl_if(dialect="postgresql")
+
+
+def _presence(table: sa.Table, model: Table, rule: dict[str, Any]) -> sa.CheckConstraint:
+    """Exactly one value or reason, or a complete group; num_nonnulls counts SQL nulls only."""
+    columns = [table.c[name] for name in column_names(model, rule["fields"])]
+    present = sa.func.num_nonnulls(*columns)
+    exact = rule["rule"] == EXACTLY_ONE
+    valid = present == 1 if exact else present.in_([0, len(columns)])
+    return sa.CheckConstraint(valid, name=presence_name(model, rule["name"]))

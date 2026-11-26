@@ -43,7 +43,7 @@ CREATE TABLE identity.lifecycle_events (
 	decision_ref TEXT,
 	event_json TEXT NOT NULL,
 	CONSTRAINT pk_lifecycle_events PRIMARY KEY (event_id),
-	CONSTRAINT ck_lifecycle_events_kind_enum CHECK (kind IN ('minted', 'linked', 'unlinked', 'merged', 'split', 'reclassified', 'retired', 'restored', 'identifier_recorded', 'attribute_recorded', 'version_recorded', 'match_recorded', 'changes_recorded'))
+	CONSTRAINT ck_lifecycle_events_kind_enum CHECK (kind IN ('minted', 'linked', 'unlinked', 'merged', 'split', 'reclassified', 'retired', 'restored', 'identifier_recorded', 'attribute_recorded', 'version_recorded', 'match_recorded', 'changes_recorded', 'record_seen'))
 );
 
 CREATE TABLE identity.links (

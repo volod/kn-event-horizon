@@ -96,3 +96,54 @@ def test_copied_event_cannot_bypass_validation_at_append(tmp_path: Path) -> None
     with pytest.raises(ValueError, match="digest mismatch"):
         journal.append(value)
     assert journal.read() == ()
+
+
+def test_refused_batch_does_not_change_the_cached_prefix(tmp_path: Path) -> None:
+    journal = Journal(tmp_path)
+    first, second, *_ = history()
+    assert journal.append(first)
+    invalid = append(
+        (first, second),
+        Mint(kn_id=A, entity_class="core.organization", anchor=SourceKey(source="x", key="y")),
+    )[-1]
+    with journal.locked() as locked:
+        with pytest.raises(ValueError, match="reused"):
+            locked.append_batch((second, invalid))
+        assert locked.events == (first,)
+        assert locked.append(second)
+    assert journal.read() == (first, second)
+
+
+def test_external_writer_and_replaced_prefix_invalidate_cached_state(tmp_path: Path) -> None:
+    journal = Journal(tmp_path)
+    first, second, third, *_ = history()
+    assert journal.append(first)
+    assert Journal(tmp_path).append(second)
+    assert journal.append(third)
+
+    original = journal.path.read_bytes()
+    replacement = journal.path.with_suffix(".new")
+    replacement.write_bytes(original.replace(b"Fixture history", b"fixture history", 1))
+    replacement.replace(journal.path)
+    with pytest.raises(ValueError, match="digest mismatch"):
+        journal.append(third)
+
+
+def test_interrupted_append_requires_reopening_before_retry(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    journal = Journal(tmp_path)
+    first, second, *_ = history()
+    assert journal.append(first)
+
+    def fail_write(encoded: bytes) -> None:
+        raise OSError("interrupted append")
+
+    with journal.locked() as locked:
+        monkeypatch.setattr(locked, "_write", fail_write)
+        with pytest.raises(OSError, match="interrupted append"):
+            locked.append(second)
+        with pytest.raises(ValueError, match="reopen the identity journal"):
+            locked.append(second)
+    assert journal.read() == (first,)
+    assert journal.append(second)

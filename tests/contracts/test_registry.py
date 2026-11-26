@@ -47,6 +47,7 @@ def test_the_registry_deploys_governance_first_then_domain_contracts() -> None:
         ("kn.core.semantic", "semantic"),
         ("kn.core.human_verification", "evidence"),
         ("kn.core.identity", "identity"),
+        ("kn.core.evidence", "evidence"),
     ]
     validate_registry(fixture_contracts())
 
@@ -100,7 +101,7 @@ def _rename_table(contract, name: str):  # type: ignore[no-untyped-def]
 
 @pytest.mark.parametrize("collision", ["contract", "field", "table", "index", "marker"])
 def test_one_deployment_has_unique_contracts_fields_and_names(collision: str) -> None:
-    system, catalogue, satcom, core_semantic, evidence, identity, space, semantic = (
+    system, catalogue, satcom, core_semantic, verification, identity, evidence, space, semantic = (
         fixture_contracts()
     )
     if collision == "contract":
@@ -114,9 +115,28 @@ def test_one_deployment_has_unique_contracts_fields_and_names(collision: str) ->
     elif collision == "index":
         # The fixture's index name, used as a SATCOM table name in the same schema.
         space = _rename_table(space, "pk_countries")
-    contracts = [system, catalogue, satcom, core_semantic, evidence, identity, space, semantic]
+    contracts = [
+        system,
+        catalogue,
+        satcom,
+        core_semantic,
+        verification,
+        identity,
+        evidence,
+        space,
+        semantic,
+    ]
     if collision == "marker":
-        contracts = [satcom, system, core_semantic, evidence, identity, space, semantic]
+        contracts = [
+            satcom,
+            system,
+            core_semantic,
+            verification,
+            identity,
+            evidence,
+            space,
+            semantic,
+        ]
     with pytest.raises(ContractError, match="registry"):
         validate_registry(contracts)
 

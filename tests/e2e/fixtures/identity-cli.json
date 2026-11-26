@@ -1,36 +1,17 @@
 {
-  "en": {
-    "history": {
-      "exit_code": 0,
-      "stderr": "Identity history for kn:019b76da-a800-7000-8000-000000000006\n{\"actor\":\"engine:fixture\",\"decision_ref\":\"decision:fixture\",\"event_id\":\"67972ae5f640f8be6a37b340da15843716afb67caf04cb45c0e410faf73314aa\",\"evidence\":\"archive:fixture\",\"occurred_at\":\"2026-01-01T00:00:00Z\",\"payload\":{\"kind\":\"reclassified\",\"kn_id\":\"kn:019b76da-a800-7000-8000-000000000005\",\"successor\":{\"anchor\":{\"key\":\"new-class\",\"source\":\"fixture:anchor\"},\"entity_class\":\"core.manufacturer\",\"kind\":\"minted\",\"kn_id\":\"kn:019b76da-a800-7000-8000-000000000006\"}},\"previous\":\"5b930ee25d1823c15b31487e1709917e78042b2125de14745c7af5cd030cbfe8\",\"reason\":\"Fixture history\",\"schema_version\":1,\"sequence\":20}\n",
-      "stdout": ""
-    },
-    "resolve": {
-      "exit_code": 0,
-      "stderr": "Identity kn:019b76da-a800-7000-8000-000000000001 resolves to kn:019b76da-a800-7000-8000-000000000004, kn:019b76da-a800-7000-8000-000000000006.\n",
-      "stdout": ""
-    },
-    "show": {
-      "exit_code": 0,
-      "stderr": "Identity kn:019b76da-a800-7000-8000-000000000003 | Class \"core.organization\" | Split\nAnchor {\"key\":\"2\",\"source\":\"fixture:anchor\"} | Mint event 75889a8749845522b6ebb2100bd99bdbffb1fc2898f6f16180afa5edf702027a\nSuccessors kn:019b76da-a800-7000-8000-000000000004, kn:019b76da-a800-7000-8000-000000000006\n",
-      "stdout": ""
-    }
+  "history": {
+    "exit_code": 0,
+    "stderr": "Identity history for kn:019b76da-a800-7000-8000-000000000006\n{\"actor\":\"engine:fixture\",\"decision_ref\":\"decision:fixture\",\"event_id\":\"67972ae5f640f8be6a37b340da15843716afb67caf04cb45c0e410faf73314aa\",\"evidence\":\"archive:fixture\",\"occurred_at\":\"2026-01-01T00:00:00Z\",\"payload\":{\"kind\":\"reclassified\",\"kn_id\":\"kn:019b76da-a800-7000-8000-000000000005\",\"successor\":{\"anchor\":{\"key\":\"new-class\",\"source\":\"fixture:anchor\"},\"entity_class\":\"core.manufacturer\",\"kind\":\"minted\",\"kn_id\":\"kn:019b76da-a800-7000-8000-000000000006\"}},\"previous\":\"5b930ee25d1823c15b31487e1709917e78042b2125de14745c7af5cd030cbfe8\",\"reason\":\"Fixture history\",\"schema_version\":1,\"sequence\":20}\n",
+    "stdout": ""
   },
-  "uk": {
-    "history": {
-      "exit_code": 0,
-      "stderr": "\u0406\u0441\u0442\u043e\u0440\u0456\u044f \u0456\u0434\u0435\u043d\u0442\u0438\u0447\u043d\u043e\u0441\u0442\u0456 \u0434\u043b\u044f kn:019b76da-a800-7000-8000-000000000006\n{\"actor\":\"engine:fixture\",\"decision_ref\":\"decision:fixture\",\"event_id\":\"67972ae5f640f8be6a37b340da15843716afb67caf04cb45c0e410faf73314aa\",\"evidence\":\"archive:fixture\",\"occurred_at\":\"2026-01-01T00:00:00Z\",\"payload\":{\"kind\":\"reclassified\",\"kn_id\":\"kn:019b76da-a800-7000-8000-000000000005\",\"successor\":{\"anchor\":{\"key\":\"new-class\",\"source\":\"fixture:anchor\"},\"entity_class\":\"core.manufacturer\",\"kind\":\"minted\",\"kn_id\":\"kn:019b76da-a800-7000-8000-000000000006\"}},\"previous\":\"5b930ee25d1823c15b31487e1709917e78042b2125de14745c7af5cd030cbfe8\",\"reason\":\"Fixture history\",\"schema_version\":1,\"sequence\":20}\n",
-      "stdout": ""
-    },
-    "resolve": {
-      "exit_code": 0,
-      "stderr": "\u041a\u0456\u043d\u0446\u0435\u0432\u0456 \u0456\u0434\u0435\u043d\u0442\u0438\u0444\u0456\u043a\u0430\u0442\u043e\u0440\u0438 \u0434\u043b\u044f kn:019b76da-a800-7000-8000-000000000001: kn:019b76da-a800-7000-8000-000000000004, kn:019b76da-a800-7000-8000-000000000006.\n",
-      "stdout": ""
-    },
-    "show": {
-      "exit_code": 0,
-      "stderr": "\u0406\u0434\u0435\u043d\u0442\u0438\u0447\u043d\u0456\u0441\u0442\u044c kn:019b76da-a800-7000-8000-000000000003 | \u041a\u043b\u0430\u0441 \"core.organization\" | \u0420\u043e\u0437\u0434\u0456\u043b\u0435\u043d\u0438\u0439\n\u041e\u043f\u043e\u0440\u043d\u0438\u0439 \u0437\u0430\u043f\u0438\u0441 {\"key\":\"2\",\"source\":\"fixture:anchor\"} | \u041f\u043e\u0434\u0456\u044f \u0441\u0442\u0432\u043e\u0440\u0435\u043d\u043d\u044f 75889a8749845522b6ebb2100bd99bdbffb1fc2898f6f16180afa5edf702027a\n\u041d\u0430\u0441\u0442\u0443\u043f\u043d\u0438\u043a\u0438 kn:019b76da-a800-7000-8000-000000000004, kn:019b76da-a800-7000-8000-000000000006\n",
-      "stdout": ""
-    }
+  "resolve": {
+    "exit_code": 0,
+    "stderr": "Identity kn:019b76da-a800-7000-8000-000000000001 resolves to kn:019b76da-a800-7000-8000-000000000004, kn:019b76da-a800-7000-8000-000000000006.\n",
+    "stdout": ""
+  },
+  "show": {
+    "exit_code": 0,
+    "stderr": "Identity kn:019b76da-a800-7000-8000-000000000003 | Class \"core.organization\" | Split\nAnchor {\"key\":\"2\",\"source\":\"fixture:anchor\"} | Mint event 75889a8749845522b6ebb2100bd99bdbffb1fc2898f6f16180afa5edf702027a\nSuccessors kn:019b76da-a800-7000-8000-000000000004, kn:019b76da-a800-7000-8000-000000000006\n",
+    "stdout": ""
   }
 }

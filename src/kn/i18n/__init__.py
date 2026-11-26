@@ -5,9 +5,7 @@ from decimal import Decimal
 from babel import Locale
 from babel.numbers import format_decimal
 
-from kn.i18n.catalog import compare_catalogs, compile_catalog, load_catalog
-
-DEFAULT_LOCALE = "en"
+from kn.i18n.catalog import DEFAULT_LOCALE, compare_catalogs, compile_catalog, load_catalog
 
 
 class Translator:
@@ -16,10 +14,11 @@ class Translator:
     def __init__(self, locale: str = DEFAULT_LOCALE) -> None:
         self.locale = locale
         self._messages = load_catalog(locale)
-        reference = load_catalog(DEFAULT_LOCALE)
-        findings = list(compare_catalogs(reference, self._messages))
-        if findings:
-            raise ValueError("invalid interface catalog: " + "; ".join(findings))
+        if locale != DEFAULT_LOCALE:
+            reference = load_catalog(DEFAULT_LOCALE)
+            findings = list(compare_catalogs(reference, self._messages, locale))
+            if findings:
+                raise ValueError("invalid interface catalog: " + "; ".join(findings))
         self._locale = Locale.parse(locale, sep="-")
         self._gettext = compile_catalog(self._messages, locale)
 

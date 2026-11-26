@@ -2,7 +2,7 @@
 
 Version: 1.0.0
 
-Digest: `d6b3174421aaa3cfd1b71d46f928797e55620d397b80ece4a93225949a1113c6`
+Digest: `14de4eab9db6e5d06d712caf4a260d9da3e96a97db3d3fdeb39538554534d18c`
 
 Storage schema: `identity`
 

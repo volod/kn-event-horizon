@@ -15,6 +15,7 @@ from kn.contracts.sqlalchemy import Geometry, deployment_metadata
 from kn.db.catalog import PG_ATTRIBUTE, PG_CLASS, PG_NAMESPACE, TABLE_KINDS
 from kn.db.platform import MIGRATION_SCHEMA, ROLE_KINDS, SCHEMAS, VERSION_TABLE, role_name
 from kn.db.statements import ResetRole, SetRole
+from kn.identity.checkpoint import CHECKPOINT
 
 
 def verify_structure(connection: Connection, contracts: Sequence[Contract] | None = None) -> None:
@@ -65,7 +66,7 @@ def _geometry_drift(connection: Connection, model: sa.MetaData) -> bool:
 
 def verify_registered_tables(connection: Connection, contracts: Sequence[Contract]) -> None:
     """Every table in a KN schema belongs to a registered contract; partitions count with their
-    parent, and the Alembic version table is the one exception."""
+    parent. The migration marker and identity projection checkpoint are internal tables."""
     for schema in SCHEMAS:
         actual: set[str] = set(
             connection.scalars(
@@ -86,6 +87,10 @@ def verify_registered_tables(connection: Connection, contracts: Sequence[Contrac
         }
         if schema == MIGRATION_SCHEMA:
             expected.add(VERSION_TABLE)
+        if schema == CHECKPOINT.schema and any(
+            contract.contract_id == "kn.core.identity" for contract in contracts
+        ):
+            expected.add(CHECKPOINT.name)
         if actual != expected:
             raise ValueError(f"tables in schema {schema} differ from the registered contracts")
 

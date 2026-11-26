@@ -82,17 +82,17 @@ def _history(records: int) -> tuple[Event, ...]:
     for number in range(1, records + 1):
         payloads = _payloads(number)
         for payload in payloads:
-            events.append(_next(events, payload))
+            events.append(_next(events[-1] if events else None, payload))
         version_id = events[-6].event_id
         changes = (FieldChange(field_id="organization.name", change="added", current_hash=DIGEST),)
-        events.append(_next(events, ChangeSet(version_id=version_id, changes=changes)))
+        events.append(_next(events[-1], ChangeSet(version_id=version_id, changes=changes)))
     return tuple(events)
 
 
-def _next(events: list[Event], payload: Payload) -> Event:
+def _next(previous: Event | None, payload: Payload) -> Event:
     return event(
         payload,
-        previous=events[-1] if events else None,
+        previous=previous,
         occurred_at=NOW,
         actor="engine:fixture",
         reason="Scale fixture",

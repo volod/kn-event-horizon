@@ -1,4 +1,4 @@
-"""The vocabulary entrypoint follows the existing bilingual and machine-readable CLI contract."""
+"""The vocabulary entrypoint follows the English and machine-readable CLI contract."""
 
 import json
 import logging
@@ -11,15 +11,10 @@ from kn.i18n import Translator
 from kn.semantic.seeds import reviewed_snapshot
 
 
-@pytest.mark.parametrize("locale", ["en", "uk"])
 @pytest.mark.parametrize("machine", [False, True])
-def test_seed_import_cli(
-    locale: str, machine: bool, tmp_path: Path, caplog: pytest.LogCaptureFixture
-) -> None:
+def test_seed_import_cli(machine: bool, tmp_path: Path, caplog: pytest.LogCaptureFixture) -> None:
     caplog.set_level(logging.INFO, logger="kn.operator")
     arguments = [
-        "--locale",
-        locale,
         "vocabulary",
         "import-proposals",
         "--check",
@@ -34,7 +29,7 @@ def test_seed_import_cli(
         assert result["rows"] == 1173 and result["status"] == "reconciled"
         assert sum(result["counts"].values()) == result["rows"]
     else:
-        assert caplog.records[-1].message == Translator(locale).text(
+        assert caplog.records[-1].message == Translator().text(
             "cli.seed_ok", rows=1173, report=str(reports[0])
         )
 

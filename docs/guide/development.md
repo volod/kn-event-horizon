@@ -166,10 +166,10 @@ See [data contracts](../impl/current/data-contracts.md) for preservation rules a
 
 ## Bilingual acceptance workflow
 
-Run `make test-bilingual` for the delivered CLI, catalogs, multilingual selection, and lossless
+Run `make test-bilingual` for English CLI goldens, catalogs, multilingual selection, and lossless
 source archive/import checks. Each run writes evidence under `$DATA_DIR/e2e/bilingual-<run-id>/`.
-Run `make bilingual-acceptance` for the full release gate; it fails while any operator surface lacks
-acceptance evidence, even if the available checks pass. See
+Run `make bilingual-acceptance` to require browser evidence for dashboards and maps in both
+languages. See
 [localization coverage](../impl/current/localization.md#bilingual-acceptance) for artifacts and
 remaining paths. Both targets honor `.env` and `DATA_DIR` using the normal Make resolution.
 

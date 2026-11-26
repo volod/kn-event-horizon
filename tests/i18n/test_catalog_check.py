@@ -85,3 +85,16 @@ def test_dynamic_missing_and_mixed_kind_keys_fail(tmp_path: Path) -> None:
 def test_unsafe_or_malformed_format_fields_fail(text: str) -> None:
     with pytest.raises(ValueError):
         read_catalog(json.dumps({"test.key": text}), "en")
+
+
+def test_cli_copy_is_required_only_in_english(tmp_path: Path) -> None:
+    root = project(tmp_path)
+    english = root / "locales" / "en" / "messages.json"
+    ukrainian = root / "locales" / "uk" / "messages.json"
+    english.write_text('{"cli.help": "Show help"}', encoding="ascii")
+    ukrainian.write_text("{}", encoding="ascii")
+    (root / "src" / "kn" / "cli.py").write_text('tr.text("cli.help")\n', encoding="ascii")
+    assert check_catalogs(root) == []
+
+    ukrainian.write_text('{"cli.help": "Show help"}', encoding="ascii")
+    assert check_catalogs(root) == ["uk: extra key: cli.help"]

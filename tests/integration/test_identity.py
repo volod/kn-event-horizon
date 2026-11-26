@@ -164,3 +164,27 @@ def test_missing_partial_predicate_is_detected_by_compiled_verification(
     )
     with pytest.raises(ValueError, match="index predicate mismatch"):
         verify_compiled_catalog(rebuild_connection)
+
+
+def test_apply_writes_only_affected_rows_and_refuses_a_changed_sql_prefix(
+    rebuild_connection: Connection, tmp_path: Path
+) -> None:
+    connection = rebuild_connection
+    journal = Journal(tmp_path)
+    rebuild(connection, data_dir=tmp_path)
+    first, second, third, *_ = history()
+    store.apply(connection, journal, lambda locked: locked.append(first))
+    unchanged = sa.text("SELECT ctid FROM identity.objects WHERE kn_id = :key").bindparams(key=A)
+    original = connection.scalar(unchanged)
+    store.apply(connection, journal, lambda locked: locked.append(second))
+    assert connection.scalar(unchanged) == original
+    assert not store.apply(connection, journal, lambda locked: locked.append(second))
+    assert connection.scalar(unchanged) == original
+
+    # The newest SQL event still matches. A change to an interior event must invalidate the
+    # checkpoint and cause refusal before adding another event to the durable log.
+    table = metadata(store.contract()).tables["identity.lifecycle_events"]
+    connection.execute(table.update().where(table.c.sequence == 1).values(event_json=canonical({})))
+    with pytest.raises(ValueError, match="not a prefix"):
+        store.apply(connection, journal, lambda locked: locked.append(third))
+    assert journal.read() == (first, second)
