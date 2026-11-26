@@ -49,7 +49,7 @@ def _submit(connection: Connection, journal: Journal, change, request_id: str):
     )
 
 
-def _run_cli(caplog: pytest.LogCaptureFixture, locale: str, action: str, *args: str) -> dict:
+def _run_cli(caplog: pytest.LogCaptureFixture, action: str, *args: str) -> dict:
     caplog.set_level(logging.INFO, logger="kn.operator")
     review = [
         "--request-id",
@@ -61,7 +61,7 @@ def _run_cli(caplog: pytest.LogCaptureFixture, locale: str, action: str, *args: 
         "--performed-at",
         NOW.isoformat(),
     ]
-    assert cli.main(["--locale", locale, "--json", "identity", action, *args, *review]) == 0
+    assert cli.main(["--json", "identity", action, *args, *review]) == 0
     return json.loads(caplog.records[-1].message)
 
 
@@ -111,17 +111,17 @@ def test_cli_merge_split_rebuild_and_reclassify(
 
 
 def _merge_and_split(journal: Journal, caplog: pytest.LogCaptureFixture) -> tuple[dict, ...]:
-    first = _run_cli(caplog, "en", "merge", A, B)
-    assert _run_cli(caplog, "uk", "merge", A, B) == first
-    second = _run_cli(caplog, "uk", "merge", B, C)
+    first = _run_cli(caplog, "merge", A, B)
+    assert _run_cli(caplog, "merge", A, B) == first
+    second = _run_cli(caplog, "merge", B, C)
     assert journal.state().resolve(A) == (C,)
     assignments = []
     for key, holding in journal.state().owned(C).items():
         payload = holding.event.payload
         successor = E if isinstance(payload, Link) and payload.record == OTHER else D
         assignments.extend(("--assign", f"{key}={successor}"))
-    split = _run_cli(caplog, "en", "split", C, D, E, *assignments)
-    assert _run_cli(caplog, "uk", "split", C, E, D, *assignments) == split
+    split = _run_cli(caplog, "split", C, D, E, *assignments)
+    assert _run_cli(caplog, "split", C, E, D, *assignments) == split
     assert journal.state().resolve(A) == (D, E)
     assert journal.state().resolve(C) == (D, E)
     active = {
@@ -137,7 +137,6 @@ def _merge_and_split(journal: Journal, caplog: pytest.LogCaptureFixture) -> tupl
 def _retire_and_restore(journal: Journal, caplog: pytest.LogCaptureFixture) -> tuple[dict, ...]:
     reclassified = _run_cli(
         caplog,
-        "uk",
         "reclassify",
         E,
         "core.manufacturer",
@@ -148,8 +147,8 @@ def _retire_and_restore(journal: Journal, caplog: pytest.LogCaptureFixture) -> t
     )
     successor = reclassified["event"]["payload"]["successor"]["kn_id"]
     assert journal.state().resolve(E) == (successor,)
-    retire = _run_cli(caplog, "en", "retire", successor)
-    restore = _run_cli(caplog, "uk", "restore", successor)
+    retire = _run_cli(caplog, "retire", successor)
+    restore = _run_cli(caplog, "restore", successor)
     assert journal.state().owned(successor) == {}
     assert journal.state().objects[successor].state == "active"
 

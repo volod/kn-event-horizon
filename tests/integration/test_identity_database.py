@@ -31,13 +31,13 @@ def test_cli_after_database_drop_preserves_complete_identity_projection(
     monkeypatch.setenv("DATA_DIR", str(tmp_path))
     snapshots = []
     with integration_database.connect(autocommit=True) as admin:
-        for locale in (None, "en", "uk"):
+        for run in range(3):
             admin.execute(sql.SQL("CREATE DATABASE {}").format(sql.Identifier(name)))
             engine = sa.create_engine(
                 "postgresql+psycopg://", creator=lambda: integration_database.connect(dbname=name)
             )
             try:
-                if locale is None:
+                if run == 0:
                     with engine.begin() as connection:
                         rebuild(connection, data_dir=tmp_path)
                     events = history()
@@ -56,7 +56,8 @@ def test_cli_after_database_drop_preserves_complete_identity_projection(
                             )
                 else:
                     monkeypatch.setattr(operations, "engine_from_env", lambda engine=engine: engine)
-                    assert cli.main(["--locale", locale, "--json", "db", "rebuild"]) == 0
+                    command = ["db", "rebuild"] if run == 1 else ["--json", "db", "rebuild"]
+                    assert cli.main(command) == 0
                 with engine.connect() as connection:
                     snapshots.append(_snapshot(connection, [store.contract()]))
             finally:

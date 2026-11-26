@@ -70,13 +70,13 @@ adding a column to one domain would leave labels, links and other facts uncovere
 
 #### review-queue-cli
 
-Human decisions on conflicts and candidates need a bilingual workflow that survives rebuilds.
+Human decisions on conflicts and candidates need a workflow that survives rebuilds.
 
 - Serves: `evidence-model` -- [Evidence model](../design/spec.md#evidence-model)
 - Agent status: CLEAR
 - Requires: `human-verification-projections`
 - Dependencies: The durable [identity review match rows](current/object-identity.md#match-resolution).
-- User-visible outcome: `kn review list` and `kn review decide` work in `en` and `uk` for fact
+- User-visible outcome: `kn review list` and `kn review decide` handle fact
   conflicts, identity match candidates, and identity drift. Decisions are appended to
   `$DATA_DIR/decisions/<domain>/` and applied to review items.
 - Scope boundary: The CLI, the decision log format, and re-attachment by deterministic keys with an
@@ -89,14 +89,13 @@ Human decisions on conflicts and candidates need a bilingual workflow that survi
   applied decisions, and report each source's dispute rate to support rank overrides.
 - Data and artifact paths: `src/kn/review/`, `src/kn/cli.py`, `$DATA_DIR/decisions/`,
   `tests/review/`.
-- Execution path: Write an append-only JSON Lines log with the reviewer, reason, and time, and
-  localized messages.
+- Execution path: Write an append-only JSON Lines log with the reviewer, reason, and time.
 - Acceptance gates: Decisions apply idempotently. A decision whose claim key disappears is
   reported as orphaned. Verification timestamps appear only for accepted human decisions on the
   matching scope/version; rejecting or revoking clears the active stamp and keeps history.
   `kn review list --overrides` lists the flagged owner overrides. An accepted identity match links
   the record and records its authoritative keys and identity attributes, as an automatic link
-  does. Golden outputs cover both locales.
+  does. Golden outputs cover English text and stable JSON.
 - Documentation target: `current/evidence-model.md` listed in the [areas index](current.md#areas).
 
 #### evidence-model-implementation-audit
@@ -251,7 +250,7 @@ Operators need per-source health and freshness without opening Kestra.
 - Agent status: CLEAR
 - Requires: `engine-skeleton`
 - Dependencies: none.
-- User-visible outcome: `kn source status` shows, in both locales, the last success and attempt,
+- User-visible outcome: `kn source status` shows the last success and attempt,
   state, stale flag, counts, bytes, budget use, cursor lag, and last error code, and feeds the
   operations mart.
   Read the early ingestion-state contracts; monitoring must not create another run/cursor schema.
@@ -260,7 +259,7 @@ Operators need per-source health and freshness without opening Kestra.
 - Data and artifact paths: `src/kn/sources/status.py`, `tests/sources/`.
 - Execution path: Compute status from fixture runs covering every run status and error code.
 - Acceptance gates: Stale detection follows the configured threshold. Every error code renders.
-  Golden outputs exist in both locales.
+  Golden outputs cover English text and stable JSON.
 - Documentation target: `current/source-management.md` listed in the
   [areas index](current.md#areas).
 
@@ -289,7 +288,7 @@ there repeats in every source that follows.
   Validate a crawler file with an unknown key, one without a licence, and a disabled source with a
   schedule, and onboard one fixture source from the templates alone. Interrupt a fixture run before its
   checkpoint, retry it and compare status, history and cursor with an uninterrupted run.
-- Acceptance gates: Each invalid crawler file is refused with a stable error code in both locales. A
+- Acceptance gates: Each invalid crawler file is refused with a stable error code. A
   disabled source cannot run. The templates cover every field the schema requires. Every finding has
   a severity, evidence, and a disposition, no `blocker` is accepted, and every fix starts from a
   failing regression test. `make ci` passes with the scheduled tasks in the plan.
@@ -1304,7 +1303,7 @@ Users need a safe, read-only Obsidian subset of the knowledge base.
 - Serves: `obsidian-export` -- [Obsidian export](../design/spec.md#obsidian-export)
 - Agent status: CLEAR
 - Dependencies: none.
-- User-visible outcome: `kn export obsidian --profile <id> --locale en|uk` writes a verified vault
+- User-visible outcome: `kn export obsidian --profile <id>` writes a verified vault
   ZIP and manifest from one snapshot.
 - Scope boundary: Profiles, the snapshot read, deterministic notes and links, rights filtering,
   limits, safe paths, the manifest, and the atomic ZIP. No scheduling and no writeback.
@@ -1352,8 +1351,8 @@ once a vault is shared.
 - Scope boundary: Focus: rights and licence filtering across notes, attachments, and front matter;
   deterministic names and content; stable links when objects merge, split, or retire; file-name
   safety across operating systems, including reserved names, length, case collisions, and Cyrillic;
-  locale parity; vault verification; export after the knowledge base changes; further domain
-  profiles. Fixes only; new behavior becomes plan tasks.
+  text language and fallback metadata; vault verification; export after the knowledge base
+  changes; further domain profiles. Fixes only; new behavior becomes plan tasks.
 - Data and artifact paths: `src/kn/export/obsidian/`, `domains/<domain>/exports/`, `tests/export/`,
   `docs/impl/plan.md`, and the task record.
 - Execution path: Rerun the group's acceptance commands, then work through the audit checks. Export
@@ -1377,8 +1376,8 @@ Scheduled ingestion needs a pinned orchestrator without host-level privileges.
 - Dependencies: A pinned Kestra OSS release whose Process task runner is confirmed.
 - User-visible outcome: Kestra runs with its own `kestra` database. A dedicated non-root image
   holds the pinned `kn` package and runs `kn source run`.
-- Scope boundary: The service, the runner image, and internal networking. The UI stays English-only
-  under the approved waiver. Proxy authentication comes in `reverse-proxy-auth`. No Docker socket.
+- Scope boundary: The service, the runner image, and internal networking. The UI uses English.
+  Proxy authentication comes in `reverse-proxy-auth`. No Docker socket.
 - Data and artifact paths: `deploy/compose.yaml`, `deploy/kestra/`, `deploy/versions.yaml`.
 - Execution path: Pin by digest, check that a smoke flow runs `kn info` through the Process runner,
   and record the confirmed release behavior.
@@ -2061,57 +2060,48 @@ Later engines and counterpart adapters will depend on the shared model boundarie
   `make ci` and the applicable integration checks pass.
 - Documentation target: [Data contracts](current/data-contracts.md).
 
-### Bilingual operator acceptance -- `localization`
+### Bilingual dashboard and map acceptance -- `localization`
 
 #### bilingual-acceptance-suite
 
-Release needs one end-to-end proof that every operator path works in both locales.
+Release needs end-to-end proof that dashboards and maps work in both languages.
 
 - Serves: `localization` -- [Localization](../design/spec.md#localization)
 - Agent status: CLEAR
-- Requires: `obsidian-export-implementation-audit`,
-  `microelectronics-dashboards-implementation-audit`, `inventree-exchange-implementation-audit`
-- Dependencies: A browser automation tool justified as a development dependency when product browser
-  surfaces exist. The available CLI and multilingual data checks are documented in
+- Requires: `space-dashboards-implementation-audit`, `gdelt-dashboards-implementation-audit`,
+  `microelectronics-dashboards-implementation-audit`
+- Dependencies: Browser automation when product browser surfaces exist. The available CLI and
+  multilingual data checks are documented in
   [current acceptance coverage](current/localization.md#bilingual-acceptance); the open
   [task record](records/0013-localization-bilingual-acceptance-suite.md) preserves partial evidence.
-- User-visible outcome: One command produces screenshots and golden outputs for the CLI, the review
-  queue, source status, lineage, InvenTree plans and reports, the dashboards with filters and the
-  map, and the export README, in both locales.
-- Scope boundary: Verification and fixing of missing translations. The Kestra UI is excluded under
-  the approved waiver. Strict bilingual interface keys are independent of optional data
-  translations: requested language, English, then the preserved original with language/provenance.
-  Source-only Russian, Chinese, and other-language messages must survive ingestion and later
-  translation without being counted as untranslated interface strings.
-- Data and artifact paths: `tests/e2e/`, `$DATA_DIR/e2e/<run-id>/` for screenshots, and
-  `locales/`.
-- Execution path: Extend `make test-bilingual` with the real browser paths against multilingual
-  fixture data; compare key coverage and rendered Cyrillic, dates, numbers, and missing-value
-  labels. Run `make bilingual-acceptance` to require all release paths rather than the available
-  subset. Retain screenshots and fallback metadata for both locales.
-- Acceptance gates: Both locales pass with no untranslated critical string. Any remaining
-  English-only operator screen is listed as a release blocker.
+- User-visible outcome: One command verifies dashboard controls, filters, and maps in both languages
+  and saves screenshots.
+- Scope boundary: Dashboard and map interface text, formatting, and fact display. Source text in
+  any language retains its language and provenance through ingestion and later translation.
+- Data and artifact paths: `tests/e2e/`, `$DATA_DIR/e2e/<run-id>/` for screenshots, and `locales/`.
+- Execution path: Extend `make test-bilingual` with browser paths against multilingual fixtures.
+  Check key coverage, Cyrillic rendering, dates, numbers, units, and missing-value labels. Run
+  `make bilingual-acceptance` to require all release paths. Retain screenshots and fallback metadata
+  for both languages.
+- Acceptance gates: Both languages pass on every dashboard and map with no untranslated critical
+  strings. Missing data translations use the documented fallback and retain original metadata.
 - Documentation target: `current/localization.md` listed in the [areas index](current.md#areas).
 
 #### localization-implementation-audit
 
-Message keys, plural rules, and locale fallback serve every operator surface, so a gap found late
-would touch every group.
+Message keys, plural rules, and locale fallback need verification across dashboards and maps.
 
 - Serves: `localization` -- [Localization](../design/spec.md#localization)
 - Agent status: CLEAR
 - Requires: `bilingual-acceptance-suite`
 - Dependencies: The accepted task records of the group and the [implementation
   audit](../guide/planning-workflow.md#implementation-audits) checks.
-- User-visible outcome: Every operator surface is shown to work in `en` and `uk` from one catalog.
-  The audit record gives every check a result and every finding a disposition. The current-state
-  page lists known limitations, and each scheduled finding is a plan task.
-- Scope boundary: Focus: key parity between `en` and `uk`; Ukrainian plural forms and number, date,
-  and unit formatting; missing-interface-key rejection and source-text fallback; precedence among
-  `--locale`, `KN_LOCALE`, and the default; operator text kept out of logs and log text kept out of
-  catalogs; one source for vocabulary labels in the CLI, exports, and dashboards; text expansion
-  and Cyrillic rendering;
-  adding a third locale without code changes. Fixes only; new behavior becomes plan tasks.
+- User-visible outcome: Every dashboard and map works in `en` and `uk`. The audit record gives
+  every check a result and every finding a disposition. The current-state page lists known
+  limitations, and each scheduled finding is a plan task.
+- Scope boundary: Dashboard and map key parity, Ukrainian plurals, number/date/unit formatting,
+  missing-interface-key rejection, text expansion, Cyrillic rendering, and source-text fallback.
+  Verify that the CLI uses English and that its JSON contract is stable.
 - Data and artifact paths: `src/kn/i18n/`, `locales/`, `tests/e2e/`, `docs/impl/plan.md`, and the
   task record.
 - Execution path: Rerun the group's acceptance commands, then work through the audit checks. Remove
@@ -2779,8 +2769,7 @@ Core Ukrainian terminology needs review by a Ukrainian technical speaker.
 - Dependencies: A Ukrainian technical speaker named by the owner. An agent prepares a glossary
   export of every `uk` UI string and every vocabulary label that still falls back to English, with
   context and the [translation review fields](current/ontology-taxonomy/text.md#label-and-review-rules).
-- User-visible outcome: Reviewed Ukrainian terminology for the UI, the vocabularies, and the
-  operator quickstart.
+- User-visible outcome: Reviewed Ukrainian terminology for dashboards, maps, and vocabulary labels.
 - Scope boundary: Review and corrections of catalogs and labels.
 - Data and artifact paths: `locales/uk/`, `domains/<domain>/seeds/`, and the task record.
 - Execution path: The agent exports the glossary. The reviewer annotates it. The agent applies the

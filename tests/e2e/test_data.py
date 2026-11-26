@@ -1,4 +1,4 @@
-"""Data display never treats a missing translation as a missing interface message."""
+"""Source language metadata and optional translations survive display selection."""
 
 import itertools
 import json
@@ -7,7 +7,6 @@ from pathlib import Path
 
 import pytest
 
-from kn.i18n import Translator
 from kn.i18n.data import SourceText, TextVariant, select_text
 from tests.e2e.support import FIXTURES, LOCALES, write_json
 
@@ -66,14 +65,11 @@ def test_all_translation_subsets_and_orders(original_language: str, locale: str)
             assert select_text(data, locale.upper()) == selected
 
 
-def test_missing_data_translation_does_not_change_interface_language() -> None:
+def test_missing_data_translation_preserves_original_language() -> None:
     original = TextVariant("\u539f\u6587", "zh", "raw:untranslated")
     selected = select_text(SourceText(original), "uk")
-    interface = Translator("uk")
     assert selected.variant is original and selected.fallback
-    assert interface.text("cli.help") != Translator("en").text("cli.help")
-    with pytest.raises(ValueError, match="missing interface key"):
-        interface.text("source.untranslated")
+    assert selected.variant.language == "zh"
 
 
 def test_later_translation_does_not_replace_the_durable_original() -> None:

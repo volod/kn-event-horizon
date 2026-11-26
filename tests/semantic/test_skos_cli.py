@@ -1,4 +1,4 @@
-"""The export command follows bilingual CLI and stable machine error conventions."""
+"""The export command follows English CLI and stable machine error conventions."""
 
 import json
 import logging
@@ -15,10 +15,8 @@ from kn.semantic.skos import term_uri
 SCHEME = "gdelt.services.scheme"
 
 
-@pytest.mark.parametrize("locale", ["en", "uk"])
 @pytest.mark.parametrize("machine", [False, True])
 def test_skos_cli(
-    locale: str,
     machine: bool,
     tmp_path: Path,
     monkeypatch: pytest.MonkeyPatch,
@@ -27,7 +25,7 @@ def test_skos_cli(
     monkeypatch.chdir(tmp_path)
     monkeypatch.setenv("DATA_DIR", str(tmp_path / "runtime data"))
     caplog.set_level(logging.INFO, logger="kn.operator")
-    arguments = ["--locale", locale, "vocabulary", "export", "--format", "skos", "--scheme", SCHEME]
+    arguments = ["vocabulary", "export", "--format", "skos", "--scheme", SCHEME]
     assert cli.main([*arguments, *(["--json"] if machine else [])]) == 0
     paths = list((tmp_path / "runtime data/skos").glob("*/vocabulary.ttl"))
     assert len(paths) == 1
@@ -47,18 +45,14 @@ def test_skos_cli(
     if machine:
         assert json.loads(caplog.records[-1].message) == expected
     else:
-        assert caplog.records[-1].message == Translator(locale).text("cli.skos_ok", **expected)
+        assert caplog.records[-1].message == Translator().text("cli.skos_ok", **expected)
 
 
-@pytest.mark.parametrize("locale", ["en", "uk"])
 def test_skos_cli_unknown_scheme_and_unwritable_output(
-    locale: str,
     tmp_path: Path,
     caplog: pytest.LogCaptureFixture,
 ) -> None:
     arguments = [
-        "--locale",
-        locale,
         "--json",
         "vocabulary",
         "export",

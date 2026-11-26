@@ -13,7 +13,7 @@ make satcom-import
 ```
 
 The equivalent CLI is `kn vocabulary import-proposals [--check] [--data-dir PATH]`, run from inside
-the repository. It supports the existing `--locale en|uk` and `--json` options. Its structured result
+the repository. Use `--json` for machine-readable output. Its structured result
 contains `status`, `rows`, `counts`, and `report`. Errors use `E_INPUT` or `E_CONTRACT`, as on the
 other commands. Direct CLI callers supply `DATA_DIR` or `--data-dir`; Make also loads `.env`.
 Each run writes `space.json`, `gdelt.json`, `microelectronics.json`, `fixtures.json`, and

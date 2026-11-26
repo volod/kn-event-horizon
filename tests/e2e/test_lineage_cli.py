@@ -1,21 +1,19 @@
-"""Lineage goldens in both locales; the PostgreSQL CLI test compares against the same files."""
+"""Lineage goldens shared by the in-memory and PostgreSQL paths."""
 
 import json
 from pathlib import Path
 
-import pytest
-
 from kn.i18n import Translator
 from kn.i18n.output import render_result
 from kn.identity.lineage import lineage
-from tests.e2e.support import FIXTURES, LOCALES, write_json
+from tests.e2e.support import FIXTURES, write_json
 from tests.identity.lineage_fixtures import CASES, build
 
 GOLDENS = FIXTURES / "lineage-cli.json"
 
 
 def rendered(data_dir: Path) -> dict[str, dict[str, object]]:
-    """Each case as the JSON result and its text in every locale."""
+    """Each case as the JSON result and its text output."""
     fixture = build(data_dir)
     state, rows = fixture.journal.state(), fixture.rows
     result: dict[str, dict[str, object]] = {}
@@ -23,14 +21,13 @@ def rendered(data_dir: Path) -> dict[str, dict[str, object]]:
         view = lineage(state, rows, case.reference, field_id=case.field_id, audience=case.audience)
         result[name] = {
             "json": view,
-            **{locale: render_result(Translator(locale), "lineage", view) for locale in LOCALES},
+            "text": render_result(Translator(), "lineage", view),
         }
     return result
 
 
-@pytest.mark.parametrize("locale", LOCALES)
-def test_lineage_goldens(locale: str, tmp_path: Path, e2e_artifacts: Path) -> None:
+def test_lineage_goldens(tmp_path: Path, e2e_artifacts: Path) -> None:
     expected = json.loads(GOLDENS.read_text("ascii"))
     for name, output in rendered(tmp_path).items():
-        write_json(e2e_artifacts / locale / "lineage" / f"{name}.json", output[locale])
-        assert output[locale] == expected[locale][name], name
+        write_json(e2e_artifacts / "cli" / "lineage" / f"{name}.json", output["text"])
+        assert output["text"] == expected[name], name

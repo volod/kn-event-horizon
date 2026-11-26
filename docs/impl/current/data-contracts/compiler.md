@@ -105,7 +105,8 @@ resolve to existing fields. Table and field scope accept column names or stable 
 scope requires globally unique stable IDs. Foreign keys remain within the contract and target the
 ordered primary key of an existing table with matching source types. Repeated declarations of one
 composite reference generate one constraint. Cross-contract SQL foreign keys are refused.
-`kn.i18nKey` must occur in both packaged interface catalogs. Aliases, rights codes and spatial
+`kn.i18nKey` refers to a dashboard or map label present in both packaged interface catalogs.
+Aliases, rights codes and spatial
 coverage semantics remain declared metadata rather than external symbol references.
 
 Every registered KN extension family is retained in `contract.json`. Table and field metadata also

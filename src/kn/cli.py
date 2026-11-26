@@ -18,9 +18,9 @@ from sqlalchemy.exc import SQLAlchemyError
 from kn.contracts.diagnostics import ContractError
 from kn.db.rebuild import RebuildRefused
 from kn.evidence.ranking import DEFAULT_AUDIENCE, Audience
-from kn.i18n import DEFAULT_LOCALE, Translator
+from kn.i18n import Translator
 from kn.i18n.output import render_result
-from kn.i18n.parser import OperatorParser, parse_interface_options
+from kn.i18n.parser import OperatorParser, parse_json_option
 from kn.identity import operator
 from kn.identity.journal import Journal
 from kn.identity.lifecycle_reviews import Change, Reclassification, ReviewDetails
@@ -46,10 +46,9 @@ _LOG = logging.getLogger("kn.operator")
 def build_parser(
     translator: Translator | None = None, *, json_output: bool = False
 ) -> argparse.ArgumentParser:
-    """Build the parser using an explicit interface locale."""
+    """Build the English operator parser."""
     tr = translator or Translator()
     parser = OperatorParser(prog="kn", translator=tr, json_output=json_output)
-    parser.add_argument("--locale", help=tr.text("cli.locale_help"))
     parser.add_argument("--json", action="store_true", help=tr.text("cli.json_help"))
     # argparse accepts a callable; its type stub requires a parser class.
     parser_class = cast(
@@ -176,51 +175,43 @@ def _identity_arguments(
 
 
 def main(argv: Sequence[str] | None = None) -> int:
-    """Run the selected command, keeping JSON keys and error codes independent of locale."""
+    """Run the selected command with English text or machine-readable JSON."""
     logging.basicConfig(level=logging.INFO, format="%(message)s")
     arguments = list(sys.argv[1:] if argv is None else argv)
-    selected, remaining = parse_interface_options(
-        arguments, os.environ.get("KN_LOCALE", DEFAULT_LOCALE)
-    )
-    try:
-        translator = Translator(selected.locale)
-    except ValueError:
-        _report_error(Translator().text("cli.locale_error"), "E_LOCALE", selected.json)
-        return 2
-    args = build_parser(translator, json_output=selected.json).parse_args(remaining)
+    translator = Translator()
+    json_output, remaining = parse_json_option(arguments, translator)
+    args = build_parser(translator, json_output=json_output).parse_args(remaining)
     try:
         result = _run(args, translator)
     except SQLAlchemyError:
-        _report_error(translator.text("cli.database_error"), "E_DATABASE", selected.json)
+        _report_error(translator.text("cli.database_error"), "E_DATABASE", json_output)
         return 1
     except RebuildRefused:
-        _report_error(translator.text("cli.rebuild_refused"), "E_INPUT", selected.json)
+        _report_error(translator.text("cli.rebuild_refused"), "E_INPUT", json_output)
         return 1
     except operator.IdentityAuthorizationError:
-        _report_error(translator.text("cli.identity_auth_error"), "E_IDENTITY_AUTH", selected.json)
+        _report_error(translator.text("cli.identity_auth_error"), "E_IDENTITY_AUTH", json_output)
         return 1
     except CrawlerConfigError as error:
         diagnostic = error.diagnostic()
         message = translator.text("cli.source_config_diagnostic", **diagnostic)
-        _report_error(message, "E_SOURCE_CONFIG", selected.json, diagnostic)
+        _report_error(message, "E_SOURCE_CONFIG", json_output, diagnostic)
         return 1
     except ContractError as error:
         diagnostic = error.diagnostic()
         message = translator.text("cli.contract_diagnostic", **diagnostic)
-        _report_error(message, "E_CONTRACT", selected.json, diagnostic)
+        _report_error(message, "E_CONTRACT", json_output, diagnostic)
         return 1
     except ValidationError as error:
         path = ".".join(map(str, error.absolute_path))
-        _report_error(
-            translator.text("cli.validation_error", path=path), "E_CONTRACT", selected.json
-        )
+        _report_error(translator.text("cli.validation_error", path=path), "E_CONTRACT", json_output)
         return 1
     except (ValueError, OSError, UnicodeError, csv.Error):
-        _report_error(translator.text("cli.input_error"), "E_INPUT", selected.json)
+        _report_error(translator.text("cli.input_error"), "E_INPUT", json_output)
         return 1
     output = (
         json.dumps(result, ensure_ascii=True, sort_keys=True)
-        if selected.json
+        if json_output
         else render_result(translator, args.command, result)
     )
     _LOG.info("%s", output)

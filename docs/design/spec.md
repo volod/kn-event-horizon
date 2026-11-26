@@ -66,8 +66,8 @@ Product principles:
   incoming value updates an object through declared [update policies](#update-policy).
 - **Disabled by default.** A source collects nothing until its terms, limits, and permission are
   documented and a maintainer approves it.
-- **Bilingual by design.** Every operator and user workflow works in `en` and `uk`, and facts are
-  never duplicated per locale.
+- **Bilingual dashboards and maps.** Dashboards and maps work in `en` and `uk`. Facts retain
+  their original language and are never duplicated per locale.
 - **Versioned at the boundary.** The interchange contract and every adapter for an external system
   are versioned and compatibility-tested from their first task. KN does not control the external
   versions. See [Data interchange](#data-interchange).
@@ -96,7 +96,7 @@ release readiness. Optional local AI extraction comes last.
 
 Exclusions: no Kubernetes, Kafka, Elasticsearch service, graph server, vector database, distributed agents,
 or full GDELT replication. No satellite tasking or operations control. No public-facing custom
-frontend; a minimal bilingual page is justified only where Superset, Kestra, and the CLI cannot meet
+frontend; a minimal page is justified only where Superset, Kestra, and the CLI cannot meet
 an acceptance test. No runtime dependency on a coding agent. No claims of comprehensive coverage or
 ownership. No private customer data, private end-user terminal locations, or tracking of people.
 No stock control, purchasing, sales, or build management inside KN. No real-time bidirectional
@@ -482,46 +482,36 @@ Floating `latest` tags are never used.
 
 ### Localization
 
-Every delivered user-facing and operator interface supports English (`en`) and Ukrainian (`uk`; the
-code is never `ua`). This covers operator controls, validation errors, statuses, chart titles,
-legends, tooltips, dashboard descriptions, exports, and user documentation. Engineering artifacts
-(code, contracts, identifiers, logs, `AGENTS.md`) stay English.
+Dashboards and map interfaces support English (`en`) and Ukrainian (`uk`). This covers their
+controls, errors, statuses, chart titles, legends, tooltips, and descriptions. The `kn` CLI,
+administration tools such as Kestra, export boilerplate, and documentation use English.
 
-- Message catalogs with stable keys live in `locales/`. The CLI takes `--locale en|uk` or
-  `KN_LOCALE`. Machine-readable JSON output keeps stable keys and codes.
-- Formatting uses CLDR plural rules and locale-aware numbers and dates. Machine data uses ISO
-  formats. Times display in UTC by default, with optional `Europe/Kyiv`. Text is UTF-8 end to end.
-- Interface catalogs and crawled data have independent languages. Interface keys must exist in
-  every supported interface locale; missing interface translations fail validation.
-- Vocabulary, entity labels, and crawled text retain their original text, language tag (or `und`
-  when unknown), and source provenance, including Russian, Chinese, and other languages without
-  English or Ukrainian versions. Optional translations are derived text with provenance, never
-  replacements for the original or duplicate facts. Data display selects the requested language,
-  then English, then the original. It reports the selected language, provenance, and whether a
-  fallback occurred. An original already in the requested or fallback language is eligible in
-  that order. Missing translations never block ingestion or discard source text.
+- Message catalogs with stable keys live in `locales/`. Dashboard and map keys must exist in both
+  languages. CLI keys are English only. Machine-readable JSON keeps stable keys and codes.
+- Dashboard and map formatting uses CLDR plural rules and locale-aware numbers and dates. Machine
+  data uses ISO formats. Times display in UTC by default, with optional `Europe/Kyiv`.
+- Vocabulary, entity labels, and text facts retain their exact original text, language tag (or
+  `und` when unknown), and source provenance. Optional English or Ukrainian translations carry
+  their own provenance and attach to the same fact. Display selects the requested language, then
+  English, then the original, and reports the selected language, provenance, and fallback status.
+  An original in the requested or fallback language is eligible in that order. Missing
+  translations never block ingestion.
 - Superset enables `en` and `uk`. Dashboards are generated as locale twins from one semantic
-  definition over the same datasets and metrics. Obsidian exports produce one locale per vault.
-- **Kestra waiver.** On 2026-11-20 the owner approved Kestra's native UI as an English-only
-  engineering and administration tool behind the authenticated proxy. Every operator workflow
-  (source status, run, retry, backfill, review queue, export) must be available bilingually
-  through the `kn` CLI and Superset dashboards. Exposing any other upstream English-only screen to
-  operators needs a new approval.
-- A Ukrainian technical speaker reviews the core terminology before release.
+  definition over the same datasets and metrics. The export profile may select a language for
+  fact text.
+- A Ukrainian technical speaker reviews dashboard and map terminology before release.
 
-Boundary: no runtime commercial translation service. Source text stays in its original language,
-and machine translation is optional derived text (see [AI extraction](#ai-extraction)).
+Machine translation is optional derived text. The system has no runtime commercial translation
+service. See [AI extraction](#ai-extraction).
 
 Evaluation:
 
-- CI fails when a key is missing in either locale, a key is unused, or a CLI handler contains a
-  user-facing literal string.
-- Plural and formatting tests pass for both locales.
-- Multilingual data fixtures verify requested-language, English, and original fallback independently
-  of interface catalogs, retaining original text and translation provenance without mutation.
-- CLI golden outputs exist in both locales.
-- Browser screenshot smoke tests in both locales cover dashboards, filters, the map, the review
-  queue, and the export README.
+- CI checks dashboard and map message parity and English CLI key usage. Plural and formatting
+  tests cover both display languages.
+- Multilingual fixtures verify requested-language, English, and original fallback, retaining
+  original text and translation provenance without mutation.
+- CLI goldens cover English help and diagnostics and stable machine output.
+- Browser screenshot smoke tests in both languages cover dashboards, filters, and the map.
 
 Negative result: when a pinned Superset `uk` catalog misses critical strings, a pinned overlay
 catalog fills them. If that is impossible, the screen is recorded as a release blocker. Core
@@ -793,9 +783,8 @@ object's current value for each field.
 **Lineage.** `kn lineage <kn-id|qualified-identifier> [--field <field-id>]` returns the identity
 history, the identifiers, every link with its match record, the record versions and change sets,
 the claims, the selected canonical fact, and any outbound exchange receipts. It is the identity
-half of "Why this fact?". `kn identity show|resolve|history|merge|split|retire|restore` works in
-both locales. A command that changes state writes a review decision and the identity event that
-cites it.
+half of "Why this fact?". An identity command that changes state writes a review decision and
+the identity event that cites it.
 
 Boundary: no merges across entity classes and no matching of people. No golden record overwrites
 canonical facts, which still come from [fact selection](#evidence-model). No learned matcher
@@ -888,7 +877,7 @@ by approved field IDs and condition sets, not a generic entity-attribute-value s
 Claim keys are deterministic, so re-running the same raw record with the same code creates no
 duplicates. Fact selection follows [rule 6](#knowledge-integrity-rules) through the
 [update policy](#update-policy), and unresolved fields stay null or conflicted with a reason.
-`kn review list|decide` is bilingual. Each decision is appended to the decision log and replayed
+Each decision submitted through `kn review list|decide` is appended to the decision log and replayed
 by rebuild.
 
 In the first release, an analyst can open "Why this fact?" from a canonical value in any domain
@@ -1228,7 +1217,7 @@ timer may run the same command.
 source then adds failing fixture tests first, then the general engine change that makes them pass.
 The core never branches on a source ID. On every change, `make ci-local` runs all source fixture
 suites plus a full rebuild from the fixture archive. Logs are structured English JSON with secrets
-redacted, and user-facing messages are localized.
+redacted.
 
 Boundary: no exactly-once network claim, and no per-source special cases inside the core.
 Prefetched datasets use no link-sharing download URLs, no Drive folder listing, no writes to Drive,
@@ -1467,14 +1456,14 @@ authorized stays disabled with the reason.
 
 ### Obsidian export
 
-`kn export obsidian --profile <id> --locale en|uk` writes a read-only, allowlisted subset of
+`kn export obsidian --profile <id>` writes a read-only, allowlisted subset of
 canonical knowledge as a ZIP that opens as a vault without plugins. Profiles in
 `domains/<domain>/exports/` select:
 
 - domain, entity classes, primary classification, and tag filters;
 - time window and allowed statuses and fields;
 - link depth, entity and byte limits, and evidence detail;
-- attachments and locale.
+- attachments and the preferred language for exported fact text.
 
 The export reads one `REPEATABLE READ` snapshot of database `kn` with an explicit as-of time.
 By default it includes only accepted, export-permitted facts. Unverified candidates go in a
@@ -1504,11 +1493,11 @@ Evaluation:
 
 - A fixture profile produces a ZIP whose manifest hashes verify.
 - Every internal link resolves or is an explicit reference.
-- Locale labels are correct.
+- Exported fact text preserves the original language and applies the profile's language preference.
 - Restricted rights are excluded, and secrets and traversal are absent.
 - A repeated export is logically identical.
 
-Negative result: a profile that cannot stay within limits or rights is refused with a localized
+Negative result: a profile that cannot stay within limits or rights is refused with an English
 explanation.
 
 ### Space ELT
@@ -1552,8 +1541,8 @@ runs `kn source run`. No host Docker socket is mounted.
 Flows are generated from enabled crawler configurations: namespace `kn.<domain>`, flow ID equal to
 the source slug, cron in UTC, concurrency 1, and retries only for transient error classes. They are
 deployed through the Kestra API with scoped credentials, and a check detects drift. dbt refreshes
-are debounced. The engine stays fully usable without Kestra through the CLI. Kestra's UI is covered
-by the approved [Kestra waiver](#localization).
+are debounced. The engine stays fully usable without Kestra through the CLI. Kestra's native
+administration UI uses English.
 
 Boundary: Kestra metadata is never a business data model, and no flow runs shell built from
 external input.
@@ -1833,7 +1822,7 @@ ready required tasks in written order before optional work.
 | 20 | `gdelt-dashboards` | planned | Watch dashboards deploy in both locales with stated denominators and story-level counts | - |
 | 21 | `microelectronics-elt` | planned | MPN identity, condition-bound observations, and matched-comparison exclusion fixtures pass | - |
 | 22 | `microelectronics-dashboards` | planned | Bilingual comparison bundles never rank incomparable records | - |
-| 23 | `localization` | planned | Key coverage, plural, golden-output, and screenshot checks pass in `en` and `uk`; the Kestra waiver is the only English-only path | [Catalog core](../impl/current/localization.md) |
+| 23 | `localization` | planned | Dashboard and map keys, formatting, and screenshots pass in `en` and `uk`; text facts retain original language and optional translations | [Catalog core](../impl/current/localization.md) |
 | 24 | `operations-hardening` | planned | Restore drill, performance gate, and security suite pass on the target host with measured objectives | - |
 | 25 | `release-readiness` | planned | Migration mode preserves data, refuses breaking changes and rebuild, freezes the interchange contract, and every evaluation has evidence | - |
 | 26 | `ai-extraction` | planned | Labeled fixtures show zero unsupported published claims within the VRAM budget; ingestion is unaffected without it | - |

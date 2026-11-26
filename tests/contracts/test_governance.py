@@ -91,16 +91,15 @@ def test_rebuild_requires_caller_transaction(monkeypatch: pytest.MonkeyPatch) ->
     connection.execute.assert_not_called()
 
 
-@pytest.mark.parametrize("locale", ["en", "uk"])
-def test_rebuild_refusal_names_the_guard_in_both_locales(
-    monkeypatch: pytest.MonkeyPatch, caplog: pytest.LogCaptureFixture, locale: str
+def test_rebuild_refusal_names_the_guard(
+    monkeypatch: pytest.MonkeyPatch, caplog: pytest.LogCaptureFixture
 ) -> None:
     from kn.cli import main
     from kn.i18n import Translator
 
     monkeypatch.setenv("KN_ENVIRONMENT", "released")
-    assert main(["--locale", locale, "db", "rebuild"]) == 1
-    assert caplog.records[-1].message == Translator(locale).text("cli.rebuild_refused")
+    assert main(["db", "rebuild"]) == 1
+    assert caplog.records[-1].message == Translator().text("cli.rebuild_refused")
     assert "KN_ENVIRONMENT=development" in caplog.records[-1].message
     caplog.clear()
     assert main(["--json", "db", "rebuild"]) == 1

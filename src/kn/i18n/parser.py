@@ -1,4 +1,4 @@
-"""Localized argparse boundary without mutating argparse's process-global gettext."""
+"""English argparse presentation and stable argument errors."""
 
 import argparse
 import json
@@ -9,27 +9,21 @@ from typing import Any, Never
 from kn.i18n import Translator
 
 
-def parse_interface_options(
-    arguments: Sequence[str], default_locale: str
-) -> tuple[argparse.Namespace, list[str]]:
-    """Keep early argument errors in the last selected locale, including the environment."""
+def parse_json_option(arguments: Sequence[str], translator: Translator) -> tuple[bool, list[str]]:
+    """Read the global JSON flag before parsing commands so errors use the requested format."""
     parser = OperatorParser(
-        prog="kn", include_help=False, json_output="--json" in arguments, exit_on_error=False
+        prog="kn",
+        translator=translator,
+        include_help=False,
+        json_output="--json" in arguments,
+        exit_on_error=False,
     )
-    parser.add_argument("--locale", default=default_locale)
     parser.add_argument("--json", action="store_true")
-    selected = argparse.Namespace(locale=default_locale)
     try:
-        return parser.parse_known_args(arguments, namespace=selected)
+        selected, remaining = parser.parse_known_args(arguments)
     except argparse.ArgumentError:
-        # argparse populates the namespace before a later malformed option is encountered.
-        # An invalid locale has no catalog; its diagnostic uses the default interface.
-        try:
-            parser.translator = Translator(selected.locale)
-        except ValueError:
-            parser.translator = Translator()
-        parser.formatter_class = partial(OperatorHelpFormatter, translator=parser.translator)
         parser.error("")
+    return selected.json, remaining
 
 
 class OperatorHelpFormatter(argparse.HelpFormatter):
@@ -70,8 +64,7 @@ class OperatorParser(argparse.ArgumentParser):
             self.add_argument("-h", "--help", action="help", help=self.translator.text("cli.help"))
 
     def error(self, message: str) -> Never:
-        # argparse's free-form English errors are not a stable localization interface.
-        # Show localized usage and a stable code; never interpolate raw argument values.
+        # Keep the diagnostic stable and avoid including raw argument values.
         if self.json_output:
             self.exit(2, json.dumps({"error": {"code": "E_ARGUMENTS"}}) + "\n")
         self.print_usage()

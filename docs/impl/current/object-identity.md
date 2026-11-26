@@ -35,8 +35,8 @@ file, and the identity and evidence loader privileges on an upgraded database.
 
 `kn identity --data-dir PATH ACTION ...` overrides `DATA_DIR`; relative paths resolve from the
 project root. When using a project's `.env`, load it with `scripts/shared/common.sh` and
-`kn_load_env` before running the CLI. Use `--locale en` or `--locale uk` for localized headings,
-help, confirmation and diagnostics. `--json` returns the same keys and values in either locale.
+`kn_load_env` before running the CLI. Help, headings, confirmations and diagnostics use English.
+Use `--json` for structured output.
 Success for a mutation returns the full identity event and `decision_id`. Input or transition
 errors report `E_INPUT`, terminal or owner refusals report `E_IDENTITY_AUTH`, and SQL errors report
 `E_DATABASE`. While a source adapter's interrupted match waits for its retry, a mutation reports
@@ -55,9 +55,8 @@ separator, and an identifier held by more than one object, or by none, reports `
 command reads the identity journal, resolves the reference before it opens the database, and then
 reads the evidence schema in a PostgreSQL read-only transaction. It needs `KN_DATABASE_URL` and
 its password or password file; an unavailable database reports `E_DATABASE`. `--data-dir`,
-`--locale` and `--json` behave as for `kn identity`. The text output gives localized section
-headings with counts followed by canonical JSON rows; `--json` returns the same keys and values
-in either locale.
+and `--json` behave as for `kn identity`. The text output gives English section headings with
+counts followed by canonical JSON rows.
 
 A lookup covers the reference's terminal successors and every object that redirects to them, so a
 merged ID shows its survivor's lineage with the merge event, and a split ID shows both
@@ -362,11 +361,11 @@ a replay or seed failure restores the complete previous SQL state. Raw replay re
 profile structure, source key preservation, authoritative merge proof, terminal authorization,
 journal damage, retries and concurrent minting.
 `tests/integration/test_identity.py` and `test_identity_database.py` check repeated replay, complete
-database-drop recovery through the CLI in both locales, concurrent SQL writers, caught SQL errors,
+database-drop recovery through the CLI, concurrent SQL writers, caught SQL errors,
 pending replay, malformed-log rebuild rollback, SQL/log disagreement and the partial index.
 `tests/integration/test_identity_lifecycle*.py` check CLI writes, cross-class refusal, interrupted
 appends, stale requests and repeat rebuilds with the original decision IDs. `make test-bilingual`
-compares identity lookups and command help with both locale goldens.
+compares identity lookups and command help with the English goldens.
 `tests/identity/test_match*.py` cover the labeled match fixtures, profile safety, comparators,
 exact and scored precedence, retries and concurrent writes. `test_match_order.py` submits the
 organization, part and variant fixtures in every order and compares objects and decision counts,
@@ -391,9 +390,9 @@ split, a merged ID against its survivor, a partial update with a sighting, a two
 split successors, withheld claims, facts, excerpts, attributes and match features, qualified and
 ambiguous identifiers, reported gaps, and the CLI refusals before any database access.
 `tests/e2e/test_lineage_cli.py` compares four lookups with the
-[lineage goldens](../../../tests/e2e/fixtures/lineage-cli.json) in both locales.
+[English lineage goldens](../../../tests/e2e/fixtures/lineage-cli.json).
 `tests/integration/test_lineage_cli.py` stores the same fixture in PostgreSQL and checks that the
-CLI returns those goldens in both locales and the same JSON, in a read-only transaction.
+CLI matches the text goldens and structured results through a read-only transaction.
 `make model-baseline` now includes identity history before SATCOM import and compares every
 registered column after two rebuilds. Run `make ci` and `make test-integration` against local
 PostGIS. The integration suite times warmed PostgreSQL submits against 5,000 and 50,000 synthetic

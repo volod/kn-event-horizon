@@ -10,6 +10,7 @@ from kn.contracts import load_contract
 from kn.contracts.diagnostics import ContractError
 from kn.contracts.exports import artifacts
 from kn.contracts.schemas import pinned_schemas
+from kn.i18n.catalog import load_catalog
 from tests.contracts.test_compiler import compiler_document, write_document
 
 EXAMPLES = json.loads((Path(__file__).with_name("fixtures") / "extensions.json").read_text())
@@ -72,8 +73,6 @@ def semantic_fixture(tmp_path: Path, name: str) -> tuple[Path, Path]:
     if name == "kn.humanVerification":
         value["recordFields"] = ["space.example.id"]
         value["fieldContexts"] = {"space.example.id": ["space.example.id"]}
-    if name == "kn.i18nKey":
-        value = "cli.contract_help"
     _, registry = pinned_schemas()
     scope = registry["properties"][name]["x-kn-scopes"][0]
     node = {"contract": data, "table": table, "field": field}[scope]
@@ -84,13 +83,34 @@ def semantic_fixture(tmp_path: Path, name: str) -> tuple[Path, Path]:
 
 
 @pytest.mark.parametrize("name", SEMANTIC)
-def test_every_semantic_extension_compiles_and_is_retained(tmp_path: Path, name: str) -> None:
+def test_every_semantic_extension_compiles_and_is_retained(
+    tmp_path: Path, name: str, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    if name == "kn.i18nKey":
+        labels = {
+            "en": "Satellite ID",
+            "uk": "\u0406\u0414 \u0441\u0443\u043f\u0443\u0442\u043d\u0438\u043a\u0430",
+        }
+        monkeypatch.setattr(
+            "kn.contracts.references.load_catalog",
+            lambda locale: load_catalog(locale) | {EXAMPLES[name]: labels[locale]},
+        )
     path, refs = semantic_fixture(tmp_path, name)
     result = artifacts(load_contract(path, references=refs))
     assert name in result["contract.json"]
     if name == "kn.enumRef":
         assert "active" in result["postgresql/schema.sql"]
         assert "Literal" in result["pydantic/models.py"]
+
+
+def test_english_cli_copy_cannot_supply_a_bilingual_display_key(tmp_path: Path) -> None:
+    path, refs = semantic_fixture(tmp_path, "kn.i18nKey")
+    data = json.loads(path.read_text())
+    entry = next(item for item in data["customProperties"] if item["property"] == "kn.i18nKey")
+    entry["value"] = "cli.contract_help"
+    path.write_text(json.dumps(data))
+    with pytest.raises(ContractError, match="use a key in both interface catalogs"):
+        load_contract(path, references=refs)
 
 
 @pytest.mark.parametrize("kind", CATALOG)

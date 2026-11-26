@@ -13,13 +13,12 @@ from kn import cli, operations
 from kn.db.rebuild import rebuild
 from kn.evidence.lineage import SqlEvidenceRows
 from kn.evidence.store import evidence_tables, record
-from tests.e2e.support import LOCALES
 from tests.e2e.test_lineage_cli import GOLDENS, rendered
 from tests.identity.lineage_fixtures import CASES, build
 from tests.integration.harness import IntegrationDatabase
 
 
-def test_the_cli_reads_identity_and_evidence_in_both_locales(
+def test_the_cli_reads_identity_and_evidence(
     integration_database: IntegrationDatabase,
     tmp_path: Path,
     monkeypatch: pytest.MonkeyPatch,
@@ -55,12 +54,11 @@ def test_the_cli_reads_identity_and_evidence_in_both_locales(
                 claims = evidence_tables()["claims"]
                 before = connection.scalar(sa.select(sa.func.count()).select_from(claims))
             for case_name, case in CASES.items():
-                for locale in LOCALES:
-                    assert cli.main(["--locale", locale, *case.arguments]) == 0
-                    assert caplog.records[-1].message == expected[locale][case_name], case_name
-                    assert cli.main(["--locale", locale, "--json", *case.arguments]) == 0
-                    result = json.loads(caplog.records[-1].message)
-                    assert result == json.loads(json.dumps(machine[case_name]["json"]))
+                assert cli.main([*case.arguments]) == 0
+                assert caplog.records[-1].message == expected[case_name], case_name
+                assert cli.main(["--json", *case.arguments]) == 0
+                result = json.loads(caplog.records[-1].message)
+                assert result == json.loads(json.dumps(machine[case_name]["json"]))
             with engine.connect() as connection:
                 assert connection.scalar(sa.select(sa.func.count()).select_from(claims)) == before
             assert modes and set(modes) == {"on"}

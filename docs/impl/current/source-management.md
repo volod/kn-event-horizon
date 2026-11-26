@@ -11,15 +11,14 @@ Set `KN_DATABASE_URL` and `KN_DATABASE_PASSWORD_FILE` for the rebuilt database b
 `kn source list`.
 
 ```bash
-kn --locale en source list
-kn --locale uk source list
+kn source list
 kn --json source list
 ```
 
 The command can connect as a database login with the `kn_system_reader` role. It lists sources
 by domain and original worksheet row. The headings, lifecycle labels, and access status use
-the selected interface language. Names and cadence retain the original proposal text. The
-`--json` output is identical in both locales. Each entry includes the catalogue ID, domain,
+English. Names and cadence retain the original proposal text. Each `--json` entry includes the
+catalogue ID, domain,
 nullable original ID, label, priority, cadence, structured access notes, access verification
 status, and lifecycle state. A newly upgraded empty database lists zero candidates until its
 first development rebuild.
@@ -56,7 +55,7 @@ seed load and rolls back any partial insert.
 
 ```bash
 kn source validate tests/sources/fixtures/config/http.yaml
-kn --locale uk source validate tests/sources/fixtures/config/curated.yaml
+kn source validate tests/sources/fixtures/config/curated.yaml
 kn --json source validate tests/sources/fixtures/config/adapter.yaml
 ```
 

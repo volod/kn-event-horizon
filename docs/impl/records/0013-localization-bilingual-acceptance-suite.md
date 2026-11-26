@@ -30,6 +30,12 @@ The owner requests implementation, execution, fixes, and documentation, with ind
 interface and source-data languages. Display uses requested language, English, then original;
 source originals and provenance must survive when English and Ukrainian translations are absent.
 
+## Scope update
+
+On 2026-11-26 the owner limited bilingual interface requirements to dashboards and maps.
+The [CLI scope change record](0050-adhoc-cli-localization-scope.md) records the English CLI checks
+and updated prerequisites. The original task and evidence below describe the prior scope.
+
 ## Implementation and decisions
 
 Initial tree: clean. Prerequisites `obsidian-space-profile`,
