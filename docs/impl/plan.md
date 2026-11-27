@@ -32,36 +32,6 @@ archive.
 
 ### Durable raw archive -- `raw-archive`
 
-#### warc-raw-store
-
-Fetch once, transform many requires an archive that can replay original bytes on its own.
-
-- Serves: `raw-archive` -- [Raw archive](../design/spec.md#raw-archive)
-- Agent status: CLEAR
-- Execution stage: MODEL
-- Dependencies: `warcio` and the [storage design review](records/0054-adhoc-raw-archive-storage-design.md).
-- User-visible outcome: Approved captures commit as WARC 1.1 batches or streamed content-addressed
-  blobs and replay by stable IDs. `kn raw verify` checks the committed archive offline.
-- Scope boundary: Request, response, metadata, resource and revisit records, blob descriptors,
-  capture schema compatibility, commit manifests, redaction, size and decompression limits,
-  and tombstones. Start with local filesystem storage, an explicit `KN_RAW_ARCHIVE_DIR`, and a
-  single writer per source.
-- Data and artifact paths: `src/kn/archive/`, `$KN_RAW_ARCHIVE_DIR`, `.env.example`, `tests/archive/`,
-  `tests/fixtures/archive/`.
-- Execution path: Wrap WARC and blob I/O behind the archive interface. Stage a batch, sync it and
-  atomically publish its manifest and objects together. Record WARC member offsets and lengths for
-  reads of the capture and its metadata. Generate compressed files in tests from sanitized text
-  fixtures and synthetic bytes.
-- Acceptance gates: Both backends round-trip exact bytes and digests. An interrupted write leaves
-  no visible committed batch. Two sources can write independently, and retrying an already
-  committed batch reuses its IDs. Old and current metadata read side by side. Verification rejects
-  unknown schema versions, missing files and digest mismatches. Redaction keeps credentials out of
-  records, URIs and diagnostics. Revisit and tombstone checks pass. Commands with a missing archive
-  root fail before I/O, even when `DATA_DIR` is set. Capture and verification work with the index
-  root unset. Relative roots resolve from the project root.
-- Documentation target: A new `current/raw-archive.md` page listed in the
-  [areas index](current.md#areas).
-
 #### raw-fetch-ledger
 
 Operators need fast capture lookup, scoped reindex and a clear way to recover a lost index.
@@ -69,8 +39,8 @@ Operators need fast capture lookup, scoped reindex and a clear way to recover a 
 - Serves: `raw-archive` -- [Capture schema and fetch ledger](../design/spec.md#capture-schema-and-fetch-ledger)
 - Agent status: CLEAR
 - Execution stage: MODEL
-- Requires: `warc-raw-store`
-- Dependencies: `pyarrow` for reading and writing the Parquet projection.
+- Dependencies: `pyarrow` for reading and writing the Parquet projection and the
+  [committed raw archive interface](current/raw-archive.md).
 - User-visible outcome: `kn raw reindex` recovers the fetch ledger from committed batches and
   tombstones. Readers can resolve records and query by domain, source and capture time.
 - Scope boundary: Versioned logical row schema, a partitioned Parquet projection with batched
@@ -95,7 +65,7 @@ force a re-fetch that a source may no longer allow.
 
 - Serves: `raw-archive` -- [Raw archive](../design/spec.md#raw-archive)
 - Agent status: CLEAR
-- Requires: `warc-raw-store`, `raw-fetch-ledger`
+- Requires: `raw-fetch-ledger`
 - Dependencies: The accepted task records of the group and the [implementation
   audit](../guide/planning-workflow.md#implementation-audits) checks.
 - User-visible outcome: Every rebuild replays from a verified archive. The audit record gives every

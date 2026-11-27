@@ -3,6 +3,8 @@
 import hashlib
 from pathlib import Path
 
+from kn.archive import Archive
+from kn.archive.model import ArchiveError
 from kn.contracts import load_contract
 from kn.contracts.compiler import compile_contract, compile_registry
 from kn.contracts.diagnostics import ContractError
@@ -126,6 +128,13 @@ def source_list_operation() -> dict[str, object]:
             return {"sources": list_sources(connection)}
     finally:
         engine.dispose()
+
+
+def raw_verify_operation() -> dict[str, object]:
+    try:
+        return Archive.configured().verify()
+    except OSError:
+        raise ArchiveError("archive_io") from None
 
 
 def lineage_operation(

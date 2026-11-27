@@ -15,7 +15,7 @@
       "--help"
     ],
     "expected": {
-      "stdout": "usage: kn [-h] [--json]\n          {info,contract,db,identity,review,lineage,source,space,vocabulary}\n          ...\n\noptions:\n  -h, --help            show this help message and exit\n  --json                emit machine-readable JSON with stable keys\n\ncommands:\n  {info,contract,db,identity,review,lineage,source,space,vocabulary}\n    info                show the installed project identity\n    contract            validate or compile open data contracts\n    db                  apply or verify governed schema revisions\n    identity            inspect and review object identity\n    review              list and decide review items\n    lineage             trace an object or field to its records and decisions\n    source              list and validate sources\n    space               space-domain datasets\n    vocabulary          review and export controlled vocabularies\n",
+      "stdout": "usage: kn [-h] [--json]\n          {info,contract,db,identity,review,lineage,source,raw,space,vocabulary}\n          ...\n\noptions:\n  -h, --help            show this help message and exit\n  --json                emit machine-readable JSON with stable keys\n\ncommands:\n  {info,contract,db,identity,review,lineage,source,raw,space,vocabulary}\n    info                show the installed project identity\n    contract            validate or compile open data contracts\n    db                  apply or verify governed schema revisions\n    identity            inspect and review object identity\n    review              list and decide review items\n    lineage             trace an object or field to its records and decisions\n    source              list and validate sources\n    raw                 inspect the durable raw archive\n    space               space-domain datasets\n    vocabulary          review and export controlled vocabularies\n",
       "stderr": "",
       "exit_code": 0
     },
@@ -165,7 +165,7 @@
       "unknown"
     ],
     "expected": {
-      "stdout": "usage: kn [-h] [--json]\n          {info,contract,db,identity,review,lineage,source,space,vocabulary}\n          ...\n",
+      "stdout": "usage: kn [-h] [--json]\n          {info,contract,db,identity,review,lineage,source,raw,space,vocabulary}\n          ...\n",
       "stderr": "E_ARGUMENTS: invalid arguments for kn; use --help.\n",
       "exit_code": 2
     },
@@ -176,7 +176,7 @@
     "expected": {
       "exit_code": 2,
       "stderr": "E_ARGUMENTS: invalid arguments for kn; use --help.\n",
-      "stdout": "usage: kn [-h] [--json]\n          {info,contract,db,identity,review,lineage,source,space,vocabulary} ...\n"
+      "stdout": "usage: kn [-h] [--json]\n          {info,contract,db,identity,review,lineage,source,raw,space,vocabulary} ...\n"
     },
     "id": "missing-command"
   },

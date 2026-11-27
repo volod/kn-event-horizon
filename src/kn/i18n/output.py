@@ -26,6 +26,8 @@ def render_result(translator: Translator, command: str, result: dict[str, object
         return translator.text("cli.seed_ok", **result)
     if command == "db":
         return translator.text("cli.db_ok")
+    if command == "raw":
+        return translator.text("cli.raw_verified", **result)
     if command == "source":
         if result.get("status") == "valid":
             return translator.text(

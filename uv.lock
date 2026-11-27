@@ -1,5 +1,5 @@
 version = 1
-revision = 3
+revision = 5
 requires-python = ">=3.12"
 resolution-markers = [
     "python_full_version >= '3.15'",
@@ -89,9 +89,9 @@ name = "boto3"
 version = "1.44.9"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
-    { name = "botocore", marker = "python_full_version < '3.15'" },
-    { name = "jmespath", marker = "python_full_version < '3.15'" },
-    { name = "s3transfer", marker = "python_full_version < '3.15'" },
+    { name = "botocore" },
+    { name = "jmespath" },
+    { name = "s3transfer" },
 ]
 sdist = { url = "https://files.pythonhosted.org/packages/24/43/993eec3594eab145ec751af0ef1dadbad0beb01b304b99d7ed0b68c31a71/boto3-1.44.9.tar.gz", hash = "sha256:da4199076833547445a7181e38e833f476808142df95084b2b46c8b2a107aa66", size = 112771, upload-time = "2026-11-21T01:33:36.737Z" }
 wheels = [
@@ -103,9 +103,9 @@ name = "botocore"
 version = "1.44.9"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
-    { name = "jmespath", marker = "python_full_version < '3.15'" },
-    { name = "python-dateutil", marker = "python_full_version < '3.15'" },
-    { name = "urllib3", marker = "python_full_version < '3.15'" },
+    { name = "jmespath" },
+    { name = "python-dateutil" },
+    { name = "urllib3" },
 ]
 sdist = { url = "https://files.pythonhosted.org/packages/04/10/cf5cb95dee4b956eb785e5225aa47054872bbcf263241e926fa796c388ce/botocore-1.44.9.tar.gz", hash = "sha256:1f783e0b31f0053f41f4239b7a7e2e73957f25cdc6b2f45d113f1b575a4db10b", size = 17206061, upload-time = "2026-11-21T01:33:31.469Z" }
 wheels = [
@@ -557,27 +557,27 @@ name = "datacontract-cli"
 version = "1.2.11"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
-    { name = "boto3", marker = "python_full_version < '3.15'" },
-    { name = "click", marker = "python_full_version < '3.15'" },
-    { name = "datacontract-specification", marker = "python_full_version < '3.15'" },
-    { name = "deepdiff", marker = "python_full_version < '3.15'" },
-    { name = "fastjsonschema", marker = "python_full_version < '3.15'" },
-    { name = "jinja-partials", marker = "python_full_version < '3.15'" },
-    { name = "jinja2", marker = "python_full_version < '3.15'" },
-    { name = "jsonschema", marker = "python_full_version < '3.15'" },
-    { name = "open-data-contract-standard", marker = "python_full_version < '3.15'" },
-    { name = "pydantic", marker = "python_full_version < '3.15'" },
-    { name = "pydantic-settings", marker = "python_full_version < '3.15'" },
-    { name = "python-dotenv", marker = "python_full_version < '3.15'" },
-    { name = "python-multipart", marker = "python_full_version < '3.15'" },
-    { name = "pytz", marker = "python_full_version < '3.15'" },
-    { name = "pyyaml", marker = "python_full_version < '3.15'" },
-    { name = "requests", marker = "python_full_version < '3.15'" },
-    { name = "rich", marker = "python_full_version < '3.15'" },
-    { name = "ruamel-yaml", marker = "python_full_version < '3.15'" },
-    { name = "sqlglot", marker = "python_full_version < '3.15'" },
-    { name = "truststore", marker = "python_full_version < '3.15'" },
-    { name = "typer", marker = "python_full_version < '3.15'" },
+    { name = "boto3" },
+    { name = "click" },
+    { name = "datacontract-specification" },
+    { name = "deepdiff" },
+    { name = "fastjsonschema" },
+    { name = "jinja-partials" },
+    { name = "jinja2" },
+    { name = "jsonschema" },
+    { name = "open-data-contract-standard" },
+    { name = "pydantic" },
+    { name = "pydantic-settings" },
+    { name = "python-dotenv" },
+    { name = "python-multipart" },
+    { name = "pytz" },
+    { name = "pyyaml" },
+    { name = "requests" },
+    { name = "rich" },
+    { name = "ruamel-yaml" },
+    { name = "sqlglot" },
+    { name = "truststore" },
+    { name = "typer" },
 ]
 sdist = { url = "https://files.pythonhosted.org/packages/41/48/617d47b7d2bec73473efe1ed12e7d31731d7e294d4595fdb076cf79e1961/datacontract_cli-1.2.11.tar.gz", hash = "sha256:6ee8535f963ae78206eb0a991eec16df1d409f810feeb5cfb9a702194d3e23ab", size = 3727103, upload-time = "2026-11-17T21:58:28.309Z" }
 wheels = [
@@ -589,8 +589,8 @@ name = "datacontract-specification"
 version = "1.2.3"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
-    { name = "pydantic", marker = "python_full_version < '3.15'" },
-    { name = "pyyaml", marker = "python_full_version < '3.15'" },
+    { name = "pydantic" },
+    { name = "pyyaml" },
 ]
 sdist = { url = "https://files.pythonhosted.org/packages/d3/a5/3ee2bc8671b08e0c350091308386d2171bb03f8255647466ddcfab8717ca/datacontract_specification-1.2.3.tar.gz", hash = "sha256:5fc612255667581321b480e3f646c76ece618632a4aca4cd6ea5f647d98cbb61", size = 16162, upload-time = "2025-09-25T14:25:49.494Z" }
 wheels = [
@@ -602,8 +602,8 @@ name = "deepdiff"
 version = "9.2.1"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
-    { name = "cachebox", marker = "python_full_version < '3.15'" },
-    { name = "orderly-set", marker = "python_full_version < '3.15'" },
+    { name = "cachebox" },
+    { name = "orderly-set" },
 ]
 sdist = { url = "https://files.pythonhosted.org/packages/f9/da/6ac44e4e37c46643adc3230674517079f7c130c04597df2bb714f3dc5c57/deepdiff-9.2.1.tar.gz", hash = "sha256:6ca37d0c19b6cc75808239992172c9c26942192445073a01a7e58138f5f3594c", size = 410282, upload-time = "2026-11-18T20:37:27.359Z" }
 wheels = [
@@ -682,7 +682,7 @@ name = "jinja-partials"
 version = "0.4.0"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
-    { name = "jinja2", marker = "python_full_version < '3.15'" },
+    { name = "jinja2" },
 ]
 sdist = { url = "https://files.pythonhosted.org/packages/9c/25/6e1e3c5adba645fb715168918101b2ef067708febaa4eb343eab31ebf82d/jinja_partials-0.4.0.tar.gz", hash = "sha256:5e85542741c445bf1320090d05d9e47dc9061deeb63a3fe2bc06e66690be9cbb", size = 2995817, upload-time = "2026-11-07T04:03:18.302Z" }
 wheels = [
@@ -694,7 +694,7 @@ name = "jinja2"
 version = "3.1.6"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
-    { name = "markupsafe", marker = "python_full_version < '3.15'" },
+    { name = "markupsafe" },
 ]
 sdist = { url = "https://files.pythonhosted.org/packages/df/bf/f7da0350254c0ed7c72f3e33cef02e048281fec7ecec5f032d4aac52226b/jinja2-3.1.6.tar.gz", hash = "sha256:0137fb05990d35f1275a587e9aee6d56da821fc83491a0fb838183be43f66d6d", size = 245115, upload-time = "2025-03-05T20:05:02.478Z" }
 wheels = [
@@ -749,9 +749,11 @@ dependencies = [
     { name = "psycopg", extra = ["binary"] },
     { name = "publicsuffixlist" },
     { name = "pydantic" },
+    { name = "python-dotenv" },
     { name = "pyyaml" },
     { name = "rdflib" },
     { name = "sqlalchemy" },
+    { name = "warcio" },
 ]
 
 [package.optional-dependencies]
@@ -776,6 +778,9 @@ contract-tools = [
     { name = "datacontract-cli", marker = "python_full_version < '3.15'" },
 ]
 
+[package.group-requires-python]
+contract-tools = ">=3.12,<3.15"
+
 [package.metadata]
 requires-dist = [
     { name = "alembic", specifier = ">=1.17,<2" },
@@ -793,6 +798,7 @@ requires-dist = [
     { name = "pyoxigraph", marker = "extra == 'dev'", specifier = ">=0.5.13,<0.6" },
     { name = "pytest", marker = "extra == 'dev'", specifier = ">=8,<10" },
     { name = "pytest-cov", marker = "extra == 'dev'", specifier = ">=6,<8" },
+    { name = "python-dotenv", specifier = ">=1.2,<2" },
     { name = "pyyaml", specifier = ">=6,<7" },
     { name = "radon", marker = "extra == 'dev'", specifier = "==6.0.1" },
     { name = "rdflib", specifier = ">=7.6,<8" },
@@ -801,6 +807,7 @@ requires-dist = [
     { name = "sqlalchemy", specifier = ">=2.0.44,<3" },
     { name = "types-jsonschema", marker = "extra == 'dev'", specifier = ">=4.25,<5" },
     { name = "types-pyyaml", marker = "extra == 'dev'", specifier = ">=6,<7" },
+    { name = "warcio", specifier = ">=1.7.5,<2" },
 ]
 provides-extras = ["dev"]
 
@@ -1123,8 +1130,8 @@ name = "open-data-contract-standard"
 version = "3.2.0"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
-    { name = "pydantic", marker = "python_full_version < '3.15'" },
-    { name = "pyyaml", marker = "python_full_version < '3.15'" },
+    { name = "pydantic" },
+    { name = "pyyaml" },
 ]
 sdist = { url = "https://files.pythonhosted.org/packages/01/5d/11fcaf438c29e66d3f3eb40fa8e10fb53930f6346bce323624e139e0e301/open_data_contract_standard-3.2.0.tar.gz", hash = "sha256:37589b1e98ea519de51366e0efc2e02dbc87e1da68f07fd9385e49ab5df76763", size = 26890, upload-time = "2026-09-02T14:16:17.219Z" }
 wheels = [
@@ -1386,10 +1393,10 @@ name = "pydantic-settings"
 version = "2.16.3"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
-    { name = "pydantic", marker = "python_full_version < '3.15'" },
-    { name = "python-dotenv", marker = "python_full_version < '3.15'" },
-    { name = "typing-extensions", marker = "python_full_version < '3.15'" },
-    { name = "typing-inspection", marker = "python_full_version < '3.15'" },
+    { name = "pydantic" },
+    { name = "python-dotenv" },
+    { name = "typing-extensions" },
+    { name = "typing-inspection" },
 ]
 sdist = { url = "https://files.pythonhosted.org/packages/59/28/227c843eedd29bd78e132e5aafa420d83154b10465c312f9c21ff2eaf77d/pydantic_settings-2.16.3.tar.gz", hash = "sha256:10e36f616623ebb586c05ca3d3cd22927146869db413d4f14c20c514442a1337", size = 311716, upload-time = "2026-11-13T11:18:30.102Z" }
 wheels = [
@@ -1609,7 +1616,7 @@ name = "python-dateutil"
 version = "2.9.0.post0"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
-    { name = "six", marker = "python_full_version < '3.15'" },
+    { name = "six" },
 ]
 sdist = { url = "https://files.pythonhosted.org/packages/66/c0/0c8b6ad9f17a802ee498c46e004a0eb49bc148f2fd230864601a86dcf6db/python-dateutil-2.9.0.post0.tar.gz", hash = "sha256:37dd54208da7e1cd875388217d5e00ebd4179249f90fb72437e91a35459a0ad3", size = 342432, upload-time = "2024-03-01T18:36:20.211Z" }
 wheels = [
@@ -1733,10 +1740,10 @@ name = "requests"
 version = "2.34.2"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
-    { name = "certifi", marker = "python_full_version < '3.15'" },
-    { name = "charset-normalizer", marker = "python_full_version < '3.15'" },
-    { name = "idna", marker = "python_full_version < '3.15'" },
-    { name = "urllib3", marker = "python_full_version < '3.15'" },
+    { name = "certifi" },
+    { name = "charset-normalizer" },
+    { name = "idna" },
+    { name = "urllib3" },
 ]
 sdist = { url = "https://files.pythonhosted.org/packages/ac/c3/e2a2b89f2d3e2179abd6d00ebd70bff6273f37fb3e0cc209f48b39d00cbf/requests-2.34.2.tar.gz", hash = "sha256:f288924cae4e29463698d6d60bc6a4da69c89185ad1e0bcc4104f584e960b9ed", size = 142856, upload-time = "2026-05-14T19:25:27.735Z" }
 wheels = [
@@ -1903,7 +1910,7 @@ name = "s3transfer"
 version = "0.19.3"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
-    { name = "botocore", marker = "python_full_version < '3.15'" },
+    { name = "botocore" },
 ]
 sdist = { url = "https://files.pythonhosted.org/packages/49/c5/0a5ce655109cb96b8dfad36908a4e108d15f5dc2eff8fbc3146c4312e704/s3transfer-0.19.3.tar.gz", hash = "sha256:8326acc3d056d7f7b8a37110c7d2aea41f67e83f6ae79cd3b5fbcca34c726406", size = 166087, upload-time = "2026-10-19T19:19:49.751Z" }
 wheels = [
@@ -2166,6 +2173,18 @@ source = { registry = "https://pypi.org/simple" }
 sdist = { url = "https://files.pythonhosted.org/packages/e3/05/b17359e1cefb4f909b5e40b1b90a496d987258916dbbf88e842c729f510e/urllib3-2.8.0.tar.gz", hash = "sha256:63bf2ead4c879426ebf22ef2a781eeb4aa3b4ae798a0435506f8687fd5bb9b63", size = 458972, upload-time = "2026-09-15T19:29:36.253Z" }
 wheels = [
     { url = "https://files.pythonhosted.org/packages/92/9d/c4e665119135114480843e7ab388fa94d8480650450e6f8e26b70d323a4c/urllib3-2.8.0-py3-none-any.whl", hash = "sha256:0cf3cae568d36aa9576b28dfb35f11328f1cb974ca7647d9475ebb86c75ac6e3", size = 135717, upload-time = "2026-09-15T19:29:34.577Z" },
+]
+
+[[package]]
+name = "warcio"
+version = "1.8.2"
+source = { registry = "https://pypi.org/simple" }
+dependencies = [
+    { name = "six" },
+]
+sdist = { url = "https://files.pythonhosted.org/packages/92/ba/15db78cf7c722376f1e8007a4f3d7b13ca0328576e0b94b2c80f05ff7cff/warcio-1.8.2.tar.gz", hash = "sha256:03e2b024c9d08523dbed7363e97abe8d56918626c00a1b94c2864b919c1927c8", size = 66566, upload-time = "2026-10-28T19:07:07.442Z" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/d3/14/0dcbcc0080bc83304fc0c923965afda562fc6bcbd152d65f31b1872826e8/warcio-1.8.2-py2.py3-none-any.whl", hash = "sha256:4fc9c12ed7e846dcb51103074d0aa964ea52a739fb95dd9f6f8a7db8388b0f01", size = 41940, upload-time = "2026-10-28T19:07:06.238Z" },
 ]
 
 [[package]]

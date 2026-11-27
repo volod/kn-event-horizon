@@ -15,6 +15,8 @@ from typing import Any, cast
 from jsonschema import ValidationError
 from sqlalchemy.exc import SQLAlchemyError
 
+from kn.archive.config import ROOT_VARIABLE
+from kn.archive.model import ArchiveError
 from kn.contracts.diagnostics import ContractError
 from kn.db.rebuild import RebuildRefused
 from kn.evidence.ranking import DEFAULT_AUDIENCE, Audience
@@ -31,6 +33,7 @@ from kn.operations import (
     contract_operation,
     database_operation,
     lineage_operation,
+    raw_verify_operation,
     satcom_operation,
     source_list_operation,
 )
@@ -94,6 +97,9 @@ def build_parser(
         "validate", help=tr.text("cli.source_validate_help")
     )
     validate_source.add_argument("source", type=Path, help=tr.text("cli.source_config_help"))
+    raw = subcommands.add_parser("raw", help=tr.text("cli.raw_help"))
+    raw_actions = raw.add_subparsers(dest="action", required=True, parser_class=parser_class)
+    raw_actions.add_parser("verify", help=tr.text("cli.raw_verify_help"))
     space = subcommands.add_parser("space", help=tr.text("cli.space_help"))
     datasets = space.add_subparsers(
         dest="dataset", required=True, title=tr.text("cli.commands"), parser_class=parser_class
@@ -222,6 +228,9 @@ def main(argv: Sequence[str] | None = None) -> int:
     except RebuildRefused:
         _report_error(translator.text("cli.rebuild_refused"), "E_INPUT", json_output)
         return 1
+    except ArchiveError as error:
+        _report_archive_error(translator, error, json_output)
+        return 1
     except operator.IdentityAuthorizationError:
         code = "E_REVIEW_AUTH" if args.command == "review" else "E_IDENTITY_AUTH"
         message = (
@@ -264,6 +273,16 @@ def _report_error(
     _LOG.error("%s", json.dumps({"error": error}, ensure_ascii=True) if json_output else message)
 
 
+def _report_archive_error(translator: Translator, error: ArchiveError, json_output: bool) -> None:
+    details = {"reason": error.code}
+    if error.code == "archive_root_required":
+        details["variable"] = ROOT_VARIABLE
+        message = translator.text("cli.raw_root_required", variable=ROOT_VARIABLE)
+    else:
+        message = translator.text("cli.raw_error", reason=error.code)
+    _report_error(message, "E_RAW_ARCHIVE", json_output, details)
+
+
 def _run(args: argparse.Namespace, translator: Translator) -> dict[str, object]:
     if args.command == "review":
         return _review(args, translator)
@@ -281,6 +300,8 @@ def _run(args: argparse.Namespace, translator: Translator) -> dict[str, object]:
         )
     if args.command == "db":
         return database_operation(args.action)
+    if args.command == "raw":
+        return raw_verify_operation()
     if args.command == "source":
         if args.action == "validate":
             return source_validate_operation(args.source)

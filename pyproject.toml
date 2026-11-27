@@ -21,9 +21,11 @@ dependencies = [
   "psycopg[binary]>=3.3,<4",
   "publicsuffixlist==1.1.2.20261122",
   "pydantic>=2.12,<3",
+  "python-dotenv>=1.2,<2",
   "pyyaml>=6,<7",
   "rdflib>=7.6,<8",
   "sqlalchemy>=2.0.44,<3",
+  "warcio>=1.7.5,<2",
 ]
 
 [project.urls]
