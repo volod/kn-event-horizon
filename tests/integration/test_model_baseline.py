@@ -14,6 +14,7 @@ from pathlib import Path
 import sqlalchemy as sa
 from sqlalchemy.engine import Connection
 
+from kn.archive import Archive
 from kn.contracts.compiler import compile_registry
 from kn.contracts.model import Contract, canonical
 from kn.contracts.registry import registered_contracts
@@ -25,6 +26,7 @@ from kn.db.statements import ResetRole, SetConstraints, SetRole
 from kn.domains.space.satcom.archive import archive
 from kn.domains.space.satcom.importer import import_package
 from kn.domains.space.satcom.package import CSV_DIRECTORY, Package, read_package
+from kn.engine.state import CONTRACT_ID, ingestion_contract
 from kn.review import store as reviews
 from kn.review.journal import Journal
 from kn.review.model import Decision, Stamp
@@ -37,6 +39,11 @@ from kn.sources.catalogue import TABLE_NAME
 from kn.sources.seeds import reviewed_catalogue
 from tests.integration.evidence_fixtures import seed_evidence_fixture
 from tests.integration.identity_fixtures import seed_identity_fixture
+from tests.integration.ingestion_fixtures import (
+    assert_ingestion_snapshot,
+    fixture_archive,
+    seed_ingestion_fixture,
+)
 from tests.integration.review_fixtures import (
     OPEN,
     SATCOM,
@@ -54,6 +61,7 @@ from tests.semantic.conftest import REFERENCES
 FIXTURE_OWNERS = {
     "kn.system.governance",
     "kn.system.source_catalogue",
+    CONTRACT_ID,
     "kn.space.satcom",
     "kn.core.semantic",
     "kn.core.human_verification",
@@ -219,6 +227,8 @@ def test_registered_model_fixture_rebuild_is_lossless_and_repeatable(
     )
     package = read_package(source_package, satcom)
     archived = archive(package, tmp_path)
+    raw_archive = Archive(tmp_path / "raw-archive")
+    manifest = fixture_archive(raw_archive.root)
     semantic_fixture = text_fixture()
     validate_model(semantic_fixture, REFERENCES)
     semantic_fixture = native_rows(semantic, semantic_fixture)
@@ -242,9 +252,13 @@ def test_registered_model_fixture_rebuild_is_lossless_and_repeatable(
         evidence = next(item for item in contracts if item.contract_id == "kn.core.evidence")
         assert seed_evidence_fixture(connection) > 0
         _drain_references(connection, evidence)
+        capture = raw_archive.metadata(manifest.captures[0].record_id)
+        seed_ingestion_fixture(connection, capture)
+        _drain_references(connection, ingestion_contract())
         verify(connection, contracts)
         snapshot = _snapshot(connection, contracts)
         _assert_satcom(snapshot, package, satcom)
+        assert_ingestion_snapshot(snapshot, capture)
         _assert_semantic(snapshot, semantic, semantic_fixture)
         assert snapshot[TABLE_NAME] == sorted(
             reviewed_catalogue(), key=lambda row: row["source_id"]

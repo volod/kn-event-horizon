@@ -1,0 +1,935 @@
+{
+  "apiVersion": "v3.1.0",
+  "kind": "DataContract",
+  "id": "kn.system.ingestion_state",
+  "name": "KN ingestion state",
+  "version": "1.0.0",
+  "status": "draft",
+  "customProperties": [
+    {
+      "property": "kn.storageSchema",
+      "value": "system"
+    }
+  ],
+  "schema": [
+    {
+      "name": "source_run_attempts",
+      "logicalType": "object",
+      "physicalType": "table",
+      "description": "One execution attempt of a logical ingestion run, including its outcome and health observations.",
+      "properties": [
+        {
+          "name": "source_id",
+          "logicalType": "string",
+          "required": true,
+          "primaryKey": true,
+          "description": "Domain-qualified source identifier shared with the catalogue and archive",
+          "customProperties": [
+            {
+              "property": "kn.fieldId",
+              "value": "system.source_run_attempts.source_id"
+            }
+          ]
+        },
+        {
+          "name": "scope",
+          "logicalType": "string",
+          "required": true,
+          "primaryKey": true,
+          "description": "Stable source-local synchronization stream",
+          "customProperties": [
+            {
+              "property": "kn.fieldId",
+              "value": "system.source_run_attempts.scope"
+            }
+          ]
+        },
+        {
+          "name": "cursor_namespace",
+          "logicalType": "string",
+          "required": true,
+          "primaryKey": true,
+          "description": "Live or configured backfill cursor namespace within the stream",
+          "customProperties": [
+            {
+              "property": "kn.fieldId",
+              "value": "system.source_run_attempts.cursor_namespace"
+            }
+          ]
+        },
+        {
+          "name": "run_id",
+          "logicalType": "string",
+          "required": true,
+          "primaryKey": true,
+          "description": "Stable logical run identifier reused by its retries",
+          "customProperties": [
+            {
+              "property": "kn.fieldId",
+              "value": "system.source_run_attempts.run_id"
+            }
+          ]
+        },
+        {
+          "name": "attempt",
+          "logicalType": "integer",
+          "required": true,
+          "primaryKey": true,
+          "description": "One-based execution attempt within the logical run",
+          "customProperties": [
+            {
+              "property": "kn.fieldId",
+              "value": "system.source_run_attempts.attempt"
+            }
+          ]
+        },
+        {
+          "name": "mode",
+          "logicalType": "string",
+          "required": true,
+          "primaryKey": false,
+          "description": "Whether the input comes from a source or retained archive captures",
+          "customProperties": [
+            {
+              "property": "kn.fieldId",
+              "value": "system.source_run_attempts.mode"
+            },
+            {
+              "property": "kn.enum",
+              "value": [
+                "fetch",
+                "replay"
+              ]
+            }
+          ]
+        },
+        {
+          "name": "started_at",
+          "logicalType": "timestamp",
+          "required": true,
+          "primaryKey": false,
+          "description": "UTC instant at which the attempt was registered",
+          "customProperties": [
+            {
+              "property": "kn.fieldId",
+              "value": "system.source_run_attempts.started_at"
+            }
+          ]
+        },
+        {
+          "name": "finished_at",
+          "logicalType": "timestamp",
+          "required": false,
+          "primaryKey": false,
+          "description": "UTC instant the outcome was recorded; null for an unfinished attempt",
+          "customProperties": [
+            {
+              "property": "kn.fieldId",
+              "value": "system.source_run_attempts.finished_at"
+            }
+          ]
+        },
+        {
+          "name": "status",
+          "logicalType": "string",
+          "required": false,
+          "primaryKey": false,
+          "description": "Terminal run outcome; null until recorded",
+          "customProperties": [
+            {
+              "property": "kn.fieldId",
+              "value": "system.source_run_attempts.status"
+            },
+            {
+              "property": "kn.enum",
+              "value": [
+                "success",
+                "partial",
+                "not_modified",
+                "blocked",
+                "failed",
+                "skipped"
+              ]
+            }
+          ]
+        },
+        {
+          "name": "config_sha256",
+          "logicalType": "string",
+          "required": true,
+          "primaryKey": false,
+          "description": "SHA-256 of the crawler configuration used by this attempt",
+          "customProperties": [
+            {
+              "property": "kn.fieldId",
+              "value": "system.source_run_attempts.config_sha256"
+            }
+          ]
+        },
+        {
+          "name": "code_sha256",
+          "logicalType": "string",
+          "required": true,
+          "primaryKey": false,
+          "description": "SHA-256 of the code used by this attempt",
+          "customProperties": [
+            {
+              "property": "kn.fieldId",
+              "value": "system.source_run_attempts.code_sha256"
+            }
+          ]
+        },
+        {
+          "name": "incomplete_reason",
+          "logicalType": "string",
+          "required": false,
+          "primaryKey": false,
+          "description": "Reviewed reason identifier for accepting incomplete or invalid input as success",
+          "customProperties": [
+            {
+              "property": "kn.fieldId",
+              "value": "system.source_run_attempts.incomplete_reason"
+            }
+          ]
+        },
+        {
+          "name": "record_count",
+          "logicalType": "integer",
+          "required": false,
+          "primaryKey": false,
+          "description": "Native records read by the attempt; null if unmeasured",
+          "customProperties": [
+            {
+              "property": "kn.fieldId",
+              "value": "system.source_run_attempts.record_count"
+            }
+          ]
+        },
+        {
+          "name": "claim_count",
+          "logicalType": "integer",
+          "required": false,
+          "primaryKey": false,
+          "description": "Claims committed by the attempt; null if unmeasured",
+          "customProperties": [
+            {
+              "property": "kn.fieldId",
+              "value": "system.source_run_attempts.claim_count"
+            }
+          ]
+        },
+        {
+          "name": "reject_count",
+          "logicalType": "integer",
+          "required": false,
+          "primaryKey": false,
+          "description": "Records rejected by the attempt; null if unmeasured",
+          "customProperties": [
+            {
+              "property": "kn.fieldId",
+              "value": "system.source_run_attempts.reject_count"
+            }
+          ]
+        },
+        {
+          "name": "quarantine_count",
+          "logicalType": "integer",
+          "required": false,
+          "primaryKey": false,
+          "description": "Records quarantined by the attempt; null if unmeasured",
+          "customProperties": [
+            {
+              "property": "kn.fieldId",
+              "value": "system.source_run_attempts.quarantine_count"
+            }
+          ]
+        },
+        {
+          "name": "bytes_received",
+          "logicalType": "integer",
+          "required": false,
+          "primaryKey": false,
+          "description": "Response entity bytes received by the attempt; null if unmeasured",
+          "customProperties": [
+            {
+              "property": "kn.fieldId",
+              "value": "system.source_run_attempts.bytes_received"
+            }
+          ]
+        },
+        {
+          "name": "requests_used",
+          "logicalType": "integer",
+          "required": false,
+          "primaryKey": false,
+          "description": "Source requests counted against the attempt budget; null if unmeasured",
+          "customProperties": [
+            {
+              "property": "kn.fieldId",
+              "value": "system.source_run_attempts.requests_used"
+            }
+          ]
+        },
+        {
+          "name": "request_budget",
+          "logicalType": "integer",
+          "required": false,
+          "primaryKey": false,
+          "description": "Request limit applied to this attempt; null if inapplicable",
+          "customProperties": [
+            {
+              "property": "kn.fieldId",
+              "value": "system.source_run_attempts.request_budget"
+            }
+          ]
+        },
+        {
+          "name": "cursor_lag_seconds",
+          "logicalType": "integer",
+          "required": false,
+          "primaryKey": false,
+          "description": "Cursor lag in whole seconds when this attempt finished; null if unknown or inapplicable",
+          "customProperties": [
+            {
+              "property": "kn.fieldId",
+              "value": "system.source_run_attempts.cursor_lag_seconds"
+            }
+          ]
+        }
+      ],
+      "customProperties": [
+        {
+          "property": "kn.humanVerification",
+          "value": {
+            "strategy": "external",
+            "resolver": "contract-v1",
+            "recordFields": [
+              "system.source_run_attempts.source_id",
+              "system.source_run_attempts.scope",
+              "system.source_run_attempts.cursor_namespace",
+              "system.source_run_attempts.run_id",
+              "system.source_run_attempts.attempt",
+              "system.source_run_attempts.mode",
+              "system.source_run_attempts.started_at",
+              "system.source_run_attempts.finished_at",
+              "system.source_run_attempts.status",
+              "system.source_run_attempts.config_sha256",
+              "system.source_run_attempts.code_sha256",
+              "system.source_run_attempts.incomplete_reason",
+              "system.source_run_attempts.record_count",
+              "system.source_run_attempts.claim_count",
+              "system.source_run_attempts.reject_count",
+              "system.source_run_attempts.quarantine_count",
+              "system.source_run_attempts.bytes_received",
+              "system.source_run_attempts.requests_used",
+              "system.source_run_attempts.request_budget",
+              "system.source_run_attempts.cursor_lag_seconds"
+            ],
+            "fieldContexts": {},
+            "defaultFieldContext": "record"
+          }
+        },
+        {
+          "property": "kn.presence",
+          "value": [
+            {
+              "name": "terminal_outcome",
+              "rule": "all_or_none",
+              "fields": [
+                "finished_at",
+                "status"
+              ]
+            }
+          ]
+        },
+        {
+          "property": "kn.index",
+          "value": [
+            {
+              "name": "source_run_attempts_started_idx",
+              "fields": [
+                "source_id",
+                "scope",
+                "cursor_namespace",
+                "started_at"
+              ],
+              "unique": false,
+              "method": "btree"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "source_run_errors",
+      "logicalType": "object",
+      "physicalType": "table",
+      "description": "Ordered standard source error and disposition history for each attempt.",
+      "properties": [
+        {
+          "name": "source_id",
+          "logicalType": "string",
+          "required": true,
+          "primaryKey": true,
+          "description": "Domain-qualified source identifier shared with the catalogue and archive",
+          "customProperties": [
+            {
+              "property": "kn.fieldId",
+              "value": "system.source_run_errors.source_id"
+            }
+          ]
+        },
+        {
+          "name": "scope",
+          "logicalType": "string",
+          "required": true,
+          "primaryKey": true,
+          "description": "Stable source-local synchronization stream",
+          "customProperties": [
+            {
+              "property": "kn.fieldId",
+              "value": "system.source_run_errors.scope"
+            }
+          ]
+        },
+        {
+          "name": "cursor_namespace",
+          "logicalType": "string",
+          "required": true,
+          "primaryKey": true,
+          "description": "Live or configured backfill cursor namespace within the stream",
+          "customProperties": [
+            {
+              "property": "kn.fieldId",
+              "value": "system.source_run_errors.cursor_namespace"
+            }
+          ]
+        },
+        {
+          "name": "run_id",
+          "logicalType": "string",
+          "required": true,
+          "primaryKey": true,
+          "description": "Stable logical run identifier reused by its retries",
+          "customProperties": [
+            {
+              "property": "kn.fieldId",
+              "value": "system.source_run_errors.run_id"
+            }
+          ]
+        },
+        {
+          "name": "attempt",
+          "logicalType": "integer",
+          "required": true,
+          "primaryKey": true,
+          "description": "One-based execution attempt within the logical run",
+          "customProperties": [
+            {
+              "property": "kn.fieldId",
+              "value": "system.source_run_errors.attempt"
+            },
+            {
+              "property": "kn.foreignKey",
+              "value": {
+                "table": "source_run_attempts",
+                "fields": [
+                  "source_id",
+                  "scope",
+                  "cursor_namespace",
+                  "run_id",
+                  "attempt"
+                ],
+                "targetFields": [
+                  "source_id",
+                  "scope",
+                  "cursor_namespace",
+                  "run_id",
+                  "attempt"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "error_no",
+          "logicalType": "integer",
+          "required": true,
+          "primaryKey": true,
+          "description": "One-based occurrence number within the attempt",
+          "customProperties": [
+            {
+              "property": "kn.fieldId",
+              "value": "system.source_run_errors.error_no"
+            }
+          ]
+        },
+        {
+          "name": "observed_at",
+          "logicalType": "timestamp",
+          "required": true,
+          "primaryKey": false,
+          "description": "UTC instant at which the source condition was observed",
+          "customProperties": [
+            {
+              "property": "kn.fieldId",
+              "value": "system.source_run_errors.observed_at"
+            }
+          ]
+        },
+        {
+          "name": "error_code",
+          "logicalType": "string",
+          "required": true,
+          "primaryKey": false,
+          "description": "Standard source condition code; retry class follows the crawler vocabulary",
+          "customProperties": [
+            {
+              "property": "kn.fieldId",
+              "value": "system.source_run_errors.error_code"
+            },
+            {
+              "property": "kn.enum",
+              "value": [
+                "transient_network",
+                "rate_limited",
+                "auth_failed",
+                "permission_denied",
+                "payload_invalid",
+                "schema_drift",
+                "integrity_lost",
+                "budget_exhausted",
+                "not_modified"
+              ]
+            }
+          ]
+        }
+      ],
+      "customProperties": [
+        {
+          "property": "kn.humanVerification",
+          "value": {
+            "strategy": "external",
+            "resolver": "contract-v1",
+            "recordFields": [
+              "system.source_run_errors.source_id",
+              "system.source_run_errors.scope",
+              "system.source_run_errors.cursor_namespace",
+              "system.source_run_errors.run_id",
+              "system.source_run_errors.attempt",
+              "system.source_run_errors.error_no",
+              "system.source_run_errors.observed_at",
+              "system.source_run_errors.error_code"
+            ],
+            "fieldContexts": {},
+            "defaultFieldContext": "record"
+          }
+        }
+      ]
+    },
+    {
+      "name": "source_loaded_batches",
+      "logicalType": "object",
+      "physicalType": "table",
+      "description": "A batch applied in the loader transaction and its committed raw archive manifest reference.",
+      "properties": [
+        {
+          "name": "source_id",
+          "logicalType": "string",
+          "required": true,
+          "primaryKey": true,
+          "description": "Domain-qualified source identifier shared with the catalogue and archive",
+          "customProperties": [
+            {
+              "property": "kn.fieldId",
+              "value": "system.source_loaded_batches.source_id"
+            }
+          ]
+        },
+        {
+          "name": "scope",
+          "logicalType": "string",
+          "required": true,
+          "primaryKey": true,
+          "description": "Stable source-local synchronization stream",
+          "customProperties": [
+            {
+              "property": "kn.fieldId",
+              "value": "system.source_loaded_batches.scope"
+            }
+          ]
+        },
+        {
+          "name": "cursor_namespace",
+          "logicalType": "string",
+          "required": true,
+          "primaryKey": true,
+          "description": "Live or configured backfill cursor namespace within the stream",
+          "customProperties": [
+            {
+              "property": "kn.fieldId",
+              "value": "system.source_loaded_batches.cursor_namespace"
+            }
+          ]
+        },
+        {
+          "name": "run_id",
+          "logicalType": "string",
+          "required": true,
+          "primaryKey": true,
+          "description": "Stable logical run identifier reused by its retries",
+          "customProperties": [
+            {
+              "property": "kn.fieldId",
+              "value": "system.source_loaded_batches.run_id"
+            }
+          ]
+        },
+        {
+          "name": "batch_id",
+          "logicalType": "string",
+          "required": true,
+          "primaryKey": true,
+          "description": "Logical batch identifier within the run, stable across attempts",
+          "customProperties": [
+            {
+              "property": "kn.fieldId",
+              "value": "system.source_loaded_batches.batch_id"
+            }
+          ]
+        },
+        {
+          "name": "attempt",
+          "logicalType": "integer",
+          "required": true,
+          "primaryKey": false,
+          "description": "Attempt that committed the batch",
+          "customProperties": [
+            {
+              "property": "kn.fieldId",
+              "value": "system.source_loaded_batches.attempt"
+            },
+            {
+              "property": "kn.foreignKey",
+              "value": {
+                "table": "source_run_attempts",
+                "fields": [
+                  "source_id",
+                  "scope",
+                  "cursor_namespace",
+                  "run_id",
+                  "attempt"
+                ],
+                "targetFields": [
+                  "source_id",
+                  "scope",
+                  "cursor_namespace",
+                  "run_id",
+                  "attempt"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "archive_run_id",
+          "logicalType": "string",
+          "required": true,
+          "primaryKey": false,
+          "description": "Run component of the retained raw archive BatchKey",
+          "customProperties": [
+            {
+              "property": "kn.fieldId",
+              "value": "system.source_loaded_batches.archive_run_id"
+            }
+          ]
+        },
+        {
+          "name": "archive_batch_id",
+          "logicalType": "string",
+          "required": true,
+          "primaryKey": false,
+          "description": "Batch component of the retained raw archive BatchKey",
+          "customProperties": [
+            {
+              "property": "kn.fieldId",
+              "value": "system.source_loaded_batches.archive_batch_id"
+            }
+          ]
+        },
+        {
+          "name": "loaded_at",
+          "logicalType": "timestamp",
+          "required": true,
+          "primaryKey": false,
+          "description": "UTC instant recorded by the loader when applying the batch",
+          "customProperties": [
+            {
+              "property": "kn.fieldId",
+              "value": "system.source_loaded_batches.loaded_at"
+            }
+          ]
+        }
+      ],
+      "customProperties": [
+        {
+          "property": "kn.humanVerification",
+          "value": {
+            "strategy": "external",
+            "resolver": "contract-v1",
+            "recordFields": [
+              "system.source_loaded_batches.source_id",
+              "system.source_loaded_batches.scope",
+              "system.source_loaded_batches.cursor_namespace",
+              "system.source_loaded_batches.run_id",
+              "system.source_loaded_batches.batch_id",
+              "system.source_loaded_batches.attempt",
+              "system.source_loaded_batches.archive_run_id",
+              "system.source_loaded_batches.archive_batch_id",
+              "system.source_loaded_batches.loaded_at"
+            ],
+            "fieldContexts": {},
+            "defaultFieldContext": "record"
+          }
+        },
+        {
+          "property": "kn.index",
+          "value": [
+            {
+              "name": "source_loaded_batches_archive_idx",
+              "fields": [
+                "source_id",
+                "scope",
+                "cursor_namespace",
+                "archive_run_id",
+                "archive_batch_id"
+              ],
+              "unique": true,
+              "method": "btree"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "source_checkpoints",
+      "logicalType": "object",
+      "physicalType": "table",
+      "description": "Append-only checkpoint advances, each linked to a loaded batch in the same stream.",
+      "properties": [
+        {
+          "name": "source_id",
+          "logicalType": "string",
+          "required": true,
+          "primaryKey": true,
+          "description": "Domain-qualified source identifier shared with the catalogue and archive",
+          "customProperties": [
+            {
+              "property": "kn.fieldId",
+              "value": "system.source_checkpoints.source_id"
+            }
+          ]
+        },
+        {
+          "name": "scope",
+          "logicalType": "string",
+          "required": true,
+          "primaryKey": true,
+          "description": "Stable source-local synchronization stream",
+          "customProperties": [
+            {
+              "property": "kn.fieldId",
+              "value": "system.source_checkpoints.scope"
+            }
+          ]
+        },
+        {
+          "name": "cursor_namespace",
+          "logicalType": "string",
+          "required": true,
+          "primaryKey": true,
+          "description": "Live or configured backfill cursor namespace within the stream",
+          "customProperties": [
+            {
+              "property": "kn.fieldId",
+              "value": "system.source_checkpoints.cursor_namespace"
+            }
+          ]
+        },
+        {
+          "name": "revision",
+          "logicalType": "integer",
+          "required": true,
+          "primaryKey": true,
+          "description": "One-based checkpoint generation; the greatest committed revision is current",
+          "customProperties": [
+            {
+              "property": "kn.fieldId",
+              "value": "system.source_checkpoints.revision"
+            }
+          ]
+        },
+        {
+          "name": "run_id",
+          "logicalType": "string",
+          "required": true,
+          "primaryKey": false,
+          "description": "Logical run of the batch justifying the advance",
+          "customProperties": [
+            {
+              "property": "kn.fieldId",
+              "value": "system.source_checkpoints.run_id"
+            }
+          ]
+        },
+        {
+          "name": "batch_id",
+          "logicalType": "string",
+          "required": true,
+          "primaryKey": false,
+          "description": "Logical batch justifying the advance",
+          "customProperties": [
+            {
+              "property": "kn.fieldId",
+              "value": "system.source_checkpoints.batch_id"
+            },
+            {
+              "property": "kn.foreignKey",
+              "value": {
+                "table": "source_loaded_batches",
+                "fields": [
+                  "source_id",
+                  "scope",
+                  "cursor_namespace",
+                  "run_id",
+                  "batch_id"
+                ],
+                "targetFields": [
+                  "source_id",
+                  "scope",
+                  "cursor_namespace",
+                  "run_id",
+                  "batch_id"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "cursor_strategy",
+          "logicalType": "string",
+          "required": true,
+          "primaryKey": false,
+          "description": "Crawler cursor strategy used for this stream",
+          "customProperties": [
+            {
+              "property": "kn.fieldId",
+              "value": "system.source_checkpoints.cursor_strategy"
+            },
+            {
+              "property": "kn.enum",
+              "value": [
+                "snapshot_hash",
+                "updated_since",
+                "id_range",
+                "window"
+              ]
+            }
+          ]
+        },
+        {
+          "name": "cursor_token",
+          "logicalType": "string",
+          "required": false,
+          "primaryKey": false,
+          "description": "Snapshot SHA-256 or opaque stable source position for id_range",
+          "customProperties": [
+            {
+              "property": "kn.fieldId",
+              "value": "system.source_checkpoints.cursor_token"
+            }
+          ]
+        },
+        {
+          "name": "watermark_at",
+          "logicalType": "timestamp",
+          "required": false,
+          "primaryKey": false,
+          "description": "UTC resume watermark for updated_since or exclusive end of a processed window",
+          "customProperties": [
+            {
+              "property": "kn.fieldId",
+              "value": "system.source_checkpoints.watermark_at"
+            }
+          ]
+        },
+        {
+          "name": "advanced_at",
+          "logicalType": "timestamp",
+          "required": true,
+          "primaryKey": false,
+          "description": "UTC instant recorded by the loader when applying this advance",
+          "customProperties": [
+            {
+              "property": "kn.fieldId",
+              "value": "system.source_checkpoints.advanced_at"
+            }
+          ]
+        }
+      ],
+      "customProperties": [
+        {
+          "property": "kn.humanVerification",
+          "value": {
+            "strategy": "external",
+            "resolver": "contract-v1",
+            "recordFields": [
+              "system.source_checkpoints.source_id",
+              "system.source_checkpoints.scope",
+              "system.source_checkpoints.cursor_namespace",
+              "system.source_checkpoints.revision",
+              "system.source_checkpoints.run_id",
+              "system.source_checkpoints.batch_id",
+              "system.source_checkpoints.cursor_strategy",
+              "system.source_checkpoints.cursor_token",
+              "system.source_checkpoints.watermark_at",
+              "system.source_checkpoints.advanced_at"
+            ],
+            "fieldContexts": {},
+            "defaultFieldContext": "record"
+          }
+        },
+        {
+          "property": "kn.presence",
+          "value": [
+            {
+              "name": "cursor_value",
+              "rule": "exactly_one",
+              "fields": [
+                "cursor_token",
+                "watermark_at"
+              ]
+            }
+          ]
+        },
+        {
+          "property": "kn.index",
+          "value": [
+            {
+              "name": "source_checkpoints_batch_idx",
+              "fields": [
+                "source_id",
+                "scope",
+                "cursor_namespace",
+                "run_id",
+                "batch_id"
+              ],
+              "unique": true,
+              "method": "btree"
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

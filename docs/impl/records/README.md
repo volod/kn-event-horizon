@@ -72,5 +72,6 @@ decision. A record can name a plan task by ID because plan headings disappear on
 | 0055 | `warc-raw-store` | [WARC raw store](0055-raw-archive-warc-raw-store.md) |
 | 0056 | `raw-fetch-ledger` | [Raw fetch ledger](0056-raw-archive-raw-fetch-ledger.md) |
 | 0057 | `raw-archive-implementation-audit` | [Raw archive implementation audit](0057-raw-archive-raw-archive-implementation-audit.md) |
+| 0058 | `ingestion-state-contracts` | [Ingestion state contracts](0058-ingestion-engine-ingestion-state-contracts.md) |
 
-Next unused sequence is `0058`.
+Next unused sequence is `0059`.

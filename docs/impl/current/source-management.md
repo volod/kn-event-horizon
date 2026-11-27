@@ -181,6 +181,6 @@ formats and explains the manual review for rights and sensitive data.
 and [onboarding record 0037](../records/0037-source-management-source-onboarding-workflow.md)
 preserve the member gates. The
 [source admission audit](../records/0038-source-management-source-admission-implementation-audit.md)
-records the handoff. Run history and source health belong to
-[ingestion state contracts](../plan.md#ingestion-state-contracts) and
-[source status monitoring](../plan.md#source-status-monitoring).
+records the handoff. [Ingestion state](ingestion-engine.md#run-history-and-health) stores run
+history and health measurements. [Source status monitoring](../plan.md#source-status-monitoring)
+will derive operator status from those records.

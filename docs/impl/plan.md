@@ -32,49 +32,22 @@ archive.
 
 ### Source runs and health -- `source-management`
 
-#### ingestion-state-contracts
-
-Run status, checkpoints and source health need stable storage definitions before the engine and
-monitoring workflows begin writing them.
-
-- Serves: `ingestion-engine` -- [Ingestion engine](../design/spec.md#ingestion-engine)
-- Agent status: CLEAR
-- Execution stage: MODEL
-- Dependencies: The run, cursor, archive and monitoring fields in the specification and the
-  [standard source error codes](current/source-management.md#error-codes-and-pagination).
-  Fixtures can supply source IDs, archive IDs and claim keys without executing a crawler.
-- User-visible outcome: Registered contracts define run attempts/status/error history, source
-  checkpoints, committed batch/archive references, configuration/code versions and health metrics.
-- Scope boundary: Schemas, keys, enums, time semantics, human-verification coverage and
-  transactional checkpoint constraints. Runtime fetching, scheduling and status CLI stay later.
-- Data and artifact paths: `contracts/core/system/`, `src/kn/contracts/resources/`,
-  `src/kn/engine/`, `tests/engine/`, `tests/integration/`.
-- Execution path: Compile the contracts and load interrupted, retried and committed fixture runs;
-  test transaction rollback and checkpoint references without HTTP or an engine implementation.
-- Acceptance gates: Duplicate attempt/batch keys are refused or idempotent as declared. A failed
-  transaction cannot advance a checkpoint. Status/error/time fields needed by source monitoring
-  are present, preserve history and share the approved error vocabulary. Rebuild reproduces the
-  fixture state. `make ci` and integration checks pass.
-- Documentation target: A new `current/ingestion-engine.md` page listed in the
-  [areas index](current.md#areas).
-
 #### engine-skeleton
 
 The core engine must run end to end on a synthetic source before any real source.
 
 - Serves: `ingestion-engine` -- [Ingestion engine](../design/spec.md#ingestion-engine)
 - Agent status: CLEAR
-- Requires: `ingestion-state-contracts`
-- Dependencies: The [crawler validator and enablement evidence](current/source-management.md#enablement-evidence)
-  and the [raw archive commit and replay interface](current/raw-archive.md#commit-and-replay).
+- Dependencies: The [crawler validator and enablement evidence](current/source-management.md#enablement-evidence),
+  [raw archive commit and replay interface](current/raw-archive.md#commit-and-replay), and
+  [ingestion state contracts](current/ingestion-engine.md#checkpoint-transaction).
 - User-visible outcome: `kn source run` and `kn source replay` process a synthetic fixture source
   served locally. They commit WARC captures and write identity events, claims with evidence linked
   to KN IDs, a checkpoint, and a run summary with a declared status.
 - Scope boundary: Lock, run registration, fetch to archive, parse, a minimal mapping, validation,
   load, checkpoint, and status. Fetch safety, full mapping, curated input, and rebuild replay come
   in the next tasks.
-  Run/checkpoint storage consumes `ingestion-state-contracts`; runtime implementation does not
-  introduce those tables for the first time.
+  Use the registered run, batch and checkpoint tables and the checkpoint transaction interface.
 - Data and artifact paths: `src/kn/engine/`, `domains/fixture/` (test-only),
   `tests/engine/`, `tests/fixtures/fixture/`.
 - Execution path: Fixture-first. A test HTTP server serves the synthetic payloads, the adapter
@@ -87,8 +60,7 @@ The core engine must run end to end on a synthetic source before any real source
   fixtures ingest without English or Ukrainian translations, retain originals and provenance, and
   use the [shared text selector](current/localization.md#source-data-and-translations) for display.
   `make ci` passes.
-- Documentation target: A new `current/ingestion-engine.md` page listed in the
-  [areas index](current.md#areas).
+- Documentation target: [Ingestion engine](current/ingestion-engine.md).
 
 #### source-status-monitoring
 
@@ -97,11 +69,11 @@ Operators need per-source health and freshness without opening Kestra.
 - Serves: `source-management` -- [Source management](../design/spec.md#source-management)
 - Agent status: CLEAR
 - Requires: `engine-skeleton`
-- Dependencies: none.
+- Dependencies: [Run history and health fields](current/ingestion-engine.md#run-history-and-health).
 - User-visible outcome: `kn source status` shows the last success and attempt,
   state, stale flag, counts, bytes, budget use, cursor lag, and last error code, and feeds the
   operations mart.
-  Read the early ingestion-state contracts; monitoring must not create another run/cursor schema.
+  Read the registered run and checkpoint tables.
 - Scope boundary: Status computation from run records and the CLI. Dashboards come in
   `space-dashboard-bundles`.
 - Data and artifact paths: `src/kn/sources/status.py`, `tests/sources/`.
@@ -118,7 +90,7 @@ there repeats in every source that follows.
 
 - Serves: `source-management` -- [Source management](../design/spec.md#source-management)
 - Agent status: CLEAR
-- Requires: `ingestion-state-contracts`, `engine-skeleton`, `source-status-monitoring`
+- Requires: `engine-skeleton`, `source-status-monitoring`
 - Dependencies: The accepted task records of the group and the [implementation
   audit](../guide/planning-workflow.md#implementation-audits) checks.
 - User-visible outcome: Every later source is onboarded through verified, enforced declarations. The
@@ -2116,9 +2088,12 @@ The target host must handle the declared load within the memory budget.
   Compose limits. For each archive shape, record domain, source and capture counts, stored bytes,
   archive and index file counts, scoped lookup p95, file planning time, and full and scoped
   reindex duration and peak memory.
+  Profile the warmed PostgreSQL identity submit benchmark on the target host to diagnose the
+  [scale gate miss recorded on the base tree](records/0058-ingestion-engine-ingestion-state-contracts.md#findings).
 - Acceptance gates: Dashboard and map p95 are at most 5 s. There is no out-of-memory failure. Any
   deviation is recorded with measurements. Record whether either archive shape meets the
   [reopening condition](future-research.md#raw-archive-format-selection----avro-and-iceberg-for-the-raw-archive).
+  Verify the existing median submit ratio of at most 2.0 between 50,000 and 5,000 objects.
 - Documentation target: `current/operations.md` listed in the [areas index](current.md#areas).
 
 #### operations-hardening-implementation-audit

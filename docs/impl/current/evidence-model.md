@@ -18,8 +18,8 @@ Existing source verification labels retain their meanings and grant no human tim
 
 The registered `kn.core.evidence` ODCS contract,
 [`resources/evidence/claims/1.0.0.json`](../../../src/kn/contracts/resources/evidence/claims/1.0.0.json),
-shares the `evidence` schema with `kn.core.human_verification`. It adds 11 tables and 148 fields;
-the registry now defines 73 tables and 707 fields at development version `1.0.0`.
+shares the `evidence` schema with `kn.core.human_verification`. It defines 11 tables and 148
+fields at development version `1.0.0`.
 `make contract-compile` writes its reviewed artifacts under
 [`generated/contracts/kn.core.evidence/`](../../../generated/contracts/kn.core.evidence/docs/contract.md).
 
@@ -551,7 +551,7 @@ These include the accepted and scheduled findings of the
 - `tests/review/` checks typed composite and locale targets, scope/purpose separation, key types,
   null completeness, UTC and clock errors, actor refusal, event digests, graph conflicts,
   revocation, retry identity, wire schemas and ODCS coverage validation.
-- `make model-baseline` tests unreviewed reads across all 73 tables, semantic locale isolation,
+- `make model-baseline` tests unreviewed reads across all registered tables, semantic locale isolation,
   SATCOM snapshot isolation, unchanged re-import, exact dates, reviewers and decision IDs
   across two rebuilds, and byte-for-byte preservation of source cells and archived files.
   PostgreSQL tests additionally cover restricted reviewers/evidence, unresolved replay and
