@@ -13,8 +13,11 @@ Copy the [terms dossier](templates/source-terms-dossier.md) to
 `domains/<domain>/sources/dossiers/`. Use published documentation to record terms, edition,
 licence, access method, native schema or codebook, cadence, rate limits, retention, redistribution
 and export rights. Cite the version or date and distinguish documented permission from inference.
-Prepare a draft crawler configuration from the
-[profile reference](../impl/current/source-management.md#validate-crawler-configurations).
+Copy the [crawler configuration template](templates/source-crawler-config.yaml) to
+`domains/<domain>/sources/<source-id>.yaml` and draft the configuration from it. Its comments name
+the alternative access blocks and the fields that enablement adds. The
+[profile reference](../impl/current/source-management.md#validate-crawler-configurations) gives the
+rules for each block.
 If permission is unknown or denied, record the reason and leave the source in `candidate` or
 `rejected`. Use curation only where its own collection and storage are permitted.
 

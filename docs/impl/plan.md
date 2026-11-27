@@ -30,41 +30,42 @@ archive.
 
 ## Agent Implementation Tasks
 
-### Source runs and health -- `source-management`
+### Acquisition, mapping and replay -- `ingestion-engine`
 
-#### source-management-implementation-audit
+#### source-lifecycle-registry
 
-Every source enters through the catalogue, the crawler schema, and the onboarding workflow, so a gap
-there repeats in every source that follows.
+A reviewed lifecycle decision cannot reach the deployed catalogue. Rebuild loads every proposal row
+as `candidate`, and no command or reviewed input records `investigating`, `sampling_authorized`,
+`approved`, `enabled`, `paused`, `retired` or `rejected`. A source outside the proposal workbooks,
+such as the SATCOM package, a curated input or a counterpart instance, has no catalogue row, and
+enablement requires one. `kn source run` needs an `enabled` row, so no real source can run without
+hand-written SQL that the next rebuild erases.
 
 - Serves: `source-management` -- [Source management](../design/spec.md#source-management)
 - Agent status: CLEAR
-- Dependencies: The [engine skeleton record](records/0059-ingestion-engine-engine-skeleton.md),
-  the [source status record](records/0060-source-management-source-status-monitoring.md), and the
-  [implementation audit](../guide/planning-workflow.md#implementation-audits) checks.
-- User-visible outcome: Every later source is onboarded through verified, enforced declarations. The
-  audit record gives every check a result and every finding a disposition. The current-state page
-  lists known limitations, and each scheduled finding is a plan task.
-- Scope boundary: Focus: catalogue states and transitions, with sources disabled by default; crawler
-  schema strictness, defaults, and messages; licence, rate-limit, and robots fields that are
-  enforced, not advisory; error-code completeness; status freshness, stale and failing thresholds,
-  and clock skew; templates that match what the engine needs; new source kinds, such as APIs, bulk
-  files, and curated input, without schema changes. Fixes only; new behavior becomes plan tasks.
-- Data and artifact paths: `contracts/core/system/`, `src/kn/sources/`, `domains/<domain>/sources/`,
-  `docs/guide/source-onboarding.md`, `docs/guide/templates/`, `tests/sources/`, `docs/impl/plan.md`,
-  and the task record.
-- Execution path: Rerun the group's acceptance commands, then work through the audit checks.
-  Validate a crawler file with an unknown key, one without a licence, and a disabled source with a
-  schedule, and onboard one fixture source from the templates alone. Interrupt a fixture run before its
-  checkpoint, retry it and compare status, history and cursor with an uninterrupted run.
-- Acceptance gates: Each invalid crawler file is refused with a stable error code. A
-  disabled source cannot run. The templates cover every field the schema requires. Every finding has
-  a severity, evidence, and a disposition, no `blocker` is accepted, and every fix starts from a
-  failing regression test. `make ci` passes with the scheduled tasks in the plan.
-- Documentation target: `current/source-management.md` listed in the [areas
-  index](current.md#areas).
-
-### Acquisition, mapping and replay -- `ingestion-engine`
+- Dependencies: Findings SMA-01 and SMA-02 of the [source management
+  audit](records/0061-source-management-source-management-implementation-audit.md#findings),
+  the reviewed [catalogue inputs](current/source-management.md#reviewed-inputs-and-identifiers)
+  and the [enablement rules](current/source-management.md#enablement-evidence).
+- User-visible outcome: A reviewed decision in Git sets a source's lifecycle state with its
+  approver, reference and date, and a rejection keeps its reason. Rebuild and upgrade apply every
+  decision, and `kn source list` shows it. A reviewed registration adds a qualified source ID that
+  no proposal row holds, so the terms reviews, sampling authorizations and enablement approvals
+  that name a catalogue state can record it.
+- Scope boundary: The decision and registration format, its validation, the allowed transitions,
+  and the catalogue load. Proposal rows keep their original cells and keys. Sampling admission
+  belongs to `source-sampling-admission`. No UI and no remote approval.
+- Data and artifact paths: `src/kn/sources/`, `domains/<domain>/seeds/`, `contracts/core/system/`,
+  `tests/sources/`, `tests/engine/`, `tests/integration/`.
+- Execution path: Fixture-first. Record each lifecycle state for fixture sources, register one
+  source outside the proposals, and rebuild twice. Then run the engine fixture source from its
+  reviewed decision instead of an inserted catalogue row.
+- Acceptance gates: Two rebuilds list identical states. An unknown source ID, a transition the
+  format does not allow, a rejection without its reason, and an `enabled` decision whose crawler
+  profile is not enabled are refused with stable error codes. The engine fixture runs from its
+  decision, and a `paused` decision leads to zero requests. `make ci` passes.
+- Documentation target: `current/source-management.md` listed in the
+  [areas index](current.md#areas).
 
 #### http-fetch-safety
 
@@ -72,8 +73,8 @@ Every fetch must be safe and polite by construction.
 
 - Serves: `ingestion-engine` -- [Ingestion engine](../design/spec.md#ingestion-engine)
 - Agent status: CLEAR
-- Requires: `source-management-implementation-audit`
-- Dependencies: HTTPX as the justified dependency.
+- Dependencies: HTTPX as the justified dependency. Findings SMA-08 and SMA-09 of the
+  [source management audit](records/0061-source-management-source-management-implementation-audit.md#findings).
 - User-visible outcome: The engine fetches only allowlisted hosts and redirects over verified TLS,
   within byte and request budgets. It uses conditional requests, honors `robots.txt`, `429`, and
   `Retry-After`, and injects credentials from the environment with redaction.
@@ -81,10 +82,42 @@ Every fetch must be safe and polite by construction.
   budget accounting. No browser automation.
 - Data and artifact paths: `src/kn/engine/http/`, `tests/engine/`.
 - Execution path: Use fixture servers for redirects, private-IP targets, oversized and compressed
-  bodies, `429`, `403`, and non-JSON `200` responses.
+  bodies, `429`, `403`, and non-JSON `200` responses, a `robots.txt` that disallows the endpoint,
+  a second run inside the declared rate window, and an interruption after the first request.
 - Acceptance gates: Each hostile fixture produces its declared error code without a request to a
-  disallowed target. No secret appears in logs or WARC files.
+  disallowed target. A path that `robots.txt` disallows receives no request. Consecutive runs stay
+  within `rate_limit`. Requests made by an interrupted attempt count toward its run's budget and
+  appear in `kn source status`. No secret appears in logs or WARC files.
 - Documentation target: `current/ingestion-engine.md` listed in the
+  [areas index](current.md#areas).
+
+#### source-sampling-admission
+
+The onboarding workflow captures an authorized sample into the raw archive before enablement, but
+`kn source run` admits only `enabled` profiles. A `sampling_authorized` profile needs no approver,
+reference, budget or expiry, so a sample can neither run through the engine nor be checked against
+its authorization.
+
+- Serves: `source-management` -- [Source management](../design/spec.md#source-management)
+- Agent status: CLEAR
+- Requires: `source-lifecycle-registry`, `http-fetch-safety`
+- Dependencies: Finding SMA-03 of the [source management
+  audit](records/0061-source-management-source-management-implementation-audit.md#findings)
+  and the [sampling authorization step](../guide/source-onboarding.md#2-obtain-sampling-authorization).
+- User-visible outcome: A `sampling_authorized` profile records the owner's decision, approved
+  endpoints, request and byte budget, and expiry. `kn source run` captures a sample within that
+  decision into the raw archive and refuses it after the budget is used or the decision expires.
+  Enabled profiles keep their current evidence rules.
+- Scope boundary: The sampling declaration, its validation and admission, sampling budget
+  accounting, and the archive locators the investigation report cites. No scheduled sampling.
+- Data and artifact paths: `src/kn/sources/config/`, `src/kn/engine/`, `tests/sources/`,
+  `tests/engine/`, `docs/guide/source-onboarding.md`, `docs/guide/templates/`.
+- Execution path: Fixture-first against the loopback server: an authorized sample, a repeat after
+  its budget is used, an expired decision, and a profile without a decision reference.
+- Acceptance gates: The authorized sample commits its captures within budget. The repeat, the
+  expired decision and the unreferenced profile make zero requests and report stable error codes.
+  The crawler template names every sampling field. `make ci` passes.
+- Documentation target: `current/source-management.md` listed in the
   [areas index](current.md#areas).
 
 #### tracked-claim-times-and-sets
@@ -205,7 +238,7 @@ its integration is dataset-specific code beside the engine.
 
 - Serves: `ingestion-engine` -- [Ingestion engine](../design/spec.md#ingestion-engine)
 - Agent status: CLEAR
-- Requires: `mapping-and-quality-rules`, `dataset-package-locations`
+- Requires: `mapping-and-quality-rules`, `dataset-package-locations`, `source-lifecycle-registry`
 - Dependencies: Finding DC-16 of the [data contracts audit](records/0017-data-contracts-data-contracts-implementation-audit.md#findings),
   the current [SATCOM import](current/data-contracts.md#source-preservation-and-import) as the first
   dataset, and the `bulk_file` access method of the
@@ -243,7 +276,6 @@ removed bytes back while `kn raw verify` still reports success.
 
 - Serves: `ingestion-engine` -- [Ingestion engine](../design/spec.md#ingestion-engine)
 - Agent status: CLEAR
-- Requires: `source-management-implementation-audit`
 - Dependencies: Findings RAA-07 and RAA-08 of the [raw archive
   audit](records/0057-raw-archive-raw-archive-implementation-audit.md#findings), the retention rules
   of the [fetch ledger specification](../design/spec.md#capture-schema-and-fetch-ledger), and the
@@ -274,7 +306,8 @@ Schema changes during development must cost a rebuild, never a re-fetch or a los
 - Serves: `ingestion-engine` -- [Ingestion engine](../design/spec.md#ingestion-engine)
 - Agent status: CLEAR
 - Requires: `curated-source-method`, `prefetched-dataset-method`, `capture-retention-enforcement`
-- Dependencies: none.
+- Dependencies: Findings SMA-10 and SMA-11 of the [source management
+  audit](records/0061-source-management-source-management-implementation-audit.md#findings).
 - User-visible outcome: `kn db rebuild` replays the committed archive, curated files, prefetched
   datasets, and decision logs through current code, and reports orphaned decisions. It can replay
   after the loss of the raw ledger.
@@ -287,6 +320,9 @@ Schema changes during development must cost a rebuild, never a re-fetch or a los
   A tombstoned input stays suppressed after reindex and replay. Decisions re-attach or are reported.
   Human-verification times, reviewers and decision IDs survive replay exactly. A changed or missing
   target remains stale, pending or orphaned, and never receives a newly fabricated verification.
+  A paused or retired source's committed batches replay while `kn source run` stays refused for
+  it. After a rebuild, `kn source run` of a replayed source ends with a declared status, never
+  `E_INPUT` with an unfinished attempt.
   `make ci-local` runs the rebuild on every change, and `make ci` stays green without a database.
 - Documentation target: `current/ingestion-engine.md` listed in the
   [areas index](current.md#areas).
@@ -325,9 +361,9 @@ every source suite and every rebuild.
 
 - Serves: `ingestion-engine` -- [Ingestion engine](../design/spec.md#ingestion-engine)
 - Agent status: CLEAR
-- Requires: `http-fetch-safety`, `mapping-and-quality-rules`, `curated-source-method`,
-  `dataset-package-locations`, `prefetched-dataset-method`, `rebuild-from-raw`,
-  `fragment-claims-follow-splits`
+- Requires: `source-lifecycle-registry`, `http-fetch-safety`, `source-sampling-admission`,
+  `mapping-and-quality-rules`, `curated-source-method`, `dataset-package-locations`,
+  `prefetched-dataset-method`, `rebuild-from-raw`, `fragment-claims-follow-splits`
 - Dependencies: The accepted task records of the group and the [implementation
   audit](../guide/planning-workflow.md#implementation-audits) checks.
 - User-visible outcome: Every source runs on a verified, source-neutral engine. The audit record
@@ -1086,7 +1122,7 @@ The space domain must prove its acceptance criteria on archived samples before d
 
 - Serves: `space-elt` -- [Space ELT](../design/spec.md#space-elt)
 - Agent status: CLEAR
-- Requires: `space-source-operator-disclosures`, `source-management-implementation-audit`
+- Requires: `space-source-operator-disclosures`
 - Dependencies: Archived authorized samples from every pilot source.
 - User-visible outcome: One command rebuilds the space domain from the archive and runs the
   identity, time, provenance, and conflation checks.
@@ -1227,7 +1263,7 @@ Schedules must follow reviewed crawler configurations, not hand-edited flows.
 
 - Serves: `orchestration` -- [Orchestration](../design/spec.md#orchestration)
 - Agent status: CLEAR
-- Requires: `kestra-service`, `source-management-implementation-audit`
+- Requires: `kestra-service`
 - Dependencies: Scoped Kestra API credentials in the environment.
 - User-visible outcome: `kn flows generate` and `kn flows deploy` produce one flow per enabled
   source (namespace `kn.<domain>`, cron in UTC, concurrency 1, transient-only retries) and detect
@@ -1441,7 +1477,6 @@ GDELT signals need their own schema that never writes canonical domain facts.
 - Serves: `gdelt-elt` -- [GDELT ELT](../design/spec.md#gdelt-elt)
 - Agent status: CLEAR
 - Execution stage: MODEL
-- Requires: `source-management-implementation-audit`
 - Dependencies: [GDELT design](../design/domains/gdelt.md).
 - User-visible outcome: The `gdelt` schema holds watches, query runs, article metadata, native
   dictionaries, story clusters, signals, and candidate links.
@@ -1851,8 +1886,7 @@ Release evaluation needs one integrated rebuild and backfill across the complete
 - Agent status: CLEAR
 - Execution stage: MODEL
 - Requires: `data-interchange-implementation-audit`, `space-elt-implementation-audit`,
-  `gdelt-elt-implementation-audit`, `microelectronics-elt-implementation-audit`,
-  `source-management-implementation-audit`
+  `gdelt-elt-implementation-audit`, `microelectronics-elt-implementation-audit`
 - Dependencies: The [contract workflow](../guide/schema-first-development.md), registered
   core/domain contracts, reviewed seeds and deterministic fixture data. No live source is needed.
   [Record 0030](records/0030-data-contracts-development-model-baseline.md) prepares the

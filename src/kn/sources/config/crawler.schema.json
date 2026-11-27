@@ -115,6 +115,7 @@
       "properties": {"en": {"$ref": "#/$defs/text"}, "uk": {"$ref": "#/$defs/text"}},
       "required": ["en", "uk"]
     },
+    "retentionDays": {"type": "integer", "minimum": 0, "maximum": 36525},
     "countRange": {
       "type": "object",
       "additionalProperties": false,
@@ -175,7 +176,7 @@
           "additionalProperties": false,
           "properties": {
             "max_requests": {"type": "integer", "minimum": 1},
-            "timeout_seconds": {"type": "integer", "minimum": 1},
+            "timeout_seconds": {"type": "integer", "minimum": 1, "maximum": 3600},
             "max_response_bytes": {"type": "integer", "minimum": 1},
             "max_decoded_bytes": {"type": "integer", "minimum": 1}
           },
@@ -557,7 +558,7 @@
       "additionalProperties": false,
       "properties": {
         "format": {"enum": ["warc", "blob"]},
-        "retention_days": {"type": "integer", "minimum": 0},
+        "retention_days": {"$ref": "#/$defs/retentionDays"},
         "redistribution": {"enum": ["forbidden", "restricted", "permitted"]}
       },
       "required": ["format", "retention_days", "redistribution"]
@@ -873,7 +874,7 @@
         "licence": {"$ref": "#/$defs/text"},
         "permission": {"enum": ["pending", "granted", "denied"]},
         "export_policy": {"enum": ["forbidden", "restricted", "permitted", "owner_private"]},
-        "retention_days": {"type": "integer", "minimum": 0},
+        "retention_days": {"$ref": "#/$defs/retentionDays"},
         "owner_export_approval_reference": {"$ref": "#/$defs/token"}
       },
       "required": ["permission"],

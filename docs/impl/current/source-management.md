@@ -47,15 +47,18 @@ evidence files. An invalid profile or an ID absent from the deployed catalogue r
 | --- | --- |
 | `lifecycle_state`, `state` | Current catalogue state and latest run attempt outcome. `never_run` means no attempt exists and `unfinished` means the latest attempt has no terminal outcome. Within a logical run, the highest attempt number wins. Across runs, start time and then run ID determine order. |
 | `last_attempt_at`, `last_success_at` | Latest attempt's start and most recent `success` finish time, including replay. JSON also gives the latest attempt's run ID, number, mode and finish time. All times use UTC. |
-| `last_confirmed_at`, `stale` | A fetch ending in `success` or `not_modified` confirms freshness at its finish time. A stream is stale before its first confirmation or when the confirmation age exceeds `schedule.freshness_seconds`, falling back to `monitoring.freshness_sla_seconds`. A future confirmation has zero age until the clock catches up. |
+| `last_confirmed_at`, `stale` | A fetch ending in `success` or `not_modified` confirms freshness at its finish time. A stream is stale before its first confirmation or when the confirmation age exceeds `schedule.freshness_seconds`. Without that value, the threshold is twice the longest gap between consecutive scheduled runs, so `0 */2 * * *` gives 14,400 seconds and `0 6 * * 1-5` gives six days. `freshness_threshold_seconds` reports the value used. A future confirmation has zero age until the clock catches up. |
 | `consecutive_failures`, `failing` | The streak counts `partial`, `blocked` and `failed` fetch outcomes since the latest confirmed fetch. The failing flag turns on at the configured `monitoring.alert_thresholds.consecutive_failures`. |
 | Counts, bytes, and requests | Record, claim, reject and quarantine counts, bytes received, and requests used and budget come from the latest attempt. JSON uses `null` for unmeasured figures and keeps a measured zero. English text displays missing values as `unknown`. |
 | `checkpoint_revision`, `cursor_lag_seconds` | The greatest committed checkpoint revision, or zero before the first. For a time watermark, lag is elapsed whole seconds, clamped to zero for a future watermark. Otherwise status uses the latest attempt's stored lag when present. |
 | `last_error_code` | Latest recorded error observation for the stream, even after a later error-free run. Observation time orders errors; run ID, attempt and occurrence number break ties. |
 
 The stable JSON result is under `source_status`. The operations mart can consume that row or use
-`kn.sources.status.read_source_status(connection, stream, policy)` with the same crawler
-thresholds. [Space analytics marts](../plan.md#space-analytics-marts) owns materialization.
+`kn.sources.status.read_source_status(connection, stream, policy)` with
+`kn.sources.status.monitoring_policy(config)` for the same crawler thresholds.
+[Space analytics marts](../plan.md#space-analytics-marts) owns materialization. Status evaluates
+only the stale and consecutive-failure thresholds. `monitoring.freshness_sla_seconds` and the
+reject, quarantine and cursor-lag alert thresholds are declarations for that mart.
 
 ## Reviewed inputs and identifiers
 
@@ -96,9 +99,11 @@ kn --json source validate tests/sources/fixtures/config/adapter.yaml
 The command reads one YAML or JSON configuration and returns `source_id`, `state`, and
 `status: valid`.
 An invalid configuration exits with status 1. JSON errors contain `E_SOURCE_CONFIG`, a
-JSON Pointer prefixed by `$`, a rule, and a hint. Diagnostics omit input values. Use the
-[version 1 JSON Schema](../../../src/kn/sources/config/crawler.schema.json) for the exact field
-names and the [HTTP fixture](../../../tests/sources/fixtures/config/http.yaml) as a starting point.
+JSON Pointer prefixed by `$`, a rule, and a hint. Diagnostics omit input values. Start from the
+[crawler configuration template](../../guide/templates/source-crawler-config.yaml), which
+validates as a candidate HTTP JSON profile and names every property the
+[version 1 JSON Schema](../../../src/kn/sources/config/crawler.schema.json) can require outside
+counterpart instance profiles. A lightweight test keeps the template valid and complete.
 Keep each domain's reviewed configuration under `domains/<domain>/sources/<source-id>.yaml`.
 The validator works offline using the packaged schema and reviewed catalogue.
 
@@ -106,9 +111,9 @@ The validator works offline using the packaged schema and reviewed catalogue.
 | --- | --- |
 | `identity` | Exact qualified `source_id`, bilingual labels and owner. Drafts can use a proposed qualified ID. Enablement requires an ID in the reviewed catalogue. |
 | `access` | Method, endpoints and controls, plus the matching file, watch, or adapter profile where applicable. |
-| `schedule` | Five-field numeric cron in UTC, including ranges, lists and steps on wildcards or ranges. Set `freshness_seconds` to override the monitoring SLA for source status. |
+| `schedule` | Five-field numeric cron in UTC, including ranges, lists and steps on wildcards or ranges. Restrict either the day of month or the day of week, because cron implementations combine the two differently (`cronDays`). The schedule must match at least one calendar date (`cronNeverRuns`). Set `freshness_seconds` to override the default stale threshold of twice the longest gap between runs. |
 | `cursor` | `snapshot_hash`, `updated_since`, `id_range`, or `window`, with the fields and overlap required by the strategy, and a backfill namespace distinct from `live`. |
-| `raw` | `warc` or `blob`, retention in days and redistribution policy. |
+| `raw` | `warc` or `blob`, retention in days (at most 36,525, like the reviewed rights retention) and redistribution policy. |
 | `parse` | `kn.domains.<domain>.<module>:<function>`, native schema or codebook edition, and a SHA-256 schema fingerprint. Validation checks the names against the profile and its owning domain. |
 | `mapping` | Ordered native `record_key` fields and optional `version_field`. Field mappings name contract field IDs and units. Optional mappings cover native codes, classes, relations, identifiers, identity attributes and time semantics. Keep native codes such as `"001"` quoted. |
 | `quality` | Required native fields, numeric ranges, expected volume, quarantine limit and batch-stop conditions. |
@@ -118,8 +123,8 @@ The validator works offline using the packaged schema and reviewed catalogue.
 | `exchange` | Counterpart direction, field ownership, and export profile and write approval when the direction includes export. |
 
 HTTP JSON, CSV, XML, feed, permitted HTML and remote bulk profiles declare HTTPS endpoints,
-exact DNS hosts, redirect policy, request and byte limits, timeout, rate limits, content types
-and conditional requests. Use `auth_env` for the credential alias and
+exact DNS hosts, redirect policy, request and byte limits, a timeout of at most 3,600 seconds,
+rate limits, content types and conditional requests. Use `auth_env` for the credential alias and
 `secret_query_parameters` to declare names for redaction. Endpoints containing those
 parameters fail validation.
 
@@ -190,8 +195,9 @@ justify changing the fetch index backend.
 
 The [onboarding guide](../../guide/source-onboarding.md) covers documentation review, bounded
 sampling, investigation, fixtures, review, enablement approval, and scheduling. It provides
-templates for the terms dossier, investigation report, fixture sanitization worksheet, and
-review checklist. Sampling and enablement each require a recorded owner decision.
+templates for the terms dossier, crawler configuration, investigation report, fixture
+sanitization worksheet, and review checklist. Sampling and enablement each require a recorded
+owner decision.
 
 `make fixture-check` runs in `make ci` and scans regular UTF-8 files under directories named
 `fixtures` anywhere in `tests/`. It refuses recognizable credentials, personal data patterns,
@@ -207,6 +213,9 @@ formats and explains the manual review for rights and sensitive data.
   exercises CLI diagnostics and enabled configurations with missing or failing evidence.
 - The fixture check has regression cases for planted credentials and personal data, encodings,
   approved placeholders, and unscannable files.
+- `make ci` measures the longest gap between scheduled runs, including weekday, month-end and
+  leap-day schedules, refuses schedules that never run or restrict both day fields, and derives
+  the default stale threshold without a database.
 - `make test-integration` checks repeated PostgreSQL rebuilds, the reader role, and rollback
   on seed conflicts or unknown override IDs. The [combined baseline](data-contracts/model-baseline.md)
   compares all stored catalogue fields across two rebuilds.
@@ -219,4 +228,30 @@ preserve the member gates. The
 records the handoff. The
 [source status record](../records/0060-source-management-source-status-monitoring.md) gives
 the fixture commands and results for both operator output formats, the registered vocabulary,
-the freshness boundary, and the reader role.
+the freshness boundary, and the reader role. The
+[source management audit](../records/0061-source-management-source-management-implementation-audit.md)
+reproduces the member gates and records its findings.
+
+## Known limitations
+
+- A reviewed lifecycle decision cannot yet reach the deployed catalogue, and only proposal rows
+  can be catalogued. Rebuild loads every row as `candidate`, so running a source needs an
+  `enabled` row that the next rebuild erases.
+  [Source lifecycle registry](../plan.md#source-lifecycle-registry) owns both.
+- A `sampling_authorized` profile cannot run, and its decision fields are not declared.
+  [Source sampling admission](../plan.md#source-sampling-admission) owns bounded samples.
+- Rate limits are declared but not enforced across runs, and no `robots.txt` check exists yet.
+  An interrupted attempt keeps unmeasured request counters, so status can report fewer requests
+  than its run made. [HTTP fetch safety](../plan.md#http-fetch-safety) owns all three.
+- Replay requires an enabled source, and a fetch after a development rebuild that has not
+  replayed the archive ends in `E_INPUT` with an unfinished attempt.
+  [Rebuild from raw](../plan.md#rebuild-from-raw) owns both.
+- A profile in any other lifecycle state validates with its schedule and reports its state.
+  `kn source run` and `kn source replay` refuse it with `enabledState` before any request.
+  [Flow generation](../plan.md#kestra-flow-generation) must emit flows only for enabled sources.
+- Status flags failures only when `monitoring.alert_thresholds.consecutive_failures` is set, and
+  an unfinished attempt is not a failure. Such a stream turns stale after its threshold. Reopen
+  when the operations mart defines alerting on the other declared thresholds.
+- Version 1 has no request body or OAuth token exchange, so a GraphQL source such as
+  `microelectronics:C03` or an OAuth source needs an additive, optional block when its
+  onboarding task begins. Existing profiles stay valid.

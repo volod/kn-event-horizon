@@ -155,4 +155,7 @@ these tables, including committed checkpoint lag and the last fetch confirmation
 - [Mapping and quality rules](../plan.md#mapping-and-quality-rules) owns generalized validation and
   per-record quarantine. The fixture engine accepts or stops the snapshot as a unit.
 - [Rebuild from raw](../plan.md#rebuild-from-raw) owns automatic discovery and full rebuild replay.
-  The fixture engine replays one explicitly selected batch.
+  The fixture engine replays one explicitly selected batch. After `kn db rebuild`, replay each
+  archived run of a loaded source before its next `kn source run`. A fetch first ends in
+  `E_INPUT` and leaves an unfinished attempt that each retry resumes. Replay also requires an
+  enabled profile and catalogue row, so a paused source cannot be restored yet.

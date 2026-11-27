@@ -5,6 +5,7 @@ from importlib.resources import files
 from typing import get_args
 
 from kn.engine.checkpoints import CursorStrategy
+from kn.engine.outcomes import ErrorCode, Status
 from kn.engine.state import ATTEMPTS, CHECKPOINTS, ERRORS, ingestion_contract
 
 
@@ -21,7 +22,7 @@ def test_storage_uses_the_crawler_error_codes_and_cursor_strategies() -> None:
     contract = ingestion_contract()
     errors = {field.name: field for field in contract.table(ERRORS).fields}
     cursor = {field.name: field for field in contract.table(CHECKPOINTS).fields}
-    assert set(errors["error_code"].enum) == expected_codes
+    assert set(errors["error_code"].enum) == expected_codes == set(get_args(ErrorCode.__value__))
     strategies = set(definitions["cursor"]["properties"]["strategy"]["enum"])
     assert set(cursor["cursor_strategy"].enum) == strategies == set(get_args(CursorStrategy))
 
@@ -29,14 +30,18 @@ def test_storage_uses_the_crawler_error_codes_and_cursor_strategies() -> None:
 def test_attempt_statuses_and_monitoring_fields_are_registered() -> None:
     attempt = ingestion_contract().table(ATTEMPTS)
     fields = {field.name: field for field in attempt.fields}
-    assert set(fields["status"].enum) == {
-        "success",
-        "partial",
-        "not_modified",
-        "blocked",
-        "failed",
-        "skipped",
-    }
+    assert (
+        set(fields["status"].enum)
+        == {
+            "success",
+            "partial",
+            "not_modified",
+            "blocked",
+            "failed",
+            "skipped",
+        }
+        == set(get_args(Status.__value__))
+    )
     assert not fields["status"].required
     assert fields["started_at"].logical_type == fields["finished_at"].logical_type == "timestamp"
     assert {

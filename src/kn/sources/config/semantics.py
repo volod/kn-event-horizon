@@ -6,7 +6,7 @@ from typing import Any
 from urllib.parse import parse_qsl, urlsplit
 
 from kn.contracts.diagnostics import Location
-from kn.sources.config.schedule import valid_cron
+from kn.sources.config.schedule import schedule_problem
 from kn.sources.config.schema import CrawlerConfigError
 from kn.sources.seeds import reviewed_catalogue
 
@@ -163,10 +163,8 @@ def _data_rules(config: dict[str, Any]) -> None:
 def validate_semantics(config: dict[str, Any], *, offline_catalogue: bool = True) -> None:
     """Validate relationships between individual schema-valid entries."""
     domain = _identity(config, offline_catalogue=offline_catalogue)
-    if not valid_cron(config["schedule"]["cron"]):
-        raise CrawlerConfigError(
-            ("schedule", "cron"), "cron", "use a valid five-field numeric UTC expression"
-        )
+    if problem := schedule_problem(config["schedule"]["cron"]):
+        raise CrawlerConfigError(("schedule", "cron"), *problem)
     cursor = config["cursor"]
     if cursor["strategy"] == "window":
         _ordered(cursor["overlap_seconds"], cursor["window_seconds"], ("cursor", "overlap_seconds"))

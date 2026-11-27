@@ -3,6 +3,7 @@
 from dataclasses import dataclass
 from datetime import UTC, datetime
 from pathlib import Path
+from typing import Any
 
 import sqlalchemy as sa
 from sqlalchemy.engine import Connection
@@ -19,6 +20,7 @@ from kn.engine.checkpoints import (
 from kn.engine.state import ATTEMPTS, ERRORS, state_table
 from kn.sources.catalogue import catalogue_table
 from kn.sources.config import load_status_config
+from kn.sources.config.schedule import longest_interval_seconds
 from kn.sources.config.schema import CrawlerConfigError
 
 _CONFIRMED = ("success", "not_modified")
@@ -40,6 +42,8 @@ _METRICS = (
     "requests_used",
     "request_budget",
 )
+# Without a declared threshold, one missed run is tolerated before a stream turns stale.
+_DEFAULT_FRESHNESS_INTERVALS = 2
 _TIMESTAMPS = (
     "last_attempt_at",
     "last_attempt_finished_at",
@@ -54,15 +58,21 @@ class MonitoringPolicy:
     failure_threshold: int | None = None
 
 
+def monitoring_policy(config: dict[str, Any]) -> MonitoringPolicy:
+    """Use the declared freshness threshold, or twice the longest gap between scheduled runs."""
+    schedule = config["schedule"]
+    freshness = schedule.get("freshness_seconds")
+    if freshness is None:
+        freshness = _DEFAULT_FRESHNESS_INTERVALS * longest_interval_seconds(schedule["cron"])
+    thresholds = config["monitoring"]["alert_thresholds"]
+    return MonitoringPolicy(freshness, thresholds.get("consecutive_failures"))
+
+
 def source_status_operation(
     path: Path, *, scope: str = DEFAULT_SCOPE, backfill: bool = False
 ) -> dict[str, object]:
     config = load_status_config(path)
-    monitoring = config["monitoring"]
-    policy = MonitoringPolicy(
-        config["schedule"].get("freshness_seconds", monitoring["freshness_sla_seconds"]),
-        monitoring["alert_thresholds"].get("consecutive_failures"),
-    )
+    policy = monitoring_policy(config)
     namespace = config["cursor"]["backfill_namespace"] if backfill else LIVE_NAMESPACE
     stream = StreamKey(config["identity"]["source_id"], scope, namespace)
     engine = engine_from_env()

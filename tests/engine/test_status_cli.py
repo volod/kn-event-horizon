@@ -73,10 +73,8 @@ def test_cli_reads_actual_snapshot_results_without_fetching(
     assert empty["state"] == "never_run" and empty["stale"]
     assert empty["last_attempt_at"] is empty["record_count"] is empty["last_error_code"] is None
     assert empty["checkpoint_revision"] == site.requests == 0
-    assert (
-        empty["freshness_threshold_seconds"]
-        == profile.config["monitoring"]["freshness_sla_seconds"]
-    )
+    assert profile.config["schedule"] == {"cron": "0 */2 * * *", "timezone": "UTC"}
+    assert empty["freshness_threshold_seconds"] == 2 * 7200
     applied = invoke(profile, caplog)
     first = read()
     assert first["state"] == "success" and not first["stale"]

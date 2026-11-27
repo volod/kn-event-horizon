@@ -60,6 +60,29 @@ def test_admission_issues_no_requests(
     assert rows(engine, state_table(ATTEMPTS)) == []
 
 
+def test_disabled_profiles_and_catalogue_rows_issue_no_requests(
+    engine: sa.Engine, site: Site, profile: ProfileFile, caplog: pytest.LogCaptureFixture
+) -> None:
+    approval = profile.config["approval"]
+    for state in ("paused", "retired", "approved", "sampling_authorized"):
+        profile.config["approval"] = {**approval, "state": state}
+        profile.save()
+        for replay in ((), ("--archive-run-id", "fixture-run")):
+            error = invoke(profile, caplog, *replay, exit_code=1)["error"]
+            assert (error["path"], error["rule"]) == ("$/approval/state", "enabledState")
+    profile.config["approval"] = approval
+    profile.save()
+    table = catalogue_table()
+    for state in ("paused", "retired", "rejected"):
+        with engine.begin() as connection:
+            connection.execute(
+                table.update().filter_by(source_id=SOURCE).values(lifecycle_state=state)
+            )
+        assert invoke(profile, caplog, exit_code=1)["error"]["rule"] == "catalogueState"
+    assert site.requests == 0
+    assert rows(engine, state_table(ATTEMPTS)) == []
+
+
 def test_snapshot_is_idempotent_and_offline_replay_restores_claims(
     engine: sa.Engine,
     site: Site,
