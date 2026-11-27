@@ -1,4 +1,62 @@
-# Ingestion Engine Storage
+# Ingestion Engine
+
+## Run and replay a snapshot
+
+```bash
+kn --json source run PROFILE.yaml
+kn --json source replay PROFILE.yaml --archive-run-id FETCH_RUN_ID
+```
+
+Set `KN_DATABASE_URL` and `KN_DATABASE_PASSWORD_FILE` for the governed PostgreSQL database.
+Configure the [raw archive root](raw-archive.md#configure-and-verify) separately. Load the
+checkout's `.env` with `source scripts/shared/common.sh && kn_load_env` when using its local
+settings. Both commands accept `--data-dir` and use the identity journal under `DATA_DIR` by
+default. Keep that journal with the archive to reproduce the same KN IDs on replay.
+
+Execution requires passing [crawler enablement evidence](source-management.md#enablement-evidence)
+and an `enabled` row in the deployed catalogue. The current runner supports one unauthenticated
+JSON response, one `snapshot_hash` checkpoint stream (`default`, `live`), and WARC captures.
+The profile names an HTTPS endpoint under `.localhost` with an explicit port. Transport opens
+IPv4 loopback directly and verifies a certificate for `127.0.0.1`. The test harness loads
+the local adapter in the reviewed parser namespace and supplies its own trust root.
+
+The loader resolves the native record key through the identity registry and tracks changes
+to the declared text fields. The text claim keeps the exact original, source language, and a
+JSON Pointer into its WARC response. Use the [shared text selector](localization.md#source-data-and-translations)
+to display an original when the requested language and English are unavailable. Missing language
+is `und`. Claim and evidence recording times derive from the archived observation time for
+deterministic replay. The attempt and batch keep the actual load times.
+
+The command writes an attempt and reports its run ID, attempt number, status, record and claim
+counts, request use, received bytes, and committed checkpoint revision in JSON. `success` marks
+an applied snapshot, `not_modified` marks identical bytes under the same configuration and code,
+and `skipped` marks an already applied or superseded archive batch. `failed` and `blocked` exit
+with status 1 and report a stable error code. Admission errors use `E_SOURCE_CONFIG` before
+acquisition. The parser validates the entire snapshot before loading. A malformed body, schema
+drift, or invalid record key leaves the previous checkpoint and claims in place.
+
+## Retry and replay
+
+The session lock covers registration, acquisition, and the load commit for one source and scope.
+A run keeps one batch named `snapshot` under
+`$KN_RAW_ARCHIVE_DIR/captures/<domain>/<source-id>/<run-id>/`. A fresh run retains a new response
+even when its bytes match the checkpoint. Unchanged bytes under the same profile and code produce
+no new identity events, claims, or revision.
+
+After interruption, rerun the same command with the same profile and adapter version. The next
+attempt resumes the logical run from the committed checkpoint. A finalized WARC batch supplies
+the original capture and the resumed attempt makes zero requests. Identity recovery completes a
+pending match before applying the remaining records. Claims, loaded batch, checkpoint and
+successful outcome commit together. An unfinished attempt can have unmeasured request counters.
+
+Replay selects the original fetch run by ID and opens its committed manifest. It runs without
+source transport and checks the profile digest and the digest of the engine and parser code.
+Apply available batches
+in capture order when restoring a new stream. An older capture cannot move a live checkpoint
+backward. The fixture harness rebuilds the database with the same identity journal and compares
+every restored claim and evidence field with the original load.
+
+## Registered storage
 
 The registered `kn.system.ingestion_state` version `1.0.0`
 [ODCS contract](../../../contracts/core/system/ingestion-state.odcs.json) defines four tables in
@@ -72,6 +130,28 @@ archive batch and checkpoint through two development rebuilds. It compares every
 registered subset. The [task record](../records/0058-ingestion-engine-ingestion-state-contracts.md)
 contains the acceptance results.
 
-The [engine skeleton](../plan.md#engine-skeleton) owns loader wiring, parsing, and the run and
-replay commands. [Source status monitoring](../plan.md#source-status-monitoring) owns status
-computation, the CLI and operations mart.
+The [engine fixture suite](../../../tests/engine/test_snapshot.py) exercises the operator commands
+over loopback HTTPS and a disposable PostgreSQL database. It uses OpenSSL 3 to create an
+ephemeral test certificate. The synthetic
+[profile](../../../domains/fixture/snapshot.yaml) and
+[payload](../../../tests/fixtures/fixture/snapshot.json) run only in that harness. With the local
+database running, use `make ci-local` or run the engine suite directly after loading the test
+environment.
+
+```bash
+source scripts/shared/common.sh && kn_load_env && kn_db_test_env
+.venv/bin/python -m pytest tests/engine tests/integration/test_ingestion_state.py
+```
+
+The [engine skeleton record](../records/0059-ingestion-engine-engine-skeleton.md) contains
+acceptance evidence and recovery findings. [Source status monitoring](../plan.md#source-status-monitoring)
+owns status computation and the operations mart.
+
+## Known limitations
+
+- [HTTP fetch safety](../plan.md#http-fetch-safety) owns real endpoints, conditional requests,
+  pagination controls, retries, and credentials. The fixture transport reads one bounded response.
+- [Mapping and quality rules](../plan.md#mapping-and-quality-rules) owns generalized validation and
+  per-record quarantine. The fixture engine accepts or stops the snapshot as a unit.
+- [Rebuild from raw](../plan.md#rebuild-from-raw) owns automatic discovery and full rebuild replay.
+  The fixture engine replays one explicitly selected batch.

@@ -29,16 +29,25 @@ def render_result(translator: Translator, command: str, result: dict[str, object
     if command == "raw":
         return _raw_result(translator, result)
     if command == "source":
-        if result.get("status") == "valid":
-            return translator.text(
-                "cli.source_config_ok",
-                source_id=result["source_id"],
-                state=_source_states(translator)[str(result["state"])],
-            )
-        sources = result["sources"]
-        assert isinstance(sources, list)
-        return _render_sources(translator, sources)
+        return _source_result(translator, result)
     return _artifact_result(translator, result)
+
+
+def _source_result(translator: Translator, result: dict[str, object]) -> str:
+    if result.get("status") == "valid":
+        return translator.text(
+            "cli.source_config_ok",
+            source_id=result["source_id"],
+            state=_source_states(translator)[str(result["state"])],
+        )
+    if "run_id" in result:
+        summary = translator.text("cli.source_outcome", **result)
+        if result["error_code"] is not None:
+            return translator.text("cli.source_outcome_error", summary=summary, **result)
+        return summary
+    sources = result["sources"]
+    assert isinstance(sources, list)
+    return _render_sources(translator, sources)
 
 
 def _raw_result(translator: Translator, result: dict[str, object]) -> str:

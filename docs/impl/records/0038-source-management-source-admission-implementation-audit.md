@@ -29,7 +29,7 @@ Verify the source keys and onboarding handoff against its specification and the 
 | --- | --- | --- | --- |
 | ADMISSION-01 | major | Three enabled HTTP profiles passed with raw redistribution broader than the export review. Archive and export consumers would receive contradictory instructions. | Source management, fixed. `test_raw_redistribution_cannot_exceed_reviewed_rights` covers forbidden, private and restricted policies. |
 | ADMISSION-02 | major | A passing case masked a nested suite with a failure counter, or an unnamed case outside its suite. Both reports passed enablement. | Source management, fixed. `test_incomplete_and_failed_reports_refuse_enablement` now checks both structures against the pytest report layout. |
-| ADMISSION-03 | minor | `kn source validate` exits 0 for a valid candidate. The first fetch consumer previously had only a successful run and replay in its plan gates. | Ingestion engine, quality improvement assigned to [engine-skeleton](../plan.md#engine-skeleton). Its fixture server must count zero requests for a candidate or missing rights. |
+| ADMISSION-03 | minor | `kn source validate` exits 0 for a valid candidate. The first fetch consumer previously had only a successful run and replay in its plan gates. | Ingestion engine, quality improvement assigned to [engine-skeleton](0059-ingestion-engine-engine-skeleton.md). Its fixture server must count zero requests for a candidate or missing rights. |
 
 ## Six audit checks
 

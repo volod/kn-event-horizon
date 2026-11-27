@@ -73,5 +73,6 @@ decision. A record can name a plan task by ID because plan headings disappear on
 | 0056 | `raw-fetch-ledger` | [Raw fetch ledger](0056-raw-archive-raw-fetch-ledger.md) |
 | 0057 | `raw-archive-implementation-audit` | [Raw archive implementation audit](0057-raw-archive-raw-archive-implementation-audit.md) |
 | 0058 | `ingestion-state-contracts` | [Ingestion state contracts](0058-ingestion-engine-ingestion-state-contracts.md) |
+| 0059 | `engine-skeleton` | [Engine skeleton](0059-ingestion-engine-engine-skeleton.md) |
 
-Next unused sequence is `0059`.
+Next unused sequence is `0060`.

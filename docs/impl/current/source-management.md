@@ -117,9 +117,10 @@ least one named test case and zero failures, errors or skips. Use a single `test
 a `testsuites` root with direct suite children. Each case belongs directly to its suite.
 Review establishes which source and revision the report covers.
 
-A successful draft validation reports its declared state, including `candidate`. A fetch consumer
-must validate the reviewed profile and require `approval.state: enabled` before issuing a scheduled
-request.
+A successful draft validation reports its declared state, including `candidate`.
+[`kn source run` and `kn source replay`](ingestion-engine.md#run-and-replay-a-snapshot) require
+both `approval.state: enabled` with passing evidence and an enabled row in the deployed
+catalogue. A candidate row or missing rights decision produces zero requests.
 
 ### Error codes and pagination
 

@@ -1,0 +1,54 @@
+version: 1
+identity:
+  source_id: space:fixture-snapshot
+  labels: {en: Fixture snapshots, uk: "\u0417\u043d\u0456\u043c\u043a\u0438"}
+  owner: fixture-maintainer
+access:
+  method: http_json
+  endpoints: [https://fixture.localhost:4443/snapshot]
+  allowed_hosts: [fixture.localhost]
+  redirect_policy: deny
+  request_budget:
+    max_requests: 1
+    timeout_seconds: 5
+    max_response_bytes: 65536
+    max_decoded_bytes: 65536
+  rate_limit: {requests: 1, per_seconds: 1}
+  conditional_requests: {etag: false, last_modified: false}
+  content_types: [application/json]
+schedule: {cron: "0 */2 * * *", timezone: UTC}
+cursor: {strategy: snapshot_hash, backfill_namespace: history}
+raw: {format: warc, retention_days: 30, redistribution: forbidden}
+parse:
+  entry_point: "kn.domains.space.snapshot_fixture:parse"
+  native_schema: "fixture/v1"
+  schema_fingerprint: 403bb283cf55795acf94a3c6e2f58632726e9aab5a3e1a70bf87f75b46ed5b5d
+mapping:
+  record_key: [id]
+  fields: [{native: name, field_id: fixture.record.name}]
+quality:
+  required_fields: [id, name]
+  ranges: []
+  expected_volume: {min: 1, max: 50}
+  quarantine_limit: 0
+  batch_stop: [record_key_missing, schema_drift, integrity_lost]
+errors: []
+monitoring:
+  freshness_sla_seconds: 21600
+  alert_thresholds: {consecutive_failures: 3, cursor_lag_seconds: 21600}
+  expected_records: {min: 1, max: 50}
+rights:
+  terms_uri: https://fixture.localhost/terms
+  reviewer: fixture-reviewer
+  reviewed_at: "2026-11-23T00:00:00Z"
+  licence: fixture-only
+  permission: granted
+  export_policy: forbidden
+  retention_days: 30
+approval:
+  state: enabled
+  approver: fixture-approver
+  reference: fixture-enable-1
+verification:
+  fixtures: [snapshot.json]
+  test_report: suite.xml

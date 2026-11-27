@@ -19,6 +19,7 @@ from kn.archive.config import INDEX_VARIABLE, ROOT_VARIABLE
 from kn.archive.model import ArchiveError
 from kn.contracts.diagnostics import ContractError
 from kn.db.rebuild import RebuildRefused
+from kn.engine.runner import source_operation
 from kn.evidence.ranking import DEFAULT_AUDIENCE, Audience
 from kn.i18n import Translator
 from kn.i18n.output import render_result
@@ -98,6 +99,14 @@ def build_parser(
         "validate", help=tr.text("cli.source_validate_help")
     )
     validate_source.add_argument("source", type=Path, help=tr.text("cli.source_config_help"))
+    run_source = source_actions.add_parser("run", help=tr.text("cli.source_run_help"))
+    replay_source = source_actions.add_parser("replay", help=tr.text("cli.source_replay_help"))
+    for action in (run_source, replay_source):
+        action.add_argument("source", type=Path, help=tr.text("cli.source_config_help"))
+        action.add_argument("--data-dir", type=Path, help=tr.text("cli.data_dir_help"))
+    replay_source.add_argument(
+        "--archive-run-id", required=True, help=tr.text("cli.archive_run_help")
+    )
     raw = subcommands.add_parser("raw", help=tr.text("cli.raw_help"))
     raw_actions = raw.add_subparsers(dest="action", required=True, parser_class=parser_class)
     raw_actions.add_parser("verify", help=tr.text("cli.raw_verify_help"))
@@ -269,7 +278,7 @@ def main(argv: Sequence[str] | None = None) -> int:
         else render_result(translator, args.command, result)
     )
     _LOG.info("%s", output)
-    return 0
+    return int(args.command == "source" and result.get("status") in {"blocked", "failed"})
 
 
 def _report_error(
@@ -310,14 +319,22 @@ def _run(args: argparse.Namespace, translator: Translator) -> dict[str, object]:
     if args.command == "raw":
         return _run_raw(args)
     if args.command == "source":
-        if args.action == "validate":
-            return source_validate_operation(args.source)
-        return source_list_operation()
+        return _run_source(args)
     if args.command == "vocabulary":
         if args.action == "export":
             return export_scheme(args.scheme, args.data_dir)
         return import_proposals(discover_project_root(), args.data_dir, check=args.check)
     return satcom_operation(args.action, args.source, args.data_dir)
+
+
+def _run_source(args: argparse.Namespace) -> dict[str, object]:
+    if args.action == "validate":
+        return source_validate_operation(args.source)
+    if args.action == "list":
+        return source_list_operation()
+    return source_operation(
+        args.source, _journal(args).data_dir, archive_run_id=getattr(args, "archive_run_id", None)
+    )
 
 
 def _run_raw(args: argparse.Namespace) -> dict[str, object]:

@@ -36,7 +36,7 @@ def test_source_list_preserves_source_text(
     assert json.loads(caplog.records[-1].message) == result
 
 
-def test_empty_catalogue_and_unavailable_execution(
+def test_empty_catalogue_and_missing_execution_argument(
     monkeypatch: pytest.MonkeyPatch,
     caplog: pytest.LogCaptureFixture,
     capsys: pytest.CaptureFixture[str],
@@ -46,6 +46,6 @@ def test_empty_catalogue_and_unavailable_execution(
     assert cli.main(["source", "list"]) == 0
     assert caplog.records[-1].message == Translator().text("cli.source_empty")
     with pytest.raises(SystemExit) as error:
-        cli.main(["--json", "source", "run", "space:row-4"])
+        cli.main(["--json", "source", "run"])
     assert error.value.code == 2
     assert json.loads(capsys.readouterr().err) == {"error": {"code": "E_ARGUMENTS"}}

@@ -32,6 +32,14 @@ def catalogue_table() -> Table:
     return metadata(load_contract(CATALOGUE)).tables[TABLE_NAME]
 
 
+def source_enabled(connection: Connection, source_id: str) -> bool:
+    table = catalogue_table()
+    return (
+        connection.scalar(select(table.c.lifecycle_state).filter_by(source_id=source_id))
+        == "enabled"
+    )
+
+
 def load_reviewed_catalogue(connection: Connection) -> None:
     """Load candidates as part of the caller's all-schema rebuild transaction."""
     if not connection.in_transaction():

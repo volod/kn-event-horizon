@@ -141,7 +141,8 @@ def test_database_volume_lives_under_data_dir_and_is_never_created_by_docker() -
 
 
 def test_bootstrap_and_probe_cover_core_schemas_and_every_domain_package() -> None:
-    domains = {path.name for path in (ROOT / "domains").iterdir() if path.is_dir()}
+    # The engine acceptance harness owns this test-only package and uses a scratch database.
+    domains = {path.name for path in (ROOT / "domains").iterdir() if path.is_dir()} - {"fixture"}
     expected = CORE_SCHEMAS | domains
     assert set(SCHEMAS) == expected
 

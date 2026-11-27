@@ -58,6 +58,7 @@ identical payload bytes, and the same access, expiry, and deletion scope. A requ
 redaction or had omitted headers falls back to a full response when submitted without
 `revisit_of`.
 
+Use `Archive.batch(key)` to open a committed manifest by `BatchKey`.
 Use `Archive.metadata(record_or_fetch_id)` for a metadata-only read and
 `Archive.replay(record_or_fetch_id, binary_output)` to verify and write the retained body.
 `Archive.iter_metadata()` yields retained metadata ordered by UTC capture time and fetch ID.

@@ -65,6 +65,12 @@ class Archive:
     def metadata(self, identifier: str) -> Metadata:
         return read_metadata(self._resolve(identifier, self._catalog))
 
+    def batch(self, key: BatchKey) -> Manifest:
+        """Open a committed batch by its archive key without creating anything."""
+        directory = batch_directory(self.root, key)
+        check_directories(self.root, directory)
+        return read_manifest(directory, self.root)
+
     def iter_metadata(self) -> Iterator[Metadata]:
         catalog = self._catalog()
         ordered = sorted(

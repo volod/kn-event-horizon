@@ -32,44 +32,14 @@ archive.
 
 ### Source runs and health -- `source-management`
 
-#### engine-skeleton
-
-The core engine must run end to end on a synthetic source before any real source.
-
-- Serves: `ingestion-engine` -- [Ingestion engine](../design/spec.md#ingestion-engine)
-- Agent status: CLEAR
-- Dependencies: The [crawler validator and enablement evidence](current/source-management.md#enablement-evidence),
-  [raw archive commit and replay interface](current/raw-archive.md#commit-and-replay), and
-  [ingestion state contracts](current/ingestion-engine.md#checkpoint-transaction).
-- User-visible outcome: `kn source run` and `kn source replay` process a synthetic fixture source
-  served locally. They commit WARC captures and write identity events, claims with evidence linked
-  to KN IDs, a checkpoint, and a run summary with a declared status.
-- Scope boundary: Lock, run registration, fetch to archive, parse, a minimal mapping, validation,
-  load, checkpoint, and status. Fetch safety, full mapping, curated input, and rebuild replay come
-  in the next tasks.
-  Use the registered run, batch and checkpoint tables and the checkpoint transaction interface.
-- Data and artifact paths: `src/kn/engine/`, `domains/fixture/` (test-only),
-  `tests/engine/`, `tests/fixtures/fixture/`.
-- Execution path: Fixture-first. A test HTTP server serves the synthetic payloads, the adapter
-  interface returns records and claims, and the loader is the only writer.
-- Acceptance gates: A catalogue candidate and a profile missing its rights decision each
-  produce zero requests at the fixture server. A second enabled run is idempotent. An interrupted
-  run resumes from the committed checkpoint. A crash after archive finalization and before SQL
-  commit reuses the archived batch.
-  Replay without network yields the same claims. Russian, Chinese, and unknown-language source
-  fixtures ingest without English or Ukrainian translations, retain originals and provenance, and
-  use the [shared text selector](current/localization.md#source-data-and-translations) for display.
-  `make ci` passes.
-- Documentation target: [Ingestion engine](current/ingestion-engine.md).
-
 #### source-status-monitoring
 
 Operators need per-source health and freshness without opening Kestra.
 
 - Serves: `source-management` -- [Source management](../design/spec.md#source-management)
 - Agent status: CLEAR
-- Requires: `engine-skeleton`
-- Dependencies: [Run history and health fields](current/ingestion-engine.md#run-history-and-health).
+- Dependencies: The [fixture runner](current/ingestion-engine.md#run-and-replay-a-snapshot)
+  and [run history and health fields](current/ingestion-engine.md#run-history-and-health).
 - User-visible outcome: `kn source status` shows the last success and attempt,
   state, stale flag, counts, bytes, budget use, cursor lag, and last error code, and feeds the
   operations mart.
@@ -90,9 +60,10 @@ there repeats in every source that follows.
 
 - Serves: `source-management` -- [Source management](../design/spec.md#source-management)
 - Agent status: CLEAR
-- Requires: `engine-skeleton`, `source-status-monitoring`
-- Dependencies: The accepted task records of the group and the [implementation
-  audit](../guide/planning-workflow.md#implementation-audits) checks.
+- Requires: `source-status-monitoring`
+- Dependencies: The [engine skeleton record](records/0059-ingestion-engine-engine-skeleton.md),
+  the accepted status-monitoring record and the
+  [implementation audit](../guide/planning-workflow.md#implementation-audits) checks.
 - User-visible outcome: Every later source is onboarded through verified, enforced declarations. The
   audit record gives every check a result and every finding a disposition. The current-state page
   lists known limitations, and each scheduled finding is a plan task.

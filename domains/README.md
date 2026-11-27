@@ -1,7 +1,8 @@
 # Domain Packages
 
-Each directory under `domains/` is a knowledge domain package: `space`, `gdelt`, and
-`microelectronics`. The [specification](../docs/design/spec.md#repository-layout) defines the full
+The knowledge domain packages are `space`, `gdelt`, and `microelectronics`.
+[`fixture/`](fixture/snapshot.yaml) holds the synthetic ingestion adapter and profile used by
+the [engine acceptance tests](../docs/impl/current/ingestion-engine.md#verification). The [specification](../docs/design/spec.md#repository-layout) defines the full
 package layout. Each package holds proposals, a reviewed semantic seed file, and a reviewed source catalogue seed file.
 
 ## Seed proposals
