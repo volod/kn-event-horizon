@@ -27,7 +27,7 @@ def render_result(translator: Translator, command: str, result: dict[str, object
     if command == "db":
         return translator.text("cli.db_ok")
     if command == "raw":
-        return translator.text("cli.raw_verified", **result)
+        return _raw_result(translator, result)
     if command == "source":
         if result.get("status") == "valid":
             return translator.text(
@@ -39,6 +39,12 @@ def render_result(translator: Translator, command: str, result: dict[str, object
         assert isinstance(sources, list)
         return _render_sources(translator, sources)
     return _artifact_result(translator, result)
+
+
+def _raw_result(translator: Translator, result: dict[str, object]) -> str:
+    if result["status"] == "reindexed":
+        return translator.text("cli.raw_reindexed", **result)
+    return translator.text("cli.raw_verified", **result)
 
 
 def _artifact_result(translator: Translator, result: dict[str, object]) -> str:

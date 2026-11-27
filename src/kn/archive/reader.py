@@ -1,5 +1,6 @@
 """Integrity-checked reads from committed WARC members and blob descriptors."""
 
+import os
 from datetime import timedelta
 from hashlib import sha256
 from io import BytesIO
@@ -20,6 +21,14 @@ from kn.archive.model import (
     decode_metadata,
 )
 from kn.archive.warc import read_member, verify_member
+
+
+def check_payload_locator(located: Located) -> None:
+    """Check that the committed object is present and sized without reading its bytes."""
+    entry = located.entry
+    with open_regular(checked_path(located.directory, entry.payload_path)) as stream:
+        if os.fstat(stream.fileno()).st_size != entry.payload.size:
+            raise ArchiveError("archive_object_size")
 
 
 def read_metadata(located: Located) -> Metadata:

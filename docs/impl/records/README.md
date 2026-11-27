@@ -70,5 +70,6 @@ decision. A record can name a plan task by ID because plan headings disappear on
 | 0053 | `evidence-model-implementation-audit` | [Evidence model implementation audit](0053-evidence-model-evidence-model-implementation-audit.md) |
 | 0054 | Raw archive design | [Design review](0054-adhoc-raw-archive-storage-design.md) |
 | 0055 | `warc-raw-store` | [WARC raw store](0055-raw-archive-warc-raw-store.md) |
+| 0056 | `raw-fetch-ledger` | [Raw fetch ledger](0056-raw-archive-raw-fetch-ledger.md) |
 
-Next unused sequence is `0056`.
+Next unused sequence is `0057`.

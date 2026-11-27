@@ -12,6 +12,10 @@ Backend = Literal["warc", "blob"]
 Kind = Literal["response", "resource", "revisit", "blob"]
 Headers = tuple[tuple[str, str], ...]
 Segment = Annotated[str, Field(pattern=r"^[A-Za-z0-9][A-Za-z0-9_.-]{0,127}$")]
+Domain = Annotated[str, Field(pattern=r"^[a-z][a-z0-9_]{0,127}$")]
+SourceID = Annotated[
+    str, Field(pattern=r"^[a-z][a-z0-9_]{0,127}:[A-Za-z0-9][A-Za-z0-9_.-]*$", max_length=257)
+]
 Digest = Annotated[str, Field(pattern=r"^[0-9a-f]{64}$")]
 RecordID = Annotated[str, Field(pattern=r"^urn:uuid:[0-9a-f]{8}-(?:[0-9a-f]{4}-){3}[0-9a-f]{12}$")]
 ByteCount = Annotated[int, Field(ge=0)]
@@ -48,10 +52,8 @@ VersionOne = Annotated[Literal[1], BeforeValidator(_version_one)]
 
 
 class BatchKey(Document):
-    domain: Annotated[str, Field(pattern=r"^[a-z][a-z0-9_]{0,127}$")]
-    source_id: Annotated[
-        str, Field(pattern=r"^[a-z][a-z0-9_]*:[A-Za-z0-9][A-Za-z0-9_.-]*$", max_length=257)
-    ]
+    domain: Domain
+    source_id: SourceID
     run_id: Segment
     batch_id: Segment
 

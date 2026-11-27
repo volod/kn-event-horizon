@@ -1,12 +1,22 @@
-"""Archive-only capture, metadata lookup, replay, verification and withdrawal."""
+"""Capture, metadata lookup, replay, verification and withdrawal."""
 
-from collections.abc import Iterable, Iterator
+from collections.abc import Callable, Iterable, Iterator
 from datetime import datetime
+from functools import cache
 from pathlib import Path
 from typing import BinaryIO
 
-from kn.archive.catalog import MANIFEST_NAME, Catalog, Located
-from kn.archive.config import archive_root, resolve_archive_path
+from kn.archive.catalog import (
+    MANIFEST_NAME,
+    Catalog,
+    Located,
+    batch_directory,
+    check_reference,
+    is_withdrawn,
+    read_manifest,
+)
+from kn.archive.config import archive_root, check_roots, index_root, resolve_archive_path
+from kn.archive.files import check_directories
 from kn.archive.model import (
     ArchiveError,
     BatchKey,
@@ -31,12 +41,16 @@ _DEFAULT_REDACTION = Redaction()
 
 
 class Archive:
-    def __init__(self, root: Path) -> None:
+    def __init__(self, root: Path, *, index_root: Path | None = None) -> None:
         self.root = resolve_archive_path(root)
+        self.index_root = None if index_root is None else resolve_archive_path(index_root)
+        if self.index_root is not None:
+            check_roots(self.root, self.index_root)
 
     @classmethod
-    def configured(cls, project_root: Path | None = None) -> "Archive":
-        return cls(archive_root(project_root))
+    def configured(cls, project_root: Path | None = None, *, use_index: bool = True) -> "Archive":
+        root = archive_root(project_root)
+        return cls(root, index_root=index_root(project_root, required=False) if use_index else None)
 
     def commit(
         self,
@@ -49,8 +63,7 @@ class Archive:
         return commit(self.root, batch, captures, limits, redaction)
 
     def metadata(self, identifier: str) -> Metadata:
-        catalog = self._catalog()
-        return read_metadata(_retained(catalog, identifier))
+        return read_metadata(self._resolve(identifier, self._catalog))
 
     def iter_metadata(self) -> Iterator[Metadata]:
         catalog = self._catalog()
@@ -62,10 +75,11 @@ class Archive:
                 yield read_metadata(located)
 
     def replay(self, identifier: str, output: BinaryIO) -> Metadata:
-        catalog = self._catalog()
-        located = _retained(catalog, identifier)
+        catalog = cache(self._catalog)
+        located = self._resolve(identifier, catalog)
         metadata = read_metadata(located)
-        _replay(catalog, located, metadata, output)
+        target = self._target(located, catalog)
+        _replay(located, metadata, output, target)
         return metadata
 
     def verify(self) -> dict[str, object]:
@@ -77,13 +91,16 @@ class Archive:
             directories.setdefault(located.directory, {MANIFEST_NAME}).add(
                 located.entry.payload_path.partition("/")[0]
             )
+            reference = located.entry.revisit_of
+            target = check_reference(
+                located, None if reference is None else catalog.records.get(reference)
+            )
             if catalog.withdrawn(located.entry):
                 verify_remaining_objects(
                     located, removal_recorded=located.entry.record_id in catalog.tombstones
                 )
-                _check_reference(catalog, located)
             else:
-                _replay(catalog, located, read_metadata(located), None)
+                _replay(located, read_metadata(located), None, target)
                 retained += 1
         for directory, expected in directories.items():
             if {path.name for path in directory.iterdir()} - expected:
@@ -105,39 +122,56 @@ class Archive:
             raise ArchiveError("archive_root_unavailable")
         return Catalog.load(self.root)
 
+    def _resolve(self, identifier: str, load_catalog: Callable[[], Catalog]) -> Located:
+        located = self._index_hint(identifier)
+        if located is None:
+            catalog = load_catalog()
+            located = catalog.lookup(identifier)
+            withdrawn = catalog.withdrawn(located.entry)
+        else:
+            withdrawn = is_withdrawn(self.root, located.entry.record_id, located.entry.revisit_of)
+        if withdrawn:
+            raise ArchiveError("capture_tombstoned")
+        return located
 
-def _retained(catalog: Catalog, identifier: str) -> Located:
-    located = catalog.lookup(identifier)
-    if catalog.withdrawn(located.entry):
-        raise ArchiveError("capture_tombstoned")
-    return located
+    def _index_hint(self, identifier: str) -> Located | None:
+        if self.index_root is None:
+            return None
+        from kn.archive.ledger import FetchLedger
 
-
-def _check_reference(catalog: Catalog, located: Located) -> Located | None:
-    reference = located.entry.revisit_of
-    if reference is None:
+        try:
+            batch = FetchLedger(self.root, self.index_root).locate_batch(identifier)
+            if batch is None:
+                return None
+            directory = batch_directory(self.root, batch)
+            check_directories(self.root, directory)
+            manifest = read_manifest(directory, self.root)
+        except (ArchiveError, OSError):
+            return None
+        for entry in manifest.captures:
+            if identifier in (entry.record_id, entry.fetch_id):
+                return Located(batch, directory, entry)
         return None
-    target = catalog.records.get(reference)
-    if (
-        target is None
-        or target.entry.revisit_of is not None
-        or target.entry.backend != "warc"
-        or target.batch.parts()[:2] != located.batch.parts()[:2]
-        or target.entry.fetched_at > located.entry.fetched_at
-        or target.entry.payload_sha256 != located.entry.payload_sha256
-    ):
-        raise ArchiveError("revisit_target")
-    return target
+
+    def _target(self, located: Located, load_catalog: Callable[[], Catalog]) -> Located | None:
+        if located.entry.revisit_of is None:
+            return None
+        try:
+            target = self._resolve(located.entry.revisit_of, load_catalog)
+        except ArchiveError as error:
+            if error.code == "capture_not_found":
+                raise ArchiveError("revisit_target") from None
+            raise
+        return check_reference(located, target)
 
 
 def _replay(
-    catalog: Catalog, located: Located, metadata: Metadata, output: BinaryIO | None
+    located: Located, metadata: Metadata, output: BinaryIO | None, target: Located | None
 ) -> None:
-    target = _check_reference(catalog, located)
     if target is None:
         replay_payload(located, metadata, output)
         return
-    previous = read_metadata(_retained(catalog, target.entry.record_id))
+    previous = read_metadata(target)
     check_revisit(metadata, previous)
     replay_payload(located, metadata, None, previous)
     replay_payload(target, previous, output)

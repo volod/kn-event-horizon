@@ -79,7 +79,7 @@ The final `make ci` passed with 1,463 tests and 141 deselected integration and h
 
 The forward plan drops from 112 to 111 tasks, from 100 to 99 in the agent lane. The human lane
 remains at 12. The raw archive registry links its current implementation and remains planned
-through the [fetch ledger](../plan.md#raw-fetch-ledger) and
+through the [fetch ledger](0056-raw-archive-raw-fetch-ledger.md) and
 [archive audit](../plan.md#raw-archive-implementation-audit). The fetch ledger is now the first
 ready agent task. Independent WARC tool conformance and the full backup and restore acceptance
 remain in the audit.

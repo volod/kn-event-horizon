@@ -9,7 +9,14 @@ import pytest
 
 from kn.archive import Archive
 from kn.archive.model import ArchiveError, HttpExchange, Limits, Redaction
-from tests.archive.fixtures import LIMITS, SAMPLE, batch, capture, committed_path
+from tests.archive.fixtures import (
+    LIMITS,
+    SAMPLE,
+    batch,
+    capture,
+    committed_path,
+    rewrite_descriptor,
+)
 
 
 @pytest.mark.parametrize("encoding", ["gzip", "deflate"])
@@ -71,21 +78,6 @@ def test_redaction_precedes_persistence_and_errors(tmp_path: Path) -> None:
     inferred_entry = inferred.captures[0]
     inferred_path = committed_path(tmp_path, batch("inferred"), inferred_entry.payload_path)
     assert marker.encode() not in gzip.decompress(inferred_path.read_bytes())
-
-
-def rewrite_descriptor(tmp_path: Path, key: str, modifications: dict[str, object]) -> None:
-    directory = committed_path(tmp_path, batch(key), "manifest.json")
-    manifest = json.loads(directory.read_bytes())
-    entry = manifest["captures"][0]
-    descriptor = directory.parent / entry["metadata_path"]
-    data = json.loads(descriptor.read_bytes())
-    data.update(modifications)
-    if data["schema_version"] == 1:
-        del data["decoded_size"]
-    serialized = json.dumps(data, ensure_ascii=True).encode("ascii")
-    descriptor.write_bytes(serialized)
-    entry["metadata"] = {"size": len(serialized), "sha256": sha256(serialized).hexdigest()}
-    directory.write_text(json.dumps(manifest), encoding="ascii")
 
 
 def test_legacy_and_current_descriptors_and_unknown_versions(tmp_path: Path) -> None:

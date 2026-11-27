@@ -3,6 +3,7 @@
 from collections.abc import Iterator
 from dataclasses import dataclass
 from pathlib import Path
+from stat import S_ISREG
 
 from kn.archive.files import read_small
 from kn.archive.model import (
@@ -34,6 +35,22 @@ class Located:
         return tuple(dict.fromkeys((self.entry.payload_path, self.entry.metadata_path)))
 
 
+def check_reference(located: Located, target: Located | None) -> Located | None:
+    if located.entry.revisit_of is None:
+        return None
+    if (
+        target is None
+        or target.entry.record_id != located.entry.revisit_of
+        or target.entry.revisit_of is not None
+        or target.entry.backend != "warc"
+        or target.batch.parts()[:2] != located.batch.parts()[:2]
+        or target.entry.fetched_at > located.entry.fetched_at
+        or target.entry.payload_sha256 != located.entry.payload_sha256
+    ):
+        raise ArchiveError("revisit_target")
+    return target
+
+
 def batch_directory(root: Path, key: BatchKey) -> Path:
     return root.joinpath("captures", *key.parts())
 
@@ -42,20 +59,25 @@ def tombstone_path(root: Path, record_id: str) -> Path:
     return root / "tombstones" / (record_directory(record_id) + ".json")
 
 
-def _directories(parent: Path) -> Iterator[Path]:
+def _directories(parent: Path, name: str | None = None) -> Iterator[Path]:
     if parent.is_symlink():
         raise ArchiveError("archive_symlink")
     if not parent.exists():
         return
-    for child in sorted(parent.iterdir()):
+    children = sorted(parent.iterdir()) if name is None else [parent / name]
+    for child in children:
+        if name is not None and not child.exists() and not child.is_symlink():
+            continue
         if child.is_symlink() or not child.is_dir():
             raise ArchiveError("archive_directory")
         yield child
 
 
-def manifests(root: Path) -> Iterator[tuple[Path, Manifest]]:
-    for domain in _directories(root / "captures"):
-        for source in _directories(domain):
+def manifests(
+    root: Path, domain: str | None = None, source_id: str | None = None
+) -> Iterator[tuple[Path, Manifest]]:
+    for directory in _directories(root / "captures", domain):
+        for source in _directories(directory, source_id):
             for run in _directories(source):
                 for batch in _directories(run):
                     yield batch, read_manifest(batch, root)
@@ -122,13 +144,21 @@ def _tombstone_files(root: Path) -> list[Path]:
 
 
 def _read_tombstones(
-    root: Path, files: list[Path], records: dict[str, Located]
+    root: Path,
+    files: list[Path],
+    records: dict[str, Located],
+    domain: str | None,
+    source_id: str | None,
 ) -> dict[str, Tombstone]:
     result = {}
     for filename in files:
         if filename.is_symlink() or not filename.is_file():
             raise ArchiveError("tombstone_path")
         stone = decode(Tombstone, read_small(filename, MAX_DESCRIPTOR), "tombstone_schema")
+        if (domain and stone.batch.domain != domain) or (
+            source_id and stone.batch.source_id != source_id
+        ):
+            continue
         located = records.get(stone.record_id)
         if located is None or filename != tombstone_path(root, stone.record_id):
             raise ArchiveError("tombstone_capture")
@@ -142,6 +172,23 @@ def _read_tombstones(
     return result
 
 
+def is_withdrawn(root: Path, record_id: str, revisit_of: str | None) -> bool:
+    """Check current withdrawal markers without scanning committed batches."""
+    if (root / "tombstones").is_symlink():
+        raise ArchiveError("archive_symlink")
+    for identifier in (record_id, revisit_of):
+        if identifier is None:
+            continue
+        try:
+            mode = tombstone_path(root, identifier).stat(follow_symlinks=False).st_mode
+        except FileNotFoundError:
+            continue
+        if not S_ISREG(mode):
+            raise ArchiveError("tombstone_path")
+        return True
+    return False
+
+
 @dataclass(frozen=True, slots=True)
 class Catalog:
     records: dict[str, Located]
@@ -150,19 +197,26 @@ class Catalog:
     batches: int
 
     @classmethod
-    def load(cls, root: Path) -> "Catalog":
+    def load(
+        cls, root: Path, *, domain: str | None = None, source_id: str | None = None
+    ) -> "Catalog":
         tombstones = _tombstone_files(root)
         records: dict[str, Located] = {}
         fetches: dict[str, Located] = {}
         batches = 0
-        for directory, manifest in manifests(root):
+        for directory, manifest in manifests(root, domain, source_id):
             batches += 1
             for entry in manifest.captures:
                 located = Located(manifest.batch, directory, entry)
                 if entry.record_id in records or entry.fetch_id in fetches:
                     raise ArchiveError("duplicate_capture")
                 records[entry.record_id] = fetches[entry.fetch_id] = located
-        return cls(records, fetches, _read_tombstones(root, tombstones, records), batches)
+        return cls(
+            records,
+            fetches,
+            _read_tombstones(root, tombstones, records, domain, source_id),
+            batches,
+        )
 
     def lookup(self, identifier: str) -> Located:
         located = self.records.get(identifier) or self.fetches.get(identifier)

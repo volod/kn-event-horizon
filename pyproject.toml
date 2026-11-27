@@ -20,6 +20,7 @@ dependencies = [
   "jsonschema>=4.25,<5",
   "psycopg[binary]>=3.3,<4",
   "publicsuffixlist==1.1.2.20261122",
+  "pyarrow>=24,<25",
   "pydantic>=2.12,<3",
   "python-dotenv>=1.2,<2",
   "pyyaml>=6,<7",

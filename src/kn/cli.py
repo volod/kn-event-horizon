@@ -15,7 +15,7 @@ from typing import Any, cast
 from jsonschema import ValidationError
 from sqlalchemy.exc import SQLAlchemyError
 
-from kn.archive.config import ROOT_VARIABLE
+from kn.archive.config import INDEX_VARIABLE, ROOT_VARIABLE
 from kn.archive.model import ArchiveError
 from kn.contracts.diagnostics import ContractError
 from kn.db.rebuild import RebuildRefused
@@ -33,6 +33,7 @@ from kn.operations import (
     contract_operation,
     database_operation,
     lineage_operation,
+    raw_reindex_operation,
     raw_verify_operation,
     satcom_operation,
     source_list_operation,
@@ -100,6 +101,11 @@ def build_parser(
     raw = subcommands.add_parser("raw", help=tr.text("cli.raw_help"))
     raw_actions = raw.add_subparsers(dest="action", required=True, parser_class=parser_class)
     raw_actions.add_parser("verify", help=tr.text("cli.raw_verify_help"))
+    reindex = raw_actions.add_parser("reindex", help=tr.text("cli.raw_reindex_help"))
+    reindex.add_argument("--domain", help=tr.text("cli.raw_domain_help"))
+    reindex.add_argument("--source", help=tr.text("cli.raw_source_help"))
+    reindex.add_argument("--since", help=tr.text("cli.raw_since_help"))
+    reindex.add_argument("--before", help=tr.text("cli.raw_before_help"))
     space = subcommands.add_parser("space", help=tr.text("cli.space_help"))
     datasets = space.add_subparsers(
         dest="dataset", required=True, title=tr.text("cli.commands"), parser_class=parser_class
@@ -275,9 +281,10 @@ def _report_error(
 
 def _report_archive_error(translator: Translator, error: ArchiveError, json_output: bool) -> None:
     details = {"reason": error.code}
-    if error.code == "archive_root_required":
-        details["variable"] = ROOT_VARIABLE
-        message = translator.text("cli.raw_root_required", variable=ROOT_VARIABLE)
+    roots = {"archive_root_required": ROOT_VARIABLE, "index_root_required": INDEX_VARIABLE}
+    if error.code in roots:
+        details["variable"] = roots[error.code]
+        message = translator.text("cli.raw_root_required", variable=details["variable"])
     else:
         message = translator.text("cli.raw_error", reason=error.code)
     _report_error(message, "E_RAW_ARCHIVE", json_output, details)
@@ -301,7 +308,7 @@ def _run(args: argparse.Namespace, translator: Translator) -> dict[str, object]:
     if args.command == "db":
         return database_operation(args.action)
     if args.command == "raw":
-        return raw_verify_operation()
+        return _run_raw(args)
     if args.command == "source":
         if args.action == "validate":
             return source_validate_operation(args.source)
@@ -311,6 +318,12 @@ def _run(args: argparse.Namespace, translator: Translator) -> dict[str, object]:
             return export_scheme(args.scheme, args.data_dir)
         return import_proposals(discover_project_root(), args.data_dir, check=args.check)
     return satcom_operation(args.action, args.source, args.data_dir)
+
+
+def _run_raw(args: argparse.Namespace) -> dict[str, object]:
+    if args.action == "reindex":
+        return raw_reindex_operation(args.domain, args.source, args.since, args.before)
+    return raw_verify_operation()
 
 
 def _review(args: argparse.Namespace, translator: Translator) -> dict[str, object]:

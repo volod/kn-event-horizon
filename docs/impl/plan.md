@@ -32,32 +32,6 @@ archive.
 
 ### Durable raw archive -- `raw-archive`
 
-#### raw-fetch-ledger
-
-Operators need fast capture lookup, scoped reindex and a clear way to recover a lost index.
-
-- Serves: `raw-archive` -- [Capture schema and fetch ledger](../design/spec.md#capture-schema-and-fetch-ledger)
-- Agent status: CLEAR
-- Execution stage: MODEL
-- Dependencies: `pyarrow` for reading and writing the Parquet projection and the
-  [committed raw archive interface](current/raw-archive.md).
-- User-visible outcome: `kn raw reindex` recovers the fetch ledger from committed batches and
-  tombstones. Readers can resolve records and query by domain, source and capture time.
-- Scope boundary: Versioned logical row schema, a partitioned Parquet projection with batched
-  writes, atomic index updates, index coverage, and an archive-only replay path. Keep payloads
-  and authoritative commit state in the archive.
-- Data and artifact paths: `src/kn/archive/`, `$KN_RAW_INDEX_DIR`, `tests/archive/`.
-- Execution path: Derive rows from the archive reader, stage replacement data on the index
-  filesystem, and publish a complete index view. Use manifest locators for metadata reads without
-  decompressing bodies. Use stable IDs for parity checks and evidence resolution.
-- Acceptance gates: Full reindex after deleting the projection yields the same logical rows and
-  replay order. A scoped rebuild preserves unrelated partitions. Failed publication leaves a
-  readable prior view with correct coverage. A record added after index publication resolves from
-  the archive. Tombstones suppress records from stale and rebuilt views. A fixture mixes domains,
-  sources, capture versions and both backends. Reindex requires an explicit `KN_RAW_INDEX_DIR` and
-  publishes there. `make ci` passes.
-- Documentation target: `current/raw-archive.md` listed in the [areas index](current.md#areas).
-
 #### raw-archive-implementation-audit
 
 The archive is the durable input that every rebuild replays, so a format or integrity defect would
@@ -65,9 +39,9 @@ force a re-fetch that a source may no longer allow.
 
 - Serves: `raw-archive` -- [Raw archive](../design/spec.md#raw-archive)
 - Agent status: CLEAR
-- Requires: `raw-fetch-ledger`
-- Dependencies: The accepted task records of the group and the [implementation
-  audit](../guide/planning-workflow.md#implementation-audits) checks.
+- Dependencies: The accepted [raw store](records/0055-raw-archive-warc-raw-store.md) and
+  [fetch ledger](records/0056-raw-archive-raw-fetch-ledger.md) task records and the
+  [implementation audit](../guide/planning-workflow.md#implementation-audits) checks.
 - User-visible outcome: Every rebuild replays from a verified archive. The audit record gives every
   check a result and every finding a disposition. The current-state page lists known limitations,
   and each scheduled finding is a plan task.

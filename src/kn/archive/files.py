@@ -46,9 +46,15 @@ def mkdirs(path: Path) -> None:
 def source_lock(root: Path, domain: str, source_id: str) -> Iterator[None]:
     directory = root / "locks" / domain
     check_directories(root, directory)
-    mkdirs(directory)
+    with exclusive_lock(directory / source_id):
+        yield
+
+
+@contextmanager
+def exclusive_lock(path: Path) -> Iterator[None]:
+    mkdirs(path.parent)
     flags = os.O_WRONLY | os.O_CREAT | os.O_NOFOLLOW | os.O_NONBLOCK
-    with os.fdopen(os.open(directory / source_id, flags, 0o600), "wb") as lock:
+    with os.fdopen(os.open(path, flags, 0o600), "wb") as lock:
         if not S_ISREG(os.fstat(lock.fileno()).st_mode):
             raise ArchiveError("archive_lock")
         flock(lock, LOCK_EX)
