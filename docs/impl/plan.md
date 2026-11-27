@@ -32,27 +32,6 @@ archive.
 
 ### Source runs and health -- `source-management`
 
-#### source-status-monitoring
-
-Operators need per-source health and freshness without opening Kestra.
-
-- Serves: `source-management` -- [Source management](../design/spec.md#source-management)
-- Agent status: CLEAR
-- Dependencies: The [fixture runner](current/ingestion-engine.md#run-and-replay-a-snapshot)
-  and [run history and health fields](current/ingestion-engine.md#run-history-and-health).
-- User-visible outcome: `kn source status` shows the last success and attempt,
-  state, stale flag, counts, bytes, budget use, cursor lag, and last error code, and feeds the
-  operations mart.
-  Read the registered run and checkpoint tables.
-- Scope boundary: Status computation from run records and the CLI. Dashboards come in
-  `space-dashboard-bundles`.
-- Data and artifact paths: `src/kn/sources/status.py`, `tests/sources/`.
-- Execution path: Compute status from fixture runs covering every run status and error code.
-- Acceptance gates: Stale detection follows the configured threshold. Every error code renders.
-  Golden outputs cover English text and stable JSON.
-- Documentation target: `current/source-management.md` listed in the
-  [areas index](current.md#areas).
-
 #### source-management-implementation-audit
 
 Every source enters through the catalogue, the crawler schema, and the onboarding workflow, so a gap
@@ -60,9 +39,8 @@ there repeats in every source that follows.
 
 - Serves: `source-management` -- [Source management](../design/spec.md#source-management)
 - Agent status: CLEAR
-- Requires: `source-status-monitoring`
 - Dependencies: The [engine skeleton record](records/0059-ingestion-engine-engine-skeleton.md),
-  the accepted status-monitoring record and the
+  the [source status record](records/0060-source-management-source-status-monitoring.md), and the
   [implementation audit](../guide/planning-workflow.md#implementation-audits) checks.
 - User-visible outcome: Every later source is onboarded through verified, enforced declarations. The
   audit record gives every check a result and every finding a disposition. The current-state page
@@ -1343,16 +1321,19 @@ Dashboards may read only reviewed, tested marts.
 - Agent status: CLEAR
 - Requires: `space-elt-implementation-audit`
 - Dependencies: dbt Core and dbt-postgres in an isolated, pinned tool environment.
+  [Source status projection](current/source-management.md#source-health-and-freshness)
+  for the operations mart.
 - User-visible outcome: The `analytics` schema holds every space mart in the
   [design](../design/domains/space.md#analytical-marts), with localized label joins and freshness
-  models.
+  models. The operations mart uses source status for stream health and freshness.
 - Scope boundary: The dbt project, tests, sources from generated definitions, and freshness. No
   dashboards.
 - Data and artifact paths: `analytics/dbt/`, `generated/dbt/`, `tests/analytics/`.
 - Execution path: Build against the rebuilt fixture archive, with dbt tests for keys,
   comparability filters, and unknown handling.
 - Acceptance gates: `dbt build` passes on fixtures and archived samples. No mart turns unknown
-  into zero. Incomparable tariffs are filtered.
+  into zero. Incomparable tariffs are filtered. Operations mart rows agree with source status
+  for a fixture stream before and after an archive replay.
 - Documentation target: `current/space-dashboards.md` listed in the
   [areas index](current.md#areas).
 

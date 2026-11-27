@@ -23,6 +23,40 @@ nullable original ID, label, priority, cadence, structured access notes, access 
 status, and lifecycle state. A newly upgraded empty database lists zero candidates until its
 first development rebuild.
 
+## Source health and freshness
+
+Use the deployed database and the crawler profile for the source you want to inspect. These
+examples read the candidate referenced by the HTTP fixture. The `kn_system_reader` role can run
+these commands.
+
+```bash
+kn source status tests/sources/fixtures/config/http.yaml
+kn --json source status tests/sources/fixtures/config/http.yaml
+```
+
+Status reads one stream. It defaults to scope `default` and namespace `live`. Use
+`--scope SCOPE` for another scope and `--backfill` for the profile's backfill namespace.
+The command reads the deployed catalogue and the
+[registered history and checkpoint tables](ingestion-engine.md#run-history-and-health) in one
+query. It works for paused and other catalogue states. It validates the profile and uses its
+monitoring settings without opening the archive, invoking adapters, or reading enablement
+evidence files. An invalid profile or an ID absent from the deployed catalogue returns
+`E_SOURCE_CONFIG`. A successful report exits zero for any health state.
+
+| Field or group | Meaning |
+| --- | --- |
+| `lifecycle_state`, `state` | Current catalogue state and latest run attempt outcome. `never_run` means no attempt exists and `unfinished` means the latest attempt has no terminal outcome. Within a logical run, the highest attempt number wins. Across runs, start time and then run ID determine order. |
+| `last_attempt_at`, `last_success_at` | Latest attempt's start and most recent `success` finish time, including replay. JSON also gives the latest attempt's run ID, number, mode and finish time. All times use UTC. |
+| `last_confirmed_at`, `stale` | A fetch ending in `success` or `not_modified` confirms freshness at its finish time. A stream is stale before its first confirmation or when the confirmation age exceeds `schedule.freshness_seconds`, falling back to `monitoring.freshness_sla_seconds`. A future confirmation has zero age until the clock catches up. |
+| `consecutive_failures`, `failing` | The streak counts `partial`, `blocked` and `failed` fetch outcomes since the latest confirmed fetch. The failing flag turns on at the configured `monitoring.alert_thresholds.consecutive_failures`. |
+| Counts, bytes, and requests | Record, claim, reject and quarantine counts, bytes received, and requests used and budget come from the latest attempt. JSON uses `null` for unmeasured figures and keeps a measured zero. English text displays missing values as `unknown`. |
+| `checkpoint_revision`, `cursor_lag_seconds` | The greatest committed checkpoint revision, or zero before the first. For a time watermark, lag is elapsed whole seconds, clamped to zero for a future watermark. Otherwise status uses the latest attempt's stored lag when present. |
+| `last_error_code` | Latest recorded error observation for the stream, even after a later error-free run. Observation time orders errors; run ID, attempt and occurrence number break ties. |
+
+The stable JSON result is under `source_status`. The operations mart can consume that row or use
+`kn.sources.status.read_source_status(connection, stream, policy)` with the same crawler
+thresholds. [Space analytics marts](../plan.md#space-analytics-marts) owns materialization.
+
 ## Reviewed inputs and identifiers
 
 The [ODCS contract](../../../contracts/core/system/source-catalogue.odcs.json) deploys beside
@@ -72,7 +106,7 @@ The validator works offline using the packaged schema and reviewed catalogue.
 | --- | --- |
 | `identity` | Exact qualified `source_id`, bilingual labels and owner. Drafts can use a proposed qualified ID. Enablement requires an ID in the reviewed catalogue. |
 | `access` | Method, endpoints and controls, plus the matching file, watch, or adapter profile where applicable. |
-| `schedule` | Five-field numeric cron in UTC, including ranges, lists and steps on wildcards or ranges. Set `freshness_seconds` to override the default of twice the schedule interval. |
+| `schedule` | Five-field numeric cron in UTC, including ranges, lists and steps on wildcards or ranges. Set `freshness_seconds` to override the monitoring SLA for source status. |
 | `cursor` | `snapshot_hash`, `updated_since`, `id_range`, or `window`, with the fields and overlap required by the strategy, and a backfill namespace distinct from `live`. |
 | `raw` | `warc` or `blob`, retention in days and redistribution policy. |
 | `parse` | `kn.domains.<domain>.<module>:<function>`, native schema or codebook edition, and a SHA-256 schema fingerprint. Validation checks the names against the profile and its owning domain. |
@@ -182,6 +216,7 @@ formats and explains the manual review for rights and sensitive data.
 and [onboarding record 0037](../records/0037-source-management-source-onboarding-workflow.md)
 preserve the member gates. The
 [source admission audit](../records/0038-source-management-source-admission-implementation-audit.md)
-records the handoff. [Ingestion state](ingestion-engine.md#run-history-and-health) stores run
-history and health measurements. [Source status monitoring](../plan.md#source-status-monitoring)
-will derive operator status from those records.
+records the handoff. The
+[source status record](../records/0060-source-management-source-status-monitoring.md) gives
+the fixture commands and results for both operator output formats, the registered vocabulary,
+the freshness boundary, and the reader role.

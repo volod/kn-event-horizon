@@ -19,6 +19,7 @@ from kn.archive.config import INDEX_VARIABLE, ROOT_VARIABLE
 from kn.archive.model import ArchiveError
 from kn.contracts.diagnostics import ContractError
 from kn.db.rebuild import RebuildRefused
+from kn.engine.checkpoints import DEFAULT_SCOPE
 from kn.engine.runner import source_operation
 from kn.evidence.ranking import DEFAULT_AUDIENCE, Audience
 from kn.i18n import Translator
@@ -47,6 +48,7 @@ from kn.semantic.seeds import import_proposals
 from kn.semantic.skos import export_scheme
 from kn.sources.config import source_validate_operation
 from kn.sources.config.schema import CrawlerConfigError
+from kn.sources.status import source_status_operation
 
 _LOG = logging.getLogger("kn.operator")
 
@@ -106,6 +108,14 @@ def build_parser(
         action.add_argument("--data-dir", type=Path, help=tr.text("cli.data_dir_help"))
     replay_source.add_argument(
         "--archive-run-id", required=True, help=tr.text("cli.archive_run_help")
+    )
+    status_source = source_actions.add_parser("status", help=tr.text("cli.source_status_help"))
+    status_source.add_argument("source", type=Path, help=tr.text("cli.source_config_help"))
+    status_source.add_argument(
+        "--scope", default=DEFAULT_SCOPE, help=tr.text("cli.source_scope_help")
+    )
+    status_source.add_argument(
+        "--backfill", action="store_true", help=tr.text("cli.source_backfill_help")
     )
     raw = subcommands.add_parser("raw", help=tr.text("cli.raw_help"))
     raw_actions = raw.add_subparsers(dest="action", required=True, parser_class=parser_class)
@@ -332,6 +342,8 @@ def _run_source(args: argparse.Namespace) -> dict[str, object]:
         return source_validate_operation(args.source)
     if args.action == "list":
         return source_list_operation()
+    if args.action == "status":
+        return source_status_operation(args.source, scope=args.scope, backfill=args.backfill)
     return source_operation(
         args.source, _journal(args).data_dir, archive_run_id=getattr(args, "archive_run_id", None)
     )

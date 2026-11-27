@@ -15,7 +15,7 @@
       "--help"
     ],
     "expected": {
-      "stdout": "usage: kn [-h] [--json]\n          {info,contract,db,identity,review,lineage,source,raw,space,vocabulary}\n          ...\n\noptions:\n  -h, --help            show this help message and exit\n  --json                emit machine-readable JSON with stable keys\n\ncommands:\n  {info,contract,db,identity,review,lineage,source,raw,space,vocabulary}\n    info                show the installed project identity\n    contract            validate or compile open data contracts\n    db                  apply or verify governed schema revisions\n    identity            inspect and review object identity\n    review              list and decide review items\n    lineage             trace an object or field to its records and decisions\n    source              list, validate, run, and replay sources\n    raw                 inspect the durable raw archive\n    space               space-domain datasets\n    vocabulary          review and export controlled vocabularies\n",
+      "stdout": "usage: kn [-h] [--json]\n          {info,contract,db,identity,review,lineage,source,raw,space,vocabulary}\n          ...\n\noptions:\n  -h, --help            show this help message and exit\n  --json                emit machine-readable JSON with stable keys\n\ncommands:\n  {info,contract,db,identity,review,lineage,source,raw,space,vocabulary}\n    info                show the installed project identity\n    contract            validate or compile open data contracts\n    db                  apply or verify governed schema revisions\n    identity            inspect and review object identity\n    review              list and decide review items\n    lineage             trace an object or field to its records and decisions\n    source              list, validate, run, replay, and monitor sources\n    raw                 inspect the durable raw archive\n    space               space-domain datasets\n    vocabulary          review and export controlled vocabularies\n",
       "stderr": "",
       "exit_code": 0
     },
@@ -65,7 +65,7 @@
     "expected": {
       "exit_code": 0,
       "stderr": "",
-      "stdout": "usage: kn source [-h] {list,validate,run,replay} ...\n\noptions:\n  -h, --help            show this help message and exit\n\ncommands:\n  {list,validate,run,replay}\n    list                list sources and their catalogue states\n    validate            validate a crawler configuration and its enablement\n                        evidence\n    run                 archive and load an enabled source snapshot\n    replay              load a source snapshot from a committed archive\n"
+      "stdout": "usage: kn source [-h] {list,validate,run,replay,status} ...\n\noptions:\n  -h, --help            show this help message and exit\n\ncommands:\n  {list,validate,run,replay,status}\n    list                list sources and their catalogue states\n    validate            validate a crawler configuration and its enablement\n                        evidence\n    run                 archive and load an enabled source snapshot\n    replay              load a source snapshot from a committed archive\n    status              show source run health and freshness\n"
     },
     "id": "source-help"
   },

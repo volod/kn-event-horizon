@@ -41,7 +41,7 @@ Verify the source keys and onboarding handoff against its specification and the 
    and all nine error codes with their retry classes. Enablement tests enforce review, fixtures
    and report evidence. The guide covers all seven onboarding steps and links the four templates.
    The status evaluation in the specification belongs to
-   [source-status-monitoring](../plan.md#source-status-monitoring).
+   [source-status-monitoring](0060-source-management-source-status-monitoring.md).
 3. **Design scope.** Qualified native or worksheet IDs survive reordering and feed ranking and
    evidence references. The ODCS baseline deploys catalogue data separately from versioned,
    reviewed YAML. New sources reuse the profiles and domain parser namespace. The semantic

@@ -45,9 +45,38 @@ def _source_result(translator: Translator, result: dict[str, object]) -> str:
         if result["error_code"] is not None:
             return translator.text("cli.source_outcome_error", summary=summary, **result)
         return summary
+    if "source_status" in result:
+        status = result["source_status"]
+        assert isinstance(status, dict)
+        return _source_status(translator, status)
     sources = result["sources"]
     assert isinstance(sources, list)
     return _render_sources(translator, sources)
+
+
+def _source_status(translator: Translator, status: dict[str, object]) -> str:
+    missing = translator.text("cli.source_status_missing")
+    values = {
+        key: missing if value is None else _status_text(value) for key, value in status.items()
+    }
+    yes = translator.text("cli.source_status_yes")
+    no = translator.text("cli.source_status_no")
+    for key in ("stale", "failing"):
+        values[key] = yes if status[key] else no
+    return "\n".join(
+        (
+            translator.text("cli.source_status_summary", **values),
+            translator.text("cli.source_status_times", **values),
+            translator.text("cli.source_status_freshness", **values),
+            translator.text("cli.source_status_counts", **values),
+            translator.text("cli.source_status_checkpoint", **values),
+        )
+    )
+
+
+def _status_text(value: object) -> str:
+    text = str(value)
+    return text if text.isascii() and text.isprintable() else ascii(text)
 
 
 def _raw_result(translator: Translator, result: dict[str, object]) -> str:

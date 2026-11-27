@@ -74,5 +74,6 @@ decision. A record can name a plan task by ID because plan headings disappear on
 | 0057 | `raw-archive-implementation-audit` | [Raw archive implementation audit](0057-raw-archive-raw-archive-implementation-audit.md) |
 | 0058 | `ingestion-state-contracts` | [Ingestion state contracts](0058-ingestion-engine-ingestion-state-contracts.md) |
 | 0059 | `engine-skeleton` | [Engine skeleton](0059-ingestion-engine-engine-skeleton.md) |
+| 0060 | `source-status-monitoring` | [Source status monitoring](0060-source-management-source-status-monitoring.md) |
 
-Next unused sequence is `0060`.
+Next unused sequence is `0061`.

@@ -6,7 +6,7 @@ from typing import Any, Never
 from urllib.parse import urlsplit
 
 from kn.archive.model import MAX_WARC_BODY, Limits
-from kn.engine.checkpoints import StreamKey
+from kn.engine.checkpoints import DEFAULT_SCOPE, LIVE_NAMESPACE, StreamKey
 from kn.review.model import digest
 from kn.sources.config import load_runtime_config
 from kn.sources.config.schema import CrawlerConfigError
@@ -52,7 +52,7 @@ def snapshot_profile(path: Path) -> SnapshotProfile:
     port, request_path = _loopback_target(endpoint)
     budget = access["request_budget"]
     return SnapshotProfile(
-        stream=StreamKey(config["identity"]["source_id"], "default", "live"),
+        stream=StreamKey(config["identity"]["source_id"], DEFAULT_SCOPE, LIVE_NAMESPACE),
         entry_point=config["parse"]["entry_point"],
         schema_fingerprint=config["parse"]["schema_fingerprint"],
         config_digest=digest(config),

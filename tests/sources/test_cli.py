@@ -49,3 +49,21 @@ def test_empty_catalogue_and_missing_execution_argument(
         cli.main(["--json", "source", "run"])
     assert error.value.code == 2
     assert json.loads(capsys.readouterr().err) == {"error": {"code": "E_ARGUMENTS"}}
+
+
+def test_source_status_rejects_invalid_config_before_database(
+    caplog: pytest.LogCaptureFixture, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    monkeypatch.delenv("KN_DATABASE_URL", raising=False)
+    assert (
+        cli.main(
+            ["--json", "source", "status", "tests/sources/fixtures/config/invalid-labels.yaml"]
+        )
+        == 1
+    )
+    error = json.loads(caplog.records[-1].message)["error"]
+    assert (error["code"], error["path"], error["rule"]) == (
+        "E_SOURCE_CONFIG",
+        "$/identity/labels/uk",
+        "required",
+    )

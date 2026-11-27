@@ -144,8 +144,9 @@ source scripts/shared/common.sh && kn_load_env && kn_db_test_env
 ```
 
 The [engine skeleton record](../records/0059-ingestion-engine-engine-skeleton.md) contains
-acceptance evidence and recovery findings. [Source status monitoring](../plan.md#source-status-monitoring)
-owns status computation and the operations mart.
+acceptance evidence and recovery findings.
+[Source status](source-management.md#source-health-and-freshness) derives operator health from
+these tables, including committed checkpoint lag and the last fetch confirmation.
 
 ## Known limitations
 

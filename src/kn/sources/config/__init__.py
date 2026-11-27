@@ -25,7 +25,12 @@ def load_runtime_config(path: Path) -> dict[str, Any]:
     return config
 
 
-def _load(path: Path, *, offline_catalogue: bool) -> dict[str, Any]:
+def load_status_config(path: Path) -> dict[str, Any]:
+    """Validate a monitoring profile independently of acquisition evidence files."""
+    return _load(path, offline_catalogue=False, verify_enablement=False)
+
+
+def _load(path: Path, *, offline_catalogue: bool, verify_enablement: bool = True) -> dict[str, Any]:
     try:
         config = read_document(path)
     except ContractError as error:
@@ -36,7 +41,7 @@ def _load(path: Path, *, offline_catalogue: bool) -> dict[str, Any]:
         raise CrawlerConfigError((), "file", "use a readable crawler configuration file") from None
     validate_schema(config)
     validate_semantics(config, offline_catalogue=offline_catalogue)
-    if config["approval"]["state"] == "enabled":
+    if verify_enablement and config["approval"]["state"] == "enabled":
         verify_evidence(path, **config["verification"])
     return config
 

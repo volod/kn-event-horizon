@@ -13,6 +13,8 @@ from kn.engine.state import CHECKPOINTS, state_table
 
 CursorStrategy = Literal["snapshot_hash", "updated_since", "id_range", "window"]
 INITIAL_REVISION = 0
+DEFAULT_SCOPE = "default"
+LIVE_NAMESPACE = "live"
 _SNAPSHOT_DIGEST = re.compile(r"[0-9a-f]{64}")
 
 
@@ -45,11 +47,13 @@ class Advance:
 
 def latest_checkpoint(connection: Connection, stream: StreamKey) -> RowMapping | None:
     """Read the greatest revision visible to this transaction."""
+    return connection.execute(latest_checkpoint_query(stream)).mappings().one_or_none()
+
+
+def latest_checkpoint_query(stream: StreamKey) -> sa.Select[tuple[object, ...]]:
+    """Select the greatest revision, including when composed into a health read."""
     table = state_table(CHECKPOINTS)
-    statement = (
-        sa.select(table).filter_by(**stream.columns()).order_by(table.c.revision.desc()).limit(1)
-    )
-    return connection.execute(statement).mappings().one_or_none()
+    return sa.select(table).filter_by(**stream.columns()).order_by(table.c.revision.desc()).limit(1)
 
 
 def advance_checkpoint(
