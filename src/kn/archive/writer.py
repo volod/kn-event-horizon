@@ -11,7 +11,9 @@ from kn.archive.files import (
     decoded_size,
     file_info,
     publish,
+    reclaim_staging,
     source_lock,
+    source_staging,
     staging,
     sync_directory,
     sync_file,
@@ -64,7 +66,9 @@ def commit(
             return read_manifest(destination, root)
         if limits.max_payload_bytes < 0 or limits.max_decoded_bytes < 0:
             raise ArchiveError("archive_limits")
-        with staging(root) as staged:
+        scope = source_staging(domain, source)
+        reclaim_staging(root, *scope)
+        with staging(root, *scope) as staged:
             manifest = _stage(root, staged, batch, captures, limits, redaction)
             publish(staged, destination, root)
             return manifest
@@ -84,7 +88,8 @@ def _stage(
         if capture.key in entries or len(entries) == MAX_CAPTURES:
             raise ArchiveError("batch_capture_count_or_key")
         if capture.revisit_of is not None and catalog is None:
-            catalog = Catalog.load(root)
+            # A revisit target belongs to the same source, so other sources are never read.
+            catalog = Catalog.load(root, domain=batch.domain, source_id=batch.source_id)
         options = _Commit(batch, limits, redaction, catalog)
         entries[capture.key] = _stage_capture(staged, capture, options)
     if not entries:

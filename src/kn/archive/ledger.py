@@ -8,9 +8,16 @@ from heapq import merge
 from itertools import groupby
 from pathlib import Path
 
-from kn.archive.catalog import Catalog, Located, check_reference, is_withdrawn
+from kn.archive.catalog import Catalog, Located, is_withdrawn
 from kn.archive.config import archive_root, check_roots, index_root, resolve_archive_path
-from kn.archive.files import check_directories, exclusive_lock, mkdirs, staging, sync_directory
+from kn.archive.files import (
+    check_directories,
+    exclusive_lock,
+    mkdirs,
+    reclaim_staging,
+    staging,
+    sync_directory,
+)
 from kn.archive.ledger_model import (
     CaptureScope,
     CoverageRow,
@@ -19,7 +26,7 @@ from kn.archive.ledger_model import (
     PartitionKey,
     ledger_row,
 )
-from kn.archive.ledger_parquet import find_batch, read_rows, write_rows
+from kn.archive.ledger_parquet import find_batch, read_record_ids, read_rows, write_rows
 from kn.archive.ledger_views import (
     Partition,
     Snapshot,
@@ -48,16 +55,22 @@ class FetchLedger:
     def reindex(self, scope: CaptureScope = _ALL) -> LedgerCoverage:
         self._require_archive()
         try:
-            with exclusive_lock(self.root / "reindex.lock"), staging(self.root) as view:
-                previous = None if scope.is_full() else load_snapshot(self.root)
-                catalog = Catalog.load(
-                    self.archive, domain=scope.effective_domain, source_id=scope.source_id
-                )
-                groups = _group(catalog, scope)
-                partitions = self._build(view, previous, groups, catalog, scope)
-                return publish_snapshot(self.root, view, partitions).coverage()
+            with exclusive_lock(self.root / "reindex.lock"):
+                reclaim_staging(self.root)
+                return self._reindex(scope)
         except OSError:
             raise ArchiveError("index_io") from None
+
+    def _reindex(self, scope: CaptureScope) -> LedgerCoverage:
+        with staging(self.root) as view:
+            previous = None if scope.is_full() else load_snapshot(self.root)
+            catalog = Catalog.load(
+                self.archive, domain=scope.effective_domain, source_id=scope.source_id
+            )
+            self._check_retained(previous, catalog, scope)
+            groups = _group(catalog, scope)
+            partitions = self._build(view, previous, groups, catalog, scope)
+            return publish_snapshot(self.root, view, partitions).coverage()
 
     def coverage(self) -> LedgerCoverage | None:
         """Counts at publication time. A missing view has no coverage."""
@@ -139,20 +152,36 @@ class FetchLedger:
                 )
         return partitions
 
+    def _check_retained(
+        self, previous: Snapshot | None, catalog: Catalog, scope: CaptureScope
+    ) -> None:
+        """Refuse to drop a covered capture that the archive lost without a tombstone."""
+        try:
+            snapshot = previous if previous is not None else load_snapshot(self.root)
+            covered = set() if snapshot is None else set(self._covered_ids(snapshot, scope))
+        except ArchiveError:
+            if previous is not None:
+                raise
+            return  # A full rebuild replaces a damaged view, which cannot vouch for coverage.
+        if covered - catalog.records.keys() - catalog.tombstones.keys():
+            raise ArchiveError("capture_lost")
+
+    def _covered_ids(self, snapshot: Snapshot, scope: CaptureScope) -> Iterator[str]:
+        view = snapshot.location(self.root)
+        for part in snapshot.partitions:
+            if part.overlaps(scope):
+                yield from read_record_ids(_partition_path(part, view), scope)
+
     def _project(self, located: Located, catalog: Catalog) -> LedgerRow:
         entry = located.entry
-        reference = entry.revisit_of
-        target = check_reference(
-            located, None if reference is None else catalog.records.get(reference)
-        )
+        target = catalog.target(located)
         withdrawn_by = entry.record_id if entry.record_id in catalog.tombstones else None
         if withdrawn_by is None:
             check_payload_locator(located)
-            if target is not None:
-                if target.entry.record_id in catalog.tombstones:
-                    withdrawn_by = target.entry.record_id
-                else:
-                    check_payload_locator(target)
+            if entry.revisit_of in catalog.tombstones:
+                withdrawn_by = entry.revisit_of
+            elif target is not None:
+                check_payload_locator(target)
         metadata = read_metadata(located) if withdrawn_by is None else None
         return ledger_row(self.archive, located, metadata, withdrawn_by)
 

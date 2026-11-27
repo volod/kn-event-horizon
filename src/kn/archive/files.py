@@ -2,6 +2,7 @@
 
 import gzip
 import os
+import shutil
 import zlib
 from collections.abc import Iterator
 from contextlib import contextmanager
@@ -13,6 +14,9 @@ from tempfile import TemporaryDirectory
 from typing import BinaryIO, Protocol
 
 from kn.archive.model import CHUNK_SIZE, ArchiveError, ObjectInfo
+
+_STAGING = "staging"
+_PENDING = "pending-"
 
 
 class ByteReader(Protocol):
@@ -61,12 +65,31 @@ def exclusive_lock(path: Path) -> Iterator[None]:
         yield
 
 
+def source_staging(domain: str, source_id: str) -> tuple[str, ...]:
+    """Staging scope written only under the source lock; `_` never starts a domain name."""
+    return ("_sources", domain, source_id)
+
+
 @contextmanager
-def staging(root: Path) -> Iterator[Path]:
-    directory = root / "staging"
+def staging(root: Path, *scope: str) -> Iterator[Path]:
+    directory = root.joinpath(_STAGING, *scope)
+    check_directories(root, directory)
     mkdirs(directory)
-    with TemporaryDirectory(prefix="pending-", dir=directory) as pending:
+    with TemporaryDirectory(prefix=_PENDING, dir=directory) as pending:
         yield Path(pending)
+
+
+def reclaim_staging(root: Path, *scope: str) -> None:
+    """Remove what an interrupted holder of the caller's lock left in its staging scope."""
+    directory = root.joinpath(_STAGING, *scope)
+    check_directories(root, directory)
+    if not directory.is_dir():
+        return
+    for path in directory.glob(_PENDING + "*"):
+        if path.is_symlink() or not path.is_dir():
+            raise ArchiveError("archive_directory")
+        shutil.rmtree(path)
+    sync_directory(directory)
 
 
 def publish(staged: Path, destination: Path, root: Path) -> None:

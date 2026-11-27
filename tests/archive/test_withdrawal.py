@@ -107,3 +107,24 @@ def test_blob_deletion_does_not_affect_identical_independent_capture(tmp_path: P
     archive.replay(entries[1].record_id, output)
     assert output.getvalue() == SAMPLE
     assert archive.verify()["captures"] == 1
+
+
+def test_a_damaged_batch_of_another_source_blocks_neither_revisits_nor_withdrawals(
+    tmp_path: Path,
+) -> None:
+    from kn.archive.ledger import FetchLedger  # Keep pyarrow threads out of forked tests.
+
+    archive = Archive(tmp_path / "archive", index_root=tmp_path / "index")
+    http = HttpExchange("GET", 200)
+    original = archive.commit(batch(), [capture(http=http)], limits=LIMITS).captures[0]
+    archive.commit(batch(source="damaged"), [capture()], limits=LIMITS)
+    assert archive.index_root is not None
+    FetchLedger(archive.root, archive.index_root).reindex()
+    manifest = committed_path(archive.root, batch(source="damaged"), "manifest.json")
+    manifest.write_bytes(manifest.read_bytes()[:50])
+    later = capture(http=http, revisit_of=original.record_id, fetched_at=AT + timedelta(days=1))
+    revisit = archive.commit(batch("revisit"), [later], limits=LIMITS).captures[0]
+    stones = archive.withdraw(original.record_id, "expired", AT, purge=True)
+    assert {stone.record_id for stone in stones} == {original.record_id, revisit.record_id}
+    with pytest.raises(ArchiveError, match="manifest_schema"):
+        archive.verify()

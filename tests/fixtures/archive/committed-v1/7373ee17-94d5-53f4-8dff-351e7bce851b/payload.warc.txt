@@ -1,0 +1,17 @@
+WARC/1.1
+WARC-Date: 2026-01-02T04:04:05.250000Z
+WARC-Payload-Digest: sha256:S5JL6NNEA4ZG7HQCYW2MX6HUPHUMVDKOWVTOHGUQPK7H3YGYG66A====
+WARC-Record-ID: <urn:uuid:7373ee17-94d5-53f4-8dff-351e7bce851b>
+WARC-Block-Digest: sha256:PQCN3NFKROLVTX6Z25FKENYBZGKUCNTLHZN5GDSG5YPQLIJQR3AA====
+WARC-Type: response
+WARC-Target-URI: https://example.test/catalog?format=json
+Content-Type: application/http; msgtype=response
+Content-Length: 136
+
+HTTP/1.1 200 OK
+content-type: application/json
+etag: "fixture-1"
+
+{"items":[{"id":"fixture-1","label":"Synthetic archive sample"}]}
+
+

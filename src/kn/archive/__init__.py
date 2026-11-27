@@ -91,10 +91,7 @@ class Archive:
             directories.setdefault(located.directory, {MANIFEST_NAME}).add(
                 located.entry.payload_path.partition("/")[0]
             )
-            reference = located.entry.revisit_of
-            target = check_reference(
-                located, None if reference is None else catalog.records.get(reference)
-            )
+            target = catalog.target(located)
             if catalog.withdrawn(located.entry):
                 verify_remaining_objects(
                     located, removal_recorded=located.entry.record_id in catalog.tombstones
@@ -115,7 +112,9 @@ class Archive:
     def withdraw(
         self, identifier: str, reason: str, withdrawn_at: datetime, *, purge: bool = False
     ) -> tuple[Tombstone, ...]:
-        return withdraw(self.root, identifier, reason, withdrawn_at, purge=purge)
+        hint = self._index_hint(identifier)
+        batch = None if hint is None else hint.batch
+        return withdraw(self.root, identifier, reason, withdrawn_at, purge=purge, batch=batch)
 
     def _catalog(self) -> Catalog:
         if not self.root.is_dir():

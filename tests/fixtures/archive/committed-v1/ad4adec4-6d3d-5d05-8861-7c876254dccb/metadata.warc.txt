@@ -1,0 +1,14 @@
+WARC/1.1
+WARC-Date: 2026-01-03T03:04:05Z
+WARC-Payload-Digest: sha256:GXJQ5LUT4PJAAJMXMFLV2LC44SROWYZYRN6QQWGEEPRDE3UDI4QQ====
+WARC-Refers-To: <urn:uuid:ad4adec4-6d3d-5d05-8861-7c876254dccb>
+WARC-Record-ID: <urn:uuid:6880caaa-d49c-55b7-b99e-6073c7d02c65>
+WARC-Block-Digest: sha256:GXJQ5LUT4PJAAJMXMFLV2LC44SROWYZYRN6QQWGEEPRDE3UDI4QQ====
+WARC-Type: metadata
+WARC-Target-URI: https://example.test/catalog?format=json
+Content-Type: application/json
+Content-Length: 1145
+
+{"batch": {"batch_id": "001", "domain": "space", "run_id": "run-2", "source_id": "space:example"}, "code_sha256": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb", "config_sha256": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa", "decoded_size": 66, "fetch_id": "urn:uuid:b4e6c293-ec17-5e29-a8d9-5427a558c425", "fetched_at": "2026-01-03T03:04:05Z", "http": {"method": "GET", "protocol": "HTTP/1.1", "request_headers": [["accept", "application/json"]], "response_headers": [["content-type", "application/json"], ["etag", "\"fixture-1\""]]}, "key": "response", "kind": "revisit", "mime_type": "application/json", "origin_uri": "https://example.test/catalog?format=json", "payload_sha256": "9752bf35a407326f9e02c5b4cbf8f479e8ca8d4eb566e39a907abe7de0d837bc", "payload_size": 66, "record_id": "urn:uuid:ad4adec4-6d3d-5d05-8861-7c876254dccb", "request_sha256": "85793fe36cafe62bbb86cf6b5a8b508e147dbb4e0b27b4a73c795ff7fdc4a3e6", "retention": {"access": "internal", "deletion_scope": "fixture", "expires_at": null}, "revisit_of": "urn:uuid:7373ee17-94d5-53f4-8dff-351e7bce851b", "schema_version": 2, "status": 200}
+
+

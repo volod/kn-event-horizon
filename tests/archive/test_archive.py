@@ -116,11 +116,12 @@ def test_process_exit_leaves_only_previous_commits(tmp_path: Path) -> None:
         process.kill()
         process.join()
     assert process.exitcode == 73
-    assert list((tmp_path / "staging").glob("*/manifest.json"))
+    assert list((tmp_path / "staging").rglob("pending-*/manifest.json"))
     assert archive.verify()["batches"] == 1
     retried = archive.commit(batch("interrupted"), [capture()], limits=LIMITS)
     assert archive.commit(batch("interrupted"), [], limits=LIMITS) == retried
     assert archive.verify()["captures"] == 2
+    assert not list((tmp_path / "staging").rglob("pending-*"))
 
 
 def test_blob_stream_reads_are_bounded(tmp_path: Path) -> None:

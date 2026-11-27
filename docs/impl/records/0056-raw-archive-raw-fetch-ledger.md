@@ -72,6 +72,7 @@ tests under the lightweight test profile. The run's `ci.log` records the gate re
 ## Handoff
 
 The forward plan moves from 111 to 110 tasks and from 99 to 98 in the agent lane. The human lane
-stays at 12. The [raw archive group audit](../plan.md#raw-archive-implementation-audit) can use
-the ledger and its acceptance fixtures. The raw archive capability stays planned until the
-group audit accepts format conformance and restore.
+stays at 12. The
+[raw archive group audit](0057-raw-archive-raw-archive-implementation-audit.md) can use the ledger
+and its acceptance fixtures. The raw archive capability stays planned until the group audit
+accepts format conformance and restore.

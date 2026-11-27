@@ -54,6 +54,24 @@ _SCHEMA = pa.schema(
 )
 
 
+def _time_filter(scope: CaptureScope) -> ds.Expression:
+    expression = ds.scalar(True)
+    if scope.since is not None:
+        expression = expression & (ds.field("fetched_at") >= scope.since)
+    if scope.before is not None:
+        expression = expression & (ds.field("fetched_at") < scope.before)
+    return expression
+
+
+def read_record_ids(path: Path, scope: CaptureScope) -> list[str]:
+    """Read only the covered record IDs of one partition within the scope's time range."""
+    try:
+        table = _dataset(path).to_table(columns=["record_id"], filter=_time_filter(scope))
+    except _ARROW_ERRORS:
+        raise ArchiveError("index_parquet") from None
+    return [str(value) for value in table.column("record_id").to_pylist()]
+
+
 def read_rows(
     path: Path,
     key: PartitionKey,
@@ -61,11 +79,7 @@ def read_rows(
     *,
     outside: bool = False,
 ) -> Iterator[LedgerRow]:
-    expression = ds.scalar(True)
-    if scope.since is not None:
-        expression = expression & (ds.field("fetched_at") >= scope.since)
-    if scope.before is not None:
-        expression = expression & (ds.field("fetched_at") < scope.before)
+    expression = _time_filter(scope)
     if outside:
         expression = ~expression
     try:

@@ -159,17 +159,26 @@ def _read_tombstones(
             source_id and stone.batch.source_id != source_id
         ):
             continue
-        located = records.get(stone.record_id)
-        if located is None or filename != tombstone_path(root, stone.record_id):
+        if filename != tombstone_path(root, stone.record_id):
             raise ArchiveError("tombstone_capture")
-        if (stone.batch, stone.payload_sha256, stone.objects) != (
-            located.batch,
-            located.entry.payload_sha256,
-            located.objects(),
-        ):
-            raise ArchiveError("tombstone_capture")
+        _check_tombstone(root, stone, records.get(stone.record_id))
         result[stone.record_id] = stone
     return result
+
+
+def _check_tombstone(root: Path, stone: Tombstone, located: Located | None) -> None:
+    if located is None:
+        # A restore can apply current tombstones to a backup taken before their batch.
+        # Such a detached tombstone keeps suppressing the capture if its batch returns.
+        if batch_directory(root, stone.batch).exists():
+            raise ArchiveError("tombstone_capture")
+        return
+    if (stone.batch, stone.payload_sha256, stone.objects) != (
+        located.batch,
+        located.entry.payload_sha256,
+        located.objects(),
+    ):
+        raise ArchiveError("tombstone_capture")
 
 
 def is_withdrawn(root: Path, record_id: str, revisit_of: str | None) -> bool:
@@ -221,8 +230,16 @@ class Catalog:
     def lookup(self, identifier: str) -> Located:
         located = self.records.get(identifier) or self.fetches.get(identifier)
         if located is None:
-            raise ArchiveError("capture_not_found")
+            detached = identifier in self.tombstones
+            raise ArchiveError("capture_tombstoned" if detached else "capture_not_found")
         return located
+
+    def target(self, located: Located) -> Located | None:
+        """Return a revisit's checked target, or None when a withdrawal detached the target."""
+        reference = located.entry.revisit_of
+        if reference is None or (reference in self.tombstones and reference not in self.records):
+            return None
+        return check_reference(located, self.records.get(reference))
 
     def withdrawn(self, entry: Entry) -> bool:
         return entry.record_id in self.tombstones or entry.revisit_of in self.tombstones

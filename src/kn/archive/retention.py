@@ -7,24 +7,36 @@ from kn.archive.catalog import Catalog, Located, tombstone_path
 from kn.archive.files import (
     checked_path,
     publish,
+    reclaim_staging,
     source_lock,
+    source_staging,
     staging,
     sync_directory,
     synced_write,
 )
 from kn.archive.inputs import valid_key
-from kn.archive.model import ArchiveError, Tombstone, encode
+from kn.archive.model import ArchiveError, BatchKey, Tombstone, encode
 
 
 def withdraw(
-    root: Path, identifier: str, reason: str, withdrawn_at: datetime, *, purge: bool
+    root: Path,
+    identifier: str,
+    reason: str,
+    withdrawn_at: datetime,
+    *,
+    purge: bool,
+    batch: BatchKey | None = None,
 ) -> tuple[Tombstone, ...]:
+    """Withdraw a capture and its revisits; `batch` is an index hint that avoids a full scan."""
     if not valid_key(reason) or withdrawn_at.utcoffset() is None:
         raise ArchiveError("withdrawal_input")
-    first = Catalog.load(root).lookup(identifier)
-    domain, source, *_ = first.batch.parts()
+    if batch is None:
+        batch = Catalog.load(root).lookup(identifier).batch
+    domain, source, *_ = batch.parts()
     with source_lock(root, domain, source):
-        catalog = Catalog.load(root)
+        # Revisits of a capture belong to its source, so other sources are never read.
+        catalog = Catalog.load(root, domain=domain, source_id=source)
+        reclaim_staging(root, *source_staging(domain, source))
         affected = _affected(catalog, identifier)
         stones = tuple(
             _persist(root, catalog, located, reason, withdrawn_at.astimezone(UTC))
@@ -44,8 +56,6 @@ def _affected(catalog: Catalog, identifier: str) -> tuple[Located, ...]:
         for candidate in catalog.records.values()
         if candidate.entry.revisit_of == target_id
     )
-    if any(candidate.batch.parts()[:2] != target.batch.parts()[:2] for candidate in dependents):
-        raise ArchiveError("revisit_target")
     return (target, *dependents)
 
 
@@ -66,7 +76,7 @@ def _persist(
         reason=reason,
         withdrawn_at=withdrawn_at,
     )
-    with staging(root) as staged:
+    with staging(root, *source_staging(*located.batch.parts()[:2])) as staged:
         pending = staged / destination.name
         synced_write(pending, encode(stone))
         publish(pending, destination, root)

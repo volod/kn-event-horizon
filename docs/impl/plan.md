@@ -30,38 +30,6 @@ archive.
 
 ## Agent Implementation Tasks
 
-### Durable raw archive -- `raw-archive`
-
-#### raw-archive-implementation-audit
-
-The archive is the durable input that every rebuild replays, so a format or integrity defect would
-force a re-fetch that a source may no longer allow.
-
-- Serves: `raw-archive` -- [Raw archive](../design/spec.md#raw-archive)
-- Agent status: CLEAR
-- Dependencies: The accepted [raw store](records/0055-raw-archive-warc-raw-store.md) and
-  [fetch ledger](records/0056-raw-archive-raw-fetch-ledger.md) task records and the
-  [implementation audit](../guide/planning-workflow.md#implementation-audits) checks.
-- User-visible outcome: Every rebuild replays from a verified archive. The audit record gives every
-  check a result and every finding a disposition. The current-state page lists known limitations,
-  and each scheduled finding is a plan task.
-- Scope boundary: Focus: WARC 1.1 conformance and readability with independent tools; block and
-  payload digests; large and streamed payloads; compressed, truncated and partial files; repeated
-  payloads; archive commit and index publication recovery; capture-version compatibility; agreement
-  between the ledger and the files; retention, backup and licence boundaries. Fixes only; new
-  behavior becomes plan tasks. Target-host scale measurements belong to `performance-gate`.
-- Data and artifact paths: `src/kn/archive/`, `$KN_RAW_ARCHIVE_DIR`, `$KN_RAW_INDEX_DIR`,
-  `tests/archive/`, `docs/impl/plan.md`, and the task record.
-- Execution path: Rerun the group's acceptance commands, then work through the audit checks. Read
-  WARC with an independent tool, truncate a file, stop a write midway, then restore to a different
-  archive root with the index missing and replay a run from the committed archive alone.
-- Acceptance gates: An independent WARC reader accepts every file. A truncated or partial file is
-  detected and never replayed silently. Digests verify on every replay. A restored tombstoned
-  capture stays suppressed, including via a revisit reference. Every finding has a
-  severity, evidence, and a disposition, no `blocker` is accepted, and every fix starts from a
-  failing regression test. `make ci` passes with the scheduled tasks in the plan.
-- Documentation target: `current/raw-archive.md` listed in the [areas index](current.md#areas).
-
 ### Source runs and health -- `source-management`
 
 #### ingestion-state-contracts
@@ -72,7 +40,6 @@ monitoring workflows begin writing them.
 - Serves: `ingestion-engine` -- [Ingestion engine](../design/spec.md#ingestion-engine)
 - Agent status: CLEAR
 - Execution stage: MODEL
-- Requires: `raw-archive-implementation-audit`
 - Dependencies: The run, cursor, archive and monitoring fields in the specification and the
   [standard source error codes](current/source-management.md#error-codes-and-pagination).
   Fixtures can supply source IDs, archive IDs and claim keys without executing a crawler.
@@ -97,8 +64,9 @@ The core engine must run end to end on a synthetic source before any real source
 
 - Serves: `ingestion-engine` -- [Ingestion engine](../design/spec.md#ingestion-engine)
 - Agent status: CLEAR
-- Requires: `raw-archive-implementation-audit`, `ingestion-state-contracts`
-- Dependencies: The [crawler validator and enablement evidence](current/source-management.md#enablement-evidence).
+- Requires: `ingestion-state-contracts`
+- Dependencies: The [crawler validator and enablement evidence](current/source-management.md#enablement-evidence)
+  and the [raw archive commit and replay interface](current/raw-archive.md#commit-and-replay).
 - User-visible outcome: `kn source run` and `kn source replay` process a synthetic fixture source
   served locally. They commit WARC captures and write identity events, claims with evidence linked
   to KN IDs, a checkpoint, and a run summary with a declared status.
@@ -316,8 +284,7 @@ its integration is dataset-specific code beside the engine.
 
 - Serves: `ingestion-engine` -- [Ingestion engine](../design/spec.md#ingestion-engine)
 - Agent status: CLEAR
-- Requires: `raw-archive-implementation-audit`, `mapping-and-quality-rules`,
-  `dataset-package-locations`
+- Requires: `mapping-and-quality-rules`, `dataset-package-locations`
 - Dependencies: Finding DC-16 of the [data contracts audit](records/0017-data-contracts-data-contracts-implementation-audit.md#findings),
   the current [SATCOM import](current/data-contracts.md#source-preservation-and-import) as the first
   dataset, and the `bulk_file` access method of the
@@ -346,13 +313,46 @@ its integration is dataset-specific code beside the engine.
 - Documentation target: `current/ingestion-engine.md` listed in the
   [areas index](current.md#areas).
 
+#### capture-retention-enforcement
+
+Captures record an expiry and a deletion scope, but nothing withdraws a capture whose retention
+ended, claims that cite a withdrawn capture never become `evidence_tombstoned`, and a purge leaves
+no record beyond its tombstone. Restoring a backup taken before a purge therefore brings the
+removed bytes back while `kn raw verify` still reports success.
+
+- Serves: `ingestion-engine` -- [Ingestion engine](../design/spec.md#ingestion-engine)
+- Agent status: CLEAR
+- Requires: `source-management-implementation-audit`
+- Dependencies: Findings RAA-07 and RAA-08 of the [raw archive
+  audit](records/0057-raw-archive-raw-archive-implementation-audit.md#findings), the retention rules
+  of the [fetch ledger specification](../design/spec.md#capture-schema-and-fetch-ledger), and the
+  current [withdrawal interface](current/raw-archive.md#layout-and-withdrawal).
+- User-visible outcome: The engine withdraws each capture whose source policy or expiry ends its
+  retention, with a reason code, and purges it where its deletion scope requires. Claims that cite
+  it become `evidence_tombstoned` and stay so after a rebuild. A purge leaves a durable record, so
+  verification of a restored archive names every purged capture whose bytes came back until the
+  purge is applied again.
+- Scope boundary: Expiry and policy selection, the purge record as a new versioned archive file
+  that leaves version 1 tombstones readable, claim status changes and their replay, and the restore
+  report. Rights decisions stay with source management and schedules with orchestration.
+- Data and artifact paths: `src/kn/archive/`, `src/kn/engine/`, `tests/archive/`, `tests/engine/`.
+- Execution path: Fixture-first. Expire one of two captures and withdraw a revisit target with a
+  purge. Restore a backup taken before the purge with the current tombstones, verify, and purge
+  again.
+- Acceptance gates: An expired capture is withdrawn once, and a rerun writes nothing new. Its
+  claims are `evidence_tombstoned` before and after a rebuild. Verification of the restored backup
+  names each purged capture until the purge is applied again. Afterwards its bytes are gone and
+  every retained capture replays. The `committed-v1` archive fixture still reads. `make ci` passes.
+- Documentation target: `current/raw-archive.md` and `current/ingestion-engine.md` listed in the
+  [areas index](current.md#areas).
+
 #### rebuild-from-raw
 
 Schema changes during development must cost a rebuild, never a re-fetch or a lost decision.
 
 - Serves: `ingestion-engine` -- [Ingestion engine](../design/spec.md#ingestion-engine)
 - Agent status: CLEAR
-- Requires: `curated-source-method`, `prefetched-dataset-method`
+- Requires: `curated-source-method`, `prefetched-dataset-method`, `capture-retention-enforcement`
 - Dependencies: none.
 - User-visible outcome: `kn db rebuild` replays the committed archive, curated files, prefetched
   datasets, and decision logs through current code, and reports orphaned decisions. It can replay
@@ -2082,7 +2082,8 @@ Recovery objectives must be measured, not assumed.
 - Serves: `operations-hardening` -- [Operations hardening](../design/spec.md#operations-hardening)
 - Agent status: RUN NEEDED
 - Requires: `provide-target-server-and-backup`, `security-test-suite`
-- Dependencies: The target server and the off-host backup destination.
+- Dependencies: The target server, the off-host backup destination, and the archive
+  [backup and restore order](current/raw-archive.md#back-up-and-restore).
 - User-visible outcome: Nightly backups of databases, globals, committed archive batches and
   tombstones, decision logs, the identity event log, and the exchange ledger. A written runbook
   covers recovery with and without the optional fetch-index backup.
