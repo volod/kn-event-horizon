@@ -90,6 +90,10 @@ when the path contains spaces. `.gitignore` excludes runtime
 artifacts, local environments, secrets, caches, and root build outputs without hiding same-named
 source subpackages.
 
+The planned shared raw archive uses `KN_RAW_ARCHIVE_DIR` for captures and tombstones and
+`KN_RAW_INDEX_DIR` for the rebuildable index. Configure those roots explicitly when running the
+archive tasks. See the [storage root contract](../design/spec.md#storage-roots).
+
 ## Project identity
 
 The distribution, import package, and commands are described in

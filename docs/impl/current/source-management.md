@@ -147,6 +147,10 @@ ordering, so version 1 adds neither the dlt REST client nor its paginators. Revi
 paginator reuse if the fetch implementation can exercise it against archived-response fixtures
 while preserving that ordering. See the [dlt REST client API](https://dlthub.com/docs/api_reference/dlt/sources/helpers/rest_client/client).
 
+The [raw archive design review](../records/0054-adhoc-raw-archive-storage-design.md) records how the
+planned fetch path uses the existing `warc` and `blob` profile values and which measurements would
+justify changing the fetch index backend.
+
 ## Onboard a source
 
 The [onboarding guide](../../guide/source-onboarding.md) covers documentation review, bounded

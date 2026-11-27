@@ -68,5 +68,6 @@ decision. A record can name a plan task by ID because plan headings disappear on
 | 0051 | All-table human verification projections and replay | [Human verification projections](0051-evidence-model-human-verification-projections.md) |
 | 0052 | `review-queue-cli` | [Review queue CLI](0052-evidence-model-review-queue-cli.md) |
 | 0053 | `evidence-model-implementation-audit` | [Evidence model implementation audit](0053-evidence-model-evidence-model-implementation-audit.md) |
+| 0054 | Raw archive design | [Design review](0054-adhoc-raw-archive-storage-design.md) |
 
-Next unused sequence is `0054`.
+Next unused sequence is `0055`.

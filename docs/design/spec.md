@@ -110,9 +110,9 @@ plan for 8-16 logical cores and confirm by measurement.
 ## Architecture
 
 ```text
- Git (reviewed)                                   $DATA_DIR (durable runtime inputs)
- contracts, interchange contract versions,        raw WARC archive, ledger, decision logs,
- seeds, match profiles, crawler configs,          identity event log, exchange ledger
+ Git (reviewed)                                   Durable runtime inputs
+ contracts, interchange contract versions,        $KN_RAW_ARCHIVE_DIR: captures, tombstones
+ seeds, match profiles, crawler configs,          $DATA_DIR: decisions, identity, exchange
  adapter profiles, external schema snapshots          ^             |
         |                                             | fetch       | replay
         v                                     approved sources,     |
@@ -136,7 +136,7 @@ plan for 8-16 logical cores and confirm by measurement.
 | Contracts | ODCS v3, exact minor and JSON Schema checksum pinned; SQLAlchemy and Alembic governance | Validate and export supported artifacts; never silently drop custom extensions |
 | Ontology and taxonomy | Reviewed JSON seed files loaded into the `semantic` schema; SKOS Turtle generated with RDFLib | SKOS is an interchange export; typed relation rules live in the meta-model |
 | Storage | PostgreSQL with PostGIS, newest major that has an official PostGIS image at pin time; one database `kn` with one schema per domain | ACID, constraints, geometry, time series; no cross-database transactions needed |
-| Raw archive | WARC 1.1 (ISO 28500:2017) via `warcio`; Parquet fetch ledger | Original bytes plus origin URI and fetch time; the only fetch output |
+| Raw archive | WARC 1.1 (ISO 28500:2017) via `warcio`, or content-addressed blobs; derived Parquet fetch ledger | Committed evidence and versioned capture metadata are the replay inputs |
 | Engine | Python 3.12+, HTTPX, Pydantic, psycopg 3 | Deterministic extract, parse, map, load |
 | Identity | KN identity registry and append-only identity event log; declared match profiles with Fellegi-Sunter style weights | Deterministic resolution and scoring; no machine-learned matcher without a calibration gate |
 | Interchange | KN interchange contract (ODCS, semantic versions from `0.1.0`), JSON Lines packages, schema-diff classifier | Versioned external boundary; never a second internal storage schema |
@@ -154,7 +154,8 @@ pagination when they leave original bytes in the raw archive. dlt pipelines that
 schemas are not used, because contracts are authoritative.
 
 Production Python lives below `src/kn/`. CLI parsing stays at the boundary and domain logic moves
-to focused modules. Runtime artifacts resolve from `DATA_DIR` and never enter source packages.
+to focused modules. Local runtime artifacts resolve from `DATA_DIR`. The raw archive and its
+fetch index each have a dedicated configured root. Keep runtime artifacts out of source packages.
 
 ### Replay and publication boundaries
 
@@ -209,14 +210,12 @@ analytics/dashboards/            semantic dashboard definitions and generated lo
 locales/en/, locales/uk/         message catalogs
 deploy/                          Compose files and service configuration
 generated/                       compiler output, committed and checked for drift
-tests/fixtures/<domain>/<source-id>/   sanitized WARC fixtures and expected outputs
+tests/fixtures/<domain>/<source-id>/   sanitized archive fixtures and expected outputs
 ```
 
 Runtime data, relative to `$DATA_DIR`:
 
 ```text
-raw/<domain>/<source-id>/<run-id>/   WARC files of one source run, never rewritten
-raw/ledger/                          Parquet fetch ledger, rebuildable from WARC files
 decisions/<domain>/                  append-only review decision logs (JSON Lines)
 identity/                            append-only identity event log (JSON Lines), never rewritten
 exchange/<counterpart>/              append-only exchange ledger: bindings, plans, receipts
@@ -225,6 +224,15 @@ interchange/<run-id>/                interchange packages (ZIP) and manifests
 runs/<run-id>/                       run manifests and redacted quarantine samples
 exports/<profile>/<run-id>/          Obsidian vault ZIP and manifest
 ```
+
+Raw storage uses [dedicated roots](#storage-roots).
+
+| Path | Contents |
+| --- | --- |
+| `$KN_RAW_ARCHIVE_DIR/captures/<domain>/<source-id>/<run-id>/` | Committed batches |
+| `$KN_RAW_ARCHIVE_DIR/tombstones/` | Retention and withdrawal records |
+| `$KN_RAW_ARCHIVE_DIR/staging/` | Unpublished inputs and batches |
+| `$KN_RAW_INDEX_DIR/` | Rebuildable Parquet fetch ledger |
 
 ## Development and release phases
 
@@ -812,42 +820,100 @@ it.
 
 ### Raw archive
 
-Payloads approved for retention are written once as WARC 1.1 (ISO 28500:2017), gzip per record,
-via `warcio`. Each source run gets its own directory, `$DATA_DIR/raw/<domain>/<source-id>/<run-id>/`.
+#### Storage roots
 
-- A request record is written with credential headers removed.
-- A response record holds the status, headers, and the exact payload.
-- A metadata record carries the run ID, crawler configuration digest, and code digest.
-- Curated evidence captures and manual source files become resource records.
+Set `KN_RAW_ARCHIVE_DIR` for commands that read or write the durable local archive. Set
+`KN_RAW_INDEX_DIR` to a distinct directory for publishing and querying the derived fetch index.
+Configure the roots in `.env` or the process environment. Resolve relative paths from the project
+root. Both roots require explicit configuration when used and have no `DATA_DIR` fallback.
+Archive-only capture, verification and replay can run with the index root unset. A command that
+requires a missing root reports the variable before accessing storage or fetching any source.
+Archive locators stay relative to the archive root so a restore can use a different mount.
 
-Every record carries `WARC-Target-URI` (the redacted origin URI), `WARC-Date` (fetch time in UTC),
-`WARC-Payload-Digest`, and `WARC-Record-ID`. A response identical to the previous one for the same
-request is written as a `revisit` record. Files are written to a temporary name, synced, and
-renamed.
+#### Capture and commit
 
-The Parquet fetch ledger under `$DATA_DIR/raw/ledger/` indexes each record: fetch ID, run, domain,
-source, origin URI, fetch time, status, MIME type, payload SHA-256, size, and WARC path and offset.
-`kn raw reindex` rebuilds it from the WARC files, and `kn raw verify` checks digests. Retention
-follows the source's policy. Deleting a record writes a tombstone with reason and hash, and claims
-that cite it are marked `evidence_tombstoned`. Keep tombstones among the durable inputs with
-the affected record IDs, including revisit references. Reindex must reconstruct the ledger after
-payload removal without treating an intentional deletion as archive corruption.
+Store approved HTTP captures in WARC 1.1 (ISO 28500:2017) via `warcio`, with one gzip member per
+record. A request record holds redacted request metadata. A response record holds status, redacted
+headers and the exact retained body bytes before HTTP content decoding. Redact credentials from URIs
+and headers before persistence. The source approval must permit retention of the body as captured.
+Use resource records for permitted curated evidence and manual files that fit the WARC limits.
+Use the applicable standard WARC target URI, date, record ID and digest fields. An identical
+response for the same request may use a standard `revisit` that resolves to a permitted retained
+response. Reuse requires compatible access, expiry and deletion obligations for both captures.
+KN also records the SHA-256 of each retained payload.
 
-Boundary: no replay UI and no storage of unselected bulk files (for example, unfiltered GDELT
-dumps). Fixtures are sanitized WARC excerpts committed under `tests/fixtures/`.
+For large files, existing compressed packages or payloads that need independent physical deletion,
+the reviewed crawler declares `raw.format: blob` and records the reason in the source investigation.
+Stream these payloads to content-addressed files with SHA-256 and size verification. Isolate blob
+storage where captures have independent deletion obligations. Keep archive record and fetch IDs
+stable and independent of file paths, compression offsets, table snapshots and metadata schema
+versions.
+
+Each source run uses `captures/<domain>/<source-id>/<run-id>/` under the archive root. Publish
+bounded batches before parsing or advancing a checkpoint. Each batch contains its WARC segments
+or blobs and a versioned commit manifest with their relative paths, sizes and SHA-256 digests, the
+batch time range, and locators for each capture and its metadata. Stage outside the visible batch
+namespace on the same filesystem, sync files and directory metadata, atomically publish the batch
+directory, and sync its parent. Readers discover committed manifests only. A retry after archive
+commit reuses the committed batch with the same ID. Writers for different sources can publish
+independently. Stream large payloads within the approved limits and bound the size of WARC segments.
+
+#### Capture schema and fetch ledger
+
+Capture metadata has an explicit KN schema version. Use a JSON metadata record linked to its WARC
+capture, or a JSON descriptor in the committed blob batch. Store the archive record ID, fetch ID,
+run, domain, source, redacted origin URI, UTC fetch time, status and MIME type where applicable,
+payload SHA-256 and byte count, crawler configuration digest and code digest. Keep the metadata
+needed to interpret each version documented. Readers project supported older versions into the
+current model with explicit defaults and reject unsupported versions. Replay source payloads using
+the current parser and data contracts. Native schema evolution needs no archive rewrite.
+
+`kn raw reindex` derives the Parquet fetch ledger under `$KN_RAW_INDEX_DIR` from committed
+batches and tombstones. The ledger has a versioned logical schema and includes an archive locator
+(backend, relative path, and offset and length for WARC) for each retrievable record. Stage index
+updates on the index filesystem, publish them atomically, and expose the committed input coverage
+of each published view.
+Support bounded reads and rebuilds by domain, source and time range. Reindex uses the manifest
+locators to read capture metadata directly without decompressing unrelated bodies. Archive-only
+replay must work after the ledger is lost. A record lookup outside the index coverage uses the
+committed archive. `kn raw verify` verifies manifests, archive objects, record digests and revisit
+references. Resolve evidence and run replay through the archive interface using stable IDs.
+
+Retention follows the source policy. Persist tombstones with affected record IDs, payload hashes,
+reason and removed object references before deleting bytes. Apply them to reads, reindex, replay and
+restores, and mark dependent claims `evidence_tombstoned`. Include affected revisits when their
+target becomes unavailable. Keep immutable segments within a common retention and access scope.
+Purge a segment or blob only when no retained capture still depends on it. Reindex must distinguish
+a tombstoned removal from lost or corrupt evidence.
+
+#### Scale and evaluation
+
+The initial archive is local filesystem storage. Parquet is the initial metadata projection.
+Consider an Iceberg metadata table when measured file planning, index query or recovery time exceeds
+an agreed budget, or the deployment requires concurrent commits from independent hosts to a shared
+metadata table. Compare partitioned Parquet with Iceberg on the measured workload, including catalog
+recovery, compaction and snapshot expiry. Populate any new index from the committed archive and
+compare logical rows and record resolution before switching readers. Large payload volume can also
+justify moving immutable objects to object storage with an equivalent commit manifest contract.
+Measure those storage and restore requirements independently. See the
+[storage design review](../impl/records/0054-adhoc-raw-archive-storage-design.md).
+
+Boundary: no replay UI, shared catalog or object-store implementation in the initial archive.
+Retain only approved inputs, including selected bulk files. Commit sanitized archive fixtures under
+`tests/fixtures/`.
 
 Evaluation:
 
-- A write and read round trip preserves payload bytes and digests.
-- An interrupted write leaves no visible partial file.
-- Reindex reproduces the ledger exactly.
-- Redaction tests show no credential in records or URIs.
-- Revisit deduplication works.
-- `verify` detects corruption.
-
-Negative result: when WARC is unsuitable for a source shape, such as a very large bulk file, the
-crawler configuration declares `raw_format: blob`. The bytes are then stored content-addressed with
-the same ledger fields, and the reason is recorded.
+- WARC and blob round trips preserve exact retained bytes and SHA-256 digests.
+- Missing roots fail before use. A restored archive at a different path replays with the same IDs,
+  and reindex writes to the separately configured index root.
+- A killed writer leaves no partial committed batch. Concurrent source writes and retries leave
+  complete batches without duplicate fetch IDs.
+- One reader handles both old and current capture metadata without rewriting either archive.
+- Losing the ledger and rebuilding it reproduces the same logical rows and replay order.
+- Redaction keeps credentials out of archives, ledgers and diagnostics.
+- Revisit resolution and tombstones still agree after reindex and restore.
+- Verification rejects unexpected missing objects, truncated records and digest mismatches.
 
 ### Evidence model
 
@@ -1127,7 +1193,7 @@ errors are never retried.
 2. The owner authorizes bounded sampling (a human-lane task).
 3. The agent captures a sample within a declared request budget into the raw archive and writes an
    investigation report: native keys, gaps, proposed mappings, and risks.
-4. The agent writes the crawler configuration, parser, sanitized fixtures from the captured WARC,
+4. The agent writes the crawler configuration, parser, sanitized fixtures from the archive,
    and tests. Engine changes this source needs go into the core with tests, and every earlier
    source's suite is rerun.
 5. Review and merge.
@@ -1157,7 +1223,7 @@ Each run executes these steps:
 
 1. Take an advisory lock per source and scope, and register the run.
 2. Discover requests.
-3. Fetch into WARC, or read from the archive in replay.
+3. Commit a capture to the raw archive, or read a committed capture in replay.
 4. Parse native records with locators, and check the native schema fingerprint.
 5. Map them to candidate objects, claims, relations, and tags through the crawler configuration.
    Compute each record's field-level change set against its previous version.
@@ -1201,7 +1267,7 @@ a copy can move without a Git change. Unset, the location is the configured defa
 A Drive fetch reads the file's metadata first: name, MIME type, size, SHA-256, and head revision.
 When the SHA-256 equals the last fetched one, the run ends `not_modified` after that one request.
 Otherwise the fetch downloads within the declared size limit, checks the bytes against the SHA-256,
-and writes them to `$DATA_DIR/raw/<domain>/<source-id>/<run-id>/` before anything is unpacked. The
+and stages them to `$KN_RAW_ARCHIVE_DIR/staging/<domain>/<source-id>/<run-id>/` before unpacking. The
 item must be a ZIP file. Google Docs, Sheets, and folder items are refused: conversion changes bytes,
 and a folder is not one snapshot. Unpacking refuses absolute and parent paths, links, duplicate
 names, and archives over the declared file count or unpacked size. The snapshot identity covers the
@@ -1686,8 +1752,9 @@ missing conditions.
 
 - **Access.** A reverse proxy with TLS and authentication fronts Superset and Kestra on a private
   network. Superset roles are `analyst_read`, `dashboard_author`, and `admin`.
-- **Backups.** Nightly compressed per-database backups plus globals, the raw ledger and changed WARC
-  files, decision logs, the identity event log, the exchange ledger, and Git release artifacts.
+- **Backups.** Nightly compressed per-database backups plus globals, committed batches and
+  tombstones from `KN_RAW_ARCHIVE_DIR`, decision logs, the identity event log, the exchange ledger,
+  and Git release artifacts. Rebuild the fetch index in `KN_RAW_INDEX_DIR` after restoring the archive.
   Copies are kept for 7 days daily and 4 weeks weekly. Proposed objectives are RPO <= 24 h and
   RTO <= 8 h, validated by a restore drill. An off-host encrypted destination is required beyond
   development.
@@ -1808,7 +1875,7 @@ ready required tasks in written order before optional work.
 | 6 | `ontology-taxonomy` | planned | Every proposal row is classified, identifiers are stable, invalid hierarchies are rejected, SKOS round-trips | [Semantic model, reviewed seeds and SKOS export](../impl/current/ontology-taxonomy.md) |
 | 7 | `evidence-model` | shipped | Conflict, time, provenance, update policy and replay pass; optional version-bound human verification covers every registered dataset | [Evidence contracts, canonical selection, review queue and human verification](../impl/current/evidence-model.md) |
 | 8 | `object-identity` | planned | KN IDs survive rebuilds; lifecycle, matching, partial-update, and lineage fixtures pass; calibrated classes meet the precision gate | [Registry, lifecycle, matching and change tracking](../impl/current/object-identity.md) |
-| 9 | `raw-archive` | planned | WARC round trip, atomic write, ledger reindex, redaction, revisit, and corruption checks pass | - |
+| 9 | `raw-archive` | planned | WARC and blob round trips, compatible metadata reads, atomic commit, index recovery, redaction, retention, and integrity checks pass | - |
 | 10 | `part-supply-model` | planned | Every vendor coverage group maps or records an exclusion; part, variant, offer, price, and substitute fixtures pass | - |
 | 11 | `source-management` | planned | Catalogue import, enablement validation, error mapping and onboarding fixture checks pass; run status matches fixtures | [Catalogue, crawler validation and onboarding](../impl/current/source-management.md) |
 | 12 | `ingestion-engine` | planned | Failure-mode fixtures yield declared statuses without cursor jumps; two rebuilds produce identical canonical tables; a prefetched package gives one snapshot from every location | - |

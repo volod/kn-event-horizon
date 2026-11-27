@@ -35,8 +35,9 @@ Read credentials through approved environment aliases or secret files. Remove se
 metadata and stored URIs. Stop and record the reason when the approved scope cannot be honored.
 
 Write responses to the source's approved raw archive under
-`$DATA_DIR/raw/<domain>/<source-id>/<run-id>/` before interpreting them. Record archive locators,
-actual budget usage and sample coverage in the
+`$KN_RAW_ARCHIVE_DIR/captures/<domain>/<source-id>/<run-id>/` before interpreting them. Configure the
+[archive root](../design/spec.md#storage-roots) before sampling. Record archive locators, actual
+budget usage and sample coverage in the
 [investigation report](templates/source-investigation-report.md). Identify native keys,
 version and cursor fields, schema fingerprint, gaps, proposed contract and ontology mappings,
 failure modes and risks. Keep restricted details with the run evidence.
@@ -47,8 +48,8 @@ Keep approved crawler YAML under `domains/<domain>/sources/` and parser code und
 `src/kn/domains/<domain>/`. Start with failing parser, mapping and failure-path tests based on
 the smallest approved extract or a synthetic fixture. Use the
 [fixture sanitization worksheet](templates/source-fixture-sanitization.md) when deriving fixtures.
-Preserve native key shape, encoding and the cases under test. Keep raw captures under
-`$DATA_DIR`. Use a synthetic fixture if redistribution terms prevent committing an extract.
+Preserve native key shape, encoding and the cases under test. Keep raw captures in the configured
+archive. Use a synthetic fixture if redistribution terms prevent committing an extract.
 
 Put fixture files under a directory named `fixtures` anywhere below `tests/`. The check accepts
 regular UTF-8 files up to 8 MiB in CSV, TSV, HTML, HTTP text, JSON, JSON Lines, Markdown, plain

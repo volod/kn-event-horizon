@@ -34,26 +34,59 @@ archive.
 
 #### warc-raw-store
 
-Fetch once, transform many requires a durable, self-describing archive of original bytes.
+Fetch once, transform many requires an archive that can replay original bytes on its own.
 
 - Serves: `raw-archive` -- [Raw archive](../design/spec.md#raw-archive)
 - Agent status: CLEAR
 - Execution stage: MODEL
-- Dependencies: `warcio` and `pyarrow` as the justified dependencies.
-- User-visible outcome: The engine writes WARC 1.1 files per source run with `WARC-Target-URI` and
-  `WARC-Date`, and `kn raw reindex` and `kn raw verify` maintain the Parquet ledger.
-- Scope boundary: Request, response, metadata, resource, and revisit records; redaction; atomic
-  writes; size and decompression limits; and the tombstone format. The blob fallback is designed
-  but enabled only when a source needs it.
-- Data and artifact paths: `src/kn/archive/`, `$DATA_DIR/raw/`, `tests/archive/`,
+- Dependencies: `warcio` and the [storage design review](records/0054-adhoc-raw-archive-storage-design.md).
+- User-visible outcome: Approved captures commit as WARC 1.1 batches or streamed content-addressed
+  blobs and replay by stable IDs. `kn raw verify` checks the committed archive offline.
+- Scope boundary: Request, response, metadata, resource and revisit records, blob descriptors,
+  capture schema compatibility, commit manifests, redaction, size and decompression limits,
+  and tombstones. Start with local filesystem storage, an explicit `KN_RAW_ARCHIVE_DIR`, and a
+  single writer per source.
+- Data and artifact paths: `src/kn/archive/`, `$KN_RAW_ARCHIVE_DIR`, `.env.example`, `tests/archive/`,
   `tests/fixtures/archive/`.
-- Execution path: Wrap the `warcio` writer and reader behind a small interface, with a ledger
-  writer and a redaction policy object.
-- Acceptance gates: Payload bytes and digests round-trip. An interrupted write leaves no visible
-  file. Reindex equals the original ledger. No credential appears in records or URIs. Revisit
-  works, and corruption is detected.
+- Execution path: Wrap WARC and blob I/O behind the archive interface. Stage a batch, sync it and
+  atomically publish its manifest and objects together. Record WARC member offsets and lengths for
+  reads of the capture and its metadata. Generate compressed files in tests from sanitized text
+  fixtures and synthetic bytes.
+- Acceptance gates: Both backends round-trip exact bytes and digests. An interrupted write leaves
+  no visible committed batch. Two sources can write independently, and retrying an already
+  committed batch reuses its IDs. Old and current metadata read side by side. Verification rejects
+  unknown schema versions, missing files and digest mismatches. Redaction keeps credentials out of
+  records, URIs and diagnostics. Revisit and tombstone checks pass. Commands with a missing archive
+  root fail before I/O, even when `DATA_DIR` is set. Capture and verification work with the index
+  root unset. Relative roots resolve from the project root.
 - Documentation target: A new `current/raw-archive.md` page listed in the
   [areas index](current.md#areas).
+
+#### raw-fetch-ledger
+
+Operators need fast capture lookup, scoped reindex and a clear way to recover a lost index.
+
+- Serves: `raw-archive` -- [Capture schema and fetch ledger](../design/spec.md#capture-schema-and-fetch-ledger)
+- Agent status: CLEAR
+- Execution stage: MODEL
+- Requires: `warc-raw-store`
+- Dependencies: `pyarrow` for reading and writing the Parquet projection.
+- User-visible outcome: `kn raw reindex` recovers the fetch ledger from committed batches and
+  tombstones. Readers can resolve records and query by domain, source and capture time.
+- Scope boundary: Versioned logical row schema, a partitioned Parquet projection with batched
+  writes, atomic index updates, index coverage, and an archive-only replay path. Keep payloads
+  and authoritative commit state in the archive.
+- Data and artifact paths: `src/kn/archive/`, `$KN_RAW_INDEX_DIR`, `tests/archive/`.
+- Execution path: Derive rows from the archive reader, stage replacement data on the index
+  filesystem, and publish a complete index view. Use manifest locators for metadata reads without
+  decompressing bodies. Use stable IDs for parity checks and evidence resolution.
+- Acceptance gates: Full reindex after deleting the projection yields the same logical rows and
+  replay order. A scoped rebuild preserves unrelated partitions. Failed publication leaves a
+  readable prior view with correct coverage. A record added after index publication resolves from
+  the archive. Tombstones suppress records from stale and rebuilt views. A fixture mixes domains,
+  sources, capture versions and both backends. Reindex requires an explicit `KN_RAW_INDEX_DIR` and
+  publishes there. `make ci` passes.
+- Documentation target: `current/raw-archive.md` listed in the [areas index](current.md#areas).
 
 #### raw-archive-implementation-audit
 
@@ -62,24 +95,25 @@ force a re-fetch that a source may no longer allow.
 
 - Serves: `raw-archive` -- [Raw archive](../design/spec.md#raw-archive)
 - Agent status: CLEAR
-- Requires: `warc-raw-store`
+- Requires: `warc-raw-store`, `raw-fetch-ledger`
 - Dependencies: The accepted task records of the group and the [implementation
   audit](../guide/planning-workflow.md#implementation-audits) checks.
 - User-visible outcome: Every rebuild replays from a verified archive. The audit record gives every
   check a result and every finding a disposition. The current-state page lists known limitations,
   and each scheduled finding is a plan task.
 - Scope boundary: Focus: WARC 1.1 conformance and readability with independent tools; block and
-  payload digests; large and streamed payloads; compressed, truncated, and partial files; repeated
-  payloads; atomic writes and crash recovery; agreement between the raw ledger and the files;
-  retention, backup, and licence boundaries; storage growth at the target volume. Fixes only; new
-  behavior becomes plan tasks.
-- Data and artifact paths: `src/kn/archive/`, `$DATA_DIR/raw/`, `tests/archive/`,
-  `docs/impl/plan.md`, and the task record.
+  payload digests; large and streamed payloads; compressed, truncated and partial files; repeated
+  payloads; archive commit and index publication recovery; capture-version compatibility; agreement
+  between the ledger and the files; retention, backup and licence boundaries. Fixes only; new
+  behavior becomes plan tasks. Target-host scale measurements belong to `performance-gate`.
+- Data and artifact paths: `src/kn/archive/`, `$KN_RAW_ARCHIVE_DIR`, `$KN_RAW_INDEX_DIR`,
+  `tests/archive/`, `docs/impl/plan.md`, and the task record.
 - Execution path: Rerun the group's acceptance commands, then work through the audit checks. Read
-  the archive with an independent WARC tool, truncate a file, stop a write midway, and replay a run
-  from the archive alone.
+  WARC with an independent tool, truncate a file, stop a write midway, then restore to a different
+  archive root with the index missing and replay a run from the committed archive alone.
 - Acceptance gates: An independent WARC reader accepts every file. A truncated or partial file is
-  detected and never replayed silently. Digests verify on every replay. Every finding has a
+  detected and never replayed silently. Digests verify on every replay. A restored tombstoned
+  capture stays suppressed, including via a revisit reference. Every finding has a
   severity, evidence, and a disposition, no `blocker` is accepted, and every fix starts from a
   failing regression test. `make ci` passes with the scheduled tasks in the plan.
 - Documentation target: `current/raw-archive.md` listed in the [areas index](current.md#areas).
@@ -122,8 +156,8 @@ The core engine must run end to end on a synthetic source before any real source
 - Requires: `raw-archive-implementation-audit`, `ingestion-state-contracts`
 - Dependencies: The [crawler validator and enablement evidence](current/source-management.md#enablement-evidence).
 - User-visible outcome: `kn source run` and `kn source replay` process a synthetic fixture source
-  served locally. They write WARC records, identity events, claims with evidence linked to KN IDs,
-  a checkpoint, and a run summary with a declared status.
+  served locally. They commit WARC captures and write identity events, claims with evidence linked
+  to KN IDs, a checkpoint, and a run summary with a declared status.
 - Scope boundary: Lock, run registration, fetch to archive, parse, a minimal mapping, validation,
   load, checkpoint, and status. Fetch safety, full mapping, curated input, and rebuild replay come
   in the next tasks.
@@ -310,16 +344,17 @@ version on Google Drive for unattended re-import.
   stub of the Drive API; the live run belongs to `publish-satcom-drive-package`.
 - User-visible outcome: `KN_SATCOM_SOURCE` in `.env` selects a local directory, a local ZIP, or
   `gdrive:<file-id>`, and `make satcom-fetch` stages that package under
-  `$DATA_DIR/raw/space/satcom/<run-id>/` for `make satcom-import`. An unchanged Drive file ends
-  `not_modified` after one metadata request.
+  `$KN_RAW_ARCHIVE_DIR/staging/space/satcom/<run-id>/` for `make satcom-import`. An unchanged Drive
+  file ends `not_modified` after one metadata request.
 - Scope boundary: The location resolver; the Drive v3 metadata and download client with a
   read-only service-account key from `KN_GDRIVE_CREDENTIALS_FILE`; SHA-256 verification; safe
-  unpacking with file-count and size limits; the raw run directory with its manifest; and the SATCOM
-  commands as the first user. The module names no dataset, so `prefetched-dataset-method` reuses it.
-  Raw records stay blobs until `warc-raw-store`. No scheduler, no other Drive operation, and no
-  link-sharing URLs.
+  unpacking with file-count and size limits, the staging run directory with its manifest, and the
+  SATCOM commands as the first user. The module names no dataset, so `prefetched-dataset-method`
+  reuses it.
+  This task stages packages for the existing import. Commit to the shared archive in
+  `prefetched-dataset-method`. No scheduler, no other Drive operation, and no link-sharing URLs.
 - Data and artifact paths: `src/kn/engine/packages/`, `Makefile`, `.env.example`, `pyproject.toml`,
-  `uv.lock`, `$DATA_DIR/raw/space/satcom/`, `tests/engine/`.
+  `uv.lock`, `$KN_RAW_ARCHIVE_DIR/staging/space/satcom/`, `tests/engine/`.
 - Execution path: Write failing tests first: one snapshot identity from a fixture directory, its
   ZIP, and the Drive stub; `not_modified`; hostile ZIPs; a Google-native item; a SHA-256 mismatch; a
   missing key file; and no key path or token in logs. Then implement, adding `google-auth` as the
@@ -353,9 +388,9 @@ its integration is dataset-specific code beside the engine.
   location variable named in the configuration; shared import, file, and raw-cell bookkeeping keyed
   by source ID
   instead of per-dataset tables; a `kn.sourceProfile` that is not fixed to `satcom-csv/1`; archive
-  placement under `raw/<domain>/<source-id>/<run-id>/`; and replay from the archive. The SATCOM
-  preservation rules stay: every file archived byte for byte, every cell kept, no formula or SQL
-  executed, and identical bytes a no-op. No fetching from the network.
+  placement in committed blob batches under `$KN_RAW_ARCHIVE_DIR/captures/`; and replay from the
+  archive. Preserve every SATCOM file byte for byte and keep every cell.
+  Execute no formulas or SQL. Identical bytes are a no-op. No fetching from the network.
 - Data and artifact paths: `src/kn/engine/`, `src/kn/domains/space/satcom/`,
   `domains/space/sources/`, `tests/engine/`, `tests/domains/space/satcom/`.
 - Execution path: Add a second synthetic fixture dataset with failing tests first, then move the
@@ -375,13 +410,15 @@ Schema changes during development must cost a rebuild, never a re-fetch or a los
 - Agent status: CLEAR
 - Requires: `curated-source-method`, `prefetched-dataset-method`
 - Dependencies: none.
-- User-visible outcome: `kn db rebuild` replays the raw ledger, curated files, prefetched datasets,
-  and decision logs through current code, and reports orphaned decisions.
+- User-visible outcome: `kn db rebuild` replays the committed archive, curated files, prefetched
+  datasets, and decision logs through current code, and reports orphaned decisions. It can replay
+  after the loss of the raw ledger.
 - Scope boundary: Replay ordering, the replay of every source suite in `make ci-local`, and
   canonical row-hash comparison. No network access during rebuild.
 - Data and artifact paths: `src/kn/db/`, `src/kn/engine/replay.py`, `tests/integration/`.
 - Execution path: Rebuild the fixture archive twice and compare row hashes of all canonical tables.
-- Acceptance gates: Two rebuilds are identical. A network call during rebuild fails the test.
+- Acceptance gates: Two rebuilds are identical, including one with the ledger removed. A network
+  call during rebuild fails the test.
   A tombstoned input stays suppressed after reindex and replay. Decisions re-attach or are reported.
   Human-verification times, reviewers and decision IDs survive replay exactly. A changed or missing
   target remains stale, pending or orphaned, and never receives a newly fabricated verification.
@@ -685,8 +722,8 @@ A package must come back into KN as evidence, with its identity and provenance i
 - Requires: `interchange-schema-evolution`, `interchange-package-export`,
   `ingestion-engine-implementation-audit`
 - Dependencies: none.
-- User-visible outcome: `kn interchange import <package>` archives the package as a WARC resource
-  record and loads it through the engine. KN IDs resolve directly for the same producer, and
+- User-visible outcome: `kn interchange import <package>` commits the original ZIP as a blob
+  capture and loads it through the engine. KN IDs resolve directly for the same producer, and
   identifiers and attributes resolve them for other producers. Each imported claim cites the
   package and the original provenance reference.
 - Scope boundary: The package source method under the same update policies (a package never
@@ -963,7 +1000,7 @@ The owner's instance must import correctly on the target release before any writ
   reviewed instance profile, and a report of losses, unmapped resources, identity matches, and
   update-policy outcomes.
 - Scope boundary: Read-only capture and import within a request budget. No writes.
-- Data and artifact paths: `interchange/inventree/instances/vl-itree.yaml`, `$DATA_DIR/raw/`,
+- Data and artifact paths: `interchange/inventree/instances/vl-itree.yaml`, `$KN_RAW_ARCHIVE_DIR`,
   `$DATA_DIR/exchange/vl-itree/<run-id>/`, and the task record.
 - Execution path: Probe, confirm the target digest, capture, and import. Then replay the import
   without network.
@@ -1104,7 +1141,8 @@ Catalog identity and constellation snapshots start from CelesTrak GP data.
 - Scope boundary: OMM JSON for the authorized groups only. No ephemeris, no coverage, and no
   operational status from orbit data. Engine improvements found here go into the core.
 - Data and artifact paths: `domains/space/sources/celestrak_gp.yaml`,
-  `src/kn/domains/space/celestrak.py`, `tests/fixtures/space/celestrak_gp/`, `$DATA_DIR/raw/space/`.
+  `src/kn/domains/space/celestrak.py`, `tests/fixtures/space/celestrak_gp/`,
+  `$KN_RAW_ARCHIVE_DIR/captures/space/`.
 - Execution path: Follow the onboarding workflow steps 3-4: bounded sample capture, investigation
   report, config, parser, sanitized fixtures, and failing tests first.
 - Acceptance gates: Fixtures and the authorized sample load. A rerun creates no duplicates. A
@@ -1144,8 +1182,8 @@ Maps need versioned, licence-reviewed reference boundaries.
   wording.
 - User-visible outcome: Country polygons load with edition, validity, simplified BI copies, and
   the boundary-policy note.
-- Scope boundary: A manual file source stored as WARC resource records. No disputed-border
-  judgments.
+- Scope boundary: A manual file source using the reviewed archive format for the release package.
+  No disputed-border judgments.
 - Data and artifact paths: `domains/space/sources/natural_earth.yaml`,
   `tests/fixtures/space/natural_earth/`.
 - Execution path: Use a bulk-file method through the engine, PostGIS validity checks, and
@@ -1351,7 +1389,8 @@ Approved space sources must run unattended within their budgets.
 - User-visible outcome: Approved space sources run on schedule with recorded statuses, budgets, and
   freshness.
 - Scope boundary: The declared window only. Kill-and-retry and restart checks are included.
-- Data and artifact paths: `$DATA_DIR/raw/space/`, `$DATA_DIR/runs/`, and the task record.
+- Data and artifact paths: `$KN_RAW_ARCHIVE_DIR/captures/space/`, `$DATA_DIR/runs/`, and the
+  task record.
 - Execution path: Deploy the flows, run the window, kill one worker mid-run, and restart the stack
   once.
 - Acceptance gates: Every scheduled slot has a run with a declared status. Request counts stay
@@ -2100,17 +2139,18 @@ Recovery objectives must be measured, not assumed.
 - Agent status: RUN NEEDED
 - Requires: `provide-target-server-and-backup`, `security-test-suite`
 - Dependencies: The target server and the off-host backup destination.
-- User-visible outcome: Nightly backups (databases, globals, raw ledger and changed WARC files,
-  decision logs, the identity event log, and the exchange ledger) and a written recovery
-  runbook.
+- User-visible outcome: Nightly backups of databases, globals, committed archive batches and
+  tombstones, decision logs, the identity event log, and the exchange ledger. A written runbook
+  covers recovery with and without the optional fetch-index backup.
 - Scope boundary: Backup jobs, retention, the restore drill into an isolated instance, and
   achieved RPO and RTO.
 - Data and artifact paths: `deploy/backup/`, `docs/guide/operations-runbook.md`,
   `$DATA_DIR/backups/`, and the task record.
-- Execution path: Back up, restore into an isolated stack, verify hashes, constraints, and
-  dashboard queries, apply current tombstones before opening reader access, and time the drill.
-- Acceptance gates: The restore passes its checks. The achieved RPO and RTO are recorded against
-  the proposed 24 h and 8 h objectives.
+- Execution path: Restore into an isolated stack with an explicit archive root, apply current
+  tombstones before opening reader access, rebuild the fetch index in its configured root, and
+  verify hashes, constraints and dashboard queries. Time the drill including index recovery.
+- Acceptance gates: The restore passes its checks with the index backup withheld. The achieved
+  RPO and RTO are recorded against the proposed 24 h and 8 h objectives.
 - Documentation target: `current/operations.md` listed in the [areas index](current.md#areas).
 
 #### performance-gate
@@ -2122,14 +2162,18 @@ The target host must handle the declared load within the memory budget.
 - Requires: `backup-restore-drill`, `gdelt-dashboards-implementation-audit`
 - Dependencies: Access to the target server.
 - User-visible outcome: A measured report covering synthetic load, dashboard and map p95, ingestion
-  memory, and disk growth, with tuned budgets.
+  memory, disk growth and the scale triggers for the raw archive index.
 - Scope boundary: Synthetic data only (50k catalog rows, 100k articles, 1M observations), with 2
-  readers and 1 ingest.
+  readers and 1 ingest. Exercise both many small sources across domains and one bulk-heavy source.
 - Data and artifact paths: `tests/performance/`, `$DATA_DIR/perf/<run-id>/`, and the task record.
-- Execution path: Generate the load, measure query plans and timings, and adjust the Compose
-  limits.
+- Execution path: Declare lookup and reindex budgets before measuring, with full reindex inside
+  the restore time budget. Generate the load, measure query plans and timings, and adjust the
+  Compose limits. For each archive shape, record domain, source and capture counts, stored bytes,
+  archive and index file counts, scoped lookup p95, file planning time, and full and scoped
+  reindex duration and peak memory.
 - Acceptance gates: Dashboard and map p95 are at most 5 s. There is no out-of-memory failure. Any
-  deviation is recorded with measurements.
+  deviation is recorded with measurements. Record whether either archive shape meets the
+  [reopening condition](future-research.md#raw-archive-format-selection----avro-and-iceberg-for-the-raw-archive).
 - Documentation target: `current/operations.md` listed in the [areas index](current.md#areas).
 
 #### operations-hardening-implementation-audit
@@ -2511,7 +2555,8 @@ that the owner shares it with.
   decision, and the documented periodic command.
 - Scope boundary: Publication, access, and approval only. Credentials stay out of Git. Scheduled
   collection beyond an operating-system timer comes with `scheduled-space-ingestion`.
-- Data and artifact paths: `.env` (local only), `$DATA_DIR/secrets/`, `$DATA_DIR/raw/space/satcom/`,
+- Data and artifact paths: `.env` (local only), `$DATA_DIR/secrets/`,
+  `$KN_RAW_ARCHIVE_DIR/staging/space/satcom/`,
   and the task record.
 - Execution path: The owner completes the checklist. The agent runs `make satcom-fetch
   satcom-import` twice, then again after the owner uploads a changed revision.
