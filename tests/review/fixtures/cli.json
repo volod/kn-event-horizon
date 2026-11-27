@@ -1,0 +1,30 @@
+[
+  {
+    "id": "empty-text",
+    "arguments": ["review", "list"],
+    "result": {"action": "list", "items": [], "dispute_rates": [], "orphans": []},
+    "code": 0,
+    "output": "Review queue:\nSource dispute rates: []\nUnattached decisions: []"
+  },
+  {
+    "id": "empty-json",
+    "arguments": ["review", "list", "--json"],
+    "result": {"action": "list", "items": [], "dispute_rates": [], "orphans": []},
+    "code": 0,
+    "output": "{\"action\": \"list\", \"dispute_rates\": [], \"items\": [], \"orphans\": []}"
+  },
+  {
+    "id": "replay-orphan-text",
+    "arguments": ["review", "replay"],
+    "result": {"action": "replayed", "report": [{"decision_id": "fixture-decision", "state": "orphan"}]},
+    "code": 0,
+    "output": "Review replay: [{\"decision_id\":\"fixture-decision\",\"state\":\"orphan\"}]"
+  },
+  {
+    "id": "auth-json",
+    "arguments": ["review", "list", "--json"],
+    "error": true,
+    "code": 1,
+    "output": "{\"error\": {\"code\": \"E_REVIEW_AUTH\"}}"
+  }
+]

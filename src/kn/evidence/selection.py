@@ -2,9 +2,11 @@
 
 `select` evaluates every claim recorded for one object, field and condition set together, with
 total orders over claim content, so arrival order never decides the value. Superseded claims are
-history; an outranking empty claim restores its predecessor and opens review unless the policy
-allows clearing. `previous` is the version the result changes, which explains the change as
-filled, replaced or corroborated; ignored and conflicting claims are explained individually.
+history, also when a claim of another subject supersedes them; an empty claim that outranks the
+current value, or retracts a value that still competes with it, restores its predecessor and opens
+review unless the policy allows clearing. `previous` is the version the result changes, which
+explains the change as filled, replaced or corroborated; ignored and conflicting claims are
+explained individually.
 """
 
 import json
@@ -109,13 +111,16 @@ def select(
     context: Context,
     knowledge_from: datetime,
     previous: Selection | None = None,
+    retired: Collection[str] = (),
 ) -> Selection | None:
     """The fact version the claims give from `knowledge_from`; None when none is eligible.
 
-    Pass every claim KN had recorded by then for the subject, including superseded ones.
+    Pass every claim KN had recorded by then for the subject, including superseded ones, and in
+    `retired` the keys of those that a claim of another subject superseded by then.
     """
     known = _known(subject, claims)
     superseded = {claim.supersedes for claim in known.values() if claim.supersedes}
+    superseded.update(retired)
     current = [known[key] for key in sorted(known) if key not in superseded]
     visible = [item for item in assess(current, policy, context) if item.exclusion != "rights"]
     plan = planned(visible, known, policy, context)
@@ -128,12 +133,12 @@ def select(
 
 
 def _known(subject: Subject, claims: Iterable[Claim]) -> dict[str, Claim]:
+    """Claims by key; an emptied claim states no value, so its condition set may differ."""
     known: dict[str, Claim] = {}
     for claim in claims:
-        if (claim.field_id, json_object(claim.conditions)) != (
-            subject.field_id,
-            subject.conditions_json,
-        ):
+        conditions = json_object(claim.conditions)
+        stated = claim.change_kind == "emptied" or conditions == subject.conditions_json
+        if claim.field_id != subject.field_id or not stated:
             raise ValueError("select claims of one field and condition set")
         known[claim.key] = claim
     return known

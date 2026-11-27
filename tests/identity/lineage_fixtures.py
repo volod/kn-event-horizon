@@ -12,7 +12,7 @@ from pathlib import Path
 from typing import Any
 
 from kn.evidence.lineage import TABLE_KEYS, Row
-from kn.evidence.projection import history, subjects
+from kn.evidence.projection import history, subjects, successors
 from kn.evidence.ranking import Audience, Context
 from kn.evidence.records import Record
 from kn.identity.events import event
@@ -199,11 +199,12 @@ def facts(journal: Journal, claims: MemoryClaims) -> list[Record]:
     """Fact histories of every survivor subject for the internal and partner audiences."""
     state = journal.state()
     grouped, _ = subjects(claims.claims.values(), state.resolve)
+    superseded = successors(claims.claims.values())
     rows: list[Record] = []
     for audience in (Audience(), PARTNER):
         context = Context(audience=audience, resolve=state.resolve)
         for subject, members in sorted(grouped.items(), key=lambda item: repr(item[0])):
-            for version in history(subject, members, policy(), context):
+            for version in history(subject, members, policy(), context, superseded):
                 rows.extend(version.records)
     return rows
 

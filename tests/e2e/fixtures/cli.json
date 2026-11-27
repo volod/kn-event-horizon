@@ -15,9 +15,9 @@
       "--help"
     ],
     "expected": {
-      "exit_code": 0,
+      "stdout": "usage: kn [-h] [--json]\n          {info,contract,db,identity,review,lineage,source,space,vocabulary}\n          ...\n\noptions:\n  -h, --help            show this help message and exit\n  --json                emit machine-readable JSON with stable keys\n\ncommands:\n  {info,contract,db,identity,review,lineage,source,space,vocabulary}\n    info                show the installed project identity\n    contract            validate or compile open data contracts\n    db                  apply or verify governed schema revisions\n    identity            inspect and review object identity\n    review              list and decide review items\n    lineage             trace an object or field to its records and decisions\n    source              list and validate sources\n    space               space-domain datasets\n    vocabulary          review and export controlled vocabularies\n",
       "stderr": "",
-      "stdout": "usage: kn [-h] [--json]\n          {info,contract,db,identity,lineage,source,space,vocabulary} ...\n\noptions:\n  -h, --help            show this help message and exit\n  --json                emit machine-readable JSON with stable keys\n\ncommands:\n  {info,contract,db,identity,lineage,source,space,vocabulary}\n    info                show the installed project identity\n    contract            validate or compile open data contracts\n    db                  apply or verify governed schema revisions\n    identity            inspect and review object identity\n    lineage             trace an object or field to its records and decisions\n    source              list and validate sources\n    space               space-domain datasets\n    vocabulary          review and export controlled vocabularies\n"
+      "exit_code": 0
     },
     "id": "root-help"
   },
@@ -129,7 +129,7 @@
     ],
     "expected": {
       "exit_code": 0,
-      "stderr": "Contract kn.system.governance 1.0.0 d11eb70b855741d6901677151d2b8bb048cf41b0aa074feae24f0db370c51d06\nContract kn.system.source_catalogue 1.0.0 0ce10ede802cc012d5d122c7d94c03769f20baef4860d7eb1163bbc2b0a3df06\nContract kn.space.satcom 1.0.0 498e717814a2eb29e44756f256fd3dab4277b069812f4b54e2bb42a496d2ec10\nContract kn.core.semantic 1.0.0 5dfdbc18f4452ba7dca18fc5e11738d7b27a75593b38664e3b6c920aab83a760\nContract kn.core.human_verification 1.0.0 a89d36f9d1f5642c00c1ff5aaee9ce868b28ee51141c6dbc1eb6c226461686f5\nContract kn.core.identity 1.0.0 14de4eab9db6e5d06d712caf4a260d9da3e96a97db3d3fdeb39538554534d18c\nContract kn.core.evidence 1.0.0 59cc497a134eca6ae6d877c7d6cbbcb2ad93d93f6de1ff44e6a112a2fdac4a80\n",
+      "stderr": "Contract kn.system.governance 1.0.0 e7000add899f2410545fcecfce284780101ecde63c854c3a17a128ffcb7f008e\nContract kn.system.source_catalogue 1.0.0 2c6fe6fe1f0097fb26bc10bc3989f80a6e9495b67e6c7ef9082e403ce080c451\nContract kn.space.satcom 1.0.0 da2abfeadfbdca862c6144358576422fa5b48dcf078aad6a28478f2a65187246\nContract kn.core.semantic 1.0.0 0fb9971b4b55742d2c3855f206bc7a8e25de93ea6beb0ba9be80f6c17e566944\nContract kn.core.human_verification 1.0.0 5fce8e3b635a0bd6a49f2e31f4e20905a541ed7696909e464922628d6be73e35\nContract kn.core.identity 1.0.0 30574ce33df4be587e272e68d4644daa102e5df21ccc80bfc399980f2b2144d8\nContract kn.core.evidence 1.0.0 539f354352f7e10de470acd85b9f5c94a26ce11a655144fba7e58fccf7eaae15\n",
       "stdout": ""
     },
     "id": "contract-lint"
@@ -142,7 +142,7 @@
     ],
     "expected": {
       "exit_code": 0,
-      "stderr": "Contract kn.system.governance 1.0.0 d11eb70b855741d6901677151d2b8bb048cf41b0aa074feae24f0db370c51d06\nContract kn.system.source_catalogue 1.0.0 0ce10ede802cc012d5d122c7d94c03769f20baef4860d7eb1163bbc2b0a3df06\nContract kn.space.satcom 1.0.0 498e717814a2eb29e44756f256fd3dab4277b069812f4b54e2bb42a496d2ec10\nContract kn.core.semantic 1.0.0 5dfdbc18f4452ba7dca18fc5e11738d7b27a75593b38664e3b6c920aab83a760\nContract kn.core.human_verification 1.0.0 a89d36f9d1f5642c00c1ff5aaee9ce868b28ee51141c6dbc1eb6c226461686f5\nContract kn.core.identity 1.0.0 14de4eab9db6e5d06d712caf4a260d9da3e96a97db3d3fdeb39538554534d18c\nContract kn.core.evidence 1.0.0 59cc497a134eca6ae6d877c7d6cbbcb2ad93d93f6de1ff44e6a112a2fdac4a80\n",
+      "stderr": "Contract kn.system.governance 1.0.0 e7000add899f2410545fcecfce284780101ecde63c854c3a17a128ffcb7f008e\nContract kn.system.source_catalogue 1.0.0 2c6fe6fe1f0097fb26bc10bc3989f80a6e9495b67e6c7ef9082e403ce080c451\nContract kn.space.satcom 1.0.0 da2abfeadfbdca862c6144358576422fa5b48dcf078aad6a28478f2a65187246\nContract kn.core.semantic 1.0.0 0fb9971b4b55742d2c3855f206bc7a8e25de93ea6beb0ba9be80f6c17e566944\nContract kn.core.human_verification 1.0.0 5fce8e3b635a0bd6a49f2e31f4e20905a541ed7696909e464922628d6be73e35\nContract kn.core.identity 1.0.0 30574ce33df4be587e272e68d4644daa102e5df21ccc80bfc399980f2b2144d8\nContract kn.core.evidence 1.0.0 539f354352f7e10de470acd85b9f5c94a26ce11a655144fba7e58fccf7eaae15\n",
       "stdout": ""
     },
     "id": "contract-check"
@@ -165,9 +165,9 @@
       "unknown"
     ],
     "expected": {
-      "exit_code": 2,
+      "stdout": "usage: kn [-h] [--json]\n          {info,contract,db,identity,review,lineage,source,space,vocabulary}\n          ...\n",
       "stderr": "E_ARGUMENTS: invalid arguments for kn; use --help.\n",
-      "stdout": "usage: kn [-h] [--json]\n          {info,contract,db,identity,lineage,source,space,vocabulary} ...\n"
+      "exit_code": 2
     },
     "id": "invalid-command"
   },
@@ -176,7 +176,7 @@
     "expected": {
       "exit_code": 2,
       "stderr": "E_ARGUMENTS: invalid arguments for kn; use --help.\n",
-      "stdout": "usage: kn [-h] [--json]\n          {info,contract,db,identity,lineage,source,space,vocabulary} ...\n"
+      "stdout": "usage: kn [-h] [--json]\n          {info,contract,db,identity,review,lineage,source,space,vocabulary} ...\n"
     },
     "id": "missing-command"
   },
@@ -372,5 +372,30 @@
       "stdout": "usage: kn identity reclassify [-h] --request-id REQUEST_ID --performed-at\n                              PERFORMED_AT --reason REASON --evidence EVIDENCE\n                              --anchor-source ANCHOR_SOURCE --anchor-key\n                              ANCHOR_KEY\n                              KN_ID entity_class\n\nretire the object and mint a successor of a different class\n\narguments:\n  KN_ID                 canonical kn: UUIDv7\n  entity_class          entity class of the new successor\n\noptions:\n  -h, --help            show this help message and exit\n  --request-id REQUEST_ID\n                        unique review request ID, reused on retry\n  --performed-at PERFORMED_AT\n                        review time in ISO 8601 with an explicit UTC offset\n  --reason REASON       reason for the identity change\n  --evidence EVIDENCE   reference to supporting evidence\n  --anchor-source ANCHOR_SOURCE\n                        source of the new anchoring record\n  --anchor-key ANCHOR_KEY\n                        native key of the new anchoring record\n"
     },
     "id": "identity-reclassify-help"
+  },
+  {
+    "id": "review-help",
+    "arguments": [
+      "review",
+      "--help"
+    ],
+    "expected": {
+      "stdout": "usage: kn review [-h] {list,decide,replay} ...\n\narguments:\n  {list,decide,replay}\n\noptions:\n  -h, --help            show this help message and exit\n",
+      "stderr": "",
+      "exit_code": 0
+    }
+  },
+  {
+    "id": "review-decide-help",
+    "arguments": [
+      "review",
+      "decide",
+      "--help"
+    ],
+    "expected": {
+      "stdout": "usage: kn review decide [-h] [--data-dir DATA_DIR] [--domain DOMAIN]\n                        (--item ITEM_ID | --target TARGET) [--select SELECTED]\n                        --outcome {accept,reject,revoke,supersede}\n                        --request-id REQUEST_ID --performed-at PERFORMED_AT\n                        --reason REASON --evidence EVIDENCE\n                        [--predecessor PREDECESSOR]\n\noptions:\n  -h, --help            show this help message and exit\n  --data-dir DATA_DIR\n  --domain DOMAIN\n  --item ITEM_ID\n  --target TARGET\n  --select SELECTED\n  --outcome {accept,reject,revoke,supersede}\n  --request-id REQUEST_ID\n  --performed-at PERFORMED_AT\n  --reason REASON\n  --evidence EVIDENCE\n  --predecessor PREDECESSOR\n",
+      "stderr": "",
+      "exit_code": 0
+    }
   }
 ]

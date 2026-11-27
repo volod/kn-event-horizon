@@ -30,6 +30,20 @@
               "unique": false
             }
           ]
+        },
+        {
+          "property": "kn.humanVerification",
+          "value": {
+            "strategy": "external",
+            "resolver": "contract-v1",
+            "recordFields": [
+              "fixture.observations.fixture_observations.observation_id",
+              "fixture.observations.fixture_observations.observed_at",
+              "fixture.observations.fixture_observations.altitude_km"
+            ],
+            "fieldContexts": {},
+            "defaultFieldContext": "record"
+          }
         }
       ],
       "properties": [

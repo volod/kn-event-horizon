@@ -473,6 +473,34 @@
     "Match": {
       "additionalProperties": false,
       "properties": {
+        "review_observation": {
+          "anyOf": [
+            {
+              "minLength": 1,
+              "pattern": "\\S",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Review Observation"
+        },
+        "review_profile": {
+          "anyOf": [
+            {
+              "minLength": 1,
+              "pattern": "\\S",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Review Profile"
+        },
         "kind": {
           "const": "match_recorded",
           "default": "match_recorded",

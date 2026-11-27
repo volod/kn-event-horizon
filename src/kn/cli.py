@@ -10,7 +10,7 @@ from collections.abc import Sequence
 from dataclasses import asdict
 from functools import partial
 from pathlib import Path
-from typing import cast
+from typing import Any, cast
 
 from jsonschema import ValidationError
 from sqlalchemy.exc import SQLAlchemyError
@@ -35,6 +35,9 @@ from kn.operations import (
     source_list_operation,
 )
 from kn.quality.project_root import discover_project_root
+from kn.review import operator as review_operator
+from kn.review.model import Target
+from kn.review.queue_model import domain_name
 from kn.semantic.seeds import import_proposals
 from kn.semantic.skos import export_scheme
 from kn.sources.config import source_validate_operation
@@ -68,6 +71,8 @@ def build_parser(
     database.add_argument("action", choices=("upgrade", "verify", "rebuild"))
     identity = subcommands.add_parser("identity", help=tr.text("cli.identity_help"))
     _identity_arguments(identity, parser_class, tr)
+    review = subcommands.add_parser("review", help=tr.text("cli.review_help"))
+    _review_arguments(review, parser_class, tr)
     lineage = subcommands.add_parser("lineage", help=tr.text("cli.lineage_help"))
     lineage.add_argument(
         "reference", metavar="REFERENCE", help=tr.text("cli.lineage_reference_help")
@@ -174,6 +179,34 @@ def _identity_arguments(
             )
 
 
+def _review_arguments(
+    parser: OperatorParser, parser_class: type[OperatorParser], tr: Translator
+) -> None:
+    actions = parser.add_subparsers(dest="action", required=True, parser_class=parser_class)
+    for name in ("list", "decide", "replay"):
+        command = actions.add_parser(name)
+        command.add_argument("--data-dir", type=Path)
+        command.add_argument("--domain", type=domain_name, default="core")
+        if name == "list":
+            command.add_argument("--overrides", action="store_true")
+            command.add_argument(
+                "--target",
+                type=Path,
+                help=tr.text("cli.review_target_help"),
+            )
+        if name == "decide":
+            targets = command.add_mutually_exclusive_group(required=True)
+            targets.add_argument("--item", dest="item_id")
+            targets.add_argument("--target", type=Path)
+            command.add_argument("--select", dest="selected")
+            command.add_argument(
+                "--outcome", choices=("accept", "reject", "revoke", "supersede"), required=True
+            )
+            for option in ("request-id", "performed-at", "reason", "evidence"):
+                command.add_argument("--" + option, required=True)
+            command.add_argument("--predecessor", action="append", default=[])
+
+
 def main(argv: Sequence[str] | None = None) -> int:
     """Run the selected command with English text or machine-readable JSON."""
     logging.basicConfig(level=logging.INFO, format="%(message)s")
@@ -190,7 +223,13 @@ def main(argv: Sequence[str] | None = None) -> int:
         _report_error(translator.text("cli.rebuild_refused"), "E_INPUT", json_output)
         return 1
     except operator.IdentityAuthorizationError:
-        _report_error(translator.text("cli.identity_auth_error"), "E_IDENTITY_AUTH", json_output)
+        code = "E_REVIEW_AUTH" if args.command == "review" else "E_IDENTITY_AUTH"
+        message = (
+            translator.text("cli.review_auth_error")
+            if args.command == "review"
+            else translator.text("cli.identity_auth_error")
+        )
+        _report_error(message, code, json_output)
         return 1
     except CrawlerConfigError as error:
         diagnostic = error.diagnostic()
@@ -226,6 +265,8 @@ def _report_error(
 
 
 def _run(args: argparse.Namespace, translator: Translator) -> dict[str, object]:
+    if args.command == "review":
+        return _review(args, translator)
     if args.command == "identity":
         return _identity(args, translator)
     if args.command == "lineage":
@@ -249,6 +290,33 @@ def _run(args: argparse.Namespace, translator: Translator) -> dict[str, object]:
             return export_scheme(args.scheme, args.data_dir)
         return import_proposals(discover_project_root(), args.data_dir, check=args.check)
     return satcom_operation(args.action, args.source, args.data_dir)
+
+
+def _review(args: argparse.Namespace, translator: Translator) -> dict[str, object]:
+    directory = _journal(args).data_dir
+    options: dict[str, Any] = {}
+    if args.action == "list":
+        options["overrides"] = args.overrides
+        options["query"] = args.target.read_text(encoding="ascii") if args.target else None
+    if args.action == "decide":
+        if args.selected is not None and args.item_id is None:
+            raise ValueError("selection requires a queue item")
+        options.update(
+            item_id=args.item_id,
+            selected=args.selected,
+            target=Target.model_validate_json(args.target.read_text(encoding="ascii"))
+            if args.target
+            else None,
+            details={
+                "request_id": args.request_id,
+                "outcome": args.outcome,
+                "performed_at": args.performed_at,
+                "reason": args.reason,
+                "evidence": args.evidence,
+                "predecessors": args.predecessor,
+            },
+        )
+    return review_operator.operation(translator, directory, args.domain, args.action, **options)
 
 
 def _journal(args: argparse.Namespace) -> Journal:

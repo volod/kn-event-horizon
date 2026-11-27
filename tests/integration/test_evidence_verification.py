@@ -13,9 +13,11 @@ from kn.evidence.verification import target
 from kn.review import store
 from kn.review.journal import Journal
 from kn.review.model import Request, Stamp
+from kn.review.projection import ReadRights, read
 from kn.review.targets import ContractResolver, declared_coverage
 from tests.evidence.fixtures import changed_mass, claim
 from tests.integration.harness import IntegrationDatabase, ScratchSchemas
+from tests.integration.review_fixtures import OPEN, approve
 from tests.review.test_protocol import NOW, reviewer
 
 
@@ -88,3 +90,43 @@ def test_a_target_that_does_not_match_the_stored_claim_is_stale(
         )
         with pytest.raises(ValueError, match="stale"):
             resolver.resolve(connection, target(original))
+
+
+@pytest.mark.parametrize(
+    "changed",
+    [
+        {"original_unit": "g"},
+        {"conditions_json": '{"quality":"fixture"}'},
+        {"value_number": 2},
+    ],
+)
+def test_a_numeric_field_stamp_requires_the_same_value_unit_and_conditions(
+    verification_db: tuple[sa.Engine, dict[str, sa.Table], ContractResolver],
+    tmp_path: Path,
+    changed: dict[str, object],
+) -> None:
+    engine, tables, resolver = verification_db
+    original = claim()
+    dataset = resolver.dataset("kn.core.evidence", "claims")
+    field = "evidence.claims.value_number"
+    journal = Journal(tmp_path)
+    with engine.begin() as connection:
+        record(connection, [original], tables)
+        key = dataset.key(original.row())
+        row = dataset.fetch(connection, key)
+        assert row is not None
+        item = dataset.target(row, "factual", field)
+        decision = approve(connection, journal, resolver, item)
+        before = read(connection, dataset, key, "factual", rights=OPEN)
+        assert before is not None
+        assert before.fields[field].human_verification_decision_id == decision.decision_id
+        rights = ReadRights(
+            lambda _, _row, field: field != "evidence.claims.original_unit", OPEN.decision
+        )
+        restricted = read(connection, dataset, key, "factual", rights=rights)
+        assert restricted is not None and restricted.fields[field] == Stamp()
+        assert "value_number" in restricted.values and "original_unit" not in restricted.values
+        connection.execute(tables["claims"].update().values(**changed))
+        result = read(connection, dataset, key, "factual", rights=OPEN)
+        assert result is not None and result.fields[field] == Stamp()
+        assert store.projection(connection, item).state == "accepted"

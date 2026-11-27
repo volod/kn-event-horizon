@@ -6,6 +6,10 @@ from kn.i18n.lineage_output import lineage_result
 
 
 def render_result(translator: Translator, command: str, result: dict[str, object]) -> str:
+    if command == "review":
+        from kn.i18n.review_output import review_result
+
+        return review_result(result)
     if command == "identity":
         return identity_result(translator, result)
     if command == "lineage":
@@ -32,6 +36,10 @@ def render_result(translator: Translator, command: str, result: dict[str, object
         sources = result["sources"]
         assert isinstance(sources, list)
         return _render_sources(translator, sources)
+    return _artifact_result(translator, result)
+
+
+def _artifact_result(translator: Translator, result: dict[str, object]) -> str:
     if "tables" in result:
         tables = result["tables"]
         assert isinstance(tables, dict)

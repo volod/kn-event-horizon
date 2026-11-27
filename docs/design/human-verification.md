@@ -1,8 +1,8 @@
 # Human Verification Metadata
 
 This is a required extension of the [evidence model](spec.md#human-verification-metadata).
-The [shared decision protocol](../impl/current/evidence-model.md) is implemented; dataset-wide
-coverage and read projections remain planned. The operator problem is to distinguish data that a
+The [shared decision protocol and read projections](../impl/current/evidence-model.md) cover
+the deployed registry. The operator problem is to distinguish data that a
 person checked from data merely imported, corroborated, or accepted by automated validation, while
 leaving unchecked data usable. Future verification workflows consume this metadata instead of
 inventing a new

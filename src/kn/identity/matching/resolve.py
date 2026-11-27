@@ -5,6 +5,7 @@ from dataclasses import dataclass
 
 from kn.contracts.model import canonical
 from kn.identity.matching.comparators import AGREEING_OUTCOMES, DISAGREE
+from kn.identity.matching.drift import guard
 from kn.identity.matching.observe import Observation
 from kn.identity.matching.registry import (
     anchor,
@@ -152,7 +153,7 @@ def resolve(state: State, profile: Profile, incoming: Observation) -> Match:
     """Resolve at the observation instant. Candidate selection never changes registry state."""
     result = _exact(state, incoming, profile.entity_class) or _scored(state, profile, incoming)
     profile_digest = profile.digest
-    return Match(
+    match = Match(
         record=incoming.record,
         profile_digest=profile_digest,
         profile_version=profile.version,
@@ -166,3 +167,5 @@ def resolve(state: State, profile: Profile, incoming: Observation) -> Match:
             prior=profile.prior,
         ),
     )
+
+    return guard(state, profile, incoming, match)

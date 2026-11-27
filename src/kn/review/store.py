@@ -1,6 +1,6 @@
 """Transactional PostgreSQL projection of trusted write-ahead human decisions."""
 
-from collections.abc import Callable
+from collections.abc import Callable, Collection
 from datetime import datetime
 from functools import cache
 
@@ -15,17 +15,20 @@ from kn.contracts.sqlalchemy import metadata
 from kn.review.journal import Journal
 from kn.review.model import Decision, Projection, Request, Target, digest
 from kn.review.protocol import Reviewer, decide, project
-from kn.review.targets import TargetResolver
+from kn.review.reports import ReplayEntry, ReplayReport, ReplayState
+from kn.review.targets import TargetResolver, TargetUnavailable
 
 # Serialize appends through the SQL boundary before taking the journal lock. Global locking
 # also makes request IDs unique across targets; caller transactions must stay short.
 DECISION_LOCK = 0x4B4E48564C4F47
+DECISION_CONTRACT = "kn.core.human_verification"
+DECISION_DATASET = "human_verification_decisions"
 
 
 @cache
 def decision_table() -> sa.Table:
     contract = load_contract(RESOURCES / "evidence" / "1.0.0.json")
-    return metadata(contract).tables["evidence.human_verification_decisions"]
+    return metadata(contract).tables[f"{contract.schema}.{DECISION_DATASET}"]
 
 
 def lock(connection: Connection) -> None:
@@ -83,13 +86,87 @@ def submit(
 def replay_target(
     connection: Connection, journal: Journal, resolver: TargetResolver, target: Target
 ) -> Projection:
-    """Replay one restored exact target. Coverage-wide pending/stale reports come later."""
+    """Replay one restored exact target or refuse the write."""
     lock(connection)
     with connection.begin_nested():
         resolver.resolve(connection, target)
         with journal.locked() as log:
             _apply(connection, log.events, target)
         return projection(connection, target)
+
+
+def replay(
+    connection: Connection,
+    journal: Journal,
+    resolver: TargetResolver,
+    *,
+    complete: bool = False,
+    contract_id: str | None = None,
+    restored_ids: frozenset[str] = frozenset(),
+) -> ReplayReport:
+    """Reapply the trusted journal atomically; leave unresolved events in durable history."""
+    lock(connection)
+    with connection.begin_nested():
+        groups: dict[Target, dict[str, Decision]] = {}
+        for event in journal.read():
+            if contract_id is None or event.target.contract_id in {contract_id, DECISION_CONTRACT}:
+                groups.setdefault(event.target, {})[event.decision_id] = event
+        report = {}
+        audit_targets = {}
+        for target, events in groups.items():
+            if (target.contract_id, target.dataset) == (DECISION_CONTRACT, DECISION_DATASET):
+                audit_targets[target] = events
+            else:
+                report[target.target_id] = _restore_target(
+                    connection, resolver, target, events, complete, restored_ids
+                )
+        report.update(_restore_audit_targets(connection, resolver, audit_targets, complete))
+        return tuple(report[key] for key in sorted(report))
+
+
+def _restore_audit_targets(
+    connection: Connection,
+    resolver: TargetResolver,
+    groups: dict[Target, dict[str, Decision]],
+    complete: bool,
+) -> dict[str, ReplayEntry]:
+    # Audit reviews can depend on other decisions restored in this pass or a prior delivery.
+    report = {}
+    while groups:
+        unresolved = {}
+        for target, events in groups.items():
+            entry = _restore_target(connection, resolver, target, events, complete, frozenset())
+            report[entry.target_id] = entry
+            if entry.state in {"pending", "orphan"}:
+                unresolved[target] = events
+        if len(unresolved) == len(groups):
+            break
+        groups = unresolved
+    return report
+
+
+def _restore_target(
+    connection: Connection,
+    resolver: TargetResolver,
+    target: Target,
+    events: dict[str, Decision],
+    complete: bool,
+    restored_ids: frozenset[str],
+) -> ReplayEntry:
+    state: ReplayState = "applied"
+    if not events.keys() <= restored_ids:
+        try:
+            resolver.resolve(connection, target)
+        except TargetUnavailable as unavailable:
+            state = (
+                ("orphan" if complete else "pending")
+                if unavailable.state == "missing"
+                else unavailable.state
+            )
+        else:
+            for event in events.values():
+                _insert(connection, event)
+    return ReplayEntry(target.target_id, target.contract_id, target.dataset, state)
 
 
 def _apply(connection: Connection, events: tuple[Decision, ...], target: Target) -> None:
@@ -137,10 +214,22 @@ def _insert(connection: Connection, event: Decision) -> None:
         raise ValueError("stored decision differs from durable journal")
 
 
-def projection(connection: Connection, target: Target) -> Projection:
-    """Historical projection for an exact version; callers resolve current versions first."""
+def history(connection: Connection, target_ids: Collection[str]) -> dict[str, list[Decision]]:
+    """Trusted exact-target history, read in one query for a row's review scopes."""
+    if not target_ids:
+        return {}
     table = decision_table()
     documents: ScalarResult[str] = connection.scalars(
-        sa.select(table.c.event_json).where(table.c.target_id == target.target_id)
+        sa.select(table.c.event_json).where(table.c.target_id.in_(target_ids))
     )
-    return project((Decision.model_validate_json(document) for document in documents), target)
+    groups: dict[str, list[Decision]] = {}
+    for document in documents:
+        event = Decision.model_validate_json(document)
+        groups.setdefault(event.target.target_id, []).append(event)
+    return groups
+
+
+def projection(connection: Connection, target: Target) -> Projection:
+    """Trusted historical lookup for an exact version, without audience filtering."""
+    key = target.target_id
+    return project(history(connection, (key,)).get(key, ()), target)

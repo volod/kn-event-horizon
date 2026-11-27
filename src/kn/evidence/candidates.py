@@ -1,7 +1,9 @@
 """Candidate values: claims that agree within tolerance, ranked so repetition never adds rank.
 
 Every order here is total over claim content and ends in the claim key, so the input order of
-claims never changes a result. A candidate ranks by its best supporting claim.
+claims never changes a result. A candidate ranks by its best supporting claim. Its claims agree
+pairwise: agreement within a tolerance is not transitive, so two claims that differ by more than
+the tolerance never support one candidate, whichever claims lie between them.
 """
 
 from collections.abc import Iterable
@@ -73,21 +75,24 @@ def newest(time: datetime | None) -> tuple[bool, timedelta]:
 
 
 def order(item: Assessed, policy: UpdatePolicy) -> tuple[object, ...]:
+    """Claim order within the mode; at equal strength a reviewed claim represents its value."""
     recency = newest(item.criteria.data_time)
+    unreviewed = not item.reviewed
     if policy.mode == "latest_observed":
-        return (recency, strength(item, policy), item.key)
-    return (strength(item, policy), recency, item.key)
+        return (recency, strength(item, policy), unreviewed, item.key)
+    return (strength(item, policy), unreviewed, recency, item.key)
 
 
 def group(items: Iterable[Assessed], policy: UpdatePolicy) -> list[Candidate]:
-    """Candidates in rank order; each claim joins the strongest candidate it agrees with."""
+    """Candidates in rank order; a claim joins the strongest candidate it agrees with entirely."""
     members: list[list[Assessed]] = []
+    tolerance = policy.value_tolerance
     for item in sorted(items, key=lambda each: order(each, policy)):
         target = next(
             (
                 claims
                 for claims in members
-                if agree(claims[0].value, item.value, policy.value_tolerance)
+                if all(agree(claim.value, item.value, tolerance) for claim in claims)
             ),
             None,
         )

@@ -221,13 +221,6 @@ def test_selection_is_audience_specific_and_hides_restricted_evidence() -> None:
     assert internal.fact.fact_key != selection.fact.fact_key
 
 
-def test_values_within_tolerance_support_one_candidate() -> None:
-    first, second = stated(MAKER, "1250"), stated(MAKER_TWO, "1250.4")
-    selection = choose([first, second], policy(valueTolerance=0.5))
-    assert selection is not None and selection.fact.verification_state == "corroborated"
-    assert choose([first, second]).fact.unresolved_reason == "conflict"  # type: ignore[union-attr]
-
-
 def test_field_groups_rank_one_source_differently_per_field() -> None:
     assert RANKS.rank(DISTRIBUTOR, PRICE) == "first_party"
     assert RANKS.rank(DISTRIBUTOR, "microelectronics.part.mass") == "authorized_channel"

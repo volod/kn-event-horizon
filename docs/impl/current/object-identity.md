@@ -103,13 +103,13 @@ view for other read-only callers. `rows` implements `kn.evidence.lineage.Evidenc
 ## Storage and wire contracts
 
 Registered ODCS contract `kn.core.identity` lives in
-`src/kn/contracts/resources/identity/1.0.0.json`. It adds ten tables and 71 stable fields to the
+`src/kn/contracts/resources/identity/1.0.0.json`. It adds ten tables and 72 stable fields to the
 editable `1.0.0` development baseline. `make contract-compile` derives the SQLAlchemy/PostgreSQL,
 Pydantic, wire and engine artifacts under `generated/contracts/kn.core.identity/`.
 
 | Table | Content |
 | --- | --- |
-| `objects` | KN UUIDv7, entity class, lifecycle state, anchoring source record, mint event and current single redirect |
+| `objects` | KN UUIDv7, entity class, lifecycle state, anchoring source record, mint event, revision event and current single redirect |
 | `identifiers` | Namespace/native value, issuer, authority level, half-open validity and evidence |
 | `attributes` | Original and normalized values, field ID, normalizer, profile digest and evidence |
 | `source_records` | Source-qualified key digest, original source/key and last-seen instant |
@@ -135,9 +135,11 @@ involving that object as a candidate or mint target.
 Objects and source records declare `kn.identity`; the local `identity.anchor-v1` reference describes
 exact anchor uniqueness, without supplying a class's scored profile. Every table declares shared
 `kn.humanVerification` coverage. External version-bound review uses the shared resolver; lifecycle
-events declare decision-log coverage. No review timestamp is fabricated by replay, and a lifecycle
-`decision_ref` does not itself prove a human acceptance. Current verification joins and invalidation
-remain owned by `human-verification-projections`.
+events declare decision-log coverage. The current `objects.revision_event` comes from durable
+history. Retire, restore, merge, split and reclassify events revise affected objects, including
+survivors, successors and redirect ancestors when applicable. The shared
+[verification read](evidence-model.md#current-verification-reads) binds reviews to that revision.
+Lifecycle workflow approvals use their own purpose and versions.
 
 ## Match resolution
 
@@ -187,8 +189,9 @@ nondiscriminating evidence alone.
 
 A receipt returns the match digest, stored match and bound KN ID, with an empty KN ID for
 review. A retried observation returns its original receipt, whose KN ID can since have been
-merged or split; resolve it before storing it outside KN. Review decisions are durable match rows
-available to `review-queue-cli` when that workflow ships. For verification,
+merged or split; resolve it before storing it outside KN. Review candidates are durable match rows
+consumed by the [review queue](evidence-model.md#operator-review-queue). New review matches retain
+the original observation and profile for accepted link/key/attribute registration. For verification,
 `kn.identity.matching.scoring.verify_match(profile, match)` checks the profile digest and
 version, reruns the comparators on the recorded inputs, and reproduces the score and probability.
 Exact shortcuts record the matched identifier or source key, with a weight and score of zero and
@@ -404,8 +407,9 @@ commands and measurements. `make ci-local` also includes the local SKOS gate.
 ## Known limitations
 
 These are accepted or scheduled findings of the
-[identity resolution audit](../records/0042-object-identity-identity-resolution-implementation-audit.md#findings)
-and the [object identity audit](../records/0049-object-identity-object-identity-implementation-audit.md#findings).
+[identity resolution audit](../records/0042-object-identity-identity-resolution-implementation-audit.md#findings),
+the [object identity audit](../records/0049-object-identity-object-identity-implementation-audit.md#findings)
+and the [evidence model audit](../records/0053-evidence-model-evidence-model-implementation-audit.md#findings).
 
 - A new `Journal` instance or a write by another instance requires full file validation. The
   first scored request for each field and normalizer builds its blocking index. Broad blocking
@@ -436,13 +440,18 @@ and the [object identity audit](../records/0049-object-identity-object-identity-
 - Resolution is sequential. Of two similar records without a shared key, the first mints and the
   second opens review, so arrival order decides which one waits. A record in review registers no
   identifiers or attributes, and a later record with the same unregistered key can mint. Accepted
-  matches will register them through `review-queue-cli`. Reopen this if reviewed duplicates grow
+  matches register them through the [review queue](evidence-model.md#operator-review-queue).
+  Reopen this if reviewed duplicates grow
   with source count.
 - An alias that names a retired object is ignored, and the record resolves as if it carried no
   alias. Reopen this when a counterpart import returns retired KN IDs.
 - A weak-key fragment has no link of its own, so a split cannot assign the claims it made before
   the split. Lineage reports them as `claim_successor_missing`, and the fact projection leaves
   them unattributed until `fragment-claims-follow-splits`.
+- A statement carries no event, published or valid time, so a tracked claim has none, and a
+  delivery states each field once. Two revisions kept as separate records of one source therefore
+  conflict under `priority` instead of the newer replacing the older, and a record can claim only
+  one item of an `accumulate` field. `tracked-claim-times-and-sets` adds both.
 
 Acceptance evidence is retained in
 [record 0033](../records/0033-object-identity-identity-registry-contracts.md),

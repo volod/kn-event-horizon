@@ -2,7 +2,7 @@
 
 Version: 1.0.0
 
-Digest: `14de4eab9db6e5d06d712caf4a260d9da3e96a97db3d3fdeb39538554534d18c`
+Digest: `30574ce33df4be587e272e68d4644daa102e5df21ccc80bfc399980f2b2144d8`
 
 Storage schema: `identity`
 
@@ -109,6 +109,7 @@ Disposable projection of identity events: objects.
 | anchor_record_id | identity.objects.anchor_record_id | string | True | False | objects: anchor record id. |
 | mint_event | identity.objects.mint_event | string | True | False | objects: mint event. |
 | current_redirect | identity.objects.current_redirect | string | False | False | objects: current redirect. |
+| revision_event | identity.objects.revision_event | string | True | False | Lifecycle event defining the current object revision. |
 
 ## redirects
 

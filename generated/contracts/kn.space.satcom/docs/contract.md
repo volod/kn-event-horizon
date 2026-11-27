@@ -2,7 +2,7 @@
 
 Version: 1.0.0
 
-Digest: `498e717814a2eb29e44756f256fd3dab4277b069812f4b54e2bb42a496d2ec10`
+Digest: `da2abfeadfbdca862c6144358576422fa5b48dcf078aad6a28478f2a65187246`
 
 Storage schema: `space`
 

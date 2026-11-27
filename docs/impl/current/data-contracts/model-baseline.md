@@ -2,8 +2,8 @@
 
 `make model-baseline` provides combined-registry fixture validation for governance, the source
 catalogue, SATCOM, semantic, human verification, identity and evidence contracts. These define 73
-tables and 706 fields. The full checkpoint in the [plan](../../plan.md) also requires dataset-wide
-verification, supply, ingestion run, exchange and canonical domain fixtures. Each delivery group
+tables and 707 fields. The full checkpoint in the [plan](../../plan.md) also requires supply,
+ingestion run, exchange and canonical domain fixtures. Each delivery group
 extends the subset check. The integrated result and its audit gate release approval.
 
 ## Run and evidence
@@ -55,8 +55,8 @@ authored expected data. The table snapshot automatically includes every register
 empty-table and fixture-owner checks prevent silent coverage gaps.
 
 The owning model tasks must first establish shared keys, measurements, seed references, coverage,
-permissions, canonical/source ownership and replay semantics. Their cross-owner checks, durable
-all-dataset human decision replay, interchange evolution and explicit shared-database
+permissions, canonical/source ownership and replay semantics. Their cross-owner checks,
+interchange evolution and explicit shared-database
 recovery/backfill evidence remain required before the full checkpoint can leave the plan. Existing
 specialized
 semantic/SATCOM review fields are not universal human verification stamps.
@@ -66,11 +66,13 @@ original
 work contract, the marker-verification regression and run evidence. Generated contract artifacts
 are refreshed when a prerequisite registers a model.
 
-The [shared review protocol](../evidence-model.md) extends this subset with a durable, exact-version
-review of a semantic label identified by namespace and locale. The first rebuild records the
-fixture decision; the second reuses the same journal and replays the original event. The test
-checks the acceptance stamp as well as the stored event and complete marker snapshots. This
-fixture coverage does not supply dataset-wide registration and read projections.
+The [shared review projection](../evidence-model.md#current-verification-reads) is checked for
+one representative row and every field of each table. The fixture writes decisions for semantic
+labels, a mapping, a SATCOM terminal field and a decision-log row before the two measured rebuilds.
+Each rebuild restores the original events and stamps from the same journal after the required
+inputs arrive. The test retains intermediate and final replay reports in the fixture directory's
+`human-verification/` subdirectory. Alternate locales, an edited label and a new SATCOM snapshot
+expose null stamps. The source fixture and archived files are compared byte for byte.
 
 The [identity fixture](../object-identity.md) seeds the durable journal before either rebuild.
 Identity replay precedes SATCOM import; all lifecycle events, record versions, match features,

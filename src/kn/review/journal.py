@@ -45,8 +45,12 @@ class LockedJournal:
 
 
 class Journal:
-    def __init__(self, data_dir: Path) -> None:
-        self.path = data_dir / "decisions" / JOURNAL_NAME
+    def __init__(self, data_dir: Path, domain: str | None = None) -> None:
+        from kn.review.queue_model import domain_name
+
+        self.data_dir = data_dir
+        root = data_dir / "decisions"
+        self.path = root / domain_name(domain) / JOURNAL_NAME if domain else root / JOURNAL_NAME
 
     @contextmanager
     def locked(self) -> Iterator[LockedJournal]:
@@ -62,6 +66,8 @@ class Journal:
             _sync_directory(directory)
             # A newly created decisions/ directory must itself survive a crash as well.
             _sync_directory(directory.parent)
+            if directory.parent != self.data_dir:
+                _sync_directory(self.data_dir)
             yield LockedJournal(stream)
 
     def read(self) -> tuple[Decision, ...]:

@@ -35,7 +35,8 @@
               "identity.lifecycle_events.decision_ref",
               "identity.lifecycle_events.event_json"
             ],
-            "fieldContexts": {}
+            "fieldContexts": {},
+            "defaultFieldContext": "record"
           }
         },
         {
@@ -233,9 +234,11 @@
               "identity.objects.state",
               "identity.objects.anchor_record_id",
               "identity.objects.mint_event",
-              "identity.objects.current_redirect"
+              "identity.objects.current_redirect",
+              "identity.objects.revision_event"
             ],
-            "fieldContexts": {}
+            "fieldContexts": {},
+            "defaultFieldContext": "record"
           }
         },
         {
@@ -402,6 +405,31 @@
               }
             }
           ]
+        },
+        {
+          "name": "revision_event",
+          "logicalType": "string",
+          "required": true,
+          "primaryKey": false,
+          "description": "Lifecycle event defining the current object revision.",
+          "customProperties": [
+            {
+              "property": "kn.fieldId",
+              "value": "identity.objects.revision_event"
+            },
+            {
+              "property": "kn.foreignKey",
+              "value": {
+                "table": "lifecycle_events",
+                "fields": [
+                  "revision_event"
+                ],
+                "targetFields": [
+                  "event_id"
+                ]
+              }
+            }
+          ]
         }
       ]
     },
@@ -421,7 +449,8 @@
               "identity.source_records.source",
               "identity.source_records.native_key"
             ],
-            "fieldContexts": {}
+            "fieldContexts": {},
+            "defaultFieldContext": "record"
           }
         },
         {
@@ -544,7 +573,8 @@
               "identity.source_versions.archive_record_id",
               "identity.source_versions.code_digest"
             ],
-            "fieldContexts": {}
+            "fieldContexts": {},
+            "defaultFieldContext": "record"
           }
         },
         {
@@ -741,7 +771,8 @@
               "identity.identifiers.valid_to",
               "identity.identifiers.evidence"
             ],
-            "fieldContexts": {}
+            "fieldContexts": {},
+            "defaultFieldContext": "record"
           }
         }
       ],
@@ -918,7 +949,8 @@
               "identity.attributes.profile_digest",
               "identity.attributes.evidence"
             ],
-            "fieldContexts": {}
+            "fieldContexts": {},
+            "defaultFieldContext": "record"
           }
         }
       ],
@@ -1077,7 +1109,8 @@
               "identity.links.decision_ref",
               "identity.links.ended_event"
             ],
-            "fieldContexts": {}
+            "fieldContexts": {},
+            "defaultFieldContext": "record"
           }
         },
         {
@@ -1332,7 +1365,8 @@
               "identity.matches.selected",
               "identity.matches.decision_ref"
             ],
-            "fieldContexts": {}
+            "fieldContexts": {},
+            "defaultFieldContext": "record"
           }
         }
       ],
@@ -1503,7 +1537,8 @@
               "identity.change_sets.version_id",
               "identity.change_sets.changes_json"
             ],
-            "fieldContexts": {}
+            "fieldContexts": {},
+            "defaultFieldContext": "record"
           }
         },
         {
@@ -1601,7 +1636,8 @@
               "identity.redirects.kn_id",
               "identity.redirects.successor"
             ],
-            "fieldContexts": {}
+            "fieldContexts": {},
+            "defaultFieldContext": "record"
           }
         }
       ],

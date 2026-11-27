@@ -2,7 +2,7 @@
 
 Version: 1.0.0
 
-Digest: `d11eb70b855741d6901677151d2b8bb048cf41b0aa074feae24f0db370c51d06`
+Digest: `e7000add899f2410545fcecfce284780101ecde63c854c3a17a128ffcb7f008e`
 
 Storage schema: `system`
 

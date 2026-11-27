@@ -4,7 +4,7 @@ import hashlib
 import re
 from datetime import UTC, date, datetime
 from decimal import Decimal, InvalidOperation
-from typing import Annotated, Literal, Self
+from typing import Annotated, Literal, Self, get_args
 
 from pydantic import (
     BaseModel,
@@ -21,6 +21,7 @@ from pydantic import (
 
 from kn.contracts.model import LogicalType, canonical
 from kn.contracts.sqlalchemy import INTEGER_MAX, INTEGER_MIN
+from kn.evidence.vocabulary import ReviewKind
 
 Text = Annotated[StrictStr, StringConstraints(min_length=1, pattern=r"\S")]
 Digest = Annotated[StrictStr, StringConstraints(pattern=r"^[0-9a-f]{64}$")]
@@ -113,7 +114,27 @@ class Target(Frozen):
         return digest(self.model_dump(mode="json"))
 
 
+QUEUE_KINDS = frozenset(get_args(ReviewKind.__value__))
+
+
+class Choice(Frozen):
+    item_id: Digest
+    kind: Text
+    candidates: tuple[Text, ...] = Field(min_length=1)
+    selected: Text | None = None
+
+    @model_validator(mode="after")
+    def registered(self) -> Self:
+        if self.kind not in QUEUE_KINDS or len(set(self.candidates)) != len(self.candidates):
+            raise ValueError("unknown review kind or duplicate candidates")
+        if self.selected is not None and self.selected not in self.candidates:
+            raise ValueError("selection must name a reviewed candidate")
+        object.__setattr__(self, "candidates", tuple(sorted(self.candidates)))
+        return self
+
+
 class Request(Frozen):
+    queue: Choice | None = Field(default=None, exclude_if=lambda value: value is None)
     request_id: Text
     target: Target
     outcome: Outcome

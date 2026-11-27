@@ -20,4 +20,4 @@ artifacts are under
 keys and views live in `kn.evidence`.
 
 See the [current protocol](../../../docs/impl/current/evidence-model.md) for trusted entry points,
-journal ownership, request retries, transaction behavior and remaining projection work.
+journal ownership, request retries, rights-filtered reads and rebuild replay.

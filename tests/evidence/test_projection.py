@@ -26,6 +26,7 @@ from tests.evidence.selection_fixtures import (
     policy,
     reviewed,
     stated,
+    tonnes,
 )
 
 STEP = timedelta(hours=1)
@@ -63,8 +64,20 @@ def _outcomes(version: Version) -> dict[str, tuple[str, str]]:
 
 
 def _canonical(fact: CanonicalFact) -> dict[str, object]:
+    """The fact without what explains the change that opened its version.
+
+    The outcome, deciding criterion and runner-up describe the comparison when the version
+    started; a later claim that changes nothing else adds its outcome row to the version.
+    """
     excluded = {"outcome", "deciding_criterion", "runner_up_criteria", "knowledge_from"}
     return fact.model_dump(exclude=excluded)
+
+
+def _final(claims: list[Claim], rule: dict[str, str]) -> tuple[object, ...]:
+    """The final version's canonical content, open review items and selected members."""
+    last = _versions(_arrive(claims), **rule)[-1]
+    items = tuple(sorted((item.kind, item.candidates) for item in last.selection.items))
+    return (repr(_canonical(last.fact)), items, last.selection.members)
 
 
 def test_the_first_eligible_claim_fills_and_a_higher_ranked_value_replaces() -> None:
@@ -123,12 +136,29 @@ ARRIVALS = [
 ]
 
 
-@pytest.mark.parametrize("rule", [{}, {"mode": "fixed"}, {"mode": "accumulate"}])
-def test_every_arrival_order_gives_identical_canonical_values(rule: dict[str, str]) -> None:
-    results = set()
-    for order in permutations(ARRIVALS):
-        final = _versions(_arrive(list(order)), **rule)[-1]
-        results.add((repr(_canonical(final.fact)), final.selection.members))
+MODES = [
+    {},
+    {"mode": "latest_observed", "timeBasis": "observed"},
+    {"mode": "fixed"},
+    {"mode": "accumulate"},
+]
+RETRACTED = stated(AGGREGATOR, "1100", record="gone")
+CONTESTED = [
+    stated(MAKER, "1300", record="rev-b", valid=T0 - timedelta(days=30)),
+    stated(MAKER_TWO, "1280", valid=T0 - timedelta(days=60), fetched_at=T0 - timedelta(days=2)),
+    stated(DISTRIBUTOR, tonnes("1.3"), fetched_at=T0 - timedelta(days=3)),
+    RETRACTED,
+    emptied(RETRACTED, T0),
+]
+
+
+@pytest.mark.parametrize("rule", MODES)
+@pytest.mark.parametrize("planted", [ARRIVALS, CONTESTED], ids=["ranked", "contested"])
+def test_every_arrival_order_gives_identical_canonical_values(
+    planted: list[Claim], rule: dict[str, str]
+) -> None:
+    # The contested set plants an equal-rank disagreement, a unit mismatch and a retraction.
+    results = {_final(list(order), rule) for order in permutations(planted)}
     assert len(results) == 1
 
 

@@ -79,7 +79,6 @@
   "cli.identity_anchor_source_help": "source of the new anchoring record",
   "cli.identity_anchor_key_help": "native key of the new anchoring record",
   "cli.identity_auth_error": "E_IDENTITY_AUTH: the journal owner must confirm the change in a local terminal.",
-  "cli.identity_confirm": "Reviewer {reviewer}. Type {approval} to approve this identity change.\n{proposal}",
   "cli.identity_applied": "Identity change recorded. Decision {decision_id}.\n{event}",
   "cli.identity_resolved": "Identity {kn_id} resolves to {successors}.",
   "cli.identity_event_history": "Identity history for {kn_id}",
@@ -113,5 +112,9 @@
   "cli.lineage_review_items": "Review items: {count}",
   "cli.lineage_review_decisions": "Review decisions: {count}",
   "cli.lineage_gaps": "Lineage gaps: {count}",
-  "cli.lineage_withheld": "Withheld by audience rights: {counts}"
+  "cli.lineage_withheld": "Withheld by audience rights: {counts}",
+  "cli.review_confirm": "Human review by {reviewer}: {proposal}\nType {approval} to apply this exact review:",
+  "cli.review_help": "list and decide review items",
+  "cli.review_target_help": "prepare a record or field target from a typed query file",
+  "cli.review_auth_error": "Review decisions require approval by the local journal owner on a controlling terminal."
 }

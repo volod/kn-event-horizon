@@ -666,6 +666,9 @@
           "minItems": 1,
           "uniqueItems": true
         },
+        "defaultFieldContext": {
+          "const": "record"
+        },
         "fieldContexts": {
           "type": "object",
           "additionalProperties": {

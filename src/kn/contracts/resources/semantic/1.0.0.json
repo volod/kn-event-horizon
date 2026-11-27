@@ -85,6 +85,21 @@
               "unique": true
             }
           ]
+        },
+        {
+          "property": "kn.humanVerification",
+          "value": {
+            "strategy": "external",
+            "resolver": "contract-v1",
+            "recordFields": [
+              "semantic.namespaces.id",
+              "semantic.namespaces.domain",
+              "semantic.namespaces.code",
+              "semantic.namespaces.definition"
+            ],
+            "fieldContexts": {},
+            "defaultFieldContext": "record"
+          }
         }
       ]
     },
@@ -170,6 +185,24 @@
               "value": "semantic.namespace_labels.reviewed_identical"
             }
           ]
+        }
+      ],
+      "customProperties": [
+        {
+          "property": "kn.humanVerification",
+          "value": {
+            "strategy": "external",
+            "resolver": "contract-v1",
+            "recordFields": [
+              "semantic.namespace_labels.namespace_id",
+              "semantic.namespace_labels.locale",
+              "semantic.namespace_labels.label",
+              "semantic.namespace_labels.review_reference",
+              "semantic.namespace_labels.reviewed_identical"
+            ],
+            "fieldContexts": {},
+            "defaultFieldContext": "record"
+          }
         }
       ]
     },
@@ -308,6 +341,23 @@
               "unique": true
             }
           ]
+        },
+        {
+          "property": "kn.humanVerification",
+          "value": {
+            "strategy": "external",
+            "resolver": "contract-v1",
+            "recordFields": [
+              "semantic.terms.id",
+              "semantic.terms.namespace_id",
+              "semantic.terms.code",
+              "semantic.terms.kind",
+              "semantic.terms.status",
+              "semantic.terms.definition"
+            ],
+            "fieldContexts": {},
+            "defaultFieldContext": "record"
+          }
         }
       ]
     },
@@ -420,6 +470,26 @@
             }
           ]
         }
+      ],
+      "customProperties": [
+        {
+          "property": "kn.humanVerification",
+          "value": {
+            "strategy": "external",
+            "resolver": "contract-v1",
+            "recordFields": [
+              "semantic.labels.term_id",
+              "semantic.labels.locale",
+              "semantic.labels.label",
+              "semantic.labels.definition",
+              "semantic.labels.inverse_label",
+              "semantic.labels.review_reference",
+              "semantic.labels.reviewed_identical"
+            ],
+            "fieldContexts": {},
+            "defaultFieldContext": "record"
+          }
+        }
       ]
     },
     {
@@ -505,6 +575,24 @@
             }
           ]
         }
+      ],
+      "customProperties": [
+        {
+          "property": "kn.humanVerification",
+          "value": {
+            "strategy": "external",
+            "resolver": "contract-v1",
+            "recordFields": [
+              "semantic.alternative_labels.term_id",
+              "semantic.alternative_labels.locale",
+              "semantic.alternative_labels.label",
+              "semantic.alternative_labels.review_reference",
+              "semantic.alternative_labels.reviewed_identical"
+            ],
+            "fieldContexts": {},
+            "defaultFieldContext": "record"
+          }
+        }
       ]
     },
     {
@@ -562,6 +650,21 @@
               }
             }
           ]
+        }
+      ],
+      "customProperties": [
+        {
+          "property": "kn.humanVerification",
+          "value": {
+            "strategy": "external",
+            "resolver": "contract-v1",
+            "recordFields": [
+              "semantic.entity_classes.id",
+              "semantic.entity_classes.parent_id"
+            ],
+            "fieldContexts": {},
+            "defaultFieldContext": "record"
+          }
         }
       ]
     },
@@ -702,6 +805,25 @@
               "value": "semantic.relation_types.guarded_errors"
             }
           ]
+        }
+      ],
+      "customProperties": [
+        {
+          "property": "kn.humanVerification",
+          "value": {
+            "strategy": "external",
+            "resolver": "contract-v1",
+            "recordFields": [
+              "semantic.relation_types.id",
+              "semantic.relation_types.source_class_id",
+              "semantic.relation_types.target_class_id",
+              "semantic.relation_types.cardinality",
+              "semantic.relation_types.minimum_evidence",
+              "semantic.relation_types.guarded_errors"
+            ],
+            "fieldContexts": {},
+            "defaultFieldContext": "record"
+          }
         }
       ]
     },
@@ -844,6 +966,27 @@
             }
           ]
         }
+      ],
+      "customProperties": [
+        {
+          "property": "kn.humanVerification",
+          "value": {
+            "strategy": "external",
+            "resolver": "contract-v1",
+            "recordFields": [
+              "semantic.concept_schemes.id",
+              "semantic.concept_schemes.origin",
+              "semantic.concept_schemes.publisher",
+              "semantic.concept_schemes.edition",
+              "semantic.concept_schemes.source_uri",
+              "semantic.concept_schemes.source_sha256",
+              "semantic.concept_schemes.verification_state",
+              "semantic.concept_schemes.verification_reason"
+            ],
+            "fieldContexts": {},
+            "defaultFieldContext": "record"
+          }
+        }
       ]
     },
     {
@@ -951,6 +1094,23 @@
               }
             }
           ]
+        }
+      ],
+      "customProperties": [
+        {
+          "property": "kn.humanVerification",
+          "value": {
+            "strategy": "external",
+            "resolver": "contract-v1",
+            "recordFields": [
+              "semantic.concepts.id",
+              "semantic.concepts.scheme_id",
+              "semantic.concepts.parent_id",
+              "semantic.concepts.replacement_id"
+            ],
+            "fieldContexts": {},
+            "defaultFieldContext": "record"
+          }
         }
       ]
     },
@@ -1084,6 +1244,25 @@
               "value": "semantic.concept_mappings.evidence_id"
             }
           ]
+        }
+      ],
+      "customProperties": [
+        {
+          "property": "kn.humanVerification",
+          "value": {
+            "strategy": "external",
+            "resolver": "contract-v1",
+            "recordFields": [
+              "semantic.concept_mappings.id",
+              "semantic.concept_mappings.source_id",
+              "semantic.concept_mappings.target_id",
+              "semantic.concept_mappings.mapping_type",
+              "semantic.concept_mappings.method",
+              "semantic.concept_mappings.evidence_id"
+            ],
+            "fieldContexts": {},
+            "defaultFieldContext": "record"
+          }
         }
       ]
     },
@@ -1231,6 +1410,27 @@
             }
           ]
         }
+      ],
+      "customProperties": [
+        {
+          "property": "kn.humanVerification",
+          "value": {
+            "strategy": "external",
+            "resolver": "contract-v1",
+            "recordFields": [
+              "semantic.entity_tags.id",
+              "semantic.entity_tags.entity_id",
+              "semantic.entity_tags.concept_id",
+              "semantic.entity_tags.method",
+              "semantic.entity_tags.evidence_id",
+              "semantic.entity_tags.verification_state",
+              "semantic.entity_tags.valid_from",
+              "semantic.entity_tags.valid_to"
+            ],
+            "fieldContexts": {},
+            "defaultFieldContext": "record"
+          }
+        }
       ]
     },
     {
@@ -1339,6 +1539,24 @@
             }
           ]
         }
+      ],
+      "customProperties": [
+        {
+          "property": "kn.humanVerification",
+          "value": {
+            "strategy": "external",
+            "resolver": "contract-v1",
+            "recordFields": [
+              "semantic.attribute_definitions.id",
+              "semantic.attribute_definitions.entity_class_id",
+              "semantic.attribute_definitions.value_type",
+              "semantic.attribute_definitions.unit",
+              "semantic.attribute_definitions.quantity_type"
+            ],
+            "fieldContexts": {},
+            "defaultFieldContext": "record"
+          }
+        }
       ]
     },
     {
@@ -1371,6 +1589,20 @@
               }
             }
           ]
+        }
+      ],
+      "customProperties": [
+        {
+          "property": "kn.humanVerification",
+          "value": {
+            "strategy": "external",
+            "resolver": "contract-v1",
+            "recordFields": [
+              "semantic.condition_sets.id"
+            ],
+            "fieldContexts": {},
+            "defaultFieldContext": "record"
+          }
         }
       ]
     },
@@ -1456,6 +1688,23 @@
             }
           ]
         }
+      ],
+      "customProperties": [
+        {
+          "property": "kn.humanVerification",
+          "value": {
+            "strategy": "external",
+            "resolver": "contract-v1",
+            "recordFields": [
+              "semantic.condition_values.condition_set_id",
+              "semantic.condition_values.attribute_id",
+              "semantic.condition_values.value",
+              "semantic.condition_values.unit"
+            ],
+            "fieldContexts": {},
+            "defaultFieldContext": "record"
+          }
+        }
       ]
     },
     {
@@ -1539,6 +1788,22 @@
             }
           ]
         }
+      ],
+      "customProperties": [
+        {
+          "property": "kn.humanVerification",
+          "value": {
+            "strategy": "external",
+            "resolver": "contract-v1",
+            "recordFields": [
+              "semantic.comparison_profiles.id",
+              "semantic.comparison_profiles.entity_class_id",
+              "semantic.comparison_profiles.condition_set_id"
+            ],
+            "fieldContexts": {},
+            "defaultFieldContext": "record"
+          }
+        }
       ]
     },
     {
@@ -1610,6 +1875,22 @@
             }
           ]
         }
+      ],
+      "customProperties": [
+        {
+          "property": "kn.humanVerification",
+          "value": {
+            "strategy": "external",
+            "resolver": "contract-v1",
+            "recordFields": [
+              "semantic.profile_attributes.profile_id",
+              "semantic.profile_attributes.attribute_id",
+              "semantic.profile_attributes.required"
+            ],
+            "fieldContexts": {},
+            "defaultFieldContext": "record"
+          }
+        }
       ]
     },
     {
@@ -1667,6 +1948,21 @@
               }
             }
           ]
+        }
+      ],
+      "customProperties": [
+        {
+          "property": "kn.humanVerification",
+          "value": {
+            "strategy": "external",
+            "resolver": "contract-v1",
+            "recordFields": [
+              "semantic.rubrics.id",
+              "semantic.rubrics.profile_id"
+            ],
+            "fieldContexts": {},
+            "defaultFieldContext": "record"
+          }
         }
       ]
     },
@@ -1758,6 +2054,23 @@
               ]
             }
           ]
+        }
+      ],
+      "customProperties": [
+        {
+          "property": "kn.humanVerification",
+          "value": {
+            "strategy": "external",
+            "resolver": "contract-v1",
+            "recordFields": [
+              "semantic.rubric_criteria.rubric_id",
+              "semantic.rubric_criteria.attribute_id",
+              "semantic.rubric_criteria.weight",
+              "semantic.rubric_criteria.direction"
+            ],
+            "fieldContexts": {},
+            "defaultFieldContext": "record"
+          }
         }
       ]
     }

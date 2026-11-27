@@ -16,9 +16,10 @@ from kn.contracts.diagnostics import ContractError
 from kn.contracts.document import read_document
 from kn.contracts.loader import load_contract
 from kn.contracts.model import Contract
-from kn.contracts.physical import relation_names
+from kn.contracts.physical import extensions, relation_names
 from kn.contracts.schemas import RESOURCES
 from kn.contracts.sqlalchemy import metadata
+from kn.contracts.verification import field_contexts
 
 REGISTRY = RESOURCES / "registry.json"
 MARKER_CONTRACT = "kn.system.governance"
@@ -83,6 +84,25 @@ def validate_registry(contracts: Sequence[Contract]) -> None:
             ),
             f"table and index names in schema {schema}",
         )
+    _validate_coverage(contracts)
+
+
+def _validate_coverage(contracts: Sequence[Contract]) -> None:
+    for contract in contracts:
+        for table in contract.tables:
+            declaration = extensions(table).get("humanVerification")
+            if (
+                declaration is None
+                or declaration.get("strategy") not in {"external", "decision-log"}
+                or set(field_contexts(table, declaration))
+                != {field.field_id for field in table.fields}
+            ):
+                raise ContractError(
+                    (),
+                    "registry",
+                    f"declare record and field verification coverage for "
+                    f"{contract.contract_id}/{table.name}",
+                )
 
 
 def _unique(values: Iterable[str], what: str) -> None:

@@ -8,9 +8,13 @@ from sqlalchemy.engine import Connection
 from kn.db.rebuild import rebuild
 from kn.identity import lifecycle, store
 from kn.identity.journal import Journal, LockedJournal
-from kn.identity.model import Merge, Retire
+from kn.identity.model import Merge, Restore, Retire
+from kn.review import store as reviews
 from kn.review.journal import Journal as ReviewJournal
+from kn.review.model import KeyPart, Request
+from kn.review.projection import ReadRights, read
 from kn.review.protocol import Reviewer
+from kn.review.targets import ContractResolver
 from tests.identity.fixtures import NOW, A, B, C
 from tests.integration.test_identity_lifecycle import (
     REVIEWER,
@@ -87,3 +91,39 @@ def test_replay_refuses_missing_review_and_preserves_sql_state(
     finally:
         decision_file.write_bytes(saved)
     assert store.replay(rebuild_connection, journal).resolve(A) == (B,)
+
+
+def test_restoring_an_identity_starts_a_new_verification_revision(
+    rebuild_connection: Connection, tmp_path: Path
+) -> None:
+    lifecycle_log = _journal(tmp_path)
+    connection = rebuild_connection
+    rebuild(connection, data_dir=tmp_path)
+    resolver = ContractResolver.registered((store.contract(),))
+    dataset = resolver.dataset("kn.core.identity", "objects")
+    key = (KeyPart(field_id="identity.objects.kn_id", kind="string", value=C),)
+    original = dataset.fetch(connection, key)
+    assert original is not None
+    target = dataset.target(original, "factual")
+    request = Request(
+        request_id="factual-identity-review",
+        target=target,
+        outcome="accept",
+        performed_at=NOW,
+        reason="Checked the identity",
+        evidence="review:fixture",
+    )
+    reviewer = Reviewer("person:fixture", "human", True, frozenset({"factual"}))
+    journal = ReviewJournal(tmp_path)
+    decision = reviews.submit(connection, journal, resolver, request, lambda: reviewer, lambda: NOW)
+    _submit(connection, lifecycle_log, Retire(kn_id=C), "retired")
+    _submit(connection, lifecycle_log, Restore(kn_id=C), "restored")
+    rights = ReadRights(lambda *_: True, lambda _: True)
+    result = read(connection, dataset, key, "factual", rights=rights)
+    assert result is not None and result.values["state"] == "active"
+    assert result.record.human_verified_at is None
+    assert reviews.projection(connection, target).stamp.human_verification_decision_id == (
+        decision.decision_id
+    )
+    report = rebuild(connection, data_dir=tmp_path)
+    assert {entry.target_id: entry.state for entry in report}[target.target_id] == "stale"

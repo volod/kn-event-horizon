@@ -246,7 +246,8 @@
               "evidence.evidence_records.curator",
               "evidence.evidence_records.recorded_at"
             ],
-            "fieldContexts": {}
+            "fieldContexts": {},
+            "defaultFieldContext": "record"
           }
         },
         {
@@ -997,7 +998,8 @@
               "evidence.claims.observed_at",
               "evidence.claims.recorded_at"
             ],
-            "fieldContexts": {}
+            "fieldContexts": {},
+            "defaultFieldContext": "record"
           }
         },
         {
@@ -1262,7 +1264,8 @@
               "evidence.claim_confirmations.observed_at",
               "evidence.claim_confirmations.recorded_at"
             ],
-            "fieldContexts": {}
+            "fieldContexts": {},
+            "defaultFieldContext": "record"
           }
         },
         {
@@ -1428,7 +1431,8 @@
               "evidence.aliases.claim_key",
               "evidence.aliases.recorded_at"
             ],
-            "fieldContexts": {}
+            "fieldContexts": {},
+            "defaultFieldContext": "record"
           }
         },
         {
@@ -1579,7 +1583,8 @@
               "evidence.text_translations.provenance",
               "evidence.text_translations.recorded_at"
             ],
-            "fieldContexts": {}
+            "fieldContexts": {},
+            "defaultFieldContext": "record"
           }
         },
         {
@@ -1888,7 +1893,8 @@
               "evidence.relation_assertions.opened_by",
               "evidence.relation_assertions.opened_at"
             ],
-            "fieldContexts": {}
+            "fieldContexts": {},
+            "defaultFieldContext": "record"
           }
         },
         {
@@ -2036,7 +2042,8 @@
               "evidence.relation_supports.claim_key",
               "evidence.relation_supports.recorded_at"
             ],
-            "fieldContexts": {}
+            "fieldContexts": {},
+            "defaultFieldContext": "record"
           }
         }
       ]
@@ -2472,7 +2479,8 @@
               "evidence.canonical_facts.valid_to_precision",
               "evidence.canonical_facts.knowledge_from"
             ],
-            "fieldContexts": {}
+            "fieldContexts": {},
+            "defaultFieldContext": "record"
           }
         },
         {
@@ -2712,7 +2720,8 @@
               "evidence.selection_outcomes.criteria_json",
               "evidence.selection_outcomes.recorded_at"
             ],
-            "fieldContexts": {}
+            "fieldContexts": {},
+            "defaultFieldContext": "record"
           }
         },
         {
@@ -2885,7 +2894,8 @@
               "evidence.review_items.opened_by",
               "evidence.review_items.opened_at"
             ],
-            "fieldContexts": {}
+            "fieldContexts": {},
+            "defaultFieldContext": "record"
           }
         },
         {
@@ -3119,7 +3129,8 @@
               "evidence.review_decisions.human_verification_decision_id",
               "evidence.review_decisions.event_json"
             ],
-            "fieldContexts": {}
+            "fieldContexts": {},
+            "defaultFieldContext": "record"
           }
         },
         {
