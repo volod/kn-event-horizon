@@ -30,174 +30,42 @@ archive.
 
 ## Agent Implementation Tasks
 
-### Durable raw archive -- `raw-archive`
+### Acquisition, mapping and replay -- `ingestion-engine`
 
-#### warc-raw-store
+#### source-lifecycle-registry
 
-Fetch once, transform many requires a durable, self-describing archive of original bytes.
-
-- Serves: `raw-archive` -- [Raw archive](../design/spec.md#raw-archive)
-- Agent status: CLEAR
-- Execution stage: MODEL
-- Dependencies: `warcio` and `pyarrow` as the justified dependencies.
-- User-visible outcome: The engine writes WARC 1.1 files per source run with `WARC-Target-URI` and
-  `WARC-Date`, and `kn raw reindex` and `kn raw verify` maintain the Parquet ledger.
-- Scope boundary: Request, response, metadata, resource, and revisit records; redaction; atomic
-  writes; size and decompression limits; and the tombstone format. The blob fallback is designed
-  but enabled only when a source needs it.
-- Data and artifact paths: `src/kn/archive/`, `$DATA_DIR/raw/`, `tests/archive/`,
-  `tests/fixtures/archive/`.
-- Execution path: Wrap the `warcio` writer and reader behind a small interface, with a ledger
-  writer and a redaction policy object.
-- Acceptance gates: Payload bytes and digests round-trip. An interrupted write leaves no visible
-  file. Reindex equals the original ledger. No credential appears in records or URIs. Revisit
-  works, and corruption is detected.
-- Documentation target: A new `current/raw-archive.md` page listed in the
-  [areas index](current.md#areas).
-
-#### raw-archive-implementation-audit
-
-The archive is the durable input that every rebuild replays, so a format or integrity defect would
-force a re-fetch that a source may no longer allow.
-
-- Serves: `raw-archive` -- [Raw archive](../design/spec.md#raw-archive)
-- Agent status: CLEAR
-- Requires: `warc-raw-store`
-- Dependencies: The accepted task records of the group and the [implementation
-  audit](../guide/planning-workflow.md#implementation-audits) checks.
-- User-visible outcome: Every rebuild replays from a verified archive. The audit record gives every
-  check a result and every finding a disposition. The current-state page lists known limitations,
-  and each scheduled finding is a plan task.
-- Scope boundary: Focus: WARC 1.1 conformance and readability with independent tools; block and
-  payload digests; large and streamed payloads; compressed, truncated, and partial files; repeated
-  payloads; atomic writes and crash recovery; agreement between the raw ledger and the files;
-  retention, backup, and licence boundaries; storage growth at the target volume. Fixes only; new
-  behavior becomes plan tasks.
-- Data and artifact paths: `src/kn/archive/`, `$DATA_DIR/raw/`, `tests/archive/`,
-  `docs/impl/plan.md`, and the task record.
-- Execution path: Rerun the group's acceptance commands, then work through the audit checks. Read
-  the archive with an independent WARC tool, truncate a file, stop a write midway, and replay a run
-  from the archive alone.
-- Acceptance gates: An independent WARC reader accepts every file. A truncated or partial file is
-  detected and never replayed silently. Digests verify on every replay. Every finding has a
-  severity, evidence, and a disposition, no `blocker` is accepted, and every fix starts from a
-  failing regression test. `make ci` passes with the scheduled tasks in the plan.
-- Documentation target: `current/raw-archive.md` listed in the [areas index](current.md#areas).
-
-### Source runs and health -- `source-management`
-
-#### ingestion-state-contracts
-
-Run status, checkpoints and source health need stable storage definitions before the engine and
-monitoring workflows begin writing them.
-
-- Serves: `ingestion-engine` -- [Ingestion engine](../design/spec.md#ingestion-engine)
-- Agent status: CLEAR
-- Execution stage: MODEL
-- Requires: `raw-archive-implementation-audit`
-- Dependencies: The run, cursor, archive and monitoring fields in the specification and the
-  [standard source error codes](current/source-management.md#error-codes-and-pagination).
-  Fixtures can supply source IDs, archive IDs and claim keys without executing a crawler.
-- User-visible outcome: Registered contracts define run attempts/status/error history, source
-  checkpoints, committed batch/archive references, configuration/code versions and health metrics.
-- Scope boundary: Schemas, keys, enums, time semantics, human-verification coverage and
-  transactional checkpoint constraints. Runtime fetching, scheduling and status CLI stay later.
-- Data and artifact paths: `contracts/core/system/`, `src/kn/contracts/resources/`,
-  `src/kn/engine/`, `tests/engine/`, `tests/integration/`.
-- Execution path: Compile the contracts and load interrupted, retried and committed fixture runs;
-  test transaction rollback and checkpoint references without HTTP or an engine implementation.
-- Acceptance gates: Duplicate attempt/batch keys are refused or idempotent as declared. A failed
-  transaction cannot advance a checkpoint. Status/error/time fields needed by source monitoring
-  are present, preserve history and share the approved error vocabulary. Rebuild reproduces the
-  fixture state. `make ci` and integration checks pass.
-- Documentation target: A new `current/ingestion-engine.md` page listed in the
-  [areas index](current.md#areas).
-
-#### engine-skeleton
-
-The core engine must run end to end on a synthetic source before any real source.
-
-- Serves: `ingestion-engine` -- [Ingestion engine](../design/spec.md#ingestion-engine)
-- Agent status: CLEAR
-- Requires: `raw-archive-implementation-audit`, `ingestion-state-contracts`
-- Dependencies: The [crawler validator and enablement evidence](current/source-management.md#enablement-evidence).
-- User-visible outcome: `kn source run` and `kn source replay` process a synthetic fixture source
-  served locally. They write WARC records, identity events, claims with evidence linked to KN IDs,
-  a checkpoint, and a run summary with a declared status.
-- Scope boundary: Lock, run registration, fetch to archive, parse, a minimal mapping, validation,
-  load, checkpoint, and status. Fetch safety, full mapping, curated input, and rebuild replay come
-  in the next tasks.
-  Run/checkpoint storage consumes `ingestion-state-contracts`; runtime implementation does not
-  introduce those tables for the first time.
-- Data and artifact paths: `src/kn/engine/`, `domains/fixture/` (test-only),
-  `tests/engine/`, `tests/fixtures/fixture/`.
-- Execution path: Fixture-first. A test HTTP server serves the synthetic payloads, the adapter
-  interface returns records and claims, and the loader is the only writer.
-- Acceptance gates: A catalogue candidate and a profile missing its rights decision each
-  produce zero requests at the fixture server. A second enabled run is idempotent. An interrupted
-  run resumes from the committed checkpoint. A crash after archive finalization and before SQL
-  commit reuses the archived batch.
-  Replay without network yields the same claims. Russian, Chinese, and unknown-language source
-  fixtures ingest without English or Ukrainian translations, retain originals and provenance, and
-  use the [shared text selector](current/localization.md#source-data-and-translations) for display.
-  `make ci` passes.
-- Documentation target: A new `current/ingestion-engine.md` page listed in the
-  [areas index](current.md#areas).
-
-#### source-status-monitoring
-
-Operators need per-source health and freshness without opening Kestra.
+A reviewed lifecycle decision cannot reach the deployed catalogue. Rebuild loads every proposal row
+as `candidate`, and no command or reviewed input records `investigating`, `sampling_authorized`,
+`approved`, `enabled`, `paused`, `retired` or `rejected`. A source outside the proposal workbooks,
+such as the SATCOM package, a curated input or a counterpart instance, has no catalogue row, and
+enablement requires one. `kn source run` needs an `enabled` row, so no real source can run without
+hand-written SQL that the next rebuild erases.
 
 - Serves: `source-management` -- [Source management](../design/spec.md#source-management)
 - Agent status: CLEAR
-- Requires: `engine-skeleton`
-- Dependencies: none.
-- User-visible outcome: `kn source status` shows the last success and attempt,
-  state, stale flag, counts, bytes, budget use, cursor lag, and last error code, and feeds the
-  operations mart.
-  Read the early ingestion-state contracts; monitoring must not create another run/cursor schema.
-- Scope boundary: Status computation from run records and the CLI. Dashboards come in
-  `space-dashboard-bundles`.
-- Data and artifact paths: `src/kn/sources/status.py`, `tests/sources/`.
-- Execution path: Compute status from fixture runs covering every run status and error code.
-- Acceptance gates: Stale detection follows the configured threshold. Every error code renders.
-  Golden outputs cover English text and stable JSON.
+- Dependencies: Findings SMA-01 and SMA-02 of the [source management
+  audit](records/0061-source-management-source-management-implementation-audit.md#findings),
+  the reviewed [catalogue inputs](current/source-management.md#reviewed-inputs-and-identifiers)
+  and the [enablement rules](current/source-management.md#enablement-evidence).
+- User-visible outcome: A reviewed decision in Git sets a source's lifecycle state with its
+  approver, reference and date, and a rejection keeps its reason. Rebuild and upgrade apply every
+  decision, and `kn source list` shows it. A reviewed registration adds a qualified source ID that
+  no proposal row holds, so the terms reviews, sampling authorizations and enablement approvals
+  that name a catalogue state can record it.
+- Scope boundary: The decision and registration format, its validation, the allowed transitions,
+  and the catalogue load. Proposal rows keep their original cells and keys. Sampling admission
+  belongs to `source-sampling-admission`. No UI and no remote approval.
+- Data and artifact paths: `src/kn/sources/`, `domains/<domain>/seeds/`, `contracts/core/system/`,
+  `tests/sources/`, `tests/engine/`, `tests/integration/`.
+- Execution path: Fixture-first. Record each lifecycle state for fixture sources, register one
+  source outside the proposals, and rebuild twice. Then run the engine fixture source from its
+  reviewed decision instead of an inserted catalogue row.
+- Acceptance gates: Two rebuilds list identical states. An unknown source ID, a transition the
+  format does not allow, a rejection without its reason, and an `enabled` decision whose crawler
+  profile is not enabled are refused with stable error codes. The engine fixture runs from its
+  decision, and a `paused` decision leads to zero requests. `make ci` passes.
 - Documentation target: `current/source-management.md` listed in the
   [areas index](current.md#areas).
-
-#### source-management-implementation-audit
-
-Every source enters through the catalogue, the crawler schema, and the onboarding workflow, so a gap
-there repeats in every source that follows.
-
-- Serves: `source-management` -- [Source management](../design/spec.md#source-management)
-- Agent status: CLEAR
-- Requires: `ingestion-state-contracts`, `engine-skeleton`, `source-status-monitoring`
-- Dependencies: The accepted task records of the group and the [implementation
-  audit](../guide/planning-workflow.md#implementation-audits) checks.
-- User-visible outcome: Every later source is onboarded through verified, enforced declarations. The
-  audit record gives every check a result and every finding a disposition. The current-state page
-  lists known limitations, and each scheduled finding is a plan task.
-- Scope boundary: Focus: catalogue states and transitions, with sources disabled by default; crawler
-  schema strictness, defaults, and messages; licence, rate-limit, and robots fields that are
-  enforced, not advisory; error-code completeness; status freshness, stale and failing thresholds,
-  and clock skew; templates that match what the engine needs; new source kinds, such as APIs, bulk
-  files, and curated input, without schema changes. Fixes only; new behavior becomes plan tasks.
-- Data and artifact paths: `contracts/core/system/`, `src/kn/sources/`, `domains/<domain>/sources/`,
-  `docs/guide/source-onboarding.md`, `docs/guide/templates/`, `tests/sources/`, `docs/impl/plan.md`,
-  and the task record.
-- Execution path: Rerun the group's acceptance commands, then work through the audit checks.
-  Validate a crawler file with an unknown key, one without a licence, and a disabled source with a
-  schedule, and onboard one fixture source from the templates alone. Interrupt a fixture run before its
-  checkpoint, retry it and compare status, history and cursor with an uninterrupted run.
-- Acceptance gates: Each invalid crawler file is refused with a stable error code. A
-  disabled source cannot run. The templates cover every field the schema requires. Every finding has
-  a severity, evidence, and a disposition, no `blocker` is accepted, and every fix starts from a
-  failing regression test. `make ci` passes with the scheduled tasks in the plan.
-- Documentation target: `current/source-management.md` listed in the [areas
-  index](current.md#areas).
-
-### Acquisition, mapping and replay -- `ingestion-engine`
 
 #### http-fetch-safety
 
@@ -205,8 +73,8 @@ Every fetch must be safe and polite by construction.
 
 - Serves: `ingestion-engine` -- [Ingestion engine](../design/spec.md#ingestion-engine)
 - Agent status: CLEAR
-- Requires: `source-management-implementation-audit`
-- Dependencies: HTTPX as the justified dependency.
+- Dependencies: HTTPX as the justified dependency. Findings SMA-08 and SMA-09 of the
+  [source management audit](records/0061-source-management-source-management-implementation-audit.md#findings).
 - User-visible outcome: The engine fetches only allowlisted hosts and redirects over verified TLS,
   within byte and request budgets. It uses conditional requests, honors `robots.txt`, `429`, and
   `Retry-After`, and injects credentials from the environment with redaction.
@@ -214,10 +82,42 @@ Every fetch must be safe and polite by construction.
   budget accounting. No browser automation.
 - Data and artifact paths: `src/kn/engine/http/`, `tests/engine/`.
 - Execution path: Use fixture servers for redirects, private-IP targets, oversized and compressed
-  bodies, `429`, `403`, and non-JSON `200` responses.
+  bodies, `429`, `403`, and non-JSON `200` responses, a `robots.txt` that disallows the endpoint,
+  a second run inside the declared rate window, and an interruption after the first request.
 - Acceptance gates: Each hostile fixture produces its declared error code without a request to a
-  disallowed target. No secret appears in logs or WARC files.
+  disallowed target. A path that `robots.txt` disallows receives no request. Consecutive runs stay
+  within `rate_limit`. Requests made by an interrupted attempt count toward its run's budget and
+  appear in `kn source status`. No secret appears in logs or WARC files.
 - Documentation target: `current/ingestion-engine.md` listed in the
+  [areas index](current.md#areas).
+
+#### source-sampling-admission
+
+The onboarding workflow captures an authorized sample into the raw archive before enablement, but
+`kn source run` admits only `enabled` profiles. A `sampling_authorized` profile needs no approver,
+reference, budget or expiry, so a sample can neither run through the engine nor be checked against
+its authorization.
+
+- Serves: `source-management` -- [Source management](../design/spec.md#source-management)
+- Agent status: CLEAR
+- Requires: `source-lifecycle-registry`, `http-fetch-safety`
+- Dependencies: Finding SMA-03 of the [source management
+  audit](records/0061-source-management-source-management-implementation-audit.md#findings)
+  and the [sampling authorization step](../guide/source-onboarding.md#2-obtain-sampling-authorization).
+- User-visible outcome: A `sampling_authorized` profile records the owner's decision, approved
+  endpoints, request and byte budget, and expiry. `kn source run` captures a sample within that
+  decision into the raw archive and refuses it after the budget is used or the decision expires.
+  Enabled profiles keep their current evidence rules.
+- Scope boundary: The sampling declaration, its validation and admission, sampling budget
+  accounting, and the archive locators the investigation report cites. No scheduled sampling.
+- Data and artifact paths: `src/kn/sources/config/`, `src/kn/engine/`, `tests/sources/`,
+  `tests/engine/`, `docs/guide/source-onboarding.md`, `docs/guide/templates/`.
+- Execution path: Fixture-first against the loopback server: an authorized sample, a repeat after
+  its budget is used, an expired decision, and a profile without a decision reference.
+- Acceptance gates: The authorized sample commits its captures within budget. The repeat, the
+  expired decision and the unreferenced profile make zero requests and report stable error codes.
+  The crawler template names every sampling field. `make ci` passes.
+- Documentation target: `current/source-management.md` listed in the
   [areas index](current.md#areas).
 
 #### tracked-claim-times-and-sets
@@ -310,16 +210,17 @@ version on Google Drive for unattended re-import.
   stub of the Drive API; the live run belongs to `publish-satcom-drive-package`.
 - User-visible outcome: `KN_SATCOM_SOURCE` in `.env` selects a local directory, a local ZIP, or
   `gdrive:<file-id>`, and `make satcom-fetch` stages that package under
-  `$DATA_DIR/raw/space/satcom/<run-id>/` for `make satcom-import`. An unchanged Drive file ends
-  `not_modified` after one metadata request.
+  `$KN_RAW_ARCHIVE_DIR/staging/space/satcom/<run-id>/` for `make satcom-import`. An unchanged Drive
+  file ends `not_modified` after one metadata request.
 - Scope boundary: The location resolver; the Drive v3 metadata and download client with a
   read-only service-account key from `KN_GDRIVE_CREDENTIALS_FILE`; SHA-256 verification; safe
-  unpacking with file-count and size limits; the raw run directory with its manifest; and the SATCOM
-  commands as the first user. The module names no dataset, so `prefetched-dataset-method` reuses it.
-  Raw records stay blobs until `warc-raw-store`. No scheduler, no other Drive operation, and no
-  link-sharing URLs.
+  unpacking with file-count and size limits, the staging run directory with its manifest, and the
+  SATCOM commands as the first user. The module names no dataset, so `prefetched-dataset-method`
+  reuses it.
+  This task stages packages for the existing import. Commit to the shared archive in
+  `prefetched-dataset-method`. No scheduler, no other Drive operation, and no link-sharing URLs.
 - Data and artifact paths: `src/kn/engine/packages/`, `Makefile`, `.env.example`, `pyproject.toml`,
-  `uv.lock`, `$DATA_DIR/raw/space/satcom/`, `tests/engine/`.
+  `uv.lock`, `$KN_RAW_ARCHIVE_DIR/staging/space/satcom/`, `tests/engine/`.
 - Execution path: Write failing tests first: one snapshot identity from a fixture directory, its
   ZIP, and the Drive stub; `not_modified`; hostile ZIPs; a Google-native item; a SHA-256 mismatch; a
   missing key file; and no key path or token in logs. Then implement, adding `google-auth` as the
@@ -337,8 +238,7 @@ its integration is dataset-specific code beside the engine.
 
 - Serves: `ingestion-engine` -- [Ingestion engine](../design/spec.md#ingestion-engine)
 - Agent status: CLEAR
-- Requires: `raw-archive-implementation-audit`, `mapping-and-quality-rules`,
-  `dataset-package-locations`
+- Requires: `mapping-and-quality-rules`, `dataset-package-locations`, `source-lifecycle-registry`
 - Dependencies: Finding DC-16 of the [data contracts audit](records/0017-data-contracts-data-contracts-implementation-audit.md#findings),
   the current [SATCOM import](current/data-contracts.md#source-preservation-and-import) as the first
   dataset, and the `bulk_file` access method of the
@@ -353,9 +253,9 @@ its integration is dataset-specific code beside the engine.
   location variable named in the configuration; shared import, file, and raw-cell bookkeeping keyed
   by source ID
   instead of per-dataset tables; a `kn.sourceProfile` that is not fixed to `satcom-csv/1`; archive
-  placement under `raw/<domain>/<source-id>/<run-id>/`; and replay from the archive. The SATCOM
-  preservation rules stay: every file archived byte for byte, every cell kept, no formula or SQL
-  executed, and identical bytes a no-op. No fetching from the network.
+  placement in committed blob batches under `$KN_RAW_ARCHIVE_DIR/captures/`; and replay from the
+  archive. Preserve every SATCOM file byte for byte and keep every cell.
+  Execute no formulas or SQL. Identical bytes are a no-op. No fetching from the network.
 - Data and artifact paths: `src/kn/engine/`, `src/kn/domains/space/satcom/`,
   `domains/space/sources/`, `tests/engine/`, `tests/domains/space/satcom/`.
 - Execution path: Add a second synthetic fixture dataset with failing tests first, then move the
@@ -367,24 +267,62 @@ its integration is dataset-specific code beside the engine.
 - Documentation target: `current/ingestion-engine.md` listed in the
   [areas index](current.md#areas).
 
+#### capture-retention-enforcement
+
+Captures record an expiry and a deletion scope, but nothing withdraws a capture whose retention
+ended, claims that cite a withdrawn capture never become `evidence_tombstoned`, and a purge leaves
+no record beyond its tombstone. Restoring a backup taken before a purge therefore brings the
+removed bytes back while `kn raw verify` still reports success.
+
+- Serves: `ingestion-engine` -- [Ingestion engine](../design/spec.md#ingestion-engine)
+- Agent status: CLEAR
+- Dependencies: Findings RAA-07 and RAA-08 of the [raw archive
+  audit](records/0057-raw-archive-raw-archive-implementation-audit.md#findings), the retention rules
+  of the [fetch ledger specification](../design/spec.md#capture-schema-and-fetch-ledger), and the
+  current [withdrawal interface](current/raw-archive.md#layout-and-withdrawal).
+- User-visible outcome: The engine withdraws each capture whose source policy or expiry ends its
+  retention, with a reason code, and purges it where its deletion scope requires. Claims that cite
+  it become `evidence_tombstoned` and stay so after a rebuild. A purge leaves a durable record, so
+  verification of a restored archive names every purged capture whose bytes came back until the
+  purge is applied again.
+- Scope boundary: Expiry and policy selection, the purge record as a new versioned archive file
+  that leaves version 1 tombstones readable, claim status changes and their replay, and the restore
+  report. Rights decisions stay with source management and schedules with orchestration.
+- Data and artifact paths: `src/kn/archive/`, `src/kn/engine/`, `tests/archive/`, `tests/engine/`.
+- Execution path: Fixture-first. Expire one of two captures and withdraw a revisit target with a
+  purge. Restore a backup taken before the purge with the current tombstones, verify, and purge
+  again.
+- Acceptance gates: An expired capture is withdrawn once, and a rerun writes nothing new. Its
+  claims are `evidence_tombstoned` before and after a rebuild. Verification of the restored backup
+  names each purged capture until the purge is applied again. Afterwards its bytes are gone and
+  every retained capture replays. The `committed-v1` archive fixture still reads. `make ci` passes.
+- Documentation target: `current/raw-archive.md` and `current/ingestion-engine.md` listed in the
+  [areas index](current.md#areas).
+
 #### rebuild-from-raw
 
 Schema changes during development must cost a rebuild, never a re-fetch or a lost decision.
 
 - Serves: `ingestion-engine` -- [Ingestion engine](../design/spec.md#ingestion-engine)
 - Agent status: CLEAR
-- Requires: `curated-source-method`, `prefetched-dataset-method`
-- Dependencies: none.
-- User-visible outcome: `kn db rebuild` replays the raw ledger, curated files, prefetched datasets,
-  and decision logs through current code, and reports orphaned decisions.
+- Requires: `curated-source-method`, `prefetched-dataset-method`, `capture-retention-enforcement`
+- Dependencies: Findings SMA-10 and SMA-11 of the [source management
+  audit](records/0061-source-management-source-management-implementation-audit.md#findings).
+- User-visible outcome: `kn db rebuild` replays the committed archive, curated files, prefetched
+  datasets, and decision logs through current code, and reports orphaned decisions. It can replay
+  after the loss of the raw ledger.
 - Scope boundary: Replay ordering, the replay of every source suite in `make ci-local`, and
   canonical row-hash comparison. No network access during rebuild.
 - Data and artifact paths: `src/kn/db/`, `src/kn/engine/replay.py`, `tests/integration/`.
 - Execution path: Rebuild the fixture archive twice and compare row hashes of all canonical tables.
-- Acceptance gates: Two rebuilds are identical. A network call during rebuild fails the test.
+- Acceptance gates: Two rebuilds are identical, including one with the ledger removed. A network
+  call during rebuild fails the test.
   A tombstoned input stays suppressed after reindex and replay. Decisions re-attach or are reported.
   Human-verification times, reviewers and decision IDs survive replay exactly. A changed or missing
   target remains stale, pending or orphaned, and never receives a newly fabricated verification.
+  A paused or retired source's committed batches replay while `kn source run` stays refused for
+  it. After a rebuild, `kn source run` of a replayed source ends with a declared status, never
+  `E_INPUT` with an unfinished attempt.
   `make ci-local` runs the rebuild on every change, and `make ci` stays green without a database.
 - Documentation target: `current/ingestion-engine.md` listed in the
   [areas index](current.md#areas).
@@ -423,9 +361,9 @@ every source suite and every rebuild.
 
 - Serves: `ingestion-engine` -- [Ingestion engine](../design/spec.md#ingestion-engine)
 - Agent status: CLEAR
-- Requires: `http-fetch-safety`, `mapping-and-quality-rules`, `curated-source-method`,
-  `dataset-package-locations`, `prefetched-dataset-method`, `rebuild-from-raw`,
-  `fragment-claims-follow-splits`
+- Requires: `source-lifecycle-registry`, `http-fetch-safety`, `source-sampling-admission`,
+  `mapping-and-quality-rules`, `curated-source-method`, `dataset-package-locations`,
+  `prefetched-dataset-method`, `rebuild-from-raw`, `fragment-claims-follow-splits`
 - Dependencies: The accepted task records of the group and the [implementation
   audit](../guide/planning-workflow.md#implementation-audits) checks.
 - User-visible outcome: Every source runs on a verified, source-neutral engine. The audit record
@@ -685,8 +623,8 @@ A package must come back into KN as evidence, with its identity and provenance i
 - Requires: `interchange-schema-evolution`, `interchange-package-export`,
   `ingestion-engine-implementation-audit`
 - Dependencies: none.
-- User-visible outcome: `kn interchange import <package>` archives the package as a WARC resource
-  record and loads it through the engine. KN IDs resolve directly for the same producer, and
+- User-visible outcome: `kn interchange import <package>` commits the original ZIP as a blob
+  capture and loads it through the engine. KN IDs resolve directly for the same producer, and
   identifiers and attributes resolve them for other producers. Each imported claim cites the
   package and the original provenance reference.
 - Scope boundary: The package source method under the same update policies (a package never
@@ -963,7 +901,7 @@ The owner's instance must import correctly on the target release before any writ
   reviewed instance profile, and a report of losses, unmapped resources, identity matches, and
   update-policy outcomes.
 - Scope boundary: Read-only capture and import within a request budget. No writes.
-- Data and artifact paths: `interchange/inventree/instances/vl-itree.yaml`, `$DATA_DIR/raw/`,
+- Data and artifact paths: `interchange/inventree/instances/vl-itree.yaml`, `$KN_RAW_ARCHIVE_DIR`,
   `$DATA_DIR/exchange/vl-itree/<run-id>/`, and the task record.
 - Execution path: Probe, confirm the target digest, capture, and import. Then replay the import
   without network.
@@ -1104,7 +1042,8 @@ Catalog identity and constellation snapshots start from CelesTrak GP data.
 - Scope boundary: OMM JSON for the authorized groups only. No ephemeris, no coverage, and no
   operational status from orbit data. Engine improvements found here go into the core.
 - Data and artifact paths: `domains/space/sources/celestrak_gp.yaml`,
-  `src/kn/domains/space/celestrak.py`, `tests/fixtures/space/celestrak_gp/`, `$DATA_DIR/raw/space/`.
+  `src/kn/domains/space/celestrak.py`, `tests/fixtures/space/celestrak_gp/`,
+  `$KN_RAW_ARCHIVE_DIR/captures/space/`.
 - Execution path: Follow the onboarding workflow steps 3-4: bounded sample capture, investigation
   report, config, parser, sanitized fixtures, and failing tests first.
 - Acceptance gates: Fixtures and the authorized sample load. A rerun creates no duplicates. A
@@ -1144,8 +1083,8 @@ Maps need versioned, licence-reviewed reference boundaries.
   wording.
 - User-visible outcome: Country polygons load with edition, validity, simplified BI copies, and
   the boundary-policy note.
-- Scope boundary: A manual file source stored as WARC resource records. No disputed-border
-  judgments.
+- Scope boundary: A manual file source using the reviewed archive format for the release package.
+  No disputed-border judgments.
 - Data and artifact paths: `domains/space/sources/natural_earth.yaml`,
   `tests/fixtures/space/natural_earth/`.
 - Execution path: Use a bulk-file method through the engine, PostGIS validity checks, and
@@ -1183,7 +1122,7 @@ The space domain must prove its acceptance criteria on archived samples before d
 
 - Serves: `space-elt` -- [Space ELT](../design/spec.md#space-elt)
 - Agent status: CLEAR
-- Requires: `space-source-operator-disclosures`, `source-management-implementation-audit`
+- Requires: `space-source-operator-disclosures`
 - Dependencies: Archived authorized samples from every pilot source.
 - User-visible outcome: One command rebuilds the space domain from the archive and runs the
   identity, time, provenance, and conflation checks.
@@ -1324,7 +1263,7 @@ Schedules must follow reviewed crawler configurations, not hand-edited flows.
 
 - Serves: `orchestration` -- [Orchestration](../design/spec.md#orchestration)
 - Agent status: CLEAR
-- Requires: `kestra-service`, `source-management-implementation-audit`
+- Requires: `kestra-service`
 - Dependencies: Scoped Kestra API credentials in the environment.
 - User-visible outcome: `kn flows generate` and `kn flows deploy` produce one flow per enabled
   source (namespace `kn.<domain>`, cron in UTC, concurrency 1, transient-only retries) and detect
@@ -1351,7 +1290,8 @@ Approved space sources must run unattended within their budgets.
 - User-visible outcome: Approved space sources run on schedule with recorded statuses, budgets, and
   freshness.
 - Scope boundary: The declared window only. Kill-and-retry and restart checks are included.
-- Data and artifact paths: `$DATA_DIR/raw/space/`, `$DATA_DIR/runs/`, and the task record.
+- Data and artifact paths: `$KN_RAW_ARCHIVE_DIR/captures/space/`, `$DATA_DIR/runs/`, and the
+  task record.
 - Execution path: Deploy the flows, run the window, kill one worker mid-run, and restart the stack
   once.
 - Acceptance gates: Every scheduled slot has a run with a declared status. Request counts stay
@@ -1417,16 +1357,19 @@ Dashboards may read only reviewed, tested marts.
 - Agent status: CLEAR
 - Requires: `space-elt-implementation-audit`
 - Dependencies: dbt Core and dbt-postgres in an isolated, pinned tool environment.
+  [Source status projection](current/source-management.md#source-health-and-freshness)
+  for the operations mart.
 - User-visible outcome: The `analytics` schema holds every space mart in the
   [design](../design/domains/space.md#analytical-marts), with localized label joins and freshness
-  models.
+  models. The operations mart uses source status for stream health and freshness.
 - Scope boundary: The dbt project, tests, sources from generated definitions, and freshness. No
   dashboards.
 - Data and artifact paths: `analytics/dbt/`, `generated/dbt/`, `tests/analytics/`.
 - Execution path: Build against the rebuilt fixture archive, with dbt tests for keys,
   comparability filters, and unknown handling.
 - Acceptance gates: `dbt build` passes on fixtures and archived samples. No mart turns unknown
-  into zero. Incomparable tariffs are filtered.
+  into zero. Incomparable tariffs are filtered. Operations mart rows agree with source status
+  for a fixture stream before and after an archive replay.
 - Documentation target: `current/space-dashboards.md` listed in the
   [areas index](current.md#areas).
 
@@ -1534,7 +1477,6 @@ GDELT signals need their own schema that never writes canonical domain facts.
 - Serves: `gdelt-elt` -- [GDELT ELT](../design/spec.md#gdelt-elt)
 - Agent status: CLEAR
 - Execution stage: MODEL
-- Requires: `source-management-implementation-audit`
 - Dependencies: [GDELT design](../design/domains/gdelt.md).
 - User-visible outcome: The `gdelt` schema holds watches, query runs, article metadata, native
   dictionaries, story clusters, signals, and candidate links.
@@ -1944,8 +1886,7 @@ Release evaluation needs one integrated rebuild and backfill across the complete
 - Agent status: CLEAR
 - Execution stage: MODEL
 - Requires: `data-interchange-implementation-audit`, `space-elt-implementation-audit`,
-  `gdelt-elt-implementation-audit`, `microelectronics-elt-implementation-audit`,
-  `source-management-implementation-audit`
+  `gdelt-elt-implementation-audit`, `microelectronics-elt-implementation-audit`
 - Dependencies: The [contract workflow](../guide/schema-first-development.md), registered
   core/domain contracts, reviewed seeds and deterministic fixture data. No live source is needed.
   [Record 0030](records/0030-data-contracts-development-model-baseline.md) prepares the
@@ -2099,18 +2040,20 @@ Recovery objectives must be measured, not assumed.
 - Serves: `operations-hardening` -- [Operations hardening](../design/spec.md#operations-hardening)
 - Agent status: RUN NEEDED
 - Requires: `provide-target-server-and-backup`, `security-test-suite`
-- Dependencies: The target server and the off-host backup destination.
-- User-visible outcome: Nightly backups (databases, globals, raw ledger and changed WARC files,
-  decision logs, the identity event log, and the exchange ledger) and a written recovery
-  runbook.
+- Dependencies: The target server, the off-host backup destination, and the archive
+  [backup and restore order](current/raw-archive.md#back-up-and-restore).
+- User-visible outcome: Nightly backups of databases, globals, committed archive batches and
+  tombstones, decision logs, the identity event log, and the exchange ledger. A written runbook
+  covers recovery with and without the optional fetch-index backup.
 - Scope boundary: Backup jobs, retention, the restore drill into an isolated instance, and
   achieved RPO and RTO.
 - Data and artifact paths: `deploy/backup/`, `docs/guide/operations-runbook.md`,
   `$DATA_DIR/backups/`, and the task record.
-- Execution path: Back up, restore into an isolated stack, verify hashes, constraints, and
-  dashboard queries, apply current tombstones before opening reader access, and time the drill.
-- Acceptance gates: The restore passes its checks. The achieved RPO and RTO are recorded against
-  the proposed 24 h and 8 h objectives.
+- Execution path: Restore into an isolated stack with an explicit archive root, apply current
+  tombstones before opening reader access, rebuild the fetch index in its configured root, and
+  verify hashes, constraints and dashboard queries. Time the drill including index recovery.
+- Acceptance gates: The restore passes its checks with the index backup withheld. The achieved
+  RPO and RTO are recorded against the proposed 24 h and 8 h objectives.
 - Documentation target: `current/operations.md` listed in the [areas index](current.md#areas).
 
 #### performance-gate
@@ -2122,14 +2065,21 @@ The target host must handle the declared load within the memory budget.
 - Requires: `backup-restore-drill`, `gdelt-dashboards-implementation-audit`
 - Dependencies: Access to the target server.
 - User-visible outcome: A measured report covering synthetic load, dashboard and map p95, ingestion
-  memory, and disk growth, with tuned budgets.
+  memory, disk growth and the scale triggers for the raw archive index.
 - Scope boundary: Synthetic data only (50k catalog rows, 100k articles, 1M observations), with 2
-  readers and 1 ingest.
+  readers and 1 ingest. Exercise both many small sources across domains and one bulk-heavy source.
 - Data and artifact paths: `tests/performance/`, `$DATA_DIR/perf/<run-id>/`, and the task record.
-- Execution path: Generate the load, measure query plans and timings, and adjust the Compose
-  limits.
+- Execution path: Declare lookup and reindex budgets before measuring, with full reindex inside
+  the restore time budget. Generate the load, measure query plans and timings, and adjust the
+  Compose limits. For each archive shape, record domain, source and capture counts, stored bytes,
+  archive and index file counts, scoped lookup p95, file planning time, and full and scoped
+  reindex duration and peak memory.
+  Profile the warmed PostgreSQL identity submit benchmark on the target host to diagnose the
+  [scale gate miss recorded on the base tree](records/0058-ingestion-engine-ingestion-state-contracts.md#findings).
 - Acceptance gates: Dashboard and map p95 are at most 5 s. There is no out-of-memory failure. Any
-  deviation is recorded with measurements.
+  deviation is recorded with measurements. Record whether either archive shape meets the
+  [reopening condition](future-research.md#raw-archive-format-selection----avro-and-iceberg-for-the-raw-archive).
+  Verify the existing median submit ratio of at most 2.0 between 50,000 and 5,000 objects.
 - Documentation target: `current/operations.md` listed in the [areas index](current.md#areas).
 
 #### operations-hardening-implementation-audit
@@ -2511,7 +2461,8 @@ that the owner shares it with.
   decision, and the documented periodic command.
 - Scope boundary: Publication, access, and approval only. Credentials stay out of Git. Scheduled
   collection beyond an operating-system timer comes with `scheduled-space-ingestion`.
-- Data and artifact paths: `.env` (local only), `$DATA_DIR/secrets/`, `$DATA_DIR/raw/space/satcom/`,
+- Data and artifact paths: `.env` (local only), `$DATA_DIR/secrets/`,
+  `$KN_RAW_ARCHIVE_DIR/staging/space/satcom/`,
   and the task record.
 - Execution path: The owner completes the checklist. The agent runs `make satcom-fetch
   satcom-import` twice, then again after the owner uploads a changed revision.

@@ -15,7 +15,7 @@
       "--help"
     ],
     "expected": {
-      "stdout": "usage: kn [-h] [--json]\n          {info,contract,db,identity,review,lineage,source,space,vocabulary}\n          ...\n\noptions:\n  -h, --help            show this help message and exit\n  --json                emit machine-readable JSON with stable keys\n\ncommands:\n  {info,contract,db,identity,review,lineage,source,space,vocabulary}\n    info                show the installed project identity\n    contract            validate or compile open data contracts\n    db                  apply or verify governed schema revisions\n    identity            inspect and review object identity\n    review              list and decide review items\n    lineage             trace an object or field to its records and decisions\n    source              list and validate sources\n    space               space-domain datasets\n    vocabulary          review and export controlled vocabularies\n",
+      "stdout": "usage: kn [-h] [--json]\n          {info,contract,db,identity,review,lineage,source,raw,space,vocabulary}\n          ...\n\noptions:\n  -h, --help            show this help message and exit\n  --json                emit machine-readable JSON with stable keys\n\ncommands:\n  {info,contract,db,identity,review,lineage,source,raw,space,vocabulary}\n    info                show the installed project identity\n    contract            validate or compile open data contracts\n    db                  apply or verify governed schema revisions\n    identity            inspect and review object identity\n    review              list and decide review items\n    lineage             trace an object or field to its records and decisions\n    source              list, validate, run, replay, and monitor sources\n    raw                 inspect the durable raw archive\n    space               space-domain datasets\n    vocabulary          review and export controlled vocabularies\n",
       "stderr": "",
       "exit_code": 0
     },
@@ -65,7 +65,7 @@
     "expected": {
       "exit_code": 0,
       "stderr": "",
-      "stdout": "usage: kn source [-h] {list,validate} ...\n\noptions:\n  -h, --help       show this help message and exit\n\ncommands:\n  {list,validate}\n    list           list sources and their catalogue states\n    validate       validate a crawler configuration and its enablement\n                   evidence\n"
+      "stdout": "usage: kn source [-h] {list,validate,run,replay,status} ...\n\noptions:\n  -h, --help            show this help message and exit\n\ncommands:\n  {list,validate,run,replay,status}\n    list                list sources and their catalogue states\n    validate            validate a crawler configuration and its enablement\n                        evidence\n    run                 archive and load an enabled source snapshot\n    replay              load a source snapshot from a committed archive\n    status              show source run health and freshness\n"
     },
     "id": "source-help"
   },
@@ -129,7 +129,7 @@
     ],
     "expected": {
       "exit_code": 0,
-      "stderr": "Contract kn.system.governance 1.0.0 e7000add899f2410545fcecfce284780101ecde63c854c3a17a128ffcb7f008e\nContract kn.system.source_catalogue 1.0.0 2c6fe6fe1f0097fb26bc10bc3989f80a6e9495b67e6c7ef9082e403ce080c451\nContract kn.space.satcom 1.0.0 da2abfeadfbdca862c6144358576422fa5b48dcf078aad6a28478f2a65187246\nContract kn.core.semantic 1.0.0 0fb9971b4b55742d2c3855f206bc7a8e25de93ea6beb0ba9be80f6c17e566944\nContract kn.core.human_verification 1.0.0 5fce8e3b635a0bd6a49f2e31f4e20905a541ed7696909e464922628d6be73e35\nContract kn.core.identity 1.0.0 30574ce33df4be587e272e68d4644daa102e5df21ccc80bfc399980f2b2144d8\nContract kn.core.evidence 1.0.0 539f354352f7e10de470acd85b9f5c94a26ce11a655144fba7e58fccf7eaae15\n",
+      "stderr": "Contract kn.system.governance 1.0.0 e7000add899f2410545fcecfce284780101ecde63c854c3a17a128ffcb7f008e\nContract kn.system.source_catalogue 1.0.0 2c6fe6fe1f0097fb26bc10bc3989f80a6e9495b67e6c7ef9082e403ce080c451\nContract kn.system.ingestion_state 1.0.0 e97701e180d7b762d6b6aa041ccc71a9815d2e6f51a79f159985c949a847bc65\nContract kn.space.satcom 1.0.0 da2abfeadfbdca862c6144358576422fa5b48dcf078aad6a28478f2a65187246\nContract kn.core.semantic 1.0.0 0fb9971b4b55742d2c3855f206bc7a8e25de93ea6beb0ba9be80f6c17e566944\nContract kn.core.human_verification 1.0.0 5fce8e3b635a0bd6a49f2e31f4e20905a541ed7696909e464922628d6be73e35\nContract kn.core.identity 1.0.0 30574ce33df4be587e272e68d4644daa102e5df21ccc80bfc399980f2b2144d8\nContract kn.core.evidence 1.0.0 539f354352f7e10de470acd85b9f5c94a26ce11a655144fba7e58fccf7eaae15\n",
       "stdout": ""
     },
     "id": "contract-lint"
@@ -142,7 +142,7 @@
     ],
     "expected": {
       "exit_code": 0,
-      "stderr": "Contract kn.system.governance 1.0.0 e7000add899f2410545fcecfce284780101ecde63c854c3a17a128ffcb7f008e\nContract kn.system.source_catalogue 1.0.0 2c6fe6fe1f0097fb26bc10bc3989f80a6e9495b67e6c7ef9082e403ce080c451\nContract kn.space.satcom 1.0.0 da2abfeadfbdca862c6144358576422fa5b48dcf078aad6a28478f2a65187246\nContract kn.core.semantic 1.0.0 0fb9971b4b55742d2c3855f206bc7a8e25de93ea6beb0ba9be80f6c17e566944\nContract kn.core.human_verification 1.0.0 5fce8e3b635a0bd6a49f2e31f4e20905a541ed7696909e464922628d6be73e35\nContract kn.core.identity 1.0.0 30574ce33df4be587e272e68d4644daa102e5df21ccc80bfc399980f2b2144d8\nContract kn.core.evidence 1.0.0 539f354352f7e10de470acd85b9f5c94a26ce11a655144fba7e58fccf7eaae15\n",
+      "stderr": "Contract kn.system.governance 1.0.0 e7000add899f2410545fcecfce284780101ecde63c854c3a17a128ffcb7f008e\nContract kn.system.source_catalogue 1.0.0 2c6fe6fe1f0097fb26bc10bc3989f80a6e9495b67e6c7ef9082e403ce080c451\nContract kn.system.ingestion_state 1.0.0 e97701e180d7b762d6b6aa041ccc71a9815d2e6f51a79f159985c949a847bc65\nContract kn.space.satcom 1.0.0 da2abfeadfbdca862c6144358576422fa5b48dcf078aad6a28478f2a65187246\nContract kn.core.semantic 1.0.0 0fb9971b4b55742d2c3855f206bc7a8e25de93ea6beb0ba9be80f6c17e566944\nContract kn.core.human_verification 1.0.0 5fce8e3b635a0bd6a49f2e31f4e20905a541ed7696909e464922628d6be73e35\nContract kn.core.identity 1.0.0 30574ce33df4be587e272e68d4644daa102e5df21ccc80bfc399980f2b2144d8\nContract kn.core.evidence 1.0.0 539f354352f7e10de470acd85b9f5c94a26ce11a655144fba7e58fccf7eaae15\n",
       "stdout": ""
     },
     "id": "contract-check"
@@ -165,7 +165,7 @@
       "unknown"
     ],
     "expected": {
-      "stdout": "usage: kn [-h] [--json]\n          {info,contract,db,identity,review,lineage,source,space,vocabulary}\n          ...\n",
+      "stdout": "usage: kn [-h] [--json]\n          {info,contract,db,identity,review,lineage,source,raw,space,vocabulary}\n          ...\n",
       "stderr": "E_ARGUMENTS: invalid arguments for kn; use --help.\n",
       "exit_code": 2
     },
@@ -176,7 +176,7 @@
     "expected": {
       "exit_code": 2,
       "stderr": "E_ARGUMENTS: invalid arguments for kn; use --help.\n",
-      "stdout": "usage: kn [-h] [--json]\n          {info,contract,db,identity,review,lineage,source,space,vocabulary} ...\n"
+      "stdout": "usage: kn [-h] [--json]\n          {info,contract,db,identity,review,lineage,source,raw,space,vocabulary} ...\n"
     },
     "id": "missing-command"
   },

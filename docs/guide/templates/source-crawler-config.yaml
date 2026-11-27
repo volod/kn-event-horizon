@@ -1,0 +1,171 @@
+# Crawler configuration template, version 1.
+#
+# Copy to domains/<domain>/sources/<source-id>.yaml and replace every example value. Fill each
+# block from the terms dossier, the sampling decision and the investigation report. The file as
+# written validates as a candidate HTTP JSON profile:
+#
+#   kn --json source validate domains/<domain>/sources/<source-id>.yaml
+#
+# Commented blocks show the alternatives and the fields that enablement adds. The exact rules are
+# in src/kn/sources/config/crawler.schema.json and docs/impl/current/source-management.md.
+version: 1
+
+identity:
+  # The exact qualified ID from `kn source list`. Enablement requires a reviewed catalogue ID.
+  source_id: space:example-source
+  labels: {en: Example source, uk: Example source}
+  owner: source-maintainer
+
+access:
+  # http_json, http_csv, http_xml, feed, html_permitted, bulk_file or curated_file.
+  method: http_json
+  # HTTPS only, without credentials or fragments. Every endpoint host is in allowed_hosts.
+  endpoints: [https://data.example.org/v1/records]
+  allowed_hosts: [data.example.org]
+  # deny, or allowlisted to follow redirects to allowed_hosts only.
+  redirect_policy: deny
+  # Name of the environment variable that holds the credential, never the credential itself.
+  # auth_env: EXAMPLE_SOURCE_TOKEN
+  # Query parameter names to redact. Endpoints cannot contain them.
+  # secret_query_parameters: [api_key]
+  request_budget:
+    max_requests: 10
+    timeout_seconds: 30
+    max_response_bytes: 1048576
+    max_decoded_bytes: 2097152
+  # The published or approved rate, whichever is lower.
+  rate_limit: {requests: 1, per_seconds: 2}
+  conditional_requests: {etag: true, last_modified: true}
+  content_types: [application/json]
+  # next_link and cursor read response_field; cursor, page and offset send parameter.
+  # pagination:
+  #   strategy: next_link
+  #   response_field: links.next
+  #   parameter: page
+  #   page_size_parameter: limit
+  #   page_size: 100
+  #
+  # curated_file replaces endpoints and the network controls above:
+  # curated:
+  #   directory: domains/<domain>/curation/<source-id>
+  #   uri_field: cited_uri
+  #   capture_time_field: captured_at
+  #   curator_field: curator
+  #
+  # bulk_file with a prefetched package replaces endpoints. A Drive package keeps the network
+  # controls with allowed_hosts [www.googleapis.com] and redirect_policy deny.
+  # package:
+  #   location_env: KN_EXAMPLE_SOURCE
+  #   default_directory: example-package
+  #   dataset_contract: {id: example.dataset, version: 1.0.0}
+  #   expected_files:
+  #     - path: records.csv
+  #       headers: [id, name]
+  #   csv_dialect: {delimiter: ",", quotechar: "\"", encoding: utf-8}
+  #   limits: {max_archive_bytes: 10485760, max_unpacked_bytes: 52428800, max_files: 10}
+  #   drive: {service_account_key_file_env: KN_GDRIVE_CREDENTIALS_FILE}
+  #
+  # http_json query watches require a window cursor:
+  # watches:
+  #   - id: example-watch
+  #     query: example query
+  #     aliases: {en: Example watch, uk: Example watch}
+  #     purpose: Why the watch exists
+  #     owner: source-maintainer
+  #     lookback_seconds: 86400
+  #     result_cap: 250
+  #     min_window_seconds: 900
+
+schedule:
+  # Five numeric fields in UTC. Restrict the day of month or the day of week, not both.
+  cron: "0 */6 * * *"
+  timezone: UTC
+  # Stale threshold. Without it, status uses twice the longest gap between scheduled runs.
+  # freshness_seconds: 43200
+
+cursor:
+  # snapshot_hash, updated_since (field, overlap_seconds), id_range (field) or window
+  # (overlap_seconds, window_seconds).
+  strategy: updated_since
+  field: updated_at
+  overlap_seconds: 300
+  # window_seconds: 86400
+  backfill_namespace: history
+
+raw:
+  format: warc
+  # Within the reviewed rights retention.
+  retention_days: 30
+  # Within the reviewed export policy: forbidden, restricted or permitted.
+  redistribution: forbidden
+
+parse:
+  # A function in the reviewed parser module of the source ID's domain.
+  entry_point: kn.domains.space.example_source:parse
+  native_schema: example-api/v1
+  # codebook_edition: 2026-01
+  # SHA-256 of the native schema from the investigation report.
+  schema_fingerprint: "0000000000000000000000000000000000000000000000000000000000000000"
+
+mapping:
+  record_key: [id]
+  version_field: updated_at
+  fields:
+    - {native: name, field_id: example.record.name}
+    # - {native: height, field_id: example.record.height, unit: km}
+  # Keep native codes quoted, such as "001".
+  # codes: [{native: category, code: "001", concept: example.concept, mapping_type: exactMatch}]
+  # classes: [{native: kind, class_id: example.class}]
+  # relations: [{native: operator, relation_id: example.relation}]
+  # identifiers: [{native: id, namespace: example, authority_level: source_qualified}]
+  # identity_attributes:
+  #   - {native: name, field_id: example.record.name, normalizer: casefold, comparator: exact,
+  #      authority_level: weak}
+  time_fields:
+    - {native: updated_at, semantics: updated_at, timezone: UTC}
+
+quality:
+  required_fields: [id, updated_at]
+  # ranges: [{field: height, min: 0, max: 5000}]
+  ranges: []
+  expected_volume: {min: 1, max: 1000}
+  quarantine_limit: 5
+  batch_stop: [record_key_missing, time_invalid, schema_drift]
+
+# Source conditions mapped to standard codes. HTTP 304, 401, 403 and 429 have fixed codes.
+errors:
+  - condition: {kind: http_status, status: 429}
+    code: rate_limited
+    retry_class: rate_limit
+  - condition: {kind: signal, name: truncated_payload}
+    code: payload_invalid
+    retry_class: permanent
+
+monitoring:
+  freshness_sla_seconds: 86400
+  alert_thresholds: {consecutive_failures: 3}
+  # reject_count, quarantine_count and cursor_lag_seconds are optional thresholds.
+  expected_records: {min: 1, max: 1000}
+
+rights:
+  # pending until the rights review grants or denies permission.
+  permission: pending
+  # Enablement records the review with granted permission:
+  # terms_uri: https://data.example.org/terms
+  # reviewer: rights-reviewer
+  # reviewed_at: "2026-01-01T00:00:00Z"
+  # licence: Example licence 1.0
+  # export_policy: forbidden
+  # retention_days: 30
+
+approval:
+  # candidate, investigating, sampling_authorized, approved, enabled, paused, retired or rejected.
+  state: candidate
+  # Enablement records the owner decision:
+  # approver: source-owner
+  # reference: example-enablement-1
+
+# Enablement links checkout-relative fixtures and the passing pytest JUnit XML report:
+# verification:
+#   fixtures: [tests/fixtures/<domain>/<source-id>/payload.json]
+#   test_report: <checkout-relative path to the reviewed JUnit XML report>

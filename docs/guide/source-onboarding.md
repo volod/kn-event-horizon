@@ -13,8 +13,11 @@ Copy the [terms dossier](templates/source-terms-dossier.md) to
 `domains/<domain>/sources/dossiers/`. Use published documentation to record terms, edition,
 licence, access method, native schema or codebook, cadence, rate limits, retention, redistribution
 and export rights. Cite the version or date and distinguish documented permission from inference.
-Prepare a draft crawler configuration from the
-[profile reference](../impl/current/source-management.md#validate-crawler-configurations).
+Copy the [crawler configuration template](templates/source-crawler-config.yaml) to
+`domains/<domain>/sources/<source-id>.yaml` and draft the configuration from it. Its comments name
+the alternative access blocks and the fields that enablement adds. The
+[profile reference](../impl/current/source-management.md#validate-crawler-configurations) gives the
+rules for each block.
 If permission is unknown or denied, record the reason and leave the source in `candidate` or
 `rejected`. Use curation only where its own collection and storage are permitted.
 
@@ -35,8 +38,9 @@ Read credentials through approved environment aliases or secret files. Remove se
 metadata and stored URIs. Stop and record the reason when the approved scope cannot be honored.
 
 Write responses to the source's approved raw archive under
-`$DATA_DIR/raw/<domain>/<source-id>/<run-id>/` before interpreting them. Record archive locators,
-actual budget usage and sample coverage in the
+`$KN_RAW_ARCHIVE_DIR/captures/<domain>/<source-id>/<run-id>/` before interpreting them. Configure the
+[archive root](../design/spec.md#storage-roots) before sampling. Record archive locators, actual
+budget usage and sample coverage in the
 [investigation report](templates/source-investigation-report.md). Identify native keys,
 version and cursor fields, schema fingerprint, gaps, proposed contract and ontology mappings,
 failure modes and risks. Keep restricted details with the run evidence.
@@ -47,8 +51,8 @@ Keep approved crawler YAML under `domains/<domain>/sources/` and parser code und
 `src/kn/domains/<domain>/`. Start with failing parser, mapping and failure-path tests based on
 the smallest approved extract or a synthetic fixture. Use the
 [fixture sanitization worksheet](templates/source-fixture-sanitization.md) when deriving fixtures.
-Preserve native key shape, encoding and the cases under test. Keep raw captures under
-`$DATA_DIR`. Use a synthetic fixture if redistribution terms prevent committing an extract.
+Preserve native key shape, encoding and the cases under test. Keep raw captures in the configured
+archive. Use a synthetic fixture if redistribution terms prevent committing an extract.
 
 Put fixture files under a directory named `fixtures` anywhere below `tests/`. The check accepts
 regular UTF-8 files up to 8 MiB in CSV, TSV, HTML, HTTP text, JSON, JSON Lines, Markdown, plain

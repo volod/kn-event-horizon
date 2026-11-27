@@ -1,0 +1,16 @@
+WARC/1.1
+WARC-Date: 2026-01-02T04:04:05.250000Z
+WARC-Payload-Digest: sha256:4OYMIQUY7QOBJGX36TEJS35ZEQT24QPEMSNZGTFESWMRW6CSXBKQ====
+WARC-Concurrent-To: <urn:uuid:7373ee17-94d5-53f4-8dff-351e7bce851b>
+WARC-Record-ID: <urn:uuid:46ed9471-5106-580a-939a-b9b9cb6e995a>
+WARC-Block-Digest: sha256:ZCFJYVH6R33PYKXGKFJWDCLFKCV7ZPX5WDFR2JD2CRZAWMYME7OA====
+WARC-Type: request
+WARC-Target-URI: https://example.test/catalog?format=json
+Content-Type: application/http; msgtype=request
+Content-Length: 63
+
+GET /catalog?format=json HTTP/1.1
+accept: application/json
+
+
+

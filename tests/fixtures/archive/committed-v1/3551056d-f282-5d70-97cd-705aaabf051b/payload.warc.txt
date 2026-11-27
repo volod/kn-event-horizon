@@ -1,0 +1,13 @@
+WARC/1.1
+WARC-Date: 2026-01-02T03:04:05Z
+WARC-Payload-Digest: sha256:S5JL6NNEA4ZG7HQCYW2MX6HUPHUMVDKOWVTOHGUQPK7H3YGYG66A====
+WARC-Record-ID: <urn:uuid:3551056d-f282-5d70-97cd-705aaabf051b>
+WARC-Block-Digest: sha256:S5JL6NNEA4ZG7HQCYW2MX6HUPHUMVDKOWVTOHGUQPK7H3YGYG66A====
+WARC-Type: resource
+WARC-Target-URI: file:///curated/sample.json
+Content-Type: application/json
+Content-Length: 66
+
+{"items":[{"id":"fixture-1","label":"Synthetic archive sample"}]}
+
+

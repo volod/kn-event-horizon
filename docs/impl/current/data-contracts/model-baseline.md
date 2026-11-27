@@ -1,10 +1,10 @@
 # Registered Model Baseline Check
 
 `make model-baseline` provides combined-registry fixture validation for governance, the source
-catalogue, SATCOM, semantic, human verification, identity and evidence contracts. These define 73
-tables and 707 fields. The full checkpoint in the [plan](../../plan.md) also requires supply,
-ingestion run, exchange and canonical domain fixtures. Each delivery group
-extends the subset check. The integrated result and its audit gate release approval.
+catalogue, SATCOM, semantic, human verification, identity, evidence and ingestion state
+contracts. These define 77 tables and 754 fields. The full checkpoint in the
+[plan](../../plan.md) also requires supply, exchange and canonical domain fixtures. Each delivery
+group extends the subset check. The integrated result and its audit gate release approval.
 
 ## Run and evidence
 
@@ -36,7 +36,7 @@ rewriting the evidence rows must be no-ops. The fixture supplies decimal weights
 aware timestamps, multilingual labels, nulls and a translation review reference alongside the
 reviewed seeds.
 
-All 73 tables must contain representative data. Every typed SATCOM row and original CSV cell must
+All 77 tables must contain representative data. Every typed SATCOM row and original CSV cell must
 equal the source fixture, and every semantic field must equal the reviewed seed or native fixture
 value. All 119 catalogue rows must equal the reviewed seeds. The test reads every column and
 orders rows by the contract's primary keys. The two rebuilds must yield identical snapshots,
@@ -77,3 +77,8 @@ expose null stamps. The source fixture and archived files are compared byte for 
 The [identity fixture](../object-identity.md) seeds the durable journal before either rebuild.
 Identity replay precedes SATCOM import; all lifecycle events, record versions, match features,
 change sets, ownership and flattened redirects survive the two complete snapshots.
+
+The [ingestion fixture](../ingestion-engine.md#verification) restores interrupted and retried
+attempts, ordered errors, a batch linked to a committed archive manifest, and its checkpoint.
+The test restores the rows as the system loader, checks the deferred references, and compares
+the restored values after each rebuild.

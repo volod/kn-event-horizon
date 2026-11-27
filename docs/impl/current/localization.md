@@ -82,8 +82,9 @@ Selection changes no fact, original text, tag, or provenance. A missing translat
 source text an unused interface key or a catalog coverage failure. The existing SATCOM archive and
 raw cells remain lossless. The evidence model stores
 [text translations](evidence-model.md#multilingual-text) beside the original text claim and
-applies this selector. `engine-skeleton` will write them during ingestion. Dashboards and
-exports use the same selection policy for fact text.
+applies this selector. The [fixture engine](ingestion-engine.md#run-and-replay-a-snapshot)
+ingests Russian, Chinese, and unknown-language originals. Dashboards and exports use the same
+selection policy for fact text.
 The optional inference task may propose derived translations with provenance.
 
 [Vocabulary text integrity](ontology-taxonomy/text.md) applies this selector to reviewed semantic

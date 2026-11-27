@@ -1,0 +1,21 @@
+WARC/1.1
+WARC-Date: 2026-01-03T03:04:05Z
+WARC-Payload-Digest: sha256:S5JL6NNEA4ZG7HQCYW2MX6HUPHUMVDKOWVTOHGUQPK7H3YGYG66A====
+WARC-Profile: http://netpreserve.org/warc/1.1/revisit/identical-payload-digest
+WARC-Refers-To: <urn:uuid:7373ee17-94d5-53f4-8dff-351e7bce851b>
+WARC-Refers-To-Target-URI: https://example.test/catalog?format=json
+WARC-Refers-To-Date: 2026-01-02T04:04:05.250000Z
+WARC-Truncated: length
+WARC-Record-ID: <urn:uuid:ad4adec4-6d3d-5d05-8861-7c876254dccb>
+WARC-Block-Digest: sha256:PJBCNUO7S3P5MPFUITLAFFR6ZMV7NLXBND7LNWAEZMTQSODIZJPA====
+WARC-Type: revisit
+WARC-Target-URI: https://example.test/catalog?format=json
+Content-Type: application/http; msgtype=response
+Content-Length: 70
+
+HTTP/1.1 200 OK
+content-type: application/json
+etag: "fixture-1"
+
+
+

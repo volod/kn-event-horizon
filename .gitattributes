@@ -1,0 +1,2 @@
+# Frozen WARC records keep their CRLF framing byte for byte.
+tests/fixtures/archive/**/*.warc.txt binary

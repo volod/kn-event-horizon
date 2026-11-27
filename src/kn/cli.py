@@ -15,8 +15,12 @@ from typing import Any, cast
 from jsonschema import ValidationError
 from sqlalchemy.exc import SQLAlchemyError
 
+from kn.archive.config import INDEX_VARIABLE, ROOT_VARIABLE
+from kn.archive.model import ArchiveError
 from kn.contracts.diagnostics import ContractError
 from kn.db.rebuild import RebuildRefused
+from kn.engine.checkpoints import DEFAULT_SCOPE
+from kn.engine.runner import source_operation
 from kn.evidence.ranking import DEFAULT_AUDIENCE, Audience
 from kn.i18n import Translator
 from kn.i18n.output import render_result
@@ -31,6 +35,8 @@ from kn.operations import (
     contract_operation,
     database_operation,
     lineage_operation,
+    raw_reindex_operation,
+    raw_verify_operation,
     satcom_operation,
     source_list_operation,
 )
@@ -42,6 +48,7 @@ from kn.semantic.seeds import import_proposals
 from kn.semantic.skos import export_scheme
 from kn.sources.config import source_validate_operation
 from kn.sources.config.schema import CrawlerConfigError
+from kn.sources.status import source_status_operation
 
 _LOG = logging.getLogger("kn.operator")
 
@@ -94,6 +101,30 @@ def build_parser(
         "validate", help=tr.text("cli.source_validate_help")
     )
     validate_source.add_argument("source", type=Path, help=tr.text("cli.source_config_help"))
+    run_source = source_actions.add_parser("run", help=tr.text("cli.source_run_help"))
+    replay_source = source_actions.add_parser("replay", help=tr.text("cli.source_replay_help"))
+    for action in (run_source, replay_source):
+        action.add_argument("source", type=Path, help=tr.text("cli.source_config_help"))
+        action.add_argument("--data-dir", type=Path, help=tr.text("cli.data_dir_help"))
+    replay_source.add_argument(
+        "--archive-run-id", required=True, help=tr.text("cli.archive_run_help")
+    )
+    status_source = source_actions.add_parser("status", help=tr.text("cli.source_status_help"))
+    status_source.add_argument("source", type=Path, help=tr.text("cli.source_config_help"))
+    status_source.add_argument(
+        "--scope", default=DEFAULT_SCOPE, help=tr.text("cli.source_scope_help")
+    )
+    status_source.add_argument(
+        "--backfill", action="store_true", help=tr.text("cli.source_backfill_help")
+    )
+    raw = subcommands.add_parser("raw", help=tr.text("cli.raw_help"))
+    raw_actions = raw.add_subparsers(dest="action", required=True, parser_class=parser_class)
+    raw_actions.add_parser("verify", help=tr.text("cli.raw_verify_help"))
+    reindex = raw_actions.add_parser("reindex", help=tr.text("cli.raw_reindex_help"))
+    reindex.add_argument("--domain", help=tr.text("cli.raw_domain_help"))
+    reindex.add_argument("--source", help=tr.text("cli.raw_source_help"))
+    reindex.add_argument("--since", help=tr.text("cli.raw_since_help"))
+    reindex.add_argument("--before", help=tr.text("cli.raw_before_help"))
     space = subcommands.add_parser("space", help=tr.text("cli.space_help"))
     datasets = space.add_subparsers(
         dest="dataset", required=True, title=tr.text("cli.commands"), parser_class=parser_class
@@ -222,6 +253,9 @@ def main(argv: Sequence[str] | None = None) -> int:
     except RebuildRefused:
         _report_error(translator.text("cli.rebuild_refused"), "E_INPUT", json_output)
         return 1
+    except ArchiveError as error:
+        _report_archive_error(translator, error, json_output)
+        return 1
     except operator.IdentityAuthorizationError:
         code = "E_REVIEW_AUTH" if args.command == "review" else "E_IDENTITY_AUTH"
         message = (
@@ -254,7 +288,7 @@ def main(argv: Sequence[str] | None = None) -> int:
         else render_result(translator, args.command, result)
     )
     _LOG.info("%s", output)
-    return 0
+    return int(args.command == "source" and result.get("status") in {"blocked", "failed"})
 
 
 def _report_error(
@@ -262,6 +296,17 @@ def _report_error(
 ) -> None:
     error = {"code": code, **(diagnostic or {})}
     _LOG.error("%s", json.dumps({"error": error}, ensure_ascii=True) if json_output else message)
+
+
+def _report_archive_error(translator: Translator, error: ArchiveError, json_output: bool) -> None:
+    details = {"reason": error.code}
+    roots = {"archive_root_required": ROOT_VARIABLE, "index_root_required": INDEX_VARIABLE}
+    if error.code in roots:
+        details["variable"] = roots[error.code]
+        message = translator.text("cli.raw_root_required", variable=details["variable"])
+    else:
+        message = translator.text("cli.raw_error", reason=error.code)
+    _report_error(message, "E_RAW_ARCHIVE", json_output, details)
 
 
 def _run(args: argparse.Namespace, translator: Translator) -> dict[str, object]:
@@ -281,15 +326,33 @@ def _run(args: argparse.Namespace, translator: Translator) -> dict[str, object]:
         )
     if args.command == "db":
         return database_operation(args.action)
+    if args.command == "raw":
+        return _run_raw(args)
     if args.command == "source":
-        if args.action == "validate":
-            return source_validate_operation(args.source)
-        return source_list_operation()
+        return _run_source(args)
     if args.command == "vocabulary":
         if args.action == "export":
             return export_scheme(args.scheme, args.data_dir)
         return import_proposals(discover_project_root(), args.data_dir, check=args.check)
     return satcom_operation(args.action, args.source, args.data_dir)
+
+
+def _run_source(args: argparse.Namespace) -> dict[str, object]:
+    if args.action == "validate":
+        return source_validate_operation(args.source)
+    if args.action == "list":
+        return source_list_operation()
+    if args.action == "status":
+        return source_status_operation(args.source, scope=args.scope, backfill=args.backfill)
+    return source_operation(
+        args.source, _journal(args).data_dir, archive_run_id=getattr(args, "archive_run_id", None)
+    )
+
+
+def _run_raw(args: argparse.Namespace) -> dict[str, object]:
+    if args.action == "reindex":
+        return raw_reindex_operation(args.domain, args.source, args.since, args.before)
+    return raw_verify_operation()
 
 
 def _review(args: argparse.Namespace, translator: Translator) -> dict[str, object]:

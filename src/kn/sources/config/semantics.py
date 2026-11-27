@@ -6,7 +6,7 @@ from typing import Any
 from urllib.parse import parse_qsl, urlsplit
 
 from kn.contracts.diagnostics import Location
-from kn.sources.config.schedule import valid_cron
+from kn.sources.config.schedule import schedule_problem
 from kn.sources.config.schema import CrawlerConfigError
 from kn.sources.seeds import reviewed_catalogue
 
@@ -23,14 +23,18 @@ def _reviewed_ids() -> frozenset[str]:
     return frozenset(row["source_id"] for row in reviewed_catalogue())
 
 
-def _identity(config: dict[str, Any]) -> str:
+def _identity(config: dict[str, Any], *, offline_catalogue: bool) -> str:
     source_id: str = config["identity"]["source_id"]
     domain = source_id.split(":", 1)[0]
     if not config["parse"]["entry_point"].startswith(f"kn.domains.{domain}."):
         raise CrawlerConfigError(
             ("parse", "entry_point"), "parserDomain", "use the source ID's domain namespace"
         )
-    if config["approval"]["state"] == "enabled" and source_id not in _reviewed_ids():
+    if (
+        offline_catalogue
+        and config["approval"]["state"] == "enabled"
+        and source_id not in _reviewed_ids()
+    ):
         raise CrawlerConfigError(
             ("identity", "source_id"), "catalogueReference", "use an exact reviewed catalogue ID"
         )
@@ -156,13 +160,11 @@ def _data_rules(config: dict[str, Any]) -> None:
     )
 
 
-def validate_semantics(config: dict[str, Any]) -> None:
+def validate_semantics(config: dict[str, Any], *, offline_catalogue: bool = True) -> None:
     """Validate relationships between individual schema-valid entries."""
-    domain = _identity(config)
-    if not valid_cron(config["schedule"]["cron"]):
-        raise CrawlerConfigError(
-            ("schedule", "cron"), "cron", "use a valid five-field numeric UTC expression"
-        )
+    domain = _identity(config, offline_catalogue=offline_catalogue)
+    if problem := schedule_problem(config["schedule"]["cron"]):
+        raise CrawlerConfigError(("schedule", "cron"), *problem)
     cursor = config["cursor"]
     if cursor["strategy"] == "window":
         _ordered(cursor["overlap_seconds"], cursor["window_seconds"], ("cursor", "overlap_seconds"))

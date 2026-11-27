@@ -43,6 +43,7 @@ def test_the_registry_deploys_governance_first_then_domain_contracts() -> None:
     assert [(item.contract_id, item.schema) for item in contracts] == [
         (MARKER_CONTRACT, "system"),
         ("kn.system.source_catalogue", "system"),
+        ("kn.system.ingestion_state", "system"),
         ("kn.space.satcom", "space"),
         ("kn.core.semantic", "semantic"),
         ("kn.core.human_verification", "evidence"),
@@ -117,9 +118,8 @@ def _rename_table(contract, name: str):  # type: ignore[no-untyped-def]
 
 @pytest.mark.parametrize("collision", ["contract", "field", "table", "index", "marker"])
 def test_one_deployment_has_unique_contracts_fields_and_names(collision: str) -> None:
-    system, catalogue, satcom, core_semantic, verification, identity, evidence, space, semantic = (
-        fixture_contracts()
-    )
+    *registered, space, semantic = fixture_contracts()
+    satcom = next(contract for contract in registered if contract.contract_id == "kn.space.satcom")
     if collision == "contract":
         space = replace(space, contract_id=satcom.contract_id)
     elif collision == "field":
@@ -131,28 +131,10 @@ def test_one_deployment_has_unique_contracts_fields_and_names(collision: str) ->
     elif collision == "index":
         # The fixture's index name, used as a SATCOM table name in the same schema.
         space = _rename_table(space, "pk_countries")
-    contracts = [
-        system,
-        catalogue,
-        satcom,
-        core_semantic,
-        verification,
-        identity,
-        evidence,
-        space,
-        semantic,
-    ]
+    contracts = [*registered, space, semantic]
     if collision == "marker":
-        contracts = [
-            satcom,
-            system,
-            core_semantic,
-            verification,
-            identity,
-            evidence,
-            space,
-            semantic,
-        ]
+        contracts.remove(satcom)
+        contracts.insert(0, satcom)
     with pytest.raises(ContractError, match="registry"):
         validate_registry(contracts)
 

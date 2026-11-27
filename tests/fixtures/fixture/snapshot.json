@@ -1,0 +1,7 @@
+{
+  "records": [
+    {"id": "ru-01", "name": "\u0418\u0441\u0442\u043e\u0447\u043d\u0438\u043a", "language": "ru"},
+    {"id": "zh-01", "name": "\u6570\u636e\u6e90", "language": "zh"},
+    {"id": "und-01", "name": "\u2605"}
+  ]
+}

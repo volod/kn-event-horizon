@@ -1,8 +1,11 @@
 """CLI operations return stable data; presentation belongs at the interface boundary."""
 
 import hashlib
+from datetime import datetime
 from pathlib import Path
 
+from kn.archive import Archive
+from kn.archive.model import ArchiveError
 from kn.contracts import load_contract
 from kn.contracts.compiler import compile_contract, compile_registry
 from kn.contracts.diagnostics import ContractError
@@ -126,6 +129,32 @@ def source_list_operation() -> dict[str, object]:
             return {"sources": list_sources(connection)}
     finally:
         engine.dispose()
+
+
+def raw_verify_operation() -> dict[str, object]:
+    try:
+        return Archive.configured(use_index=False).verify()
+    except OSError:
+        raise ArchiveError("archive_io") from None
+
+
+def raw_reindex_operation(
+    domain: str | None, source_id: str | None, since: str | None, before: str | None
+) -> dict[str, object]:
+    from kn.archive.ledger import FetchLedger
+    from kn.archive.ledger_model import CaptureScope
+
+    ledger = FetchLedger.configured()
+    try:
+        scope = CaptureScope(
+            domain=domain,
+            source_id=source_id,
+            since=None if since is None else datetime.fromisoformat(since),
+            before=None if before is None else datetime.fromisoformat(before),
+        )
+    except ValueError:
+        raise ArchiveError("index_scope") from None
+    return {"status": "reindexed", **ledger.reindex(scope).model_dump()}
 
 
 def lineage_operation(

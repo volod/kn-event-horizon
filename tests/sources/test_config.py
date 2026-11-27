@@ -70,6 +70,13 @@ def test_drive_package_and_binary_limits(config: dict[str, Any], tmp_path: Path)
         ("http", ("schedule", "cron"), "5-2 * * * *", "/schedule/cron"),
         ("http", ("schedule", "cron"), "*/0 * * * *", "/schedule/cron"),
         ("http", ("schedule", "cron"), "* * * *", "/schedule/cron"),
+        (
+            "http",
+            ("access", "request_budget", "timeout_seconds"),
+            10**12,
+            "/access/request_budget/timeout_seconds",
+        ),
+        ("http", ("raw", "retention_days"), 10**7, "/raw/retention_days"),
         ("http", ("cursor", "backfill_namespace"), "live", "/cursor/backfill_namespace"),
         ("http", ("cursor", "field"), None, "/cursor/field"),
         ("http", ("raw", "format"), "zip", "/raw/format"),

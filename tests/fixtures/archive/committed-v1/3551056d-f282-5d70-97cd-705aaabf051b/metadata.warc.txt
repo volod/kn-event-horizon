@@ -1,0 +1,13 @@
+WARC/1.1
+WARC-Date: 2026-01-02T03:04:05Z
+WARC-Payload-Digest: sha256:CXSOSFRM4HBQ73ZJT7MLSMQX2NZGLHNNQFNQOSFRMTZJYUEIMFEA====
+WARC-Refers-To: <urn:uuid:3551056d-f282-5d70-97cd-705aaabf051b>
+WARC-Record-ID: <urn:uuid:9b5e44af-3190-59ac-a903-b182b0f360ed>
+WARC-Block-Digest: sha256:CXSOSFRM4HBQ73ZJT7MLSMQX2NZGLHNNQFNQOSFRMTZJYUEIMFEA====
+WARC-Type: metadata
+WARC-Target-URI: file:///curated/sample.json
+Content-Type: application/json
+Content-Length: 841
+
+{"schema_version": 1, "key": "legacy-resource", "batch": {"domain": "space", "source_id": "space:example", "run_id": "run-1", "batch_id": "legacy"}, "record_id": "urn:uuid:3551056d-f282-5d70-97cd-705aaabf051b", "fetch_id": "urn:uuid:7f38543f-0e6d-589e-b9c0-a0e4786062b6", "origin_uri": "file:///curated/sample.json", "fetched_at": "2026-01-02T03:04:05Z", "kind": "resource", "status": null, "mime_type": "application/json", "payload_sha256": "9752bf35a407326f9e02c5b4cbf8f479e8ca8d4eb566e39a907abe7de0d837bc", "payload_size": 66, "config_sha256": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa", "code_sha256": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb", "retention": {"access": "internal", "deletion_scope": "fixture", "expires_at": null}, "http": null, "request_sha256": null, "revisit_of": null}
+

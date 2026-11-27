@@ -7,6 +7,9 @@
       "path": "system/source-catalogue/1.0.0.json"
     },
     {
+      "path": "system/ingestion-state/1.0.0.json"
+    },
+    {
       "path": "satcom/1.0.0.json"
     },
     {

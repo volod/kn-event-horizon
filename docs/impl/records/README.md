@@ -68,5 +68,13 @@ decision. A record can name a plan task by ID because plan headings disappear on
 | 0051 | All-table human verification projections and replay | [Human verification projections](0051-evidence-model-human-verification-projections.md) |
 | 0052 | `review-queue-cli` | [Review queue CLI](0052-evidence-model-review-queue-cli.md) |
 | 0053 | `evidence-model-implementation-audit` | [Evidence model implementation audit](0053-evidence-model-evidence-model-implementation-audit.md) |
+| 0054 | Raw archive design | [Design review](0054-adhoc-raw-archive-storage-design.md) |
+| 0055 | `warc-raw-store` | [WARC raw store](0055-raw-archive-warc-raw-store.md) |
+| 0056 | `raw-fetch-ledger` | [Raw fetch ledger](0056-raw-archive-raw-fetch-ledger.md) |
+| 0057 | `raw-archive-implementation-audit` | [Raw archive implementation audit](0057-raw-archive-raw-archive-implementation-audit.md) |
+| 0058 | `ingestion-state-contracts` | [Ingestion state contracts](0058-ingestion-engine-ingestion-state-contracts.md) |
+| 0059 | `engine-skeleton` | [Engine skeleton](0059-ingestion-engine-engine-skeleton.md) |
+| 0060 | `source-status-monitoring` | [Source status monitoring](0060-source-management-source-status-monitoring.md) |
+| 0061 | `source-management-implementation-audit` | [Source management implementation audit](0061-source-management-source-management-implementation-audit.md) |
 
-Next unused sequence is `0054`.
+Next unused sequence is `0062`.

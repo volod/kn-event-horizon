@@ -76,3 +76,32 @@ Other local mixtures require a separately identified official subset before offi
   Figure 9 has no source code strings and omits the seed engineering extensions.
 - Importing full GDELT dictionaries to settle this review -- publication examples were sufficient;
   dictionary ingestion belongs to `gdelt-source-dictionaries`.
+
+## `raw-archive-format-selection` -- Avro and Iceberg for the raw archive
+
+### Question
+
+Would Avro or Iceberg improve capture fidelity, schema migration or recovery enough to replace
+WARC and the initial Parquet fetch index?
+
+### Answer
+
+Keep WARC for HTTP evidence and stream large files into content-addressed blobs. Version the
+capture metadata separately and keep the Parquet index rebuildable. The documented format
+capabilities and KN replay requirements support this decision. Target-host performance remains
+to be measured. See the [storage design review](records/0054-adhoc-raw-archive-storage-design.md).
+
+### Reopening condition
+
+Revisit Iceberg for the index if the [performance gate](plan.md#performance-gate) shows file
+planning, lookup or recovery exceeding an agreed budget after partitioning and batching, or a
+deployment requires independent hosts to commit to a shared metadata table. Revisit Avro for
+capture metadata if a required consumer needs interoperable Avro writer/reader schema resolution
+or a representative workload shows the current metadata encoding exceeding its budget.
+
+### Do not re-run
+
+- Replacing WARC to migrate the schema of an opaque source body. Avro schema resolution applies to
+  fields in the Avro envelope. The parser and data contracts interpret the original source bytes.
+- Using Iceberg snapshot history as the only evidence retention mechanism. Snapshot expiry can
+  release the files those snapshots alone protect.

@@ -95,8 +95,9 @@ scripts/shared/            shared shell environment helpers
 .github/workflows/         required CI
 ```
 
-Runtime output belongs under `$DATA_DIR/<method>/<run-id>/`, which defaults to `.data/` and is
-ignored by Git.
+Local runtime output uses `$DATA_DIR/<method>/<run-id>/`, which defaults to `.data/` and is ignored
+by Git. The planned raw archive and fetch index use explicitly configured storage roots. See the
+[archive specification](docs/design/spec.md#storage-roots).
 
 ## License
 
